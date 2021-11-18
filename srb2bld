@@ -1,0 +1,1725 @@
+#!/bin/sh
+
+set -e
+
+ARCH=$(uname -m)
+OS=$(uname)
+IS64=$(printf "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, RLENGTH)}')
+BUILDPATH="$HOME/.local/share/srb2-builds"
+DEBVER="jessie"
+
+choosebuild() {
+    clear
+    while
+        printf "\n%s\n" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Persona" "Build SRB2 2.1 Legacy" "Build SRB2 2.0" "Build SRB2 Final Demo" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart VR"; do printf "%s\n" "$((i += 1))) $loop"; done
+        printf "#? "
+        read -r choose
+    do
+        unset i
+        case "$choose" in
+            "1")
+                BUILD="$BUILDPATH/srb2"
+                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --depth 1 --branch master $BUILD"
+                break
+                ;;
+            "2")
+                BUILD="$BUILDPATH/srb2-uncapped-plus"
+                GIT="git clone https://git.do.srb2.org/Fafabis/SRB2.git --depth 1 --branch uncapped-plus $BUILD"
+                break
+                ;;
+            "3")
+                BUILD="$BUILDPATH/srb2-netplus"
+                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus --depth 1 --branch master $BUILD"
+                break
+                ;;
+            "4")
+                BUILD="$BUILDPATH/srb2-persona"
+                GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --depth 1 --branch srb2p_22 $BUILD"
+                break
+                ;;
+            "5")
+                BUILD="$BUILDPATH/srb2-2.1-legacy"
+                GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --depth 1 --branch master $BUILD"
+                break
+                ;;
+            "6")
+                BUILD="$BUILDPATH/srb2-2.0"
+                GIT="git clone https://github.com/STJr/SRB2-Public --depth 1 --branch master $BUILD"
+                break
+                ;;
+            "7")
+                BUILD="$BUILDPATH/srb2-final-demo"
+                GIT="git clone https://github.com/KrazeeTobi/SRB2-OldSRC --depth 1 --branch main $BUILD"
+                break
+                ;;
+            "8")
+                BUILD="$BUILDPATH/srb2-kart"
+                GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --depth 1 --branch master $BUILD"
+                break
+                ;;
+            "9")
+                BUILD="$BUILDPATH/srb2-kart-moe-mansion"
+                GIT="git clone https://gitlab.com/himie/kart-public.git --depth 1 --branch moe-mansion $BUILD"
+                break
+                ;;
+            "10")
+
+                BUILD="$BUILDPATH/srb2-kart-vr"
+                break
+                ;;
+            *)
+                printf "\n%s\n" "No option has been chosen."
+                exit
+                ;;
+        esac
+    done
+}
+
+chooseremovebuild() {
+    printf "\n%s\n" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
+    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|containers|installed|discord-rpc/ {print}' | sort)
+    arrayname=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' | gawk '/srb2/ {print}' | sort)
+    count="$(printf "%s\n" "$array" | wc -l)"
+    n=""
+    printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
+    while true; do
+        printf "#? "
+        read -r n
+        if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
+
+            BUILDNAME=$(printf "%s\n" "$array" | gawk NR=="${n}")
+            rm -Irv $BUILDNAME
+            break
+
+        else
+
+            printf "%s\n" "No option has been chosen."
+            exit
+
+        fi
+    done
+}
+
+chooseuninstall() {
+    printf "\n%s\n" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
+    array=$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1)
+    arrayname=$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}')
+    count="$(printf "%s\n" "$array" | wc -l)"
+    n=""
+    printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
+    while true; do
+        printf "#? "
+        read -r n
+        if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
+
+            BUILDNAME=$(printf "%s\n" "$array" | gawk NR=="${n}")
+            INSTALLFILES=$(cat "$BUILDNAME")
+            sudo rm -Irv $INSTALLFILES
+            rm -f $BUILDNAME
+            break
+
+        else
+
+            printf "%s\n" "No option has been chosen."
+            exit
+
+        fi
+    done
+}
+
+dockerrun() {
+    if [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+        docker build -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
+        docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-old-docker
+
+    else
+
+        docker build -t srb2-docker "$BUILDPATH/containers/srb2-docker"
+        docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-docker
+
+    fi
+
+    CONTAINER_ID=$(docker ps -alq)
+    docker stop "$CONTAINER_ID"
+    docker container rm "$CONTAINER_ID"
+}
+
+dockerentry() {
+    if [ ! -d "$BUILDPATH/containers/srb2-docker" ]; then
+
+        mkdir -p "$BUILDPATH/containers/srb2-docker"
+
+    fi
+
+    cat > "$BUILDPATH/containers/srb2-docker/Entrypoint" << ENTRYPOINT
+#!/bin/bash
+
+    set -e -x
+
+    trap 'git -C \$BUILD clean -dfx -e .comrev ; git -C \$BUILD reset --hard ; exit' 1 2 3 6 15
+
+    # Build the application
+    if [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+
+        mkdir -p "$BUILD" && curl -LC - \$(curl -s https://gitlab.com/api/v4/projects/24705991/releases | gawk '{gsub('/^{/',"{\n") || gsub('/}$/',"\n}") || gsub('/,/',",\n"); print}' | gawk -F'"' '/archive/ && (/.zip/ || /.tar.gz/) {print \$4}' | head -n2 | head -n1) -o "$BUILD/SRB2KartVR.zip" && 7z x "$BUILD/SRB2KartVR.zip" -o"$BUILD" && mv "$BUILD"/*/* "$BUILD"
+
+    elif [ ! -d "\$BUILD/.git" ]; then
+
+        \$GIT
+
+    fi
+
+    mkdir -p "\$BUILDPATH/assets" "\$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
+    cd "\$BUILD" || exit
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+        mkdir -p "\$BUILD/build/AppDir/usr/games/SRB2Kart"
+
+    else
+
+        mkdir -p "\$BUILD/build/AppDir/usr/games/SRB2"
+
+    fi
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
+
+        curl -LC - \$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}') -o "\$BUILDPATH/assets/SRB2.zip"
+        7z x -y "\$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+
+        curl -LC - \$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}') -o "\$BUILDPATH/assets/SRB2.zip"
+        7z x -y "\$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+        SRB2PLINKS=\$(for p in \$(curl -Ls https://mb.srb2.org/addons/1-3-srb2-persona-multiplayer-demo.166/download/ | gawk -F'a href="|" class' '/version/ {print \$2}'); do
+
+              FILENAME=\$(curl -LIs "https://mb.srb2.org/\$p" | gawk -F'=|;' '/content-disposition:/ && (/SRB2P_MP/ || /SRB2P-music.pk3/) {gsub("\r|\"","");print \$3}')
+
+              if [ -n "\$FILENAME" ]; then
+
+                   printf "%s\n" "https://mb.srb2.org/\$p"
+
+              fi
+
+        done)
+
+    for p in \$SRB2PLINKS; do
+
+    FILENAME=\$(curl -LIs "\$p" | gawk -F'=|;' '/content-disposition:/ && (/SRB2P_MP/ || /SRB2P-music.pk3/) {gsub("\r|\"","");print \$3}')
+        curl -LC - "\$p" -o "\$FILENAME" --output-dir "\$BUILDPATH/assets" 2>&1 &
+
+    done | cat
+
+        7z x -y "\$BUILDPATH/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        rm -f "\$BUILDPATH/assets/SRB2P_MP"*.rar
+        cp "\$BUILDPATH/assets/SRB2P-music.pk3" "\$BUILD/build/AppDir/usr/games/SRB2"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        curl -LC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-x64-Installer.exe -o "\$BUILDPATH/assets/SRB2-2.1.exe"
+        7z x -y "\$BUILDPATH/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+
+        curl -LC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "\$BUILDPATH/assets/SRB2-2.0.exe"
+        7z x -y "\$BUILDPATH/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        curl -LC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "\$BUILDPATH/assets/SRB2FinalDemo.exe"
+        7z x -y "\$BUILDPATH/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+        curl -LC - \$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}') -o "\$BUILDPATH/assets/SRB2Kart.exe"
+        7z x -y "\$BUILDPATH/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+#        curl -s "https://gitlab.com/api/v4/projects/24705991/releases" | gawk '{gsub('/^{/',"{\n") || gsub('/}\$/',"\n}") || gsub('/,/',",\n"); print}' | gawk '/uploads/ {split(\$0,a,"\\)|\\(");print a[2]"\n"a[4]"\n"a[6]}' | gawk '!/default/ && NF'
+
+    fi
+
+    if [ "\$(ldd --version | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}')" = "musl" ]; then
+        cat > "\$BUILD/srb2-musl.patch" << MUSL
+--- $BUILD/src/sdl/i_system.c
++++ $BUILD/src/sdl/i_system.c
+@@ -137,11 +137,11 @@ typedef LPVOID (WINAPI *p_MapViewOfFile) (HANDLE, DWORD, DWORD, DWORD, SIZE_T);
+ #include <errno.h>
+ #endif
+
+-#if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
+-#include <execinfo.h>
+-#include <time.h>
+-#define UNIXBACKTRACE
+-#endif
++//#if definer (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
++//#include <execinfo.h>
++//#include <time.h>
++//#define UNIXBACKTRACE
++//#endif
+
+ // Locations for searching the srb2.pk3
+ #if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
+MUSL
+        patch -p1 < "\$BUILD/srb2-musl.patch"
+    fi
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+
+         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2persona"/' "\$BUILD/src/doomdef.h"
+         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2persona"/' "\$BUILD/src/doomdef.h"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+
+         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2_20"/' "\$BUILD/src/doomdef.h"
+         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2_20"/' "\$BUILD/src/doomdef.h"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2finaldemo"/' "\$BUILD/Final Demo 1.09.4a/src/doomdef.h"
+         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2finaldemo"/' "\$BUILD/Final Demo 1.09.4a/src/doomdef.h"
+
+    fi
+
+#    if [ "\$1" = "-u" ] || [ "\$1" = "--upgrade" ]; then
+#
+#        clear
+#    while
+#        printf "\n%s\n" "Do you want to upgrade \$BUILD as AppImage? Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
+#        for loop in "Yes" "No"; do printf "%s\n" "\$((i += 1))) \$loop"; done
+#        printf "#? "
+#        read -r choose
+#    do
+#        unset i
+#        case "\$choose" in
+#            "Yes")
+#                APPIMAGE=1
+#                break
+#                ;;
+#
+#            "No")
+#
+#                break
+#                ;;
+#            *)
+#                printf "\n%s\n" "No option has been chosen."
+#                exit
+#                ;;
+#        esac
+#    done
+#
+#    fi
+
+if [ "\$APPIMAGE" = 1 ]; then
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+        if [ ! -d "\$BUILDPATH/discord-rpc/.git" ]; then
+
+              git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/discord-rpc"
+
+        else
+
+              git -C "\$BUILDPATH/discord-rpc" clean -dfx
+              git -C "\$BUILDPATH/discord-rpc" reset --hard
+              git -C "\$BUILDPATH/discord-rpc" pull
+
+        fi
+        mkdir -p "\$BUILDPATH/discord-rpc/build"
+        cmake -S "\$BUILDPATH/discord-rpc" -B "\$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
+        sudo cmake --build "\$BUILDPATH/discord-rpc/build" --config Release --target install
+
+    fi
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+        if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+            printf "%s\n" "Compiling game with this command: make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 HAVE_DISCORDRPC=1"
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 HAVE_DISCORDRPC=1
+
+        else
+
+            printf "%s\n" "Compiling game with this command: make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 HAVE_DISCORDRPC=1"
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 HAVE_DISCORDRPC=1
+
+        fi
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        mkdir -p "\$BUILD/Final Demo 1.09.4a/objs/Linux/SDL/Release"
+        if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1
+
+        else
+
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1 NONX86=1
+
+        fi
+
+    else
+
+        if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1
+
+        else
+
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1
+
+        fi
+
+    fi
+
+    if [ -f "\$BUILD/bin/Linux$IS64/Release/lsdl2srb2" ]; then
+
+        cp -rfv "\$BUILD/bin/Linux$IS64/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
+
+    elif [ -f "\$BUILD/bin/lsdl2srb2" ]; then
+
+        cp -rfv "\$BUILD/bin/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
+
+    elif [ -f "\$BUILD/bin/Linux$IS64/Release/srb2legacy" ]; then
+
+        cp -rfv "\$BUILD/bin/Linux$IS64/Release/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
+
+    elif [ -f "\$BUILD/bin/Linux$IS64/Release/lsdlsrb2" ]; then
+
+        cp -rfv "\$BUILD/bin/Linux$IS64/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
+
+    elif [ -f "\$BUILD/Final Demo 1.09.4a/bin/Linux/Release/lsdlsrb2" ]; then
+
+        cp -rfv "\$BUILD/Final Demo 1.09.4a/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
+
+    elif [ -f "\$BUILD/bin/Linux$IS64/Release/lsdl2srb2kart" ]; then
+
+        cp -rfv "\$BUILD/bin/Linux$IS64/Release/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
+
+    fi
+
+    # Create desktop file
+
+        COMREV=\$(git rev-parse --short HEAD)
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2
+Comment=Open source 3D Sonic game
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 Uncapped PLUS
+Comment=Modified open source 3D Sonic game with improved framerate and other features
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2UncappedPlus
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 NetPlus
+Comment=Modified open source 3D Sonic game with rollback netcode
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2NetPlus
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 Persona
+Comment=Modified open source 3D Sonic game with Persona gameplay
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;rpg;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2Persona
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 2.1 Legacy
+Comment=Open source 3D Sonic game
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2-2.1-Legacy
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 2.0
+Comment=Open source 3D Sonic game
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2-2.0
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 Final Demo
+Comment=Open source 3D Sonic game
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2FinalDemo
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 Kart
+Comment=Modified open source 3D Sonic game with kart racing gameplay
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;kart;racing;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2Kart
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 Kart Moe Mansion
+Comment=Modified open source 3D Sonic game with kart racing gameplay, improved framerate and other features
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;kart;racing;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2KartMoeMansion
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 Kart VR
+Comment=Modified open source 3D Sonic game with VR kart racing gameplay, improved framerate and other features
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;kart;racing;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2KartVR
+X-AppImage-Arch=$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    fi
+
+    # Get app icon
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        curl -L https://mb.srb2.org/data/resource_icons/3/3248.jpg -o "\$BUILD/build/icon.jpg"
+        convert "\$BUILD/build/icon.jpg" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        ICONSIZE=\$(identify "\$BUILD/build/icon.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/srb2.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        curl -L http://www.rw-designer.com/icon-download.php?id=22713 -o "\$BUILD/build/icon.ico"
+        convert "\$BUILD/build/icon.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        ICONSIZE=\$(identify "\$BUILD/build/icon.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+
+        curl -L https://mb.srb2.org/data/resource_icons/0/166.jpg -o "\$BUILD/build/icon.jpg"
+        convert "\$BUILD/build/icon.jpg" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        ICONSIZE=\$(identify "\$BUILD/build/icon.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+
+    else
+
+        ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/srb2.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png"
+
+    fi
+
+    # create app entrypoint
+DEPS="
+libFLAC.so.[0-9]
+libSDL2-2.0.so.[0-9]
+libSDL2_mixer-2.0.so.[0-9]
+libfluidsynth.so.[0-9]
+libgme.so.[0-9]
+libjack.so.[0-9]
+libmad.so.[0-9]
+libmodplug.so.[0-9]
+libmpg123.so.[0-9]
+libogg.so.[0-9]
+libopenmpt.so.[0-9]
+libopus.so.[0-9]
+libopusfile.so.[0-9]
+libpng.so.[0-9]
+libpng16.so.16
+libpulse-simple.so.[0-9]
+libpulse.so.[0-9]
+libpulsecommon-14.2.so.[0-9]
+libreadline.so.[0-9]
+libsndio.so.[0-9]
+libsndfile.so.[0-9]
+libtinfo.so.[0-9]
+libvorbis.so.[0-9]
+libvorbisenc.so.[0-9]
+libvorbisfile.so.[0-9]
+libwrap.so.[0-9]
+"
+
+    cat > "\$BUILD/build/AppDir/AppRun" << 'APPRUN'
+#!/bin/sh
+
+export HERE="\$(dirname "\$(readlink -f "\$0")")"
+
+export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:\$HERE/usr/lib"
+
+APPRUN
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+export SRB2WADDIR="\$HERE/usr/games/SRB2"
+
+exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
+APPRUNBIN
+
+        cp -Lv \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ]; then
+
+DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
+        cp -rfv \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
+
+    fi
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+export SRB2WADDIR="\$HERE/usr/games/SRB2"
+
+exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
+APPRUNBIN
+
+        cp -Lv \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+export SRB2WADDIR="\$HERE/usr/games/SRB2"
+
+exec "\$HERE/usr/bin/lsdlsrb2" "\$@"
+APPRUNBIN
+
+        cp -Lv \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so|libglib|libgobject/ {print}') "\$BUILD/build/AppDir/usr/lib"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
+
+exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
+APPRUNBIN
+
+DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
+        cp -rfv \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
+        cp -Lv \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
+
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+              OPENVRLIBPATH=\$(find /lib* /usr/lib* -iname libopenvr_api.so)
+              cp -rfv \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
+        fi
+    fi
+    chmod +x "\$BUILD/build/AppDir/AppRun"
+
+    # Build AppImage
+    ISARM=\$(printf "%s\n" "$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}')
+    IS64=\$(getconf LONG_BIT)
+
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        if [ "$ARCH" = "x86_64" ]; then
+
+            curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-i686.AppImage" -o "\$BUILD/appimagetool"
+
+        elif [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ]; then
+
+            curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-i686.AppImage" -o "\$BUILD/appimagetool"
+
+        elif ([ -n "\$ISARM" ] && [ "\$IS64" = "64" ]) || [ "$ARCH" = "aarch64" ]; then
+
+            curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-armhf.AppImage" -o "\$BUILD/appimagetool"
+
+        elif [ -n "\$ISARM" ] && [ "\$IS64" = "32" ]; then
+
+            curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-armhf.AppImage" -o "\$BUILD/appimagetool"
+
+        fi
+
+    else
+
+        if [ "$ARCH" = "x86_64" ]; then
+
+            curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -o "\$BUILD/appimagetool"
+
+        elif [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ]; then
+
+            curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-i686.AppImage" -o "\$BUILD/appimagetool"
+
+        elif ([ -n "\$ISARM" ] && [ "\$IS64" = "64" ]) || [ "$ARCH" = "aarch64" ]; then
+
+            curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage" -o "\$BUILD/appimagetool"
+
+        elif [ -n "\$ISARM" ] && [ "\$IS64" = "32" ]; then
+
+            curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-armhf.AppImage" -o "\$BUILD/appimagetool"
+
+        fi
+
+    fi
+
+    chmod +x "\$BUILD/appimagetool"
+    rm -rfv "\$BUILD/build/AppDir/usr/share/doc" "\$BUILD/build/AppDir/usr/lib/libgcc_s.so"* "\$BUILD/build/AppDir/usr/lib/libstdc++.so"* "\$BUILD/build/AppDir/usr/lib/libc.so"* "\$BUILD/build/AppDir/usr/lib/ld-linux"*
+    cd "\$BUILD/build/AppDir" || exit
+    ln -sf "icon.png" ".DirIcon"
+    ln -sf "usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png" "icon.png"
+    ln -sf "usr/share/applications/app.desktop" "app.desktop"
+    cd "\$BUILD/build/AppDir/usr" || exit
+    ln -sf "lib" "lib32"
+    cd "\$BUILD" || exit
+    "\$BUILD/appimagetool" -n "\$BUILD/build/AppDir"
+    mv "\$BUILD/"*.AppImage "\$BUILDPATH"
+#    printf "%s\n" "\$COMREV" > "\$BUILD/.comrev"
+
+    git -C "\$BUILD" clean -dfx -e .comrev
+    git -C "\$BUILD" reset --hard
+
+else
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        gawk '/^# GNU/,/^$/ {print}' "\$BUILD/Final Demo 1.09.4a/src/makefile"
+
+    else
+
+        gawk '/^# GNU/,/^$/ {print}' "\$BUILD/src/"*akefile
+
+    fi
+    printf "\n%s\n" "Please enter configuration flags to compilation and then press enter, or just press enter to begin compiling."
+    read -r CONF
+
+    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|UNIX=1|FREEBSD=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+
+        CONF=\$(printf "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|UNIX=1|FREEBSD=1","");print}')
+        printf "\n%s\n" "Currently prompting OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Defaulting to LINUX=1 or LINUX64=1 based on CPU architecture."
+
+    fi
+
+    if ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+
+        if [ ! -d "\$BUILDPATH/discord-rpc/.git" ]; then
+
+              git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/discord-rpc"
+
+        else
+
+              git -C "\$BUILDPATH/discord-rpc" clean -dfx
+              git -C "\$BUILDPATH/discord-rpc" reset --hard
+              git -C "\$BUILDPATH/discord-rpc" pull
+
+        fi
+        mkdir -p "\$BUILDPATH/discord-rpc/build"
+        cmake -S "\$BUILDPATH/discord-rpc" -B "\$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
+        sudo cmake --build "\$BUILDPATH/discord-rpc/build" --config Release --target install
+
+    fi
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        mkdir -p "\$BUILD/Final Demo 1.09.4a/objs/Linux/SDL/Release"
+        if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1 \$CONF
+
+        else
+
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NONX86=1 NOASM=1 \$CONF
+
+        fi
+
+    else
+
+        if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 \$CONF
+
+        else
+
+            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 \$CONF
+
+        fi
+
+    fi
+
+    COMREV=\$(git rev-parse --short HEAD)
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2
+Comment=Open source 3D Sonic game
+Icon=srb2
+Exec=srb2
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2","Name=Sonic Robo Blast 2 (OpenGL)") || gsub("Exec=srb2","Exec=srb2 -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2uncappedplus.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 Uncapped PLUS
+Comment=Modified open source 3D Sonic game with improved framerate and other features
+Icon=srb2uncappedplus
+Exec=srb2ucp
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2uncappedplus.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2uncappedplus-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 Uncapped PLUS","Name=Sonic Robo Blast 2 Uncapped PLUS (OpenGL)") || gsub("Exec=srb2ucp","Exec=srb2ucp -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2uncappedplus-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2netplus.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 NetPlus
+Comment=Modified open source 3D Sonic game with rollback netcode
+Icon=srb2netplus
+Exec=srb2np
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2netplus.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2netplus-opengl.desktop"
+    gawk -i inplace '{gsub("Name=SRB2 NetPlus","Name=SRB2 NetPlus (OpenGL)") || gsub("Exec=srb2np","Exec=srb2np -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2netplus-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2persona.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 Persona
+Comment=Modified open source 3D Sonic game with Persona gameplay
+Icon=srb2persona
+Exec=srb2p
+Categories=Game;
+Keywords=sonic;rpg;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2persona.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2persona-opengl.desktop"
+    gawk -i inplace '{gsub("Name=SRB2 Persona","Name=SRB2 Persona (OpenGL)") || gsub("Exec=srb2p","Exec=srb2p -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2persona-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2legacy.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 2.1 Legacy
+Comment=Open source 3D Sonic game
+Icon=srb2legacy
+Exec=srb2legacy
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2legacy.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2legacy-opengl.desktop"
+    gawk -i inplace '{gsub("Name=SRB2 Legacy","Name=SRB2 Legacy (OpenGL)") || gsub("Exec=srb2legacy","Exec=srb2legacy -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2legacy-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2_2.0.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 2.0
+Comment=Open source 3D Sonic game
+Icon=srb2_2.0
+Exec=srb2_2.0
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2_2.0.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2_2.0-opengl.desktop"
+    gawk -i inplace '{gsub("Name=SRB2 2.0","Name=SRB2 2.0 (OpenGL)") || gsub("Exec=srb2_2.0","Exec=srb2_2.0 -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2_2.0-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2finaldemo.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 Final Demo
+Comment=Open source 3D Sonic game
+Icon=srb2finaldemo
+Exec=srb2fd
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2finaldemo.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2finaldemo-opengl.desktop"
+    gawk -i inplace '{gsub("Name=SRB2 Final Demo","Name=SRB2 Final Demo (OpenGL)") || gsub("Exec=srb2finaldemo","Exec=srb2finaldemo -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2finaldemo-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2kart.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 Kart
+Comment=Modified open source 3D Sonic game with kart racing gameplay
+Icon=srb2kart
+Exec=srb2kart
+Categories=Game;
+Keywords=sonic;kart;racing;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2kart.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2kart-opengl.desktop"
+    gawk -i inplace '{gsub("Name=SRB2 Kart","Name=SRB2 Kart (OpenGL)") || gsub("Exec=srb2kart","Exec=srb2kart -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2kart-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2kartmoemansion.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 Kart Moe Mansion
+Comment=Modified open source 3D Sonic game with kart racing gameplay, improved framerate and other features
+Icon=srb2kartmoe
+Exec=srb2kartmoe
+Categories=Game;
+Keywords=sonic;kart;racing;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2kartmoemansion.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2kartmoemansion-opengl.desktop"
+    gawk -i inplace '{gsub("Name=SRB2 Kart Moe Mansion","Name=SRB2 Kart Moe Mansion (OpenGL)") || gsub("Exec=srb2kartmoe","Exec=srb2kartmoe -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2kartmoemansion-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2kartvr.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 Kart VR
+Comment=Modified open source 3D Sonic game with VR kart racing gameplay, improved framerate and other features
+Icon=srb2kartvr
+Exec=srb2kartvr
+Categories=Game;
+Keywords=sonic;kart;racing;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp "\$BUILD/build/AppDir/usr/share/applications/srb2kartvr.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2kartvr-opengl.desktop"
+    gawk -i inplace '{gsub("Name=SRB2 Kart VR","Name=SRB2 Kart VR (OpenGL)") || gsub("Exec=srb2kartvr","Exec=srb2kartvr -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2kartvr-opengl.desktop"
+
+    fi
+
+    # Get app icon
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
+
+        ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/srb2.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        curl -L https://mb.srb2.org/data/resource_icons/3/3248.jpg -o "\$BUILD/build/srb2uncappedplus.jpg"
+        convert "\$BUILD/build/srb2uncappedplus.jpg" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/srb2uncappedplus.png"
+        ICONSIZE=\$(identify "\$BUILD/build/srb2uncappedplus.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/build/srb2uncappedplus.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
+
+        ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/srb2.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2netplus.png"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+
+        curl -L https://mb.srb2.org/data/resource_icons/0/166.jpg -o "\$BUILD/build/srb2persona.jpg"
+        convert "\$BUILD/build/srb2persona.jpg" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/srb2persona.png"
+        ICONSIZE=\$(identify "\$BUILD/build/srb2persona.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/build/srb2persona.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/srb2.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2legacy.png"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+
+        curl -L http://www.rw-designer.com/icon-download.php?id=22713 -o "\$BUILD/build/srb2_2.0.ico"
+        convert "\$BUILD/build/srb2_2.0.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/srb2_2.0.png"
+        ICONSIZE=\$(identify "\$BUILD/build/srb2_2.0.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/build/srb2_2.0.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        curl -L http://www.rw-designer.com/icon-download.php?id=22713 -o "\$BUILD/build/srb2finaldemo.ico"
+        convert "\$BUILD/build/srb2finaldemo.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/srb2finaldemo.png"
+        ICONSIZE=\$(identify "\$BUILD/build/srb2finaldemo.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/build/srb2finaldemo.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
+
+        ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/srb2.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2kart.png"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ]; then
+
+        ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/srb2.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2kartmoe.png"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+        ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
+        mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
+        cp "\$BUILD/srb2.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2kartvr.png"
+
+    fi
+
+fi
+
+ENTRYPOINT
+    chmod +x "$BUILDPATH/containers/srb2-docker/Entrypoint"
+
+    rm -rf "$BUILDPATH/containers/srb2-old-docker"
+    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-docker"
+
+    if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+        ISARM="i386"
+
+    else
+
+        ISARM="armhf"
+
+    fi
+
+    cat > "$BUILDPATH/containers/srb2-old-docker/Dockerfile" << DOCKERFILE
+FROM $ISARM/debian:$DEBVER
+
+ENV container docker \
+DEBIAN_FRONTEND noninteractive
+
+RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
+printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
+apt-get update && \
+apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
+printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
+
+#printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\ndeb https://snapshot.debian.org/archive/debian/20160807T174741Z jessie main contrib non-free" >> /etc/apt/sources.list && \
+#apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B 8B48AD6246925553 7638D0442B90D010 6FB2A1C265FFB764
+
+RUN apt-get update && \
+apt-get upgrade -y && \
+apt-get install -y apt-fast && \
+apt-fast install -y libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libjack-dev libfuse-dev libcurl4-openssl-dev libpng12-dev zlib1g-dev musl-tools fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/gcc-3.4_3.4.6-4_i386.deb && \
+#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/gcc-3.4-base_3.4.6-4_i386.deb && \
+#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/cpp-3.4_3.4.6-4_i386.deb && \
+#dpkg -i gcc-3.4_3.4.6-4_i386.deb gcc-3.4-base_3.4.6-4_i386.deb cpp-3.4_3.4.6-4_i386.deb
+
+#apt-fast install -y binutils cpp-4.9 gcc-4.9
+
+#libcom-err2 libfuse-dev
+
+#libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libjack-dev libupnp-dev libcurl4-gnutls-dev rapidjson-dev libopenvr-dev
+
+#printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\ndeb https://snapshot.debian.org/archive/debian/20160807T174741Z jessie main" >> /etc/apt/sources.list && \
+
+#RUN curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_i386.deb,g/gcc-4.9/cpp-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/g%2B%2B-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/gcc-4.9-base_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/gcc-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libgcc-4.9-dev_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libasan1_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libubsan0_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libcilkrts5_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libstdc%2B%2B-4.9-dev_4.9.2-10%2Bdeb8u1_i386.deb,m/mpfr4/libmpfr4_3.1.5-1_i386.deb,c/cloog/libcloog-isl4_0.18.4-1+b1_i386.deb,i/isl/libisl10_0.12.2-2_i386.deb,i/isl/libisl15_0.18-1_i386.deb} && \
+#dpkg -i multiarch-support_2.28-10_i386.deb && \
+#dpkg -i ./*.deb
+
+#RUN curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_i386.deb,libp/libpng/libpng12-0_1.2.50-2+deb8u3_i386.deb,l/lz4/liblz4-1_1.9.3-2_i386.deb,l/lzo2/liblzo2-2_2.10-2_i386.deb,libz/libzstd/libzstd1_1.4.8%2Bdfsg-3_i386.deb,s/squashfuse/squashfuse_0.1.103-3_i386.deb,s/squashfuse/libsquashfuse0_0.1.103-3_i386.deb} && \
+#dpkg -i ./*.deb
+
+RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+useradd -m -G sudo -s /bin/dash srb2 && \
+passwd -d srb2
+
+#curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_amd64.deb,libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb,l/lz4/liblz4-1_1.9.3-2_amd64.deb,l/lzo2/liblzo2-2_2.10-2_amd64.deb,libz/libzstd/libzstd1_1.4.8%2Bdfsg-3_amd64.deb,s/squashfuse/squashfuse_0.1.103-3_amd64.deb,s/squashfuse/libsquashfuse0_0.1.103-3_amd64.deb} && \
+#dpkg -i multiarch-support_2.28-10_amd64.deb && \
+#dpkg -i ./*.deb
+
+COPY Entrypoint /home/srb2
+
+ENTRYPOINT [ "/home/srb2/Entrypoint" ]
+
+DOCKERFILE
+
+    cat > "$BUILDPATH/containers/srb2-docker/Dockerfile" << DOCKERFILE
+#FROM ubuntu:18.04
+FROM debian:latest
+#FROM archlinux:latest
+#FROM opensuse/leap:latest
+#FROM alpine:latest
+#FROM voidlinux/voidlinux-musl:latest
+#FROM voidlinux/voidlinux:latest
+
+ENV container docker \
+DEBIAN_FRONTEND noninteractive
+
+#RUN gawk -i inplace '{gsub("#VerbosePkgLists","VerbosePkgLists\nParallelDownloads = 10");print}' /etc/pacman.conf && \
+#pacman -Syu --needed --noconfirm && \
+#pacman -S --needed --noconfirm fluidsynth jack2 libgme libopenmpt libpng sdl2_mixer glu mesa libcurl-gnutls libupnp dash nasm base-devel cmake gawk git curl fuse p7zip openvr rapidjson imagemagick patchelf
+
+#RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+#useradd -m -G wheel -s /bin/bash srb2 && \
+#passwd -d srb2
+
+#RUN zypper --non-interactive dist-upgrade && \
+#zypper --non-interactive install -t pattern --no-recommends devel_basis && \
+#zypper --non-interactive install --no-recommends git cmake fuse-devel squashfs curl libcurl-devel unzip fluidsynth-devel libgme-devel libopenmpt-devel libpng-devel libSDL2_mixer-devel libGLU1 Mesa-devel nasm
+
+#RUN xbps-install -Syu && \
+#xbps-install -Sy fluidsynth-devel jack-devel libgme-devel libopenmpt-devel libpng-devel SDL2_mixer-devel libcurl-devel libupnp-devel bash dash sudo base-devel cmake gawk git curl fuse p7zip nasm rapidjson ImageMagick patchelf
+
+#RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+#useradd -m -G wheel -s /bin/bash srb2 && \
+#passwd -d srb2
+
+RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
+printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
+apt-get update && \
+apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
+printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\n" >> /etc/apt/sources.list && \
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
+
+RUN apt-get update && \
+apt-get upgrade -y && \
+apt-get install -y apt-fast && \
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng16-16 libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev rapidjson-dev libopenvr-dev zlib1g-dev musl-tools fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+
+RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+useradd -m -G sudo -s /bin/dash srb2 && \
+passwd -d srb2
+
+COPY Entrypoint /home/srb2
+
+ENTRYPOINT [ "/home/srb2/Entrypoint" ]
+
+DOCKERFILE
+}
+
+trap 'git -C $BUILD clean -dfx -e .comrev ; git -C $BUILD reset --hard ; exit' 1 2 3 6 15
+
+case "$1" in
+
+    -h | --help)
+        printf "%s\n" "
+Build SRB2/SRB2Kart AppImage.
+
+Usage: srb2bld [OPTIONS]
+  OPTIONS:
+     -h, --help                             Show this help text.
+     -u, --upgrade                          Upgrade SRB2/SRB2Kart build.
+
+  EXAMPLES:
+     1. Upgrade SRB2/SRB2Kart build:
+            srb2bld -u
+
+  Warning! Old builds like SRB2 2.0 and SRB2 Final Demo can not work properly on modern Linux distributions.
+"
+        exit
+
+        ;;
+
+    "")
+        if [ "$OS" != "Linux" ]; then
+
+            printf "Currently building is only available for Linux. Exiting."
+            exit
+
+        fi
+
+        choosebuild
+
+        dockerentry
+
+        dockerrun
+
+        if [ ! -d "/usr/local/bin" ]; then
+
+            printf "%s\n" "Creating /usr/local/bin and /usr/local/games directory paths"
+            sudo install -d "/usr/local/bin"
+
+        fi
+
+        BUILDNAME=$(printf "$BUILD" | gawk -F'/' '{print $NF}')
+
+        if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2 binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2"
+            DESKTOPPATH="/usr/local/share/applications/srb2.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2.png"
+            sudo install -Dm755 "$BUILD/bin/lsdl2srb2" "/usr/local/bin/srb2"
+            sudo install -d "/usr/local/share/games/SRB2"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2ucp binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2ucp"
+            DESKTOPPATH="/usr/local/share/applications/srb2uncappedplus.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2uncappedplus-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2uncappedplus.png"
+            sudo install -Dm755 "$BUILD/bin/lsdl2srb2" "/usr/local/bin/srb2ucp"
+            sudo install -d "/usr/local/share/games/SRB2"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2np binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2np"
+            DESKTOPPATH="/usr/local/share/applications/srb2netplus.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2netplus-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2netplus.png"
+            sudo install -Dm755 "$BUILD/bin/lsdl2srb2" "/usr/local/bin/srb2np"
+            sudo install -d "/usr/local/share/games/SRB2"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2p binary, assets and desktop files to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2p"
+            DESKTOPPATH="/usr/local/share/applications/srb2persona.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2persona-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2persona.png"
+            sudo install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2" "/usr/local/bin/srb2p"
+            sudo install -d "/usr/local/share/games/SRB2"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2legacy binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2legacy"
+            DESKTOPPATH="/usr/local/share/applications/srb2legacy.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2legacy-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2legacy.png"
+            sudo install -Dm755 "$BUILD/bin/Linux$IS64/Release/srb2legacy" "/usr/local/bin/srb2legacy"
+            sudo install -d "/usr/local/share/games/SRB2"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2_2.0 binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2_2.0"
+            DESKTOPPATH="/usr/local/share/applications/srb2_2.0.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2_2.0-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2_2.0.png"
+            sudo install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdlsrb2" "/usr/local/bin/srb2_2.0"
+            sudo install -d "/usr/local/share/games/SRB2"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2fd binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2fd"
+            DESKTOPPATH="/usr/local/share/applications/srb2finaldemo.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2finaldemo-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2finaldemo.png"
+            sudo install -Dm755 "$BUILD/Final Demo 1.09.4a/bin/Linux/Release/lsdlsrb2" "/usr/local/bin/srb2fd"
+            sudo install -d "/usr/local/share/games/SRB2"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2kart binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2kart"
+            DESKTOPPATH="/usr/local/share/applications/srb2kart.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2kart-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2kart.png"
+            sudo install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2kart" "/usr/local/bin/srb2kart"
+            sudo install -d "/usr/local/share/games/SRB2Kart"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "/usr/local/share/games/SRB2Kart"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2kartmoe binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2kartmoe"
+            DESKTOPPATH="/usr/local/share/applications/srb2kartmoemansion.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2kartmoemansion-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2kartmoemansion.png"
+            sudo install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2kart" "/usr/local/bin/srb2kartmoe"
+            sudo install -d "/usr/local/share/games/SRB2Kart"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "/usr/local/share/games/SRB2Kart"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+
+            printf "%s\n" "Installing $BUILDNAME's srb2kartvr binary and assets to /usr/local/bin and /usr/local/share/games."
+            BINARYPATH="/usr/local/bin/srb2kartvr"
+            DESKTOPPATH="/usr/local/share/applications/srb2kartvr.desktop"
+            DESKTOPOPENGLPATH="/usr/local/share/applications/srb2kartvr-opengl.desktop"
+            ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+            ICONPATH="/usr/local/share/icons/hicolor/$ICONSIZE/apps/srb2kartvr.png"
+            sudo install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2kart" "/usr/local/bin/srb2kartvr"
+            sudo install -d "/usr/local/share/games/SRB2Kart"
+            sudo cp -rfv "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "/usr/local/share/games/SRB2Kart"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+            sudo install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$ICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$ICONSIZE/apps"
+
+        fi
+
+        #        xdg-desktop-menu forceupdate
+        mkdir -p "$BUILDPATH/installed"
+        cat > "$BUILDPATH/installed/$(printf "%s\n" $BUILD | gawk -F'/' '{print $NF}')" << INSTALL
+$BINARYPATH
+$DESKTOPPATH
+$DESKTOPOPENGLPATH
+$ICONPATH
+INSTALL
+
+        COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
+        printf "%s\n" "$COMREV" > "$BUILD/.comrev"
+        git -C "$BUILD" clean -dfx -e .comrev
+        git -C "$BUILD" reset --hard
+
+        if [ -n "$(ldd $BINARYPATH | gawk '/not found/ && !/GLIBC/ {print $1}')" ]; then
+
+            printf "%s\n" "Installing missing dependencies for $BUILDNAME on system. Please wait..."
+            #            if [ ! -x "$(which e-file)" ] && [ -x "$(which emerge)" ]; then
+            #
+            #                sudo emerge pfl
+            #
+            #            elif [ ! -x "$(which apt-file)" ] && [ -x "$(which apt-get)" ]; then
+            #
+            #                sudo apt-get install -y apt-file
+            #
+            #            elif [ ! -x "$(which xlocate)" ] && [ -x "$(which xbps-install)" ]; then
+            #
+            #                sudo xbps-install -Sy xtools
+            #
+            #            fi
+            #
+            #            if [ -x "$(which apt-file)" ]; then
+            #
+            #                sudo apt-file update
+            #
+            #            elif [ -x "$(which xlocate)" ]; then
+            #
+            #                xlocate -S
+            #
+            #            fi
+
+            PACKAGE=$(for l in $(ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u); do
+                if [ -x "$(which emerge)" ]; then
+
+                    if [ ! -x "$(which e-file)" ]; then
+
+                        sudo emerge pfl > /dev/null
+
+                    fi
+                    e-file "$l" | col | gawk -F' ' '/1;32m/ && gsub(/1;29m|0m/,"") {print $NF}'
+
+                elif [ -x "$(which pacman)" ]; then
+
+                    sudo pacman -Fyq "$l"
+
+                elif [ -x "$(which apt-get)" ]; then
+
+                    if [ ! -x "$(which apt-file)" ]; then
+
+                        sudo apt-get install -y apt-file > /dev/null
+
+                    fi
+                    sudo apt-file update > /dev/null
+                    apt-file -l find "$l" | gawk 'NF{print}'
+
+                elif [ -x "$(which zypper)" ]; then
+
+                    zypper search --provides --match-exact "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
+
+                elif [ -x "$(which dnf)" ]; then
+
+                    dnf provides -q "$l" | gawk '/.fc[0-9]./ {print $1}'
+
+                elif [ -x "$(which xbps-install)" ]; then
+
+                    if [ ! -x "$(which xlocate)" ]; then
+
+                        sudo xbps-install -Sy xtools > /dev/null
+
+                    fi
+                    xlocate -S > /dev/null
+                    xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | uniq
+
+                fi
+            done)
+
+            if [ -x "$(which emerge)" ]; then
+
+                sudo emerge $PACKAGE
+
+            elif [ -x "$(which pacman)" ]; then
+
+                sudo pacman -S --needed --noconfirm $PACKAGE
+
+            elif [ -x "$(which apt-get)" ]; then
+
+                sudo apt-get install -y $PACKAGE
+
+            elif [ -x "$(which zypper)" ]; then
+
+                sudo zypper install -y $PACKAGE
+
+            elif [ -x "$(which dnf)" ]; then
+
+                sudo dnf install --best --skip-broken -y $PACKAGE
+
+            elif [ -x "$(which xbps-install)" ]; then
+
+                sudo xbps-install -Sy $PACKAGE
+
+            else
+
+                ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}'
+                printf "\n%s\n" "Script can't detect package manager. Please install manually these missing libraries."
+
+            fi
+
+            if [ -n "$(ldd $BINARYPATH | gawk 'match($0, /discord/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+                printf "%s\n" "Building and installing discord-rpc for $BUILDNAME on system. Please wait..."
+
+                if [ ! -d "$BUILDPATH/discord-rpc/.git" ]; then
+
+                    git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/discord-rpc"
+
+                else
+
+                    git -C "$BUILDPATH/discord-rpc" clean -dfx
+                    git -C "$BUILDPATH/discord-rpc" reset --hard
+                    git -C "$BUILDPATH/discord-rpc" pull
+
+                fi
+                mkdir -p "$BUILDPATH/discord-rpc/build"
+                cmake -S "$BUILDPATH/discord-rpc" -B "$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
+                sudo cmake --build "$BUILDPATH/discord-rpc/build" --config Release --target install
+
+            fi
+
+        fi
+
+        ;;
+
+    -a | --appimage)
+
+        if [ "$OS" != "Linux" ] && [ -z "$(ldd --version | gawk '/Free Software Foundation/ {print}')" ]; then
+
+            printf "Currently building AppImages is only available for Linux with glibc. Exiting."
+            exit
+
+        fi
+
+        choosebuild
+
+        export APPIMAGE=1
+
+        dockerentry
+
+        dockerrun
+
+        mv -v "$BUILDPATH/"*.AppImage .
+
+        ;;
+
+    -li | --listinstalled)
+
+        ls "$BUILDPATH/installed" | sort
+
+        ;;
+
+    -rb | --removebuild)
+
+        chooseremovebuild
+
+        ;;
+
+    -up | --upgrade)
+
+        for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '/srb2/ && !/srb2-2.0/ && !/srb2-final-demo/'); do
+
+            printf "%s\n" "Updating $u"
+            git -C "$BUILDPATH/$u" pull
+            printf "%s\n" ""
+
+            if [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
+
+                export "BUILD=$BUILDPATH/$u"
+
+                dockerentry
+
+                dockerrun
+
+            fi
+
+        done
+
+        ;;
+
+    -ui | --uninstall)
+
+        chooseuninstall
+
+        ;;
+
+esac
