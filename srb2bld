@@ -7,12 +7,13 @@ OS=$(uname)
 IS64=$(printf "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, RLENGTH)}')
 BUILDPATH="$HOME/.local/share/srb2-builds"
 DEBVER="jessie"
+UBUVER="18.04"
 
 choosebuild() {
     clear
     while
         printf "\n%s\n" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Persona" "Build SRB2 2.1 Legacy" "Build SRB2 2.0" "Build SRB2 Final Demo" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart VR"; do printf "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Persona" "Build SRB2 2.1 Legacy" "Build SRB2 2.0" "Build SRB2 Final Demo" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion"; do printf "%s\n" "$((i += 1))) $loop"; done
         printf "#? "
         read -r choose
     do
@@ -63,11 +64,10 @@ choosebuild() {
                 GIT="git clone https://gitlab.com/himie/kart-public.git --depth 1 --branch moe-mansion $BUILD"
                 break
                 ;;
-            "10")
-
-                BUILD="$BUILDPATH/srb2-kart-vr"
-                break
-                ;;
+#            "10")
+#                BUILD="$BUILDPATH/srb2-kart-vr"
+#                break
+#                ;;
             *)
                 printf "\n%s\n" "No option has been chosen."
                 exit
@@ -128,24 +128,6 @@ chooseuninstall() {
     done
 }
 
-dockerrun() {
-    if [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-        docker build -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
-        docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-old-docker
-
-    else
-
-        docker build -t srb2-docker "$BUILDPATH/containers/srb2-docker"
-        docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-docker
-
-    fi
-
-    CONTAINER_ID=$(docker ps -alq)
-    docker stop "$CONTAINER_ID"
-    docker container rm "$CONTAINER_ID"
-}
-
 dockerentry() {
     if [ ! -d "$BUILDPATH/containers/srb2-docker" ]; then
 
@@ -159,6 +141,8 @@ dockerentry() {
     set -e -x
 
     trap 'git -C \$BUILD clean -dfx -e .comrev ; git -C \$BUILD reset --hard ; exit' 1 2 3 6 15
+
+    sudo apt update && sudo apt full-upgrade -y
 
     # Build the application
     if [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
@@ -175,6 +159,7 @@ dockerentry() {
     cd "\$BUILD" || exit
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
         mkdir -p "\$BUILD/build/AppDir/usr/games/SRB2Kart"
 
     else
@@ -264,6 +249,15 @@ MUSL
         patch -p1 < "\$BUILD/srb2-musl.patch"
     fi
 
+    if [ "\$OS" = "Windows" ]; then
+
+         sed -i '/#if !defined(_WIN32) && !defined(__CYGWIN__)/,/#endif/d' "/usr/share/mingw-w64/include/_mingw.h"
+         sed -i '/#ifndef _WIN32/,/#endif/d' "/usr/share/mingw-w64/include/_mingw_stdarg.h"
+         sed -i '/#ifndef _WIN32/,/#endif/d' "/usr/share/mingw-w64/include/sys/types.h"
+         sed -i '/#ifndef _WIN32/,/#endif/d' "/usr/share/mingw-w64/include/sys/stat.h"
+
+    fi
+
     if [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
          sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2persona"/' "\$BUILD/src/doomdef.h"
@@ -280,35 +274,6 @@ MUSL
          sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2finaldemo"/' "\$BUILD/Final Demo 1.09.4a/src/doomdef.h"
 
     fi
-
-#    if [ "\$1" = "-u" ] || [ "\$1" = "--upgrade" ]; then
-#
-#        clear
-#    while
-#        printf "\n%s\n" "Do you want to upgrade \$BUILD as AppImage? Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-#        for loop in "Yes" "No"; do printf "%s\n" "\$((i += 1))) \$loop"; done
-#        printf "#? "
-#        read -r choose
-#    do
-#        unset i
-#        case "\$choose" in
-#            "Yes")
-#                APPIMAGE=1
-#                break
-#                ;;
-#
-#            "No")
-#
-#                break
-#                ;;
-#            *)
-#                printf "\n%s\n" "No option has been chosen."
-#                exit
-#                ;;
-#        esac
-#    done
-#
-#    fi
 
 if [ "\$APPIMAGE" = 1 ]; then
 
@@ -335,13 +300,13 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-            printf "%s\n" "Compiling game with this command: make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 HAVE_DISCORDRPC=1"
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 HAVE_DISCORDRPC=1
+            printf "%s\n" "Compiling game with this command: LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1"
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
 
         else
 
-            printf "%s\n" "Compiling game with this command: make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 HAVE_DISCORDRPC=1"
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 HAVE_DISCORDRPC=1
+            printf "%s\n" "Compiling game with this command: LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1"
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
 
         fi
 
@@ -351,11 +316,11 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
 
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1
 
         else
 
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1 NONX86=1
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1 NONX86=1
 
         fi
 
@@ -363,11 +328,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
 
         else
 
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
 
         fi
 
@@ -401,7 +366,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     # Create desktop file
 
-        COMREV=\$(git rev-parse --short HEAD)
+    COMREV=\$(git rev-parse --short HEAD)
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
 
@@ -867,7 +832,6 @@ DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
     cd "\$BUILD" || exit
     "\$BUILD/appimagetool" -n "\$BUILD/build/AppDir"
     mv "\$BUILD/"*.AppImage "\$BUILDPATH"
-#    printf "%s\n" "\$COMREV" > "\$BUILD/.comrev"
 
     git -C "\$BUILD" clean -dfx -e .comrev
     git -C "\$BUILD" reset --hard
@@ -912,16 +876,47 @@ else
 
     fi
 
+    if [ "\$OS" = "Windows" ]; then
+
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+            mkdir -p "\$BUILD/Final Demo 1.09.4a/objs/Linux/SDL/Release"
+            if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+                LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme C_INCLUDE_PATH="\$C_INCLUDE_PATH:/usr/i686-w64-mingw32/include" CC="i686-w64-mingw32-gcc-10-win32" make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" MINGW=1 NOASM=1 \$CONF
+
+            else
+
+                LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme C_INCLUDE_PATH="\$C_INCLUDE_PATH:/usr/i686-w64-mingw32/include" CC="i686-w64-mingw32-gcc-10-win32" make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" MINGW=1 NONX86=1 NOASM=1 \$CONF
+
+            fi
+
+        else
+
+            if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+                LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme C_INCLUDE_PATH="\$C_INCLUDE_PATH:/usr/i686-w64-mingw32/include" CC="i686-w64-mingw32-gcc-10-win32" make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+
+            else
+
+                LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme C_INCLUDE_PATH="\$C_INCLUDE_PATH:/usr/i686-w64-mingw32/include" CC="i686-w64-mingw32-gcc-10-win32" make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+
+            fi
+
+        fi
+
+    else
+
     if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
         mkdir -p "\$BUILD/Final Demo 1.09.4a/objs/Linux/SDL/Release"
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1 \$CONF
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1 \$CONF
 
         else
 
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NONX86=1 NOASM=1 \$CONF
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NONX86=1 NOASM=1 \$CONF
 
         fi
 
@@ -929,13 +924,15 @@ else
 
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 \$CONF
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         else
 
-            make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOUPX=1 NOVERSION=1 \$CONF
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         fi
+
+    fi
 
     fi
 
@@ -1209,8 +1206,9 @@ fi
 ENTRYPOINT
     chmod +x "$BUILDPATH/containers/srb2-docker/Entrypoint"
 
-    rm -rf "$BUILDPATH/containers/srb2-old-docker"
+    rm -rf "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-windows-docker"
     cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-docker"
+    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-windows-docker"
 
     if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
@@ -1278,8 +1276,8 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 DOCKERFILE
 
     cat > "$BUILDPATH/containers/srb2-docker/Dockerfile" << DOCKERFILE
-#FROM ubuntu:18.04
-FROM debian:latest
+FROM ubuntu:$UBUVER
+#FROM debian:latest
 #FROM archlinux:latest
 #FROM opensuse/leap:latest
 #FROM alpine:latest
@@ -1319,7 +1317,9 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng16-16 libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev rapidjson-dev libopenvr-dev zlib1g-dev musl-tools fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng16-16 libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev musl-tools fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+
+#rapidjson-dev libopenvr-dev
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/dash srb2 && \
@@ -1330,6 +1330,89 @@ COPY Entrypoint /home/srb2
 ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 
 DOCKERFILE
+
+    cat > "$BUILDPATH/containers/srb2-windows-docker/Dockerfile" << DOCKERFILE
+#FROM ubuntu:18.04
+FROM i386/debian:latest
+#FROM archlinux:latest
+#FROM opensuse/leap:latest
+#FROM alpine:latest
+#FROM voidlinux/voidlinux-musl:latest
+#FROM voidlinux/voidlinux:latest
+
+ENV container docker \
+DEBIAN_FRONTEND noninteractive
+
+#RUN gawk -i inplace '{gsub("#VerbosePkgLists","VerbosePkgLists\nParallelDownloads = 10");print}' /etc/pacman.conf && \
+#pacman -Syu --needed --noconfirm && \
+#pacman -S --needed --noconfirm fluidsynth jack2 libgme libopenmpt libpng sdl2_mixer glu mesa libcurl-gnutls libupnp dash nasm base-devel cmake gawk git curl fuse p7zip openvr rapidjson imagemagick patchelf
+
+#RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+#useradd -m -G wheel -s /bin/bash srb2 && \
+#passwd -d srb2
+
+#RUN zypper --non-interactive dist-upgrade && \
+#zypper --non-interactive install -t pattern --no-recommends devel_basis && \
+#zypper --non-interactive install --no-recommends git cmake fuse-devel squashfs curl libcurl-devel unzip fluidsynth-devel libgme-devel libopenmpt-devel libpng-devel libSDL2_mixer-devel libGLU1 Mesa-devel nasm
+
+#RUN xbps-install -Syu && \
+#xbps-install -Sy fluidsynth-devel jack-devel libgme-devel libopenmpt-devel libpng-devel SDL2_mixer-devel libcurl-devel libupnp-devel bash dash sudo base-devel cmake gawk git curl fuse p7zip nasm rapidjson ImageMagick patchelf
+
+#RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+#useradd -m -G wheel -s /bin/bash srb2 && \
+#passwd -d srb2
+
+RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
+printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
+apt-get update && \
+apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
+printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\n" >> /etc/apt/sources.list && \
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
+
+RUN apt-get update && \
+apt-get upgrade -y && \
+apt-get install -y apt-fast && \
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng16-16 libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev musl-tools fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+
+# rapidjson-dev libopenvr-dev
+
+RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+useradd -m -G sudo -s /bin/dash srb2 && \
+passwd -d srb2
+
+COPY Entrypoint /home/srb2
+
+ENTRYPOINT [ "/home/srb2/Entrypoint" ]
+
+DOCKERFILE
+}
+
+dockerrun() {
+    if [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+        docker build -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
+        docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-old-docker
+
+    else
+
+        if [ "$OS" = "Windows" ]; then
+
+            docker build -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-windows-docker
+
+        else
+
+            docker build -t srb2-docker "$BUILDPATH/containers/srb2-docker"
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-docker
+
+        fi
+
+    fi
+
+    CONTAINER_ID=$(docker ps -alq)
+    docker stop "$CONTAINER_ID"
+    docker container rm "$CONTAINER_ID"
 }
 
 trap 'git -C $BUILD clean -dfx -e .comrev ; git -C $BUILD reset --hard ; exit' 1 2 3 6 15
@@ -1356,12 +1439,31 @@ Usage: srb2bld [OPTIONS]
         ;;
 
     "")
-        if [ "$OS" != "Linux" ]; then
+        if [ "$OS" != "Linux" ] && [ "$OS" != "Darwin" ]; then
 
-            printf "Currently building is only available for Linux. Exiting."
+            printf "Currently building is only available for Linux and MacOS. Exiting."
             exit
 
         fi
+
+        #if [ $OS = Darwin ]; then
+
+        #export MACOSX_DEPLOYMENT_TARGET=10.9
+        #export LIBRARY_PATH=/usr/local/lib
+
+        #mkdir -p /Users/user/Downloads/SRB2/assets/installer
+
+        #7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"/Users/user/Downloads/SRB2/assets/installer"
+
+        #brew install cmake libpng libogg libvorbis libmpeg2 libmodplug libopenmpt libgme sdl2 sdl2 sdl2_mixer p7zip gawk
+
+        #                cmake -S "$BUILDPATH/discord-rpc" -B "$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
+        #                sudo cmake --build "$BUILDPATH/discord-rpc/build" --config Release --target install
+
+        #                cmake -S "$BUILDPATH/SRB2" -B "$BUILDPATH/SRB2" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
+        #                sudo cmake --build "$BUILDPATH/discord-rpc/build" --config Release --target install
+
+        #fi
 
         choosebuild
 
@@ -1537,30 +1639,6 @@ INSTALL
         if [ -n "$(ldd $BINARYPATH | gawk '/not found/ && !/GLIBC/ {print $1}')" ]; then
 
             printf "%s\n" "Installing missing dependencies for $BUILDNAME on system. Please wait..."
-            #            if [ ! -x "$(which e-file)" ] && [ -x "$(which emerge)" ]; then
-            #
-            #                sudo emerge pfl
-            #
-            #            elif [ ! -x "$(which apt-file)" ] && [ -x "$(which apt-get)" ]; then
-            #
-            #                sudo apt-get install -y apt-file
-            #
-            #            elif [ ! -x "$(which xlocate)" ] && [ -x "$(which xbps-install)" ]; then
-            #
-            #                sudo xbps-install -Sy xtools
-            #
-            #            fi
-            #
-            #            if [ -x "$(which apt-file)" ]; then
-            #
-            #                sudo apt-file update
-            #
-            #            elif [ -x "$(which xlocate)" ]; then
-            #
-            #                xlocate -S
-            #
-            #            fi
-
             PACKAGE=$(for l in $(ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u); do
                 if [ -x "$(which emerge)" ]; then
 
