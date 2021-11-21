@@ -9,6 +9,7 @@ BUILDPATH="$HOME/.local/share/srb2-builds"
 DEBVER="jessie"
 UBUVER="18.04"
 SRB2VER="SRB2_release_2.2.9"
+GMEVER="0.6.2"
 
 choosebuild() {
     clear
@@ -156,7 +157,7 @@ dockerentry() {
 
     fi
 
-    mkdir -p "\$BUILDPATH/assets" "\$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
+    mkdir -p "\$BUILDPATH/assets" "\$BUILDPATH/libraries" "\$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
     cd "\$BUILD" || exit
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
@@ -1450,29 +1451,74 @@ Usage: srb2bld [OPTIONS]
         if [ "$OS" = "Darwin" ]; then
 
         choosebuild
-#        brew install cmake libpng libogg libvorbis libmpeg2 libmodplug libopenmpt libgme sdl2 sdl2_mixer p7zip gawk
 
-    if [ ! -d "$BUILD/.git" ]; then
+        mkdir -p "$BUILD/build"
+        cmake -LA -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+        printf "\n%s\n" "Please enter configuration flags to compilation and then press enter, or just press enter to begin compiling."
+        read -r CONF
 
-        $GIT
+        if [ -n "$(printf "%s\n" $CONF | gawk 'match($0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|UNIX=1|FREEBSD=1/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-    fi
-        mkdir -pv "$BUILD/assets/installer"
+           CONF=$(printf "%s\n" "$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|UNIX=1|FREEBSD=1","");print}')
+           printf "\n%s\n" "Currently prompting OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Defaulting to macOS."
+
+        fi
 
 
-    mkdir -p "$BUILDPATH/assets" "$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
-    cd "$BUILD" || exit
+  if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-    if [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
-        mkdir -p "$BUILD/build/AppDir/usr/games/SRB2Kart"
+	ISGME=""
 
-    else
+  else
 
-        mkdir -p "$BUILD/build/AppDir/usr/games/SRB2"
+        ISGME=libgme
 
-    fi
+  fi
 
+  if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+
+	ISOPENMPT=""
+
+  else
+
+        ISOPENMPT=libopenmpt
+
+  fi
+
+  if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+
+	ISPNG=""
+
+  else
+
+        ISPNG=libpng
+
+  fi
+
+  if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+
+	ISSDL2MIXER=""
+
+  else
+
+        ISSDL2MIXER=sdl2_mixer
+
+  fi
+
+        brew install -f cmake $ISPNG libogg libvorbis libmpeg2 libmodplug $ISOPENMPT sdl2 $ISSDL2MIXER
+
+        if [ ! -d "$BUILD/.git" ]; then
+
+           $GIT
+
+        fi
+set -x
+        mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer" "$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
+        cd "$BUILD" || exit
 
         curl -LC - $(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}') -o "$BUILDPATH/assets/SRB2.zip"
 
@@ -1481,33 +1527,47 @@ Usage: srb2bld [OPTIONS]
 
         7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
+        export LIBRARY_PATH=/usr/local/lib
+
+        if [ ! -f "/usr/local/lib/libgme.$GMEVER.dylib" ] && [ "$ISGME" = "libgme" ]; then
         if [ ! -d "$BUILDPATH/libraries/game-music-emu/.git" ]; then
-           git -C "$BUILDPATH/libraries" https://bitbucket.org/mpyne/game-music-emu --branch 0.6.2
+           git -C "$BUILDPATH/libraries" clone https://bitbucket.org/mpyne/game-music-emu --branch "$GMEVER"
 
         else
 
-             git -C "$BUILDPATH/libraries/game-music-emu" pull
+#             git -C "$BUILDPATH/libraries/game-music-emu" pull
              git -C "$BUILDPATH/libraries/game-music-emu" clean -dfx
              git -C "$BUILDPATH/libraries/game-music-emu" reset --hard
 
         fi
         mkdir -p "$BUILDPATH/libraries/game-music-emu/build"
-        cmake -S "$BUILDPATH/libraries/game-music-emu" -B "$BUILDPATH/libraries/game-music-emu/build" -DCMAKE_INSTALL_PREFIX=/usr/local
+        cmake -S "$BUILDPATH/libraries/game-music-emu" -B "$BUILDPATH/libraries/game-music-emu/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
         sudo -E cmake --build "$BUILDPATH/libraries/game-music-emu/build" --config Release --target install
+        fi
 
-        export LIBRARY_PATH=/usr/local/lib
+        if ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]) && [ -n "$(printf "%s\n" $CONF | gawk 'match($0, /HAVE_DISCORDRPC=1/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-#                        cmake -S "$BUILDPATH/discord-rpc" -B "$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
-#                        sudo cmake --build "$BUILDPATH/discord-rpc/build" --config Release --target install
+            if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
+                 git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/libraries/discord-rpc"
 
-        mkdir -p "$BUILD/build"
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
-        sudo -E cmake --build "$BUILD/build" --config Release --target install
+            else
 
-#         cd "$BUILD/build" || exit
-#         make
-#         make install
+                 git -C "$BUILDPATH/libraries/discord-rpc" clean -dfx
+                 git -C "$BUILDPATH/libraries/discord-rpc" reset --hard
+                 git -C "$BUILDPATH/libraries/discord-rpc" pull
+
+            fi
+            mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
+            cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
+            sudo -E cmake --build "$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
+
+    fi
+
+        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/Downloads" $CONF
+        cd "$BUILD/build" || exit
+        make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+        make install
 
 else
         choosebuild
@@ -1726,6 +1786,15 @@ INSTALL
                     xlocate -S > /dev/null
                     xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | uniq
 
+                elif [ -x "$(which apk)" ]; then
+
+                    if [ ! -x "$(which apk-file)" ]; then
+
+                        sudo apk add apk-file > /dev/null
+
+                    fi
+                    apk-file "$l" | gawk '/-dev/ {print $2}' | sort -u
+
                 fi
             done)
 
@@ -1752,6 +1821,10 @@ INSTALL
             elif [ -x "$(which xbps-install)" ]; then
 
                 sudo xbps-install -Sy $PACKAGE
+
+            elif [ -x "$(which apk)" ]; then
+
+                sudo apk add $PACKAGE
 
             else
 
