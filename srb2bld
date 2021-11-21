@@ -8,6 +8,7 @@ IS64=$(printf "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, R
 BUILDPATH="$HOME/.local/share/srb2-builds"
 DEBVER="jessie"
 UBUVER="18.04"
+SRB2VER="SRB2_release_2.2.9"
 
 choosebuild() {
     clear
@@ -21,7 +22,7 @@ choosebuild() {
         case "$choose" in
             "1")
                 BUILD="$BUILDPATH/srb2"
-                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --depth 1 --branch master $BUILD"
+                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --depth 1 --branch $SRB2VER $BUILD"
                 break
                 ;;
             "2")
@@ -31,7 +32,7 @@ choosebuild() {
                 ;;
             "3")
                 BUILD="$BUILDPATH/srb2-netplus"
-                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus --depth 1 --branch master $BUILD"
+                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --depth 1 --branch master $BUILD"
                 break
                 ;;
             "4")
@@ -46,12 +47,12 @@ choosebuild() {
                 ;;
             "6")
                 BUILD="$BUILDPATH/srb2-2.0"
-                GIT="git clone https://github.com/STJr/SRB2-Public --depth 1 --branch master $BUILD"
+                GIT="git clone https://github.com/STJr/SRB2-Public.git --depth 1 --branch master $BUILD"
                 break
                 ;;
             "7")
                 BUILD="$BUILDPATH/srb2-final-demo"
-                GIT="git clone https://github.com/KrazeeTobi/SRB2-OldSRC --depth 1 --branch main $BUILD"
+                GIT="git clone https://github.com/KrazeeTobi/SRB2-OldSRC.git --depth 1 --branch main $BUILD"
                 break
                 ;;
             "8")
@@ -78,7 +79,7 @@ choosebuild() {
 
 chooseremovebuild() {
     printf "\n%s\n" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|containers|installed|discord-rpc/ {print}' | sort)
+    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|containers|installed|libraries/ {print}' | sort)
     arrayname=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' | gawk '/srb2/ {print}' | sort)
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -279,20 +280,20 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-        if [ ! -d "\$BUILDPATH/discord-rpc/.git" ]; then
+        if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-              git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/discord-rpc"
+              git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/libraries/discord-rpc"
 
         else
 
-              git -C "\$BUILDPATH/discord-rpc" clean -dfx
-              git -C "\$BUILDPATH/discord-rpc" reset --hard
-              git -C "\$BUILDPATH/discord-rpc" pull
+              git -C "\$BUILDPATH/libraries/discord-rpc" clean -dfx
+              git -C "\$BUILDPATH/libraries/discord-rpc" reset --hard
+              git -C "\$BUILDPATH/libraries/discord-rpc" pull
 
         fi
-        mkdir -p "\$BUILDPATH/discord-rpc/build"
-        cmake -S "\$BUILDPATH/discord-rpc" -B "\$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        sudo cmake --build "\$BUILDPATH/discord-rpc/build" --config Release --target install
+        mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
+        cmake -S "\$BUILDPATH/libraries/discord-rpc" -B "\$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
+        sudo cmake --build "\$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
 
     fi
 
@@ -859,20 +860,20 @@ else
 
     if ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
-        if [ ! -d "\$BUILDPATH/discord-rpc/.git" ]; then
+        if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-              git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/discord-rpc"
+              git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/libraries/discord-rpc"
 
         else
 
-              git -C "\$BUILDPATH/discord-rpc" clean -dfx
-              git -C "\$BUILDPATH/discord-rpc" reset --hard
-              git -C "\$BUILDPATH/discord-rpc" pull
+              git -C "\$BUILDPATH/libraries/discord-rpc" clean -dfx
+              git -C "\$BUILDPATH/libraries/discord-rpc" reset --hard
+              git -C "\$BUILDPATH/libraries/discord-rpc" pull
 
         fi
-        mkdir -p "\$BUILDPATH/discord-rpc/build"
-        cmake -S "\$BUILDPATH/discord-rpc" -B "\$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        sudo cmake --build "\$BUILDPATH/discord-rpc/build" --config Release --target install
+        mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
+        cmake -S "\$BUILDPATH/libraries/discord-rpc" -B "\$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
+        sudo cmake --build "\$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
 
     fi
 
@@ -1446,31 +1447,75 @@ Usage: srb2bld [OPTIONS]
 
         fi
 
-        #if [ $OS = Darwin ]; then
+        if [ "$OS" = "Darwin" ]; then
 
-        #export MACOSX_DEPLOYMENT_TARGET=10.9
-        #export LIBRARY_PATH=/usr/local/lib
+        choosebuild
+#        brew install cmake libpng libogg libvorbis libmpeg2 libmodplug libopenmpt libgme sdl2 sdl2_mixer p7zip gawk
 
-        #mkdir -p /Users/user/Downloads/SRB2/assets/installer
+    if [ ! -d "$BUILD/.git" ]; then
 
-        #7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"/Users/user/Downloads/SRB2/assets/installer"
+        $GIT
 
-        #brew install cmake libpng libogg libvorbis libmpeg2 libmodplug libopenmpt libgme sdl2 sdl2 sdl2_mixer p7zip gawk
+    fi
+        mkdir -pv "$BUILD/assets/installer"
 
-        #                cmake -S "$BUILDPATH/discord-rpc" -B "$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
-        #                sudo cmake --build "$BUILDPATH/discord-rpc/build" --config Release --target install
 
-        #                cmake -S "$BUILDPATH/SRB2" -B "$BUILDPATH/SRB2" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
-        #                sudo cmake --build "$BUILDPATH/discord-rpc/build" --config Release --target install
+    mkdir -p "$BUILDPATH/assets" "$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
+    cd "$BUILD" || exit
 
-        #fi
+    if [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
+        mkdir -p "$BUILD/build/AppDir/usr/games/SRB2Kart"
+
+    else
+
+        mkdir -p "$BUILD/build/AppDir/usr/games/SRB2"
+
+    fi
+
+
+        curl -LC - $(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}') -o "$BUILDPATH/assets/SRB2.zip"
+
+        git -C "$BUILD" clean -dfx
+        git -C "$BUILD" reset --hard
+
+        7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+
+        if [ ! -d "$BUILDPATH/libraries/game-music-emu/.git" ]; then
+           git -C "$BUILDPATH/libraries" https://bitbucket.org/mpyne/game-music-emu --branch 0.6.2
+
+        else
+
+             git -C "$BUILDPATH/libraries/game-music-emu" pull
+             git -C "$BUILDPATH/libraries/game-music-emu" clean -dfx
+             git -C "$BUILDPATH/libraries/game-music-emu" reset --hard
+
+        fi
+        mkdir -p "$BUILDPATH/libraries/game-music-emu/build"
+        cmake -S "$BUILDPATH/libraries/game-music-emu" -B "$BUILDPATH/libraries/game-music-emu/build" -DCMAKE_INSTALL_PREFIX=/usr/local
+        sudo -E cmake --build "$BUILDPATH/libraries/game-music-emu/build" --config Release --target install
+
+        export LIBRARY_PATH=/usr/local/lib
+
+#                        cmake -S "$BUILDPATH/discord-rpc" -B "$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
+#                        sudo cmake --build "$BUILDPATH/discord-rpc/build" --config Release --target install
+
+
+        mkdir -p "$BUILD/build"
+        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+        sudo -E cmake --build "$BUILD/build" --config Release --target install
+
+#         cd "$BUILD/build" || exit
+#         make
+#         make install
+
+else
         choosebuild
 
         dockerentry
 
         dockerrun
-
+fi
         if [ ! -d "/usr/local/bin" ]; then
 
             printf "%s\n" "Creating /usr/local/bin and /usr/local/games directory paths"
@@ -1718,20 +1763,20 @@ INSTALL
             if [ -n "$(ldd $BINARYPATH | gawk 'match($0, /discord/) {print substr($0, RSTART, RLENGTH)}')" ]; then
                 printf "%s\n" "Building and installing discord-rpc for $BUILDNAME on system. Please wait..."
 
-                if [ ! -d "$BUILDPATH/discord-rpc/.git" ]; then
+                if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-                    git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/discord-rpc"
+                    git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/libraries/discord-rpc"
 
                 else
 
-                    git -C "$BUILDPATH/discord-rpc" clean -dfx
-                    git -C "$BUILDPATH/discord-rpc" reset --hard
-                    git -C "$BUILDPATH/discord-rpc" pull
+                    git -C "$BUILDPATH/libraries/discord-rpc" clean -dfx
+                    git -C "$BUILDPATH/libraries/discord-rpc" reset --hard
+                    git -C "$BUILDPATH/libraries/discord-rpc" pull
 
                 fi
-                mkdir -p "$BUILDPATH/discord-rpc/build"
-                cmake -S "$BUILDPATH/discord-rpc" -B "$BUILDPATH/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo cmake --build "$BUILDPATH/discord-rpc/build" --config Release --target install
+                mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
+                cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
+                sudo cmake --build "$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
 
             fi
 
