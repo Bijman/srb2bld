@@ -9,7 +9,14 @@ BUILDPATH="$HOME/.local/share/srb2-builds"
 DEBVER="jessie"
 UBUVER="18.04"
 SRB2VER="SRB2_release_2.2.9"
+PNGVER="1.6.37"
+OGGVER="1.3.4"
+VORBIS="1.3.6"
+MPG123="1.25.13"
+OPENMPT="0.4.12"
 GMEVER="0.6.2"
+SDL2="2.0.12"
+SDL2MIXER="2.0.4"
 
 choosebuild() {
     clear
@@ -23,53 +30,53 @@ choosebuild() {
         case "$choose" in
             "1")
                 BUILD="$BUILDPATH/srb2"
-                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --depth 1 --branch $SRB2VER $BUILD"
+                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --branch $SRB2VER $BUILD"
                 break
                 ;;
             "2")
                 BUILD="$BUILDPATH/srb2-uncapped-plus"
-                GIT="git clone https://git.do.srb2.org/Fafabis/SRB2.git --depth 1 --branch uncapped-plus $BUILD"
+                GIT="git clone https://git.do.srb2.org/Fafabis/SRB2.git --branch uncapped-plus $BUILD"
                 break
                 ;;
             "3")
                 BUILD="$BUILDPATH/srb2-netplus"
-                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --depth 1 --branch master $BUILD"
+                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --branch master $BUILD"
                 break
                 ;;
             "4")
                 BUILD="$BUILDPATH/srb2-persona"
-                GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --depth 1 --branch srb2p_22 $BUILD"
+                GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --branch srb2p_22 $BUILD"
                 break
                 ;;
             "5")
                 BUILD="$BUILDPATH/srb2-2.1-legacy"
-                GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --depth 1 --branch master $BUILD"
+                GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --branch master $BUILD"
                 break
                 ;;
             "6")
                 BUILD="$BUILDPATH/srb2-2.0"
-                GIT="git clone https://github.com/STJr/SRB2-Public.git --depth 1 --branch master $BUILD"
+                GIT="git clone https://github.com/STJr/SRB2-Public.git --branch master $BUILD"
                 break
                 ;;
             "7")
                 BUILD="$BUILDPATH/srb2-final-demo"
-                GIT="git clone https://github.com/KrazeeTobi/SRB2-OldSRC.git --depth 1 --branch main $BUILD"
+                GIT="git clone https://github.com/KrazeeTobi/SRB2-OldSRC.git --branch main $BUILD"
                 break
                 ;;
             "8")
                 BUILD="$BUILDPATH/srb2-kart"
-                GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --depth 1 --branch master $BUILD"
+                GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --branch master $BUILD"
                 break
                 ;;
             "9")
                 BUILD="$BUILDPATH/srb2-kart-moe-mansion"
-                GIT="git clone https://gitlab.com/himie/kart-public.git --depth 1 --branch moe-mansion $BUILD"
+                GIT="git clone https://gitlab.com/himie/kart-public.git --branch moe-mansion $BUILD"
                 break
                 ;;
-#            "10")
-#                BUILD="$BUILDPATH/srb2-kart-vr"
-#                break
-#                ;;
+                #            "10")
+                #                BUILD="$BUILDPATH/srb2-kart-vr"
+                #                break
+                #                ;;
             *)
                 printf "\n%s\n" "No option has been chosen."
                 exit
@@ -161,7 +168,6 @@ dockerentry() {
     cd "\$BUILD" || exit
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
-
         mkdir -p "\$BUILD/build/AppDir/usr/games/SRB2Kart"
 
     else
@@ -249,6 +255,7 @@ dockerentry() {
  #if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
 MUSL
         patch -p1 < "\$BUILD/srb2-musl.patch"
+        export LDFLAGS="$LDFLAGS -lexecinfo"
     fi
 
     if [ "\$OS" = "Windows" ]; then
@@ -283,7 +290,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-              git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/libraries/discord-rpc"
+              git clone --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/libraries/discord-rpc"
 
         else
 
@@ -863,7 +870,7 @@ else
 
         if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-              git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/libraries/discord-rpc"
+              git clone --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/libraries/discord-rpc"
 
         else
 
@@ -1450,132 +1457,297 @@ Usage: srb2bld [OPTIONS]
 
         if [ "$OS" = "Darwin" ]; then
 
-        choosebuild
+            choosebuild
 
-        mkdir -p "$BUILD/build"
-        cmake -LA -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-        printf "\n%s\n" "Please enter configuration flags to compilation and then press enter, or just press enter to begin compiling."
-        read -r CONF
+            mkdir -p "$BUILD/build"
+            cmake -LH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+            printf "\n%s\n" "Please enter configuration flags to compilation and then press enter, or just press enter to begin compiling."
+            read -r CONF
 
-        if [ -n "$(printf "%s\n" $CONF | gawk 'match($0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|UNIX=1|FREEBSD=1/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+            if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-           CONF=$(printf "%s\n" "$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|UNIX=1|FREEBSD=1","");print}')
-           printf "\n%s\n" "Currently prompting OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Defaulting to macOS."
-
-        fi
-
-
-  if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
-
-
-	ISGME=""
-
-  else
-
-        ISGME=libgme
-
-  fi
-
-  if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
-
-
-	ISOPENMPT=""
-
-  else
-
-        ISOPENMPT=libopenmpt
-
-  fi
-
-  if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
-
-
-	ISPNG=""
-
-  else
-
-        ISPNG=libpng
-
-  fi
-
-  if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
-
-
-	ISSDL2MIXER=""
-
-  else
-
-        ISSDL2MIXER=sdl2_mixer
-
-  fi
-
-        brew install -f cmake $ISPNG libogg libvorbis libmpeg2 libmodplug $ISOPENMPT sdl2 $ISSDL2MIXER
-
-        if [ ! -d "$BUILD/.git" ]; then
-
-           $GIT
-
-        fi
-set -x
-        mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer" "$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
-        cd "$BUILD" || exit
-
-        curl -LC - $(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}') -o "$BUILDPATH/assets/SRB2.zip"
-
-        git -C "$BUILD" clean -dfx
-        git -C "$BUILD" reset --hard
-
-        7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
-
-        export LIBRARY_PATH=/usr/local/lib
-
-        if [ ! -f "/usr/local/lib/libgme.$GMEVER.dylib" ] && [ "$ISGME" = "libgme" ]; then
-        if [ ! -d "$BUILDPATH/libraries/game-music-emu/.git" ]; then
-           git -C "$BUILDPATH/libraries" clone https://bitbucket.org/mpyne/game-music-emu --branch "$GMEVER"
-
-        else
-
-#             git -C "$BUILDPATH/libraries/game-music-emu" pull
-             git -C "$BUILDPATH/libraries/game-music-emu" clean -dfx
-             git -C "$BUILDPATH/libraries/game-music-emu" reset --hard
-
-        fi
-        mkdir -p "$BUILDPATH/libraries/game-music-emu/build"
-        cmake -S "$BUILDPATH/libraries/game-music-emu" -B "$BUILDPATH/libraries/game-music-emu/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
-        sudo -E cmake --build "$BUILDPATH/libraries/game-music-emu/build" --config Release --target install
-        fi
-
-        if ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]) && [ -n "$(printf "%s\n" $CONF | gawk 'match($0, /HAVE_DISCORDRPC=1/) {print substr($0, RSTART, RLENGTH)}')" ]; then
-
-            if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
-
-                 git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/libraries/discord-rpc"
+                ISGME=""
 
             else
 
-                 git -C "$BUILDPATH/libraries/discord-rpc" clean -dfx
-                 git -C "$BUILDPATH/libraries/discord-rpc" reset --hard
-                 git -C "$BUILDPATH/libraries/discord-rpc" pull
+                ISGME=libgme
 
             fi
-            mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
-            cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
-            sudo -E cmake --build "$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
 
-    fi
+            if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/Downloads" $CONF
-        cd "$BUILD/build" || exit
-        make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-        make install
+                ISOPENMPT=""
 
-else
-        choosebuild
+            else
 
-        dockerentry
+                ISOPENMPT=libopenmpt
 
-        dockerrun
-fi
+            fi
+
+            if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+                ISPNG=""
+
+            else
+
+                ISPNG=libpng
+
+            fi
+
+            if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+                ISSDL2MIXER=""
+
+            else
+
+                ISSDL2MIXER=sdl2_mixer
+
+            fi
+
+            #            brew install -f cmake $ISPNG libogg libvorbis libmpeg2 libmodplug $ISOPENMPT sdl2 $ISSDL2MIXER
+
+            if [ ! -d "$BUILD/.git" ]; then
+
+                $GIT
+
+            fi
+
+            set -x
+
+            mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer"
+            cd "$BUILD" || exit
+
+            curl -LC - $(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}') -o "$BUILDPATH/assets/SRB2.zip"
+
+            git -C "$BUILD" clean -dfx
+            git -C "$BUILD" reset --hard
+
+            7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+
+            export LIBRARY_PATH=/usr/local/lib
+
+            if [ ! -f "/usr/local/lib/libpng.$PNGVER.dylib" ] && [ "$ISPNG" = "libpng" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/libpng/.git" ]; then
+
+                    git clone git://git.code.sf.net/p/libpng/code --branch "v$PNGVER" "$BUILDPATH/libraries/libpng"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/libpng" pull
+                    git -C "$BUILDPATH/libraries/libpng" clean -dfx
+                    git -C "$BUILDPATH/libraries/libpng" reset --hard
+
+                fi
+                mkdir -p "$BUILDPATH/libraries/libpng/build"
+                cmake -S "$BUILDPATH/libraries/libpng" -B "$BUILDPATH/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+                sudo -E cmake --build "$BUILDPATH/libraries/libpng/build" --config Release --target install
+
+            fi
+
+            if [ ! -f "/usr/local/lib/libogg.$OGGVER.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/libogg/.git" ]; then
+
+                    git clone https://gitlab.xiph.org/xiph/ogg --branch "v$OGGVER" "$BUILDPATH/libraries/libogg"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/libogg" pull
+                    git -C "$BUILDPATH/libraries/libogg" clean -dfx
+                    git -C "$BUILDPATH/libraries/libogg" reset --hard
+
+                fi
+                mkdir -p "$BUILDPATH/libraries/libogg/build"
+                cmake -S "$BUILDPATH/libraries/libogg" -B "$BUILDPATH/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local
+                sudo -E cmake --build "$BUILDPATH/libraries/libogg/build" --config Release --target install
+
+            fi
+
+            if [ ! -f "/usr/local/lib/libvorbis.$VORBISVER.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/libvorbis/.git" ]; then
+
+                    git clone https://gitlab.xiph.org/xiph/vorbis --branch "v$VORBISVER" "$BUILDPATH/libraries/libvorbis"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/libvorbis" pull
+                    git -C "$BUILDPATH/libraries/libvorbis" clean -dfx
+                    git -C "$BUILDPATH/libraries/libvorbis" reset --hard
+
+                fi
+                "$BUILDPATH/libraries/libvorbis/configure"
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
+
+            fi
+
+            if [ ! -f "/usr/local/lib/libmpg123.$MPG123VER.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+
+                if [ ! -f "$BUILDPATH/libraries/libmpg123.zip" ]; then
+
+                    mkdir -p "$BUILDPATH/libraries/libmpg123/build"
+                    curl -LC - "https://deac-riga.dl.sourceforge.net/project/mpg123/mpg123/$MPG123VER/mpg123-$MPG123VER.tar.bz2" -o "$BUILDPATH/libraries/libmpg123/build/libmpg123.zip"
+
+                fi
+                7z x "$BUILDPATH/libraries/libmpg123/build/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123/build"
+                "$BUILDPATH/libraries/libmpg123/build/configure"
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
+
+            fi
+
+            if [ ! -f "/usr/local/lib/libmodplug.$MODPLUGVER.dylib" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/libmodplug/.git" ]; then
+
+                    git clone https://github.com/Konstanty/libmodplug --branch master "$BUILDPATH/libraries/libmodplug"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/libmodplug" pull
+                    git -C "$BUILDPATH/libraries/libmodplug" clean -dfx
+                    git -C "$BUILDPATH/libraries/libmodplug" reset --hard
+
+                fi
+                mkdir -p "$BUILDPATH/libraries/libmodplug/build"
+                cmake -S "$BUILDPATH/libraries/libmodplug" -B "$BUILDPATH/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local
+                sudo -E cmake --build "$BUILDPATH/libraries/libmodplug/build" --config Release --target install
+
+            fi
+
+            if [ ! -f "/usr/local/lib/libopenmpt.$OPENMPTVER.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
+
+                    git clone https://github.com/OpenMPT/openmpt --branch "libopenmpt-$OPENMPT" "$BUILDPATH/libraries/libopenmpt"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/libopenmpt" pull
+                    git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
+                    git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
+
+                fi
+                "$BUILDPATH/libraries/libopenmpt/configure" --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
+
+            fi
+
+            if [ ! -f "/usr/local/lib/libgme.$GMEVER.dylib" ] && [ "$ISGME" = "libgme" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/game-music-emu/.git" ]; then
+
+                    git clone https://bitbucket.org/mpyne/game-music-emu --branch "$GMEVER" "$BUILDPATH/libraries/game-music-emu"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/game-music-emu" pull
+                    git -C "$BUILDPATH/libraries/game-music-emu" clean -dfx
+                    git -C "$BUILDPATH/libraries/game-music-emu" reset --hard
+
+                fi
+                mkdir -p "$BUILDPATH/libraries/game-music-emu/build"
+                cmake -S "$BUILDPATH/libraries/game-music-emu" -B "$BUILDPATH/libraries/game-music-emu/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+                sudo -E cmake --build "$BUILDPATH/libraries/game-music-emu/build" --config Release --target install
+
+            fi
+
+            if [ ! -f "/usr/local/lib/libsdl2.$SDL2VER.dylib" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/libsdl2/.git" ]; then
+
+                    git clone https://github.com/libsdl-org/SDL --branch "release-$SDL2VER" "$BUILDPATH/libraries/libsdl2"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/libsdl2" pull
+                    git -C "$BUILDPATH/libraries/libsdl2" clean -dfx
+                    git -C "$BUILDPATH/libraries/libsdl2" reset --hard
+
+                fi
+                mkdir -p "$BUILDPATH/libraries/libsdl2/build"
+                cmake -S "$BUILDPATH/libraries/libsdl2" -B "$BUILDPATH/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local
+                sudo -E cmake --build "$BUILDPATH/libraries/libsdl2/build" --config Release --target install
+
+            fi
+
+            if [ ! -f "/usr/local/lib/libsdl2mixer.$SDL2MIXERVER.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2mixer" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/libsdl2mixer/.git" ]; then
+
+                    git clone --branch "release-$SDL2MIXERVER" https://github.com/libsdl-org/SDL_mixer "$BUILDPATH/libraries/libsdl2mixer"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/libsdl2mixer" pull
+                    git -C "$BUILDPATH/libraries/libsdl2mixer" clean -dfx
+                    git -C "$BUILDPATH/libraries/libsdl2mixer" reset --hard
+
+                fi
+                "$BUILDPATH/libraries/libsdl2mixer/configure" \
+                    --disable-dependency-tracking \
+                    --disable-music-flac \
+                    --disable-music-flac-shared \
+                    --enable-music-midi \
+                    --disable-music-midi-fluidsynth \
+                    --disable-music-midi-fluidsynth-shared \
+                    --enable-music-midi-native \
+                    --disable-music-midi-timidity \
+                    --enable-music-mod \
+                    --disable-music-mod-mikmod \
+                    --disable-music-mod-mikmod-shared \
+                    --enable-music-mod-modplug \
+                    --disable-music-mod-modplug-shared \
+                    --enable-music-mp3 \
+                    --enable-music-mp3-mpg123 \
+                    --disable-music-mp3-mpg123-shared \
+                    --enable-music-ogg \
+                    --disable-music-ogg-shared \
+                    --disable-music-opus \
+                    --disable-music-opus-shared \
+                    --enable-music-wave
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
+
+            fi
+
+            if ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]) && [ -n "$(printf "%s\n" $CONF | gawk 'match($0, /HAVE_DISCORDRPC=1/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+                if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
+
+                    git clone --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/libraries/discord-rpc"
+
+                else
+
+                    git -C "$BUILDPATH/libraries/discord-rpc" clean -dfx
+                    git -C "$BUILDPATH/libraries/discord-rpc" reset --hard
+                    git -C "$BUILDPATH/libraries/discord-rpc" pull
+
+                fi
+                mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
+                cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
+                sudo -E cmake --build "$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
+
+            fi
+
+            cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/Downloads" $CONF
+            cd "$BUILD/build" || exit
+            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+            make install
+
+        else
+
+            choosebuild
+
+            dockerentry
+
+            dockerrun
+
+        fi
+
         if [ ! -d "/usr/local/bin" ]; then
 
             printf "%s\n" "Creating /usr/local/bin and /usr/local/games directory paths"
@@ -1824,7 +1996,7 @@ INSTALL
 
             elif [ -x "$(which apk)" ]; then
 
-                sudo apk add $PACKAGE
+                sudo apk add --force-broken-world $PACKAGE
 
             else
 
@@ -1838,7 +2010,7 @@ INSTALL
 
                 if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-                    git clone --depth 1 --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/libraries/discord-rpc"
+                    git clone --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/libraries/discord-rpc"
 
                 else
 
