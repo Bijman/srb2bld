@@ -9,14 +9,15 @@ BUILDPATH="$HOME/.local/share/srb2-builds"
 DEBVER="jessie"
 UBUVER="18.04"
 SRB2VER="SRB2_release_2.2.9"
+MACOSVER="10.9"
 PNGVER="1.6.37"
 OGGVER="1.3.4"
-VORBIS="1.3.6"
-MPG123="1.25.13"
-OPENMPT="0.4.12"
+VORBISVER="1.3.6"
+MPG123VER="1.25.13"
+OPENMPTVER="0.4.12"
 GMEVER="0.6.2"
-SDL2="2.0.12"
-SDL2MIXER="2.0.4"
+SDL2VER="2.0.12"
+SDL2MIXERVER="2.0.4"
 
 choosebuild() {
     clear
@@ -290,7 +291,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-              git clone --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/libraries/discord-rpc"
+              git clone https://github.com/discord/discord-rpc.git --branch master "\$BUILDPATH/libraries/discord-rpc"
 
         else
 
@@ -301,7 +302,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         fi
         mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
         cmake -S "\$BUILDPATH/libraries/discord-rpc" -B "\$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        sudo cmake --build "\$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
+        sudo cmake --build "\$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
 
     fi
 
@@ -870,7 +871,7 @@ else
 
         if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-              git clone --branch master https://github.com/discord/discord-rpc.git "\$BUILDPATH/libraries/discord-rpc"
+              git clone https://github.com/discord/discord-rpc.git --branch master "\$BUILDPATH/libraries/discord-rpc"
 
         else
 
@@ -881,7 +882,7 @@ else
         fi
         mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
         cmake -S "\$BUILDPATH/libraries/discord-rpc" -B "\$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        sudo cmake --build "\$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
+        sudo cmake --build "\$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
 
     fi
 
@@ -1500,11 +1501,12 @@ Usage: srb2bld [OPTIONS]
 
             else
 
-                ISSDL2MIXER=sdl2_mixer
+                ISSDL2MIXER=libsdl2-mixer
 
             fi
 
             #            brew install -f cmake $ISPNG libogg libvorbis libmpeg2 libmodplug $ISOPENMPT sdl2 $ISSDL2MIXER
+            #            brew install -f autoconf libtool
 
             if [ ! -d "$BUILD/.git" ]; then
 
@@ -1525,8 +1527,9 @@ Usage: srb2bld [OPTIONS]
             7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
             export LIBRARY_PATH=/usr/local/lib
+            export STOW_DIR=/usr/local/stow
 
-            if [ ! -f "/usr/local/lib/libpng.$PNGVER.dylib" ] && [ "$ISPNG" = "libpng" ]; then
+            if [ ! -f "/usr/local/lib/libpng.dylib" ] && [ "$ISPNG" = "libpng" ]; then
 
                 if [ ! -d "$BUILDPATH/libraries/libpng/.git" ]; then
 
@@ -1534,18 +1537,19 @@ Usage: srb2bld [OPTIONS]
 
                 else
 
-                    git -C "$BUILDPATH/libraries/libpng" pull
                     git -C "$BUILDPATH/libraries/libpng" clean -dfx
                     git -C "$BUILDPATH/libraries/libpng" reset --hard
+                    git -C "$BUILDPATH/libraries/libpng" fetch origin master
 
                 fi
                 mkdir -p "$BUILDPATH/libraries/libpng/build"
-                cmake -S "$BUILDPATH/libraries/libpng" -B "$BUILDPATH/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo -E cmake --build "$BUILDPATH/libraries/libpng/build" --config Release --target install
+                cmake -S "$BUILDPATH/libraries/libpng" -B "$BUILDPATH/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng
+                sudo -E cmake --build "$BUILDPATH/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                sudo -E stow -v --adopt libpng
 
             fi
 
-            if [ ! -f "/usr/local/lib/libogg.$OGGVER.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+            if [ ! -f "/usr/local/lib/libogg.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
                 if [ ! -d "$BUILDPATH/libraries/libogg/.git" ]; then
 
@@ -1553,18 +1557,19 @@ Usage: srb2bld [OPTIONS]
 
                 else
 
-                    git -C "$BUILDPATH/libraries/libogg" pull
                     git -C "$BUILDPATH/libraries/libogg" clean -dfx
                     git -C "$BUILDPATH/libraries/libogg" reset --hard
+                    git -C "$BUILDPATH/libraries/libpng" fetch origin master
 
                 fi
                 mkdir -p "$BUILDPATH/libraries/libogg/build"
-                cmake -S "$BUILDPATH/libraries/libogg" -B "$BUILDPATH/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo -E cmake --build "$BUILDPATH/libraries/libogg/build" --config Release --target install
+                cmake -S "$BUILDPATH/libraries/libogg" -B "$BUILDPATH/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg
+                sudo -E cmake --build "$BUILDPATH/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                sudo -E stow -v --adopt libogg
 
             fi
 
-            if [ ! -f "/usr/local/lib/libvorbis.$VORBISVER.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+            if [ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
                 if [ ! -d "$BUILDPATH/libraries/libvorbis/.git" ]; then
 
@@ -1572,18 +1577,19 @@ Usage: srb2bld [OPTIONS]
 
                 else
 
-                    git -C "$BUILDPATH/libraries/libvorbis" pull
                     git -C "$BUILDPATH/libraries/libvorbis" clean -dfx
                     git -C "$BUILDPATH/libraries/libvorbis" reset --hard
+                    git -C "$BUILDPATH/libraries/libvorbis" fetch origin master
 
                 fi
-                "$BUILDPATH/libraries/libvorbis/configure"
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make install
+                "$BUILDPATH/libraries/libvorbis/autogen.sh"
+                "$BUILDPATH/libraries/libvorbis/configure" --prefix=/usr/local/stow/libvorbis
+                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                sudo -E stow -v --adopt libvorbis
 
             fi
 
-            if [ ! -f "/usr/local/lib/libmpg123.$MPG123VER.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+            if [ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
                 if [ ! -f "$BUILDPATH/libraries/libmpg123.zip" ]; then
 
@@ -1592,13 +1598,13 @@ Usage: srb2bld [OPTIONS]
 
                 fi
                 7z x "$BUILDPATH/libraries/libmpg123/build/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123/build"
-                "$BUILDPATH/libraries/libmpg123/build/configure"
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make install
+                "$BUILDPATH/libraries/libmpg123/build/configure" --prefix=/usr/local/stow/libmpg123
+                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                sudo -E stow -v --adopt libmpg123
 
             fi
 
-            if [ ! -f "/usr/local/lib/libmodplug.$MODPLUGVER.dylib" ]; then
+            if [ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
                 if [ ! -d "$BUILDPATH/libraries/libmodplug/.git" ]; then
 
@@ -1606,56 +1612,58 @@ Usage: srb2bld [OPTIONS]
 
                 else
 
-                    git -C "$BUILDPATH/libraries/libmodplug" pull
                     git -C "$BUILDPATH/libraries/libmodplug" clean -dfx
                     git -C "$BUILDPATH/libraries/libmodplug" reset --hard
+                    git -C "$BUILDPATH/libraries/libmodplug" pull
 
                 fi
                 mkdir -p "$BUILDPATH/libraries/libmodplug/build"
-                cmake -S "$BUILDPATH/libraries/libmodplug" -B "$BUILDPATH/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo -E cmake --build "$BUILDPATH/libraries/libmodplug/build" --config Release --target install
+                cmake -S "$BUILDPATH/libraries/libmodplug" -B "$BUILDPATH/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug
+                sudo -E cmake --build "$BUILDPATH/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                sudo -E stow -v --adopt libmodplug
 
             fi
 
-            if [ ! -f "/usr/local/lib/libopenmpt.$OPENMPTVER.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+            if [ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
                 if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
 
-                    git clone https://github.com/OpenMPT/openmpt --branch "libopenmpt-$OPENMPT" "$BUILDPATH/libraries/libopenmpt"
+                    git clone https://github.com/OpenMPT/openmpt --branch "libopenmpt-$OPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
 
                 else
 
-                    git -C "$BUILDPATH/libraries/libopenmpt" pull
                     git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
                     git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
+                    git -C "$BUILDPATH/libraries/libopenmpt" fetch origin master
 
                 fi
-                "$BUILDPATH/libraries/libopenmpt/configure" --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make install
+                "$BUILDPATH/libraries/libopenmpt/configure" --prefix=/usr/local/stow/libopenmpt --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
+                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                sudo -E stow -v --adopt libopenmpt
 
             fi
 
-            if [ ! -f "/usr/local/lib/libgme.$GMEVER.dylib" ] && [ "$ISGME" = "libgme" ]; then
+            if [ ! -f "/usr/local/lib/libgme.dylib" ] && [ "$ISGME" = "libgme" ]; then
 
-                if [ ! -d "$BUILDPATH/libraries/game-music-emu/.git" ]; then
+                if [ ! -d "$BUILDPATH/libraries/libgme/.git" ]; then
 
-                    git clone https://bitbucket.org/mpyne/game-music-emu --branch "$GMEVER" "$BUILDPATH/libraries/game-music-emu"
+                    git clone https://bitbucket.org/mpyne/game-music-emu --branch "$GMEVER" "$BUILDPATH/libraries/libgme"
 
                 else
 
-                    git -C "$BUILDPATH/libraries/game-music-emu" pull
-                    git -C "$BUILDPATH/libraries/game-music-emu" clean -dfx
-                    git -C "$BUILDPATH/libraries/game-music-emu" reset --hard
+                    git -C "$BUILDPATH/libraries/libgme" clean -dfx
+                    git -C "$BUILDPATH/libraries/libgme" reset --hard
+                    git -C "$BUILDPATH/libraries/libgme" fetch origin master
 
                 fi
-                mkdir -p "$BUILDPATH/libraries/game-music-emu/build"
-                cmake -S "$BUILDPATH/libraries/game-music-emu" -B "$BUILDPATH/libraries/game-music-emu/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo -E cmake --build "$BUILDPATH/libraries/game-music-emu/build" --config Release --target install
+                mkdir -p "$BUILDPATH/libraries/libgme/build"
+                cmake -S "$BUILDPATH/libraries/libgme" -B "$BUILDPATH/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
+                sudo -E cmake --build "$BUILDPATH/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                sudo -E stow -v --adopt libgme
 
             fi
 
-            if [ ! -f "/usr/local/lib/libsdl2.$SDL2VER.dylib" ]; then
+            if [ ! -f "/usr/local/lib/libSDL2.dylib" ]; then
 
                 if [ ! -d "$BUILDPATH/libraries/libsdl2/.git" ]; then
 
@@ -1663,31 +1671,32 @@ Usage: srb2bld [OPTIONS]
 
                 else
 
-                    git -C "$BUILDPATH/libraries/libsdl2" pull
                     git -C "$BUILDPATH/libraries/libsdl2" clean -dfx
                     git -C "$BUILDPATH/libraries/libsdl2" reset --hard
+                    git -C "$BUILDPATH/libraries/libsdl2" fetch origin master
 
                 fi
                 mkdir -p "$BUILDPATH/libraries/libsdl2/build"
-                cmake -S "$BUILDPATH/libraries/libsdl2" -B "$BUILDPATH/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo -E cmake --build "$BUILDPATH/libraries/libsdl2/build" --config Release --target install
+                cmake -S "$BUILDPATH/libraries/libsdl2" -B "$BUILDPATH/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2
+                sudo -E cmake --build "$BUILDPATH/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                sudo -E stow -v --adopt libsdl2
 
             fi
 
-            if [ ! -f "/usr/local/lib/libsdl2mixer.$SDL2MIXERVER.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2mixer" ]; then
+            if [ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2-mixer" ]; then
 
-                if [ ! -d "$BUILDPATH/libraries/libsdl2mixer/.git" ]; then
+                if [ ! -d "$BUILDPATH/libraries/libsdl2-mixer/.git" ]; then
 
-                    git clone --branch "release-$SDL2MIXERVER" https://github.com/libsdl-org/SDL_mixer "$BUILDPATH/libraries/libsdl2mixer"
+                    git clone https://github.com/libsdl-org/SDL_mixer --branch "release-$SDL2MIXERVER" "$BUILDPATH/libraries/libsdl2-mixer"
 
                 else
 
-                    git -C "$BUILDPATH/libraries/libsdl2mixer" pull
-                    git -C "$BUILDPATH/libraries/libsdl2mixer" clean -dfx
-                    git -C "$BUILDPATH/libraries/libsdl2mixer" reset --hard
+                    git -C "$BUILDPATH/libraries/libsdl2-mixer" clean -dfx
+                    git -C "$BUILDPATH/libraries/libsdl2-mixer" reset --hard
+                    git -C "$BUILDPATH/libraries/libsdl2-mixer" fetch origin master
 
                 fi
-                "$BUILDPATH/libraries/libsdl2mixer/configure" \
+                "$BUILDPATH/libraries/libsdl2-mixer/configure" \
                     --disable-dependency-tracking \
                     --disable-music-flac \
                     --disable-music-flac-shared \
@@ -1708,9 +1717,10 @@ Usage: srb2bld [OPTIONS]
                     --disable-music-ogg-shared \
                     --disable-music-opus \
                     --disable-music-opus-shared \
-                    --enable-music-wave
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make install
+                    --enable-music-wave \
+                    --prefix=/usr/local/stow/libsdl2-mixer
+                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                sudo -E stow -v --adopt libsdl2-mixer
 
             fi
 
@@ -1718,7 +1728,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
-                    git clone --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/libraries/discord-rpc"
+                    git clone https://github.com/discord/discord-rpc.git --branch master "$BUILDPATH/libraries/discord-rpc"
 
                 else
 
@@ -1728,15 +1738,14 @@ Usage: srb2bld [OPTIONS]
 
                 fi
                 mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
-                cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo -E cmake --build "$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
+                cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
+                sudo -E cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                sudo -E stow -v --adopt discord-rpc
 
             fi
 
-            cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/Downloads" $CONF
-            cd "$BUILD/build" || exit
-            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-            make install
+            cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local $CONF
+            sudo -E cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
 
         else
 
@@ -2021,7 +2030,7 @@ INSTALL
                 fi
                 mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
                 cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo cmake --build "$BUILDPATH/libraries/discord-rpc/build" --config Release --target install
+                sudo cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
 
             fi
 
