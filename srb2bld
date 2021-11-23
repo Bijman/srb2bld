@@ -8,7 +8,8 @@ IS64=$(printf "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, R
 BUILDPATH="$HOME/.local/share/srb2-builds"
 DEBVER="jessie"
 UBUVER="18.04"
-SRB2VER="SRB2_release_2.2.9"
+#SRB2VER="SRB2_release_2.2.9"
+SRB2VER="master"
 MACOSVER="10.9"
 PNGVER="1.6.37"
 OGGVER="1.3.4"
@@ -150,9 +151,22 @@ dockerentry() {
 
     set -e -x
 
+    BUILDPATH="$BUILDPATH"
+    BUILD="$BUILD"
+    GIT="$GIT"
+    APPIMAGE="$APPIMAGE"
+
     trap 'git -C \$BUILD clean -dfx -e .comrev ; git -C \$BUILD reset --hard ; exit' 1 2 3 6 15
 
-    sudo apt update && sudo apt full-upgrade -y
+    if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
+
+        sudo apk update && sudo apk upgrade
+
+    else
+
+        sudo apt update && sudo apt full-upgrade -y
+
+    fi
 
     # Build the application
     if [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
@@ -1321,7 +1335,6 @@ RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignor
 printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
 apt-get update && \
 apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
-gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\n" >> /etc/apt/sources.list && \
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
 
@@ -1350,9 +1363,9 @@ ENV container docker
 RUN printf "%s\n" https://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
 apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libpng-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo dash curl git p7zip shadow
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libpng-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow
 
-RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
 passwd -d srb2
 
