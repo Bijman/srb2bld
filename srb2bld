@@ -271,6 +271,21 @@ dockerentry() {
 MUSL
         patch -p1 < "\$BUILD/srb2-musl.patch"
         export LDFLAGS="$LDFLAGS -lexecinfo"
+
+        if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
+
+            git clone https://github.com/OpenMPT/openmpt --branch master "$BUILDPATH/libraries/libopenmpt"
+
+        else
+
+            git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
+            git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
+            git -C "$BUILDPATH/libraries/libopenmpt" pull
+
+        fi
+        "$BUILDPATH/libraries/libopenmpt/configure" --prefix=/usr/local --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
+        sudo -E make -k -j$(($(nproc) + 1)) install
+
     fi
 
     if [ "\$OS" = "Windows" ]; then
