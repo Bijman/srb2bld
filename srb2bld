@@ -1216,8 +1216,9 @@ fi
 ENTRYPOINT
     chmod +x "$BUILDPATH/containers/srb2-docker/Entrypoint"
 
-    rm -rf "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-windows-docker"
+    rm -rf "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-musl-docker" "$BUILDPATH/containers/srb2-windows-docker"
     cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-docker"
+    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-musl-docker"
     cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-windows-docker"
 
     if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
