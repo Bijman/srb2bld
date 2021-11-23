@@ -965,11 +965,17 @@ else
 
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            cd "\$BUILD/src"
+            bash ../comptime.sh
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            cd "\$BUILD"
 
         else
 
-            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            cd "\$BUILD/src"
+            bash ../comptime.sh
+            LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            cd "\$BUILD"
 
         fi
 
