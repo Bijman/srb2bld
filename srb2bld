@@ -1250,7 +1250,7 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libjack-dev libfuse-dev libcurl4-openssl-dev libpng12-dev zlib1g-dev musl-tools fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+apt-fast install -y libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libjack-dev libfuse-dev libcurl4-openssl-dev libpng12-dev zlib1g-dev fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
 #curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/gcc-3.4_3.4.6-4_i386.deb && \
 #curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/gcc-3.4-base_3.4.6-4_i386.deb && \
 #curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/cpp-3.4_3.4.6-4_i386.deb && \
@@ -1327,9 +1327,29 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng16-16 libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev musl-tools fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng16-16 libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
 
 #rapidjson-dev libopenvr-dev
+
+RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+useradd -m -G sudo -s /bin/dash srb2 && \
+passwd -d srb2
+
+COPY Entrypoint /home/srb2
+
+ENTRYPOINT [ "/home/srb2/Entrypoint" ]
+
+DOCKERFILE
+
+    cat > "$BUILDPATH/containers/srb2-musl-docker/Dockerfile" << DOCKERFILE
+FROM $ISARM/alpine:latest
+
+ENV container docker
+
+RUN printf "%s\n" https://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
+apk update && \
+apk upgrade && \
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libpng-dev libgme-dev libfluidsynth-dev libmodplug-dev libjack-dev curl-dev libupnp-dev zlib1g-dev libexecinfo-dev imagemagick nasm build-base cmake sudo dash curl git p7zip
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/dash srb2 && \
@@ -1383,7 +1403,7 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng16-16 libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev musl-tools fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng16-16 libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
 
 # rapidjson-dev libopenvr-dev
 
@@ -1410,6 +1430,11 @@ dockerrun() {
 
             docker build -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-windows-docker
+
+        elif [ "$(ldd --version | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}')" = "musl" ]; then
+
+            docker build -t srb2-musl-docker "$BUILDPATH/containers/srb2-musl-docker"
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-musl-docker
 
         else
 
