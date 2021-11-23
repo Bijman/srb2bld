@@ -249,8 +249,8 @@ dockerentry() {
 
     if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
         cat > "\$BUILD/srb2-musl.patch" << MUSL
---- $BUILD/src/sdl/i_system.c
-+++ $BUILD/src/sdl/i_system.c
+--- /src/sdl/i_system.c
++++ /src/sdl/i_system.c
 @@ -137,11 +137,11 @@ typedef LPVOID (WINAPI *p_MapViewOfFile) (HANDLE, DWORD, DWORD, DWORD, SIZE_T);
  #include <errno.h>
  #endif
@@ -338,7 +338,6 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         mkdir -p "\$BUILD/Final Demo 1.09.4a/objs/Linux/SDL/Release"
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
-
 
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/Final Demo 1.09.4a/src" LINUX=1 NOASM=1
 
@@ -1356,7 +1355,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 DOCKERFILE
 
     cat > "$BUILDPATH/containers/srb2-musl-docker/Dockerfile" << DOCKERFILE
-FROM $ISARM/alpine:latest
+FROM alpine:latest
 
 ENV container docker
 
@@ -2079,7 +2078,7 @@ INSTALL
 
     -a | --appimage)
 
-        if [ "$OS" != "Linux" ] && [ -z "$(ldd --version | gawk '/Free Software Foundation/ {print}')" ]; then
+        if [ "$OS" != "Linux" ] || [ -z "$(ldd --version 2>&1 | gawk '/Free Software Foundation/ {print}')" ]; then
 
             printf "Currently building AppImages is only available for Linux with glibc. Exiting."
             exit
