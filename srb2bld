@@ -272,20 +272,6 @@ MUSL
         patch -p1 < "\$BUILD/srb2-musl.patch"
         export LDFLAGS="$LDFLAGS -lexecinfo"
 
-        if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
-
-            git clone https://github.com/OpenMPT/openmpt --branch master "$BUILDPATH/libraries/libopenmpt"
-
-        else
-
-            git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
-            git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
-            git -C "$BUILDPATH/libraries/libopenmpt" pull
-
-        fi
-        "$BUILDPATH/libraries/libopenmpt/configure" --prefix=/usr/local --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
-        sudo -E make -k -j$(($(nproc) + 1)) install
-
     fi
 
     if [ "\$OS" = "Windows" ]; then
@@ -892,6 +878,23 @@ else
 
         CONF=\$(printf "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|UNIX=1|FREEBSD=1","");print}')
         printf "\n%s\n" "Currently prompting OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Defaulting to LINUX=1 or LINUX64=1 based on CPU architecture."
+
+    fi
+
+    if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ -z "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+
+        if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
+
+            git clone https://github.com/OpenMPT/openmpt.git --branch master "$BUILDPATH/libraries/libopenmpt"
+
+        else
+
+            git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
+            git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
+            git -C "$BUILDPATH/libraries/libopenmpt" pull
+
+        fi
+        sudo -E make -k -j$(($(nproc) + 1)) -C "$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1 install
 
     fi
 
@@ -1586,7 +1589,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libpng/.git" ]; then
 
-                    git clone git://git.code.sf.net/p/libpng/code --branch "v$PNGVER" "$BUILDPATH/libraries/libpng"
+                    git clone git://git.code.sf.net/p/libpng/code.git --branch "v$PNGVER" "$BUILDPATH/libraries/libpng"
 
                 else
 
@@ -1606,7 +1609,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libogg/.git" ]; then
 
-                    git clone https://gitlab.xiph.org/xiph/ogg --branch "v$OGGVER" "$BUILDPATH/libraries/libogg"
+                    git clone https://gitlab.xiph.org/xiph/ogg.git --branch "v$OGGVER" "$BUILDPATH/libraries/libogg"
 
                 else
 
@@ -1626,7 +1629,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libvorbis/.git" ]; then
 
-                    git clone https://gitlab.xiph.org/xiph/vorbis --branch "v$VORBISVER" "$BUILDPATH/libraries/libvorbis"
+                    git clone https://gitlab.xiph.org/xiph/vorbis.git --branch "v$VORBISVER" "$BUILDPATH/libraries/libvorbis"
 
                 else
 
@@ -1661,7 +1664,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libmodplug/.git" ]; then
 
-                    git clone https://github.com/Konstanty/libmodplug --branch master "$BUILDPATH/libraries/libmodplug"
+                    git clone https://github.com/Konstanty/libmodplug.git --branch master "$BUILDPATH/libraries/libmodplug"
 
                 else
 
@@ -1681,7 +1684,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
 
-                    git clone https://github.com/OpenMPT/openmpt --branch "libopenmpt-$OPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
+                    git clone https://github.com/OpenMPT/openmpt.git --branch "libopenmpt-$OPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
 
                 else
 
@@ -1700,7 +1703,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libgme/.git" ]; then
 
-                    git clone https://bitbucket.org/mpyne/game-music-emu --branch "$GMEVER" "$BUILDPATH/libraries/libgme"
+                    git clone https://bitbucket.org/mpyne/game-music-emu.git --branch "$GMEVER" "$BUILDPATH/libraries/libgme"
 
                 else
 
@@ -1720,7 +1723,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libsdl2/.git" ]; then
 
-                    git clone https://github.com/libsdl-org/SDL --branch "release-$SDL2VER" "$BUILDPATH/libraries/libsdl2"
+                    git clone https://github.com/libsdl-org/SDL.git --branch "release-$SDL2VER" "$BUILDPATH/libraries/libsdl2"
 
                 else
 
@@ -1740,7 +1743,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libsdl2-mixer/.git" ]; then
 
-                    git clone https://github.com/libsdl-org/SDL_mixer --branch "release-$SDL2MIXERVER" "$BUILDPATH/libraries/libsdl2-mixer"
+                    git clone https://github.com/libsdl-org/SDL_mixer.git --branch "release-$SDL2MIXERVER" "$BUILDPATH/libraries/libsdl2-mixer"
 
                 else
 
