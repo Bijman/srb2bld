@@ -326,12 +326,18 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
             printf "%s\n" "Compiling game with this command: LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1"
+            cd "\$BUILD/src"
+            bash ../comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
+            cd "\$BUILD"
 
         else
 
             printf "%s\n" "Compiling game with this command: LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1"
+            cd "\$BUILD/src"
+            bash ../comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
+            cd "\$BUILD"
 
         fi
 
@@ -881,23 +887,6 @@ else
 
     fi
 
-    if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ -z "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
-
-        if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
-
-            git clone https://github.com/OpenMPT/openmpt.git --branch master "$BUILDPATH/libraries/libopenmpt"
-
-        else
-
-            git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
-            git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
-            git -C "$BUILDPATH/libraries/libopenmpt" pull
-
-        fi
-        sudo -E make -k -j$(($(nproc) + 1)) -C "$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1 install
-
-    fi
-
     if ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
         if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
@@ -1379,14 +1368,17 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 DOCKERFILE
 
     cat > "$BUILDPATH/containers/srb2-musl-docker/Dockerfile" << DOCKERFILE
-FROM alpine:latest
+FROM voidlinux/voidlinux-musl:latest
 
 ENV container docker
 
-RUN printf "%s\n" https://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
-apk update && \
-apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libpng-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow
+#RUN printf "%s\n" https://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
+#apk update && \
+#apk upgrade && \
+#apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libpng-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow
+
+RUN xbps-install -Syu && \
+xbps-install -Sy SDL2-devel SDL2_mixer-devel SDL-devel SDL_mixer-devel libpng-devel libopenmpt-devel libgme-devel fluidsynth-devel libmodplug-devel jack-devel libcurl-devel libupnp-devel zlib-devel libexecinfo-devel shadow bash dash sudo base-devel cmake gawk git curl p7zip nasm ImageMagick patchelf
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
@@ -1568,7 +1560,7 @@ Usage: srb2bld [OPTIONS]
             fi
 
             #            brew install -f cmake $ISPNG libogg libvorbis libmpeg2 libmodplug $ISOPENMPT sdl2 $ISSDL2MIXER
-            #            brew install -f autoconf libtool
+            #            brew install -f cmake autoconf automake pkgconfig libtool gawk stow p7zip curl
 
             if [ ! -d "$BUILD/.git" ]; then
 
@@ -1588,6 +1580,7 @@ Usage: srb2bld [OPTIONS]
 
             7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
+            export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
             export LIBRARY_PATH=/usr/local/lib
             export STOW_DIR=/usr/local/stow
 
@@ -1606,7 +1599,9 @@ Usage: srb2bld [OPTIONS]
                 fi
                 mkdir -p "$BUILDPATH/libraries/libpng/build"
                 cmake -S "$BUILDPATH/libraries/libpng" -B "$BUILDPATH/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng
-                sudo -E cmake --build "$BUILDPATH/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                #                sudo -E cmake --build "$BUILDPATH/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                cmake --build "$BUILDPATH/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+                sudo cmake --install "$BUILDPATH/libraries/libpng/build"
                 sudo -E stow -v --adopt libpng
 
             fi
@@ -1626,7 +1621,9 @@ Usage: srb2bld [OPTIONS]
                 fi
                 mkdir -p "$BUILDPATH/libraries/libogg/build"
                 cmake -S "$BUILDPATH/libraries/libogg" -B "$BUILDPATH/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg
-                sudo -E cmake --build "$BUILDPATH/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                #                sudo -E cmake --build "$BUILDPATH/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                cmake --build "$BUILDPATH/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+                sudo cmake --install "$BUILDPATH/libraries/libogg/build"
                 sudo -E stow -v --adopt libogg
 
             fi
@@ -1646,7 +1643,9 @@ Usage: srb2bld [OPTIONS]
                 fi
                 "$BUILDPATH/libraries/libvorbis/autogen.sh"
                 "$BUILDPATH/libraries/libvorbis/configure" --prefix=/usr/local/stow/libvorbis
-                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                #                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
                 sudo -E stow -v --adopt libvorbis
 
             fi
@@ -1661,7 +1660,9 @@ Usage: srb2bld [OPTIONS]
                 fi
                 7z x "$BUILDPATH/libraries/libmpg123/build/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123/build"
                 "$BUILDPATH/libraries/libmpg123/build/configure" --prefix=/usr/local/stow/libmpg123
-                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                #                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
                 sudo -E stow -v --adopt libmpg123
 
             fi
@@ -1681,7 +1682,9 @@ Usage: srb2bld [OPTIONS]
                 fi
                 mkdir -p "$BUILDPATH/libraries/libmodplug/build"
                 cmake -S "$BUILDPATH/libraries/libmodplug" -B "$BUILDPATH/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug
-                sudo -E cmake --build "$BUILDPATH/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                #                sudo -E cmake --build "$BUILDPATH/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                cmake --build "$BUILDPATH/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+                sudo cmake --install "$BUILDPATH/libraries/libmodplug/build"
                 sudo -E stow -v --adopt libmodplug
 
             fi
@@ -1700,7 +1703,9 @@ Usage: srb2bld [OPTIONS]
 
                 fi
                 "$BUILDPATH/libraries/libopenmpt/configure" --prefix=/usr/local/stow/libopenmpt --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
-                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                #                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
                 sudo -E stow -v --adopt libopenmpt
 
             fi
@@ -1720,7 +1725,9 @@ Usage: srb2bld [OPTIONS]
                 fi
                 mkdir -p "$BUILDPATH/libraries/libgme/build"
                 cmake -S "$BUILDPATH/libraries/libgme" -B "$BUILDPATH/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
-                sudo -E cmake --build "$BUILDPATH/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                #                sudo -E cmake --build "$BUILDPATH/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                cmake --build "$BUILDPATH/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+                sudo cmake --install "$BUILDPATH/libraries/libgme/build"
                 sudo -E stow -v --adopt libgme
 
             fi
@@ -1740,7 +1747,9 @@ Usage: srb2bld [OPTIONS]
                 fi
                 mkdir -p "$BUILDPATH/libraries/libsdl2/build"
                 cmake -S "$BUILDPATH/libraries/libsdl2" -B "$BUILDPATH/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2
-                sudo -E cmake --build "$BUILDPATH/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                #                sudo -E cmake --build "$BUILDPATH/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                cmake --build "$BUILDPATH/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+                sudo cmake --install "$BUILDPATH/libraries/libsdl2/build"
                 sudo -E stow -v --adopt libsdl2
 
             fi
@@ -1781,7 +1790,8 @@ Usage: srb2bld [OPTIONS]
                     --disable-music-opus-shared \
                     --enable-music-wave \
                     --prefix=/usr/local/stow/libsdl2-mixer
-                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
                 sudo -E stow -v --adopt libsdl2-mixer
 
             fi
@@ -1801,13 +1811,17 @@ Usage: srb2bld [OPTIONS]
                 fi
                 mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
                 cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
-                sudo -E cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                #                sudo -E cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+                sudo cmake --install "$BUILDPATH/libraries/discord-rpc/build"
                 sudo -E stow -v --adopt discord-rpc
 
             fi
 
             cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local $CONF
-            sudo -E cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+            #            sudo -E cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+            cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo cmake --install "$BUILD/build"
 
         else
 
@@ -1984,7 +1998,7 @@ INSTALL
         git -C "$BUILD" clean -dfx -e .comrev
         git -C "$BUILD" reset --hard
 
-        if [ -n "$(ldd $BINARYPATH | gawk '/not found/ && !/GLIBC/ {print $1}')" ]; then
+        if [ -n "$(ldd $BINARYPATH | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u)" ]; then
 
             printf "%s\n" "Installing missing dependencies for $BUILDNAME on system. Please wait..."
             PACKAGE=$(for l in $(ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u); do
@@ -2069,9 +2083,27 @@ INSTALL
 
                 sudo apk add --force-broken-world $PACKAGE
 
+                if [ -n "$(ldd $BINARYPATH | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u)" ]; then
+
+                    if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
+
+                        git clone https://github.com/OpenMPT/openmpt.git --branch master "$BUILDPATH/libraries/libopenmpt"
+
+                    else
+
+                        git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
+                        git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
+                        git -C "$BUILDPATH/libraries/libopenmpt" pull
+
+                    fi
+                    make -k -j$(($(nproc) + 1)) -C "$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+                    sudo make install
+                    sudo -E STOW_DIR=/usr/local/stow stow -v --adopt discord-rpc
+
+                fi
             else
 
-                ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}'
+                ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u
                 printf "\n%s\n" "Script can't detect package manager. Please install manually these missing libraries."
 
             fi
@@ -2091,8 +2123,10 @@ INSTALL
 
                 fi
                 mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
-                cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local
-                sudo cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release --target install
+                cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
+                cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+                sudo cmake --install
+                sudo -E STOW_DIR=/usr/local/stow stow -v --adopt discord-rpc
 
             fi
 
