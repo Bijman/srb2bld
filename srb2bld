@@ -11,14 +11,14 @@ UBUVER="18.04"
 #SRB2VER="SRB2_release_2.2.9"
 SRB2VER="master"
 MACOSVER="10.9"
-PNGVER="1.6.37"
-OGGVER="1.3.4"
-VORBISVER="1.3.6"
-MPG123VER="1.25.13"
-OPENMPTVER="0.4.12"
-GMEVER="0.6.2"
-SDL2VER="2.0.12"
-SDL2MIXERVER="2.0.4"
+MACOSPNGVER="1.6.37"
+MACOSOGGVER="1.3.4"
+MACOSVORBISVER="1.3.6"
+MACOSMPG123VER="1.25.13"
+MACOSOPENMPTVER="0.4.12"
+MACOSGMEVER="0.6.2"
+MACOSSDL2VER="2.0.12"
+MACOSSDL2MIXERVER="2.0.4"
 
 choosebuild() {
     clear
@@ -160,7 +160,7 @@ dockerentry() {
 
     if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
 
-        sudo xbps-install -Syu
+        sudo apk update && sudo apk upgrade
 
     else
 
@@ -224,7 +224,7 @@ dockerentry() {
 
         done | cat
 
-        7z x -y "\$BUILDPATH/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        bsdtar -vxf "\$BUILDPATH/assets/SRB2P_MP"*.rar -C "\$BUILD/build/AppDir/usr/games/SRB2" "*.pk3" "*.wad"
         rm -f "\$BUILDPATH/assets/SRB2P_MP"*.rar
         cp "\$BUILDPATH/assets/SRB2P-music.pk3" "\$BUILD/build/AppDir/usr/games/SRB2"
 
@@ -257,28 +257,29 @@ dockerentry() {
     fi
 
     if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
-        cat > "\$BUILD/srb2-musl.patch" << MUSL
---- /src/sdl/i_system.c
-+++ /src/sdl/i_system.c
-@@ -137,11 +137,11 @@ typedef LPVOID (WINAPI *p_MapViewOfFile) (HANDLE, DWORD, DWORD, DWORD, SIZE_T);
- #include <errno.h>
- #endif
 
--#if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
--#include <execinfo.h>
--#include <time.h>
--#define UNIXBACKTRACE
--#endif
-+//#if definer (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
-+//#include <execinfo.h>
-+//#include <time.h>
-+//#define UNIXBACKTRACE
-+//#endif
+#        cat > "\$BUILD/srb2-musl.patch" << MUSL
+#--- /src/sdl/i_system.c
+#+++ /src/sdl/i_system.c
+#@@ -137,11 +137,11 @@ typedef LPVOID (WINAPI *p_MapViewOfFile) (HANDLE, DWORD, DWORD, DWORD, SIZE_T);
+# #include <errno.h>
+# #endif
 
- // Locations for searching the srb2.pk3
- #if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
-MUSL
-        patch -p1 < "\$BUILD/srb2-musl.patch"
+#-#if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
+#-#include <execinfo.h>
+#-#include <time.h>
+#-#define UNIXBACKTRACE
+#-#endif
+#+//#if definer (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
+#+//#include <execinfo.h>
+#+//#include <time.h>
+#+//#define UNIXBACKTRACE
+#+//#endif3
+
+# // Locations for searching the srb2.pk3
+# #if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
+#MUSL
+#        patch -p1 < "\$BUILD/srb2-musl.patch"
         export LDFLAGS="$LDFLAGS -lexecinfo"
 
     fi
@@ -896,6 +897,25 @@ else
 
     fi
 
+    if [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
+
+        if [ ! -d "\$BUILDPATH/libraries/libopenmpt/.git" ]; then
+
+            git clone https://github.com/OpenMPT/openmpt.git --branch master "\$BUILDPATH/libraries/libopenmpt"
+
+        else
+
+            git -C "\$BUILDPATH/libraries/libopenmpt" clean -dfx
+            git -C "\$BUILDPATH/libraries/libopenmpt" reset --hard
+            git -C "\$BUILDPATH/libraries/libopenmpt" pull
+
+        fi
+        make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+        sudo make -C "\$BUILDPATH/libraries/libopenmpt" install
+        sudo -E STOW_DIR=/usr/local/stow stow -v --adopt libopenmpt
+
+    fi
+
     if ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
         if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
@@ -962,6 +982,9 @@ else
     else
 
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
+
+#LDFLAGS="-Wl,-rpath,/usr/lib -Wl,-rpath,/lib/i386-linux-gnu -Wl,-rpath,/usr/lib/i386-linux-gnu" LIBRARY_PATH="/usr/lib:/usr/lib/i386-linux-gnu" C_INCLUDE_PATH="/usr/include:/usr/include/i386-linux-gnu" CC="musl-gcc" make -k -j5 -C src LINUX=1 NOVERSION=1 NOUPX=1 NOOBJDUMP=1
+#make CC=musl-gcc CFLAGS=-O3 LDFLAGS=-static -j$(($(nproc) + 1))
 
             cd "\$BUILD/src"
             bash ../comptime.sh
@@ -1251,9 +1274,10 @@ fi
 ENTRYPOINT
     chmod +x "$BUILDPATH/containers/srb2-docker/Entrypoint"
 
-    rm -rf "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-musl-docker" "$BUILDPATH/containers/srb2-windows-docker"
+    rm -rf "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-musl-docker" "$BUILDPATH/containers/srb2-old-musl-docker" "$BUILDPATH/containers/srb2-windows-docker"
     cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-docker"
     cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-musl-docker"
+    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-musl-docker"
     cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-windows-docker"
 
     if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
@@ -1265,61 +1289,6 @@ ENTRYPOINT
         ISARM="armhf"
 
     fi
-
-    cat > "$BUILDPATH/containers/srb2-old-docker/Dockerfile" << DOCKERFILE
-FROM $ISARM/debian:$DEBVER
-
-ENV container docker \
-DEBIAN_FRONTEND noninteractive
-
-RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
-printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
-apt-get update && \
-apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
-gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
-printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
-
-#printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\ndeb https://snapshot.debian.org/archive/debian/20160807T174741Z jessie main contrib non-free" >> /etc/apt/sources.list && \
-#apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B 8B48AD6246925553 7638D0442B90D010 6FB2A1C265FFB764
-
-RUN apt-get update && \
-apt-get upgrade -y && \
-apt-get install -y apt-fast && \
-apt-fast install -y libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libjack-dev libfuse-dev libcurl4-openssl-dev libpng12-dev zlib1g-dev fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
-#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/gcc-3.4_3.4.6-4_i386.deb && \
-#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/gcc-3.4-base_3.4.6-4_i386.deb && \
-#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/cpp-3.4_3.4.6-4_i386.deb && \
-#dpkg -i gcc-3.4_3.4.6-4_i386.deb gcc-3.4-base_3.4.6-4_i386.deb cpp-3.4_3.4.6-4_i386.deb
-
-#apt-fast install -y binutils cpp-4.9 gcc-4.9
-
-#libcom-err2 libfuse-dev
-
-#libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libjack-dev libupnp-dev libcurl4-gnutls-dev rapidjson-dev libopenvr-dev
-
-#printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\ndeb https://snapshot.debian.org/archive/debian/20160807T174741Z jessie main" >> /etc/apt/sources.list && \
-
-#RUN curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_i386.deb,g/gcc-4.9/cpp-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/g%2B%2B-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/gcc-4.9-base_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/gcc-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libgcc-4.9-dev_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libasan1_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libubsan0_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libcilkrts5_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libstdc%2B%2B-4.9-dev_4.9.2-10%2Bdeb8u1_i386.deb,m/mpfr4/libmpfr4_3.1.5-1_i386.deb,c/cloog/libcloog-isl4_0.18.4-1+b1_i386.deb,i/isl/libisl10_0.12.2-2_i386.deb,i/isl/libisl15_0.18-1_i386.deb} && \
-#dpkg -i multiarch-support_2.28-10_i386.deb && \
-#dpkg -i ./*.deb
-
-#RUN curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_i386.deb,libp/libpng/libpng12-0_1.2.50-2+deb8u3_i386.deb,l/lz4/liblz4-1_1.9.3-2_i386.deb,l/lzo2/liblzo2-2_2.10-2_i386.deb,libz/libzstd/libzstd1_1.4.8%2Bdfsg-3_i386.deb,s/squashfuse/squashfuse_0.1.103-3_i386.deb,s/squashfuse/libsquashfuse0_0.1.103-3_i386.deb} && \
-#dpkg -i ./*.deb
-
-RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
-useradd -m -G sudo -s /bin/dash srb2 && \
-passwd -d srb2
-
-#curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_amd64.deb,libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb,l/lz4/liblz4-1_1.9.3-2_amd64.deb,l/lzo2/liblzo2-2_2.10-2_amd64.deb,libz/libzstd/libzstd1_1.4.8%2Bdfsg-3_amd64.deb,s/squashfuse/squashfuse_0.1.103-3_amd64.deb,s/squashfuse/libsquashfuse0_0.1.103-3_amd64.deb} && \
-#dpkg -i multiarch-support_2.28-10_amd64.deb && \
-#dpkg -i ./*.deb
-
-COPY Entrypoint /home/srb2
-
-ENTRYPOINT [ "/home/srb2/Entrypoint" ]
-
-DOCKERFILE
 
     cat > "$BUILDPATH/containers/srb2-docker/Dockerfile" << DOCKERFILE
 FROM ubuntu:$UBUVER
@@ -1376,18 +1345,98 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 
 DOCKERFILE
 
+    cat > "$BUILDPATH/containers/srb2-old-docker/Dockerfile" << DOCKERFILE
+FROM $ISARM/debian:$DEBVER
+
+ENV container docker \
+DEBIAN_FRONTEND noninteractive
+
+RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
+printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
+apt-get update && \
+apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
+printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
+
+#printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\ndeb https://snapshot.debian.org/archive/debian/20160807T174741Z jessie main contrib non-free" >> /etc/apt/sources.list && \
+#apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B 8B48AD6246925553 7638D0442B90D010 6FB2A1C265FFB764
+
+RUN apt-get update && \
+apt-get upgrade -y && \
+apt-get install -y apt-fast && \
+apt-fast install -y libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libjack-dev libfuse-dev libcurl4-openssl-dev libpng12-dev zlib1g-dev fuse imagemagick nasm build-essential cmake mingw-w64 file sudo dash curl git p7zip-full p7zip-rar
+#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/gcc-3.4_3.4.6-4_i386.deb && \
+#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/gcc-3.4-base_3.4.6-4_i386.deb && \
+#curl -k -O https://snapshot.debian.org/archive/debian/20060717T000000Z/pool/main/g/gcc-3.4/cpp-3.4_3.4.6-4_i386.deb && \
+#dpkg -i gcc-3.4_3.4.6-4_i386.deb gcc-3.4-base_3.4.6-4_i386.deb cpp-3.4_3.4.6-4_i386.deb
+
+#apt-fast install -y binutils cpp-4.9 gcc-4.9
+
+#libcom-err2 libfuse-dev
+
+#libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libjack-dev libupnp-dev libcurl4-gnutls-dev rapidjson-dev libopenvr-dev
+
+#printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\ndeb https://snapshot.debian.org/archive/debian/20160807T174741Z jessie main" >> /etc/apt/sources.list && \
+
+#RUN curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_i386.deb,g/gcc-4.9/cpp-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/g%2B%2B-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/gcc-4.9-base_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/gcc-4.9_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libgcc-4.9-dev_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libasan1_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libubsan0_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libcilkrts5_4.9.2-10%2Bdeb8u1_i386.deb,g/gcc-4.9/libstdc%2B%2B-4.9-dev_4.9.2-10%2Bdeb8u1_i386.deb,m/mpfr4/libmpfr4_3.1.5-1_i386.deb,c/cloog/libcloog-isl4_0.18.4-1+b1_i386.deb,i/isl/libisl10_0.12.2-2_i386.deb,i/isl/libisl15_0.18-1_i386.deb} && \
+#dpkg -i multiarch-support_2.28-10_i386.deb && \
+#dpkg -i ./*.deb
+
+#RUN curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_i386.deb,libp/libpng/libpng12-0_1.2.50-2+deb8u3_i386.deb,l/lz4/liblz4-1_1.9.3-2_i386.deb,l/lzo2/liblzo2-2_2.10-2_i386.deb,libz/libzstd/libzstd1_1.4.8%2Bdfsg-3_i386.deb,s/squashfuse/squashfuse_0.1.103-3_i386.deb,s/squashfuse/libsquashfuse0_0.1.103-3_i386.deb} && \
+#dpkg -i ./*.deb
+
+RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+useradd -m -G sudo -s /bin/dash srb2 && \
+passwd -d srb2
+
+#curl -LO http://ftp.us.debian.org/debian/pool/main/{g/glibc/multiarch-support_2.28-10_amd64.deb,libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb,l/lz4/liblz4-1_1.9.3-2_amd64.deb,l/lzo2/liblzo2-2_2.10-2_amd64.deb,libz/libzstd/libzstd1_1.4.8%2Bdfsg-3_amd64.deb,s/squashfuse/squashfuse_0.1.103-3_amd64.deb,s/squashfuse/libsquashfuse0_0.1.103-3_amd64.deb} && \
+#dpkg -i multiarch-support_2.28-10_amd64.deb && \
+#dpkg -i ./*.deb
+
+COPY Entrypoint /home/srb2
+
+ENTRYPOINT [ "/home/srb2/Entrypoint" ]
+
+DOCKERFILE
+
     cat > "$BUILDPATH/containers/srb2-musl-docker/Dockerfile" << DOCKERFILE
-FROM voidlinux/voidlinux-musl:latest
+FROM $ISARM/alpine:latest
+#FROM voidlinux/voidlinux-musl:latest
 
 ENV container docker
 
-#RUN printf "%s\n" https://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
-#apk update && \
-#apk upgrade && \
-#apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libpng-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow
+RUN printf "https://dl-cdn.alpinelinux.org/alpine/edge/main\nhttps://dl-cdn.alpinelinux.org/alpine/edge/community\nhttps://dl-cdn.alpinelinux.org/alpine/edge/testing" > /etc/apk/repositories && \
+apk update && \
+apk upgrade && \
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libpng-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow
 
-RUN xbps-install -Syu && \
-xbps-install -Sy SDL2-devel SDL2_mixer-devel SDL-devel SDL_mixer-devel libpng-devel libopenmpt-devel libgme-devel fluidsynth-devel libmodplug-devel jack-devel libcurl-devel libupnp-devel zlib-devel libexecinfo-devel shadow bash dash sudo base-devel cmake gawk git curl p7zip nasm ImageMagick patchelf
+#RUN xbps-install -Syu && \
+#xbps-install -Sy SDL2-devel SDL2_mixer-devel SDL-devel SDL_mixer-devel libpng-devel libopenmpt-devel libgme-devel fluidsynth-devel libmodplug-devel jack-devel libcurl-devel libupnp-devel zlib-devel libexecinfo-devel shadow bash dash sudo base-devel cmake gawk git curl bsdtar p7zip nasm ImageMagick patchelf
+
+RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+useradd -m -G wheel -s /usr/bin/dash srb2 && \
+passwd -d srb2
+
+COPY Entrypoint /home/srb2
+
+ENTRYPOINT [ "/home/srb2/Entrypoint" ]
+
+DOCKERFILE
+
+    cat > "$BUILDPATH/containers/srb2-old-musl-docker/Dockerfile" << DOCKERFILE
+FROM $ISARM/alpine:latest
+#FROM voidlinux/voidlinux-musl:latest
+
+ENV container docker
+
+RUN printf "https://dl-cdn.alpinelinux.org/alpine/edge/main\nhttps://dl-cdn.alpinelinux.org/alpine/edge/community\nhttps://dl-cdn.alpinelinux.org/alpine/edge/testing" > /etc/apk/repositories && \
+apk update && \
+apk upgrade && \
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libpng-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base gcc-6 cmake sudo bash dash gawk curl git p7zip shadow stow
+
+#RUN xbps-install -Syu && \
+#xbps-install -Sy SDL2-devel SDL2_mixer-devel SDL-devel SDL_mixer-devel libpng-devel libopenmpt-devel libgme-devel fluidsynth-devel libmodplug-devel jack-devel libcurl-devel libupnp-devel zlib-devel libexecinfo-devel shadow bash dash sudo base-devel cmake gawk git curl bsdtar p7zip nasm ImageMagick patchelf
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
@@ -1459,23 +1508,37 @@ DOCKERFILE
 dockerrun() {
     if [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-        docker build -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
-        docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-old-docker
+        if [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
+
+            docker pull "$ISARM/alpine:latest"
+            docker build -t srb2-musl-docker "$BUILDPATH/containers/srb2-old-musl-docker"
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-old-musl-docker
+
+        else
+
+            docker pull "$ISARM/ubuntu:$UBUVER"
+            docker build -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-old-docker
+
+        fi
 
     else
 
         if [ "$OS" = "Windows" ]; then
 
+            docker pull "ubuntu:$UBUVER"
             docker build -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
+            docker pull alpine:latest
             docker build -t srb2-musl-docker "$BUILDPATH/containers/srb2-musl-docker"
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-musl-docker
 
         else
 
+            docker pull "ubuntu:$UBUVER"
             docker build -t srb2-docker "$BUILDPATH/containers/srb2-docker"
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --env "BUILDPATH=$BUILDPATH" --env "BUILD=$BUILD" --env "GIT=$GIT" --env "APPIMAGE=$APPIMAGE" srb2-docker
 
@@ -1514,7 +1577,7 @@ Usage: srb2bld [OPTIONS]
     "")
         if [ "$OS" != "Linux" ] && [ "$OS" != "Darwin" ]; then
 
-            printf "Currently building is only available for Linux and MacOS. Exiting."
+            printf "%s\n" "Currently building is only available for Linux and MacOS. Exiting."
             exit
 
         fi
@@ -1658,7 +1721,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libpng/.git" ]; then
 
-                    git clone git://git.code.sf.net/p/libpng/code.git --branch "v$PNGVER" "$BUILDPATH/libraries/libpng"
+                    git clone git://git.code.sf.net/p/libpng/code.git --branch "v$MACOSPNGVER" "$BUILDPATH/libraries/libpng"
 
                 else
 
@@ -1680,7 +1743,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libogg/.git" ]; then
 
-                    git clone https://gitlab.xiph.org/xiph/ogg.git --branch "v$OGGVER" "$BUILDPATH/libraries/libogg"
+                    git clone https://gitlab.xiph.org/xiph/ogg.git --branch "v$MACOSOGGVER" "$BUILDPATH/libraries/libogg"
 
                 else
 
@@ -1702,7 +1765,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libvorbis/.git" ]; then
 
-                    git clone https://gitlab.xiph.org/xiph/vorbis.git --branch "v$VORBISVER" "$BUILDPATH/libraries/libvorbis"
+                    git clone https://gitlab.xiph.org/xiph/vorbis.git --branch "v$MACOSVORBISVER" "$BUILDPATH/libraries/libvorbis"
 
                 else
 
@@ -1714,8 +1777,8 @@ Usage: srb2bld [OPTIONS]
                 "$BUILDPATH/libraries/libvorbis/autogen.sh"
                 "$BUILDPATH/libraries/libvorbis/configure" --prefix=/usr/local/stow/libvorbis
                 #                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make install
+                make -C "$BUILDPATH/libraries/libvorbis" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make -C "$BUILDPATH/libraries/libvorbis" install
                 sudo -E stow -v --adopt libvorbis
 
             fi
@@ -1724,15 +1787,19 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -f "$BUILDPATH/libraries/libmpg123.zip" ]; then
 
-                    mkdir -p "$BUILDPATH/libraries/libmpg123/build"
-                    curl -RLC - "https://deac-riga.dl.sourceforge.net/project/mpg123/mpg123/$MPG123VER/mpg123-$MPG123VER.tar.bz2" -o "$BUILDPATH/libraries/libmpg123/build/libmpg123.zip"
+                    mkdir -p "$BUILDPATH/libraries/libmpg123"
+                    curl -RLC - "https://deac-riga.dl.sourceforge.net/project/mpg123/mpg123/$MACOSMPG123VER/mpg123-$MACOSMPG123VER.tar.bz2" -o "$BUILDPATH/libraries/libmpg123/libmpg123.zip"
+
+                else
+
+                    make -C "$BUILDPATH/libraries/libmpg123" clean
 
                 fi
-                7z x "$BUILDPATH/libraries/libmpg123/build/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123/build"
-                "$BUILDPATH/libraries/libmpg123/build/configure" --prefix=/usr/local/stow/libmpg123
+                7z x "$BUILDPATH/libraries/libmpg123/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123"
+                "$BUILDPATH/libraries/libmpg123/configure" --prefix=/usr/local/stow/libmpg123
                 #                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make install
+                make -C "$BUILDPATH/libraries/libmpg123" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make -C "$BUILDPATH/libraries/libmpg123" install
                 sudo -E stow -v --adopt libmpg123
 
             fi
@@ -1763,7 +1830,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
 
-                    git clone https://github.com/OpenMPT/openmpt.git --branch "libopenmpt-$OPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
+                    git clone https://github.com/OpenMPT/openmpt.git --branch "libopenmpt-$MACOSOPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
 
                 else
 
@@ -1774,8 +1841,8 @@ Usage: srb2bld [OPTIONS]
                 fi
                 "$BUILDPATH/libraries/libopenmpt/configure" --prefix=/usr/local/stow/libopenmpt --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
                 #                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make install
+                make -C "$BUILDPATH/libraries/libopenmpt" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make -C "$BUILDPATH/libraries/libopenmpt" install
                 sudo -E stow -v --adopt libopenmpt
 
             fi
@@ -1784,7 +1851,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libgme/.git" ]; then
 
-                    git clone https://bitbucket.org/mpyne/game-music-emu.git --branch "$GMEVER" "$BUILDPATH/libraries/libgme"
+                    git clone https://bitbucket.org/mpyne/game-music-emu.git --branch "$MACOSGMEVER" "$BUILDPATH/libraries/libgme"
 
                 else
 
@@ -1806,7 +1873,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libsdl2/.git" ]; then
 
-                    git clone https://github.com/libsdl-org/SDL.git --branch "release-$SDL2VER" "$BUILDPATH/libraries/libsdl2"
+                    git clone https://github.com/libsdl-org/SDL.git --branch "release-$MACOSSDL2VER" "$BUILDPATH/libraries/libsdl2"
 
                 else
 
@@ -1828,7 +1895,7 @@ Usage: srb2bld [OPTIONS]
 
                 if [ ! -d "$BUILDPATH/libraries/libsdl2-mixer/.git" ]; then
 
-                    git clone https://github.com/libsdl-org/SDL_mixer.git --branch "release-$SDL2MIXERVER" "$BUILDPATH/libraries/libsdl2-mixer"
+                    git clone https://github.com/libsdl-org/SDL_mixer.git --branch "release-$MACOSSDL2MIXERVER" "$BUILDPATH/libraries/libsdl2-mixer"
 
                 else
 
@@ -1860,8 +1927,8 @@ Usage: srb2bld [OPTIONS]
                     --disable-music-opus-shared \
                     --enable-music-wave \
                     --prefix=/usr/local/stow/libsdl2-mixer
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make install
+                make -C "$BUILDPATH/libraries/libsdl2-mixer" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make -C "$BUILDPATH/libraries/libsdl2-mixer" install
                 sudo -E stow -v --adopt libsdl2-mixer
 
             fi
@@ -2153,24 +2220,15 @@ INSTALL
 
                 sudo apk add --force-broken-world $PACKAGE
 
-                if [ -n "$(ldd $BINARYPATH | gawk 'match($0, /openmpt/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+                if [ -n "$(ldd $BINARYPATH | gawk 'match($0, /libopenmpt/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-                    if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
-
-                        git clone https://github.com/OpenMPT/openmpt.git --branch master "$BUILDPATH/libraries/libopenmpt"
-
-                    else
-
-                        git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
-                        git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
-                        git -C "$BUILDPATH/libraries/libopenmpt" pull
-
-                    fi
-                    make -k -j$(($(nproc) + 1)) -C "$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-                    sudo make install
+                    sudo make -C "$BUILDPATH/libraries/libopenmpt" install
                     sudo -E STOW_DIR=/usr/local/stow stow -v --adopt libopenmpt
+                    git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
+                    git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
 
                 fi
+
             else
 
                 ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u
@@ -2208,7 +2266,7 @@ INSTALL
 
         if [ "$OS" != "Linux" ] || [ -z "$(ldd --version 2>&1 | gawk '/Free Software Foundation/ {print}')" ]; then
 
-            printf "Currently building AppImages is only available for Linux with glibc. Exiting."
+            printf "%s\n" "Currently building AppImages is only available for Linux with glibc. Exiting."
             exit
 
         fi
