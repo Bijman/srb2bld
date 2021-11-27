@@ -183,6 +183,7 @@ dockerentry() {
     cd "\$BUILD" || exit
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
         mkdir -p "\$BUILD/build/AppDir/usr/games/SRB2Kart"
 
     else
@@ -911,7 +912,7 @@ else
             git -C "\$BUILDPATH/libraries/libopenmpt" pull
 
         fi
-        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$BUILDPATH/libraries/libopenmpt"
+        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$BUILDPATH/libraries/libopenmpt/Makefile"
         make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
         sudo make -C "\$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
         sudo -E STOW_DIR=/usr/local/stow stow -v --adopt libopenmpt
@@ -2167,10 +2168,10 @@ INSTALL
         git -C "$BUILD" clean -dfx -e .comrev
         git -C "$BUILD" reset --hard
 
-        if [ -n "$(ldd $BINARYPATH 2> /dev/null | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u)" ]; then
+        if [ -n "$(ldd $BINARYPATH | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u)" ]; then
 
             printf "%s\n" "Installing missing dependencies for $BUILDNAME on system. Please wait..."
-            PACKAGE=$(for l in $(ldd "$BINARYPATH" 2> /dev/null | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u); do
+            PACKAGE=$(for l in $(ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u); do
                 if [ -x "$(which emerge)" ]; then
 
                     if [ ! -x "$(which e-file)" ]; then
@@ -2212,15 +2213,6 @@ INSTALL
                     xlocate -S > /dev/null
                     xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | uniq
 
-                elif [ -x "$(which apk)" ]; then
-
-                    if [ ! -x "$(which apk-file)" ]; then
-
-                        sudo apk add apk-file > /dev/null
-
-                    fi
-                    apk-file "$l" | gawk '/-dev/ {print $2}' | sort -u
-
                 fi
             done)
 
@@ -2248,34 +2240,64 @@ INSTALL
 
                 sudo xbps-install -Sy $PACKAGE
 
-            elif [ -x "$(which apk)" ]; then
+            else
+
+                ldd "$BINARYPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u
+                printf "\n%s\n" "Script can't detect package manager. Please install manually these missing libraries."
+
+            fi
+
+        fi
+
+        if [ -n "$(ldd $BINARYPATH 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u)" ]; then
+
+            printf "%s\n" "Installing missing dependencies for $BUILDNAME on system. Please wait..."
+            PACKAGE=$(for l in $(ldd "$BINARYPATH" 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u); do
+                if [ -x "$(which apk)" ]; then
+
+                    if [ ! -x "$(which apk-file)" ]; then
+
+                        sudo apk add apk-file > /dev/null
+
+                    fi
+                    apk-file "$l" | gawk '/-dev/ {print $2}' | sort -u
+
+                fi
+
+            done)
+
+            if [ -x "$(which apk)" ]; then
 
                 sudo apk add --force-broken-world $PACKAGE
 
-                if [ -n "$(ldd $BINARYPATH 2> /dev/null | gawk 'match($0, /libopenmpt/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+                if [ -n "$(ldd $BINARYPATH 2>&1 | gawk 'match($0, /libopenmpt/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
                     sudo -E STOW_DIR=/usr/local/stow stow -v --adopt libopenmpt
 
                 fi
 
-                if [ -n "$(ldd $BINARYPATH 2> /dev/null | gawk 'match($0, /libpng12/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+                if [ -n "$(ldd $BINARYPATH 2>&1 | gawk 'match($0, /libpng12/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
                     sudo -E STOW_DIR=/usr/local/stow stow -v --adopt libpng12
 
                 fi
 
+            elif [ -x "$(which xbps-install)" ]; then
+
+                sudo xbps-install -Sy $PACKAGE
+
             else
 
-                ldd "$BINARYPATH" 2> /dev/null | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u
+                ldd "$BINARYPATH" 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u
                 printf "\n%s\n" "Script can't detect package manager. Please install manually these missing libraries."
 
             fi
 
-            if [ -n "$(ldd $BINARYPATH 2> /dev/null | gawk 'match($0, /discord/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+        fi
 
-                sudo -E STOW_DIR=/usr/local/stow stow -v --adopt discord-rpc
+        if [ ! -f /usr/local/lib/discord-rpc.so ]; then
 
-            fi
+            sudo -E STOW_DIR=/usr/local/stow stow -v --adopt discord-rpc
 
         fi
 
