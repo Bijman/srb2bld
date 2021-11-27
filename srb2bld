@@ -337,14 +337,18 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
             printf "%s\n" "Compiling game with this command: LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1"
-            bash ./comptime.sh
+            cd "\$BUILD/src"
+            bash ../comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
+            cd "\$BUILD"
 
         else
 
             printf "%s\n" "Compiling game with this command: LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1"
-            bash ./comptime.sh
+            cd "\$BUILD/src"
+            bash ../comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
+            cd "\$BUILD"
 
         fi
 
@@ -907,8 +911,9 @@ else
             git -C "\$BUILDPATH/libraries/libopenmpt" pull
 
         fi
-        make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenmpt" DESTDIR=/usr/local/stow/libopenmpt NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1 DYNLINK=0 STATIC_LIB=0 EXAMPLES=0 OPENMPT123=0 TEST=0
-        sudo make -C "\$BUILDPATH/libraries/libopenmpt" install
+        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$BUILDPATH/libraries/libopenmpt"
+        make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+        sudo make -C "\$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
         sudo -E STOW_DIR=/usr/local/stow stow -v --adopt libopenmpt
 
     fi
@@ -1007,13 +1012,17 @@ else
 #LDFLAGS="-Wl,-rpath,/usr/lib -Wl,-rpath,/lib/i386-linux-gnu -Wl,-rpath,/usr/lib/i386-linux-gnu" LIBRARY_PATH="/usr/lib:/usr/lib/i386-linux-gnu" C_INCLUDE_PATH="/usr/include:/usr/include/i386-linux-gnu" CC="musl-gcc" make -k -j5 -C src LINUX=1 NOVERSION=1 NOUPX=1 NOOBJDUMP=1
 #make CC=musl-gcc CFLAGS=-O3 LDFLAGS=-static -j$(($(nproc) + 1))
 
-            bash ./comptime.sh
+            cd "\$BUILD/src"
+            bash ../comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            cd "\$BUILD"
 
         else
 
-            bash ./comptime.sh
+            cd "\$BUILD/src"
+            bash ../comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            cd "\$BUILD"
 
         fi
 
@@ -1791,12 +1800,14 @@ Usage: srb2bld [OPTIONS]
                     git -C "$BUILDPATH/libraries/libvorbis" fetch origin master
 
                 fi
-                "$BUILDPATH/libraries/libvorbis/autogen.sh"
-                "$BUILDPATH/libraries/libvorbis/configure" --prefix=/usr/local/stow/libvorbis
+                cd "$BUILDPATH/libraries/libvorbis"
+                ./autogen.sh
+                ./configure --prefix=/usr/local/stow/libvorbis
                 #                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
-                make -C "$BUILDPATH/libraries/libvorbis" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make -C "$BUILDPATH/libraries/libvorbis" install
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
                 sudo -E stow -v --adopt libvorbis
+                cd "$BUILD"
 
             fi
 
@@ -1856,11 +1867,13 @@ Usage: srb2bld [OPTIONS]
                     git -C "$BUILDPATH/libraries/libopenmpt" fetch origin master
 
                 fi
-                "$BUILDPATH/libraries/libopenmpt/configure" --prefix=/usr/local/stow/libopenmpt --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
+                cd "$BUILDPATH/libraries/libopenmpt"
+                ./configure --prefix=/usr/local/stow/libopenmpt --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
                 #                sudo -E make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) install
-                make -C "$BUILDPATH/libraries/libopenmpt" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make -C "$BUILDPATH/libraries/libopenmpt" install
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
                 sudo -E stow -v --adopt libopenmpt
+                cd "$BUILD"
 
             fi
 
@@ -1921,7 +1934,8 @@ Usage: srb2bld [OPTIONS]
                     git -C "$BUILDPATH/libraries/libsdl2-mixer" fetch origin master
 
                 fi
-                "$BUILDPATH/libraries/libsdl2-mixer/configure" \
+                cd "$BUILDPATH/libraries/libsdl2-mixer"
+                ./configure \
                     --disable-dependency-tracking \
                     --disable-music-flac \
                     --disable-music-flac-shared \
@@ -1944,9 +1958,10 @@ Usage: srb2bld [OPTIONS]
                     --disable-music-opus-shared \
                     --enable-music-wave \
                     --prefix=/usr/local/stow/libsdl2-mixer
-                make -C "$BUILDPATH/libraries/libsdl2-mixer" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-                sudo make -C "$BUILDPATH/libraries/libsdl2-mixer" install
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+                sudo make install
                 sudo -E stow -v --adopt libsdl2-mixer
+                cd "$BUILD"
 
             fi
 
