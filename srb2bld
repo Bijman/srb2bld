@@ -327,7 +327,8 @@ if [ "\$APPIMAGE" = 1 ]; then
         fi
         mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
         cmake -S "\$BUILDPATH/libraries/discord-rpc" -B "\$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        sudo cmake --build "\$BUILDPATH/libraries/discord-rpc/build" -j$(($(nproc) + 1)) --config Release --target install
+        cmake --build "\$BUILDPATH/libraries/discord-rpc/build" -j\$((\$(nproc) + 1)) --config Release
+        sudo cmake --install "\$BUILDPATH/libraries/discord-rpc/build"
 
     fi
 
@@ -336,18 +337,14 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
             printf "%s\n" "Compiling game with this command: LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1"
-            cd "\$BUILD/src"
-            bash ../comptime.sh
+            bash ./comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
-            cd "\$BUILD"
 
         else
 
             printf "%s\n" "Compiling game with this command: LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1"
-            cd "\$BUILD/src"
-            bash ../comptime.sh
+            bash ./comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
-            cd "\$BUILD"
 
         fi
 
@@ -918,7 +915,7 @@ else
 
     if [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
 
-        if [ ! -d "\$BUILDPATH/libraries/libgpng12/.git" ]; then
+        if [ ! -d "\$BUILDPATH/libraries/libpng12/.git" ]; then
 
             git clone https://github.com/glennrp/libpng.git --branch libpng12 "\$BUILDPATH/libraries/libpng12"
 
@@ -952,8 +949,10 @@ else
 
         fi
         mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
-        cmake -S "\$BUILDPATH/libraries/discord-rpc" -B "\$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        sudo cmake --build "\$BUILDPATH/libraries/discord-rpc/build" -j$(($(nproc) + 1)) --config Release --target install
+        cmake -S "\$BUILDPATH/libraries/discord-rpc" -B "\$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
+        cmake --build "\$BUILDPATH/libraries/discord-rpc/build" -j\$((\$(nproc) + 1)) --config Release
+        sudo cmake --install "\$BUILDPATH/libraries/discord-rpc/build"
+        sudo -E STOW_DIR=/usr/local/stow stow -v --adopt discord-rpc
 
     fi
 
@@ -1008,17 +1007,13 @@ else
 #LDFLAGS="-Wl,-rpath,/usr/lib -Wl,-rpath,/lib/i386-linux-gnu -Wl,-rpath,/usr/lib/i386-linux-gnu" LIBRARY_PATH="/usr/lib:/usr/lib/i386-linux-gnu" C_INCLUDE_PATH="/usr/include:/usr/include/i386-linux-gnu" CC="musl-gcc" make -k -j5 -C src LINUX=1 NOVERSION=1 NOUPX=1 NOOBJDUMP=1
 #make CC=musl-gcc CFLAGS=-O3 LDFLAGS=-static -j$(($(nproc) + 1))
 
-            cd "\$BUILD/src"
-            bash ../comptime.sh
+            bash ./comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
-            cd "\$BUILD"
 
         else
 
-            cd "\$BUILD/src"
-            bash ../comptime.sh
+            bash ./comptime.sh
             LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
-            cd "\$BUILD"
 
         fi
 
@@ -2244,32 +2239,13 @@ INSTALL
 
                 if [ -n "$(ldd $BINARYPATH 2> /dev/null | gawk 'match($0, /libopenmpt/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-                    sudo make -C "$BUILDPATH/libraries/libopenmpt" install
                     sudo -E STOW_DIR=/usr/local/stow stow -v --adopt libopenmpt
-                    git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
-                    git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
 
                 fi
 
                 if [ -n "$(ldd $BINARYPATH 2> /dev/null | gawk 'match($0, /libpng12/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-                    if [ ! -d "$BUILDPATH/libraries/libgpng12/.git" ]; then
-
-                        git clone https://github.com/glennrp/libpng.git --branch libpng12 "$BUILDPATH/libraries/libpng12"
-
-                    else
-
-                        git -C "$BUILDPATH/libraries/libpng12" clean -dfx
-                        git -C "$BUILDPATH/libraries/libpng12" reset --hard
-                        git -C "$BUILDPATH/libraries/libpng12" pull
-
-                    fi
-                    cd "$BUILDPATH/libraries/libpng12"
-                    ./configure --prefix=/usr/local/stow/libpng12
-                    make -k -j$(($(nproc) + 1))
-                    sudo make install
                     sudo -E STOW_DIR=/usr/local/stow stow -v --adopt libpng12
-                    cd "$BUILD"
 
                 fi
 
@@ -2281,23 +2257,7 @@ INSTALL
             fi
 
             if [ -n "$(ldd $BINARYPATH 2> /dev/null | gawk 'match($0, /discord/) {print substr($0, RSTART, RLENGTH)}')" ]; then
-                printf "%s\n" "Building and installing discord-rpc for $BUILDNAME on system. Please wait..."
 
-                if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
-
-                    git clone --branch master https://github.com/discord/discord-rpc.git "$BUILDPATH/libraries/discord-rpc"
-
-                else
-
-                    git -C "$BUILDPATH/libraries/discord-rpc" clean -dfx
-                    git -C "$BUILDPATH/libraries/discord-rpc" reset --hard
-                    git -C "$BUILDPATH/libraries/discord-rpc" pull
-
-                fi
-                mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
-                cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
-                cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-                sudo cmake --install
                 sudo -E STOW_DIR=/usr/local/stow stow -v --adopt discord-rpc
 
             fi
