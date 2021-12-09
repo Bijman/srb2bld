@@ -140,6 +140,14 @@ chooseinstall() {
 
         choosebuild
 
+        # Download source code
+        printf "$MESSAGE\n%s\n\e[0m" "Downloading source code. Please wait..."
+        if [ ! -d "$BUILD/.git" ]; then
+
+            $GIT "$BUILD"
+
+        fi
+
         # Display content of CMakeLists for a good view of available compilation flags
         mkdir -p "$BUILD/build"
         cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
@@ -193,15 +201,6 @@ chooseinstall() {
 
         #            brew install -f cmake $ISPNG libogg libvorbis libmpeg2 libmodplug $ISOPENMPT sdl2 $ISSDL2MIXER
         #            brew install -f cmake autoconf automake pkgconfig libtool gawk stow p7zip curl
-
-        # Download source code
-        printf "$MESSAGE\n%s\n\e[0m" "Downloading source code. Please wait..."
-        if [ ! -d "$BUILD/.git" ]; then
-
-            $GIT "$BUILD"
-
-        fi
-
         # Make directories for storing essential files
         mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer"
         cd "$BUILD" || exit
@@ -216,7 +215,7 @@ chooseinstall() {
                 curl -RLC - "$SRB2ASSETSURL" -o "$BUILDPATH/assets/SRB2.zip"
 
             fi
-            7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
         fi
 
@@ -241,24 +240,24 @@ chooseinstall() {
 
             done | cat
 
-            7z x -y "$BUILDPATH/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "$BUILDPATH/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
             rm -f "$BUILDPATH/assets/SRB2P_MP"*.rar
-            mv "$BUILDPATH/assets/SRB2P-music.pk3" "$BUILD/build/AppDir/usr/games/SRB2"
+            mv "$BUILDPATH/assets/SRB2P-music.pk3" "$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
             curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-x64-Installer.exe -o "$BUILDPATH/assets/SRB2-2.1.exe"
-            7z x -y "$BUILDPATH/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" "models/*" -o"$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "$BUILDPATH/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
             curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "$BUILDPATH/assets/SRB2-2.0.exe"
-            7z x -y "$BUILDPATH/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "$BUILDPATH/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
             curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "$BUILDPATH/assets/SRB2FinalDemo.exe"
-            7z x -y "$BUILDPATH/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "$BUILDPATH/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -268,7 +267,7 @@ chooseinstall() {
                 curl -RLC - "$SRB2KARTASSETSURL" -o "$BUILDPATH/assets/SRB2Kart.exe"
 
             fi
-            7z x -y "$BUILDPATH/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/build/AppDir/usr/games/SRB2Kart"
+            7z x -y "$BUILDPATH/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
             #        curl -s "https://gitlab.com/api/v4/projects/24705991/releases" | gawk '{gsub('/^{/',"{\n") || gsub('/}$/',"\n}") || gsub('/,/',",\n"); print}' | gawk '/uploads/ {split($0,a,"\\)|\\(");print a[2]"\n"a[4]"\n"a[6]}' | gawk '!/default/ && NF'
 
         fi
@@ -544,9 +543,25 @@ chooseinstall() {
 
         fi
 
+        # Patching CMakeLists.txt to prevent MacOS from loading external frameworks prior to libraries installed by Homebrew.
+        cat > "$BUILD/framework-last.patch" << CMAKE
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -107,6 +107,7 @@
+
+ if(${CMAKE_SYSTEM} MATCHES "Darwin")
+        add_definitions(-DMACOSX)
++        set(CMAKE_FIND_FRAMEWORK LAST)
+ endif()
+
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+CMAKE
+
+        patch -p1 < "$BUILD/framework-last.patch"
+
         # Build the game and install it
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing $BUILDNAME. Please wait..."
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local $CONF
+        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local -DGME_INCLUDE_DIR=/usr/local/include/gme -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$BUILD/build"
 
@@ -2880,7 +2895,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for musl based Linux SRB2 builds. Please wait..."
             docker pull "$ISARM"alpine:latest
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
-            docker build -t srb2-old-musl-docker "$BUILDPATH/containers/srb2-old-musl-docker"
+            docker build --rm -t srb2-old-musl-docker "$BUILDPATH/containers/srb2-old-musl-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" srb2-old-musl-docker
 
@@ -2889,7 +2904,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for Windows SRB2 builds. Please wait..."
             docker pull "i386/debian:$DEBVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
-            docker build -t srb2-old-windows-docker "$BUILDPATH/containers/srb2-old-windows-docker"
+            docker build --rm -t srb2-old-windows-docker "$BUILDPATH/containers/srb2-old-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2-builds:$BUILDPATH:rw" srb2-old-windows-docker
 
@@ -2898,7 +2913,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker pull "$ISARM"debian:"$DEBVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
-            docker build -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
+            docker build --rm -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" srb2-old-docker
 
@@ -2911,7 +2926,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for Windows builds. Please wait..."
             docker pull "ubuntu:$UBUVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows builds. Please wait..."
-            docker build -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
+            docker build --rm -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2-builds:$BUILDPATH:rw" srb2-windows-docker
 
@@ -2920,7 +2935,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for musl based Linux builds. Please wait..."
             docker pull alpine:latest
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux builds. Please wait..."
-            docker build -t srb2-musl-docker "$BUILDPATH/containers/srb2-musl-docker"
+            docker build --rm -t srb2-musl-docker "$BUILDPATH/containers/srb2-musl-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" srb2-musl-docker
 
@@ -2929,7 +2944,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux builds. Please wait..."
             docker pull "ubuntu:$UBUVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux builds. Please wait..."
-            docker build -t srb2-docker "$BUILDPATH/containers/srb2-docker"
+            docker build --rm -t srb2-docker "$BUILDPATH/containers/srb2-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" srb2-docker
 
