@@ -154,11 +154,12 @@ chooseinstall() {
 
         # Add compilation flags
         printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
-        printf "$NOTICE%s\n\e[0m" "cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+        printf "$NOTICE%s\n\e[0m" "cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
         printf "$PROMPT\n%s\e[0m" "> "
         read -r CONF
 
-        # Some checks, if the game's dependencies compilation flags of were entered
+        # Some checks, if the game's certain compilation flags were entered
         if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
             ISGME=""
@@ -195,11 +196,11 @@ chooseinstall() {
 
         else
 
-            ISSDL2MIXER=libsdl2-mixer
+            ISSDL2MIXER=sdl2_mixer
 
         fi
 
-        #            brew install -f cmake $ISPNG libogg libvorbis libmpeg2 libmodplug $ISOPENMPT sdl2 $ISSDL2MIXER
+                    brew install -f cmake curl $ISGME $ISPNG libogg libvorbis $ISOPENMPT sdl2 $ISSDL2MIXER zlib
         #            brew install -f cmake autoconf automake pkgconfig libtool gawk stow p7zip curl
         # Make directories for storing essential files
         mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer"
@@ -547,23 +548,31 @@ chooseinstall() {
         cat > "$BUILD/framework-last.patch" << CMAKE
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -107,6 +107,7 @@
+@@ -108,6 +108,7 @@
 
  if(${CMAKE_SYSTEM} MATCHES "Darwin")
-        add_definitions(-DMACOSX)
+	add_definitions(-DMACOSX)
 +        set(CMAKE_FIND_FRAMEWORK LAST)
  endif()
 
  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 CMAKE
 
-        patch -p1 < "$BUILD/framework-last.patch"
+        patch -p0 < "$BUILD/framework-last.patch"
 
         # Build the game and install it
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing $BUILDNAME. Please wait..."
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local -DGME_INCLUDE_DIR=/usr/local/include/gme -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt $CONF
+        mkdir -p "$BUILD/build"
+        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo cmake --install "$BUILD/build"
+        sudo mkdir -p /usr/local/opt/srb2-apps
+#        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
+#        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
+#        sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0" /Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib
+#        sudo cmake --install "$BUILD/build"
+        sudo cp -rfv "$(find "$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type d)" /usr/local/opt/srb2-apps
+        SRB2MACDIR=$(find "$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type d | gawk -F'/' '{print "/usr/local/opt/srb2-apps/"$NF}')
+        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
 
         cleansource
 
@@ -1123,18 +1132,30 @@ chooseuninstall() {
 
             BUILDINSTALLED=$(printf "%s\n" "$array" | gawk NR=="${n}")
             INSTALLFILES=$(cat "$BUILDINSTALLED")
-            printf "%s\n" "$INSTALLFILES"
-            if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]; then
+            printf "%s\n" "$INSTALLFILES
+Above files will be uninstalled. Are you sure you want to that? Enter "yes" or "no"."
+            printf "$PROMPT\n%s\e[0m" "> "
+            read -r CONFIRM
 
-                 rm -Irv $INSTALLFILES
+            if [ "$OS" = "Darwin" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]); then
 
-            else
+                 sudo rm -rv "$INSTALLFILES"
+                 rm -f "$BUILDINSTALLED"
+                 printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
-                 sudo rm -Irv $INSTALLFILES
+            elif [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]); then
+
+                 rm -rv $INSTALLFILES
+                 rm -f "$BUILDINSTALLED"
+                 printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
+
+            elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
+
+                 sudo rm -rv $INSTALLFILES
+                 rm -f "$BUILDINSTALLED"
+                 printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
             fi
-            rm -f "$BUILDINSTALLED"
-            printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
             break
 
         else
@@ -2965,6 +2986,7 @@ $BINARYPATH
 $DESKTOPPATH
 $DESKTOPOPENGLPATH
 $ICONPATH
+$SRB2MACDIR
 $SRB2DIR
 $SRB2UCPDIR
 $SRB2NPDIR
@@ -2983,6 +3005,10 @@ INSTALL
     if [ -n "$BINARYPATH" ]; then
 
         SRB2PATH="$BINARYPATH"
+
+    elif [ -n "$SRB2MACDIR" ]; then
+
+        SRB2PATH="$SRB2MACDIR"
 
     elif [ -n "$SRB2DIR" ]; then
 
