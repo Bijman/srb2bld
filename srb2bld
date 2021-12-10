@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e -x
+set -e
 
 # Set environment variables
 ARCH=$(uname -m)
@@ -32,6 +32,7 @@ MESSAGE="\e[1;94m"
 PROMPT="\e[1;97m"
 
 appimage() {
+    clear
     # Blocking access to this option for users that uses OS othe than Linux since AppImages are Linux exclusive
     if [ "$OS" != "Linux" ] || [ -z "$(ldd --version 2>&1 | gawk '/Free Software Foundation/ {print}')" ]; then
 
@@ -128,7 +129,7 @@ choosebuild() {
 }
 
 chooseinstall() {
-
+    clear
     if [ "$OS" != "Linux" ] && [ "$OS" != "Darwin" ] && [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" != "MINGW64" ] && [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" != "MINGW" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Currently building and installing is only available for Linux, MacOS and Windows. Exiting."
@@ -141,7 +142,7 @@ chooseinstall() {
         choosebuild
 
         # Download source code
-        printf "$MESSAGE\n%s\n\e[0m" "Downloading source code. Please wait..."
+        printf "$MESSAGE\n%s\n\e[0m" "Downloading $BUILDNAME's source code. Please wait..."
         if [ ! -d "$BUILD/.git" ]; then
 
             $GIT "$BUILD"
@@ -207,7 +208,7 @@ chooseinstall() {
         cd "$BUILD" || exit
 
         # Download and extract assets
-        printf "$MESSAGE\n%s\n\e[0m" "Downloading assets. Please wait..."
+        printf "$MESSAGE\n%s\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
         if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
 
             SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
@@ -570,10 +571,23 @@ CMAKE
 #        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
 #        sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0" /Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib
 #        sudo cmake --install "$BUILD/build"
-        sudo cp -rfv "$(find "$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type d)" /usr/local/opt/srb2-apps
-        SRB2MACDIR=$(find "$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type d | gawk -F'/' '{print "/usr/local/opt/srb2-apps/"$NF}')
-        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
+        SRB2MACDIR=$(find "$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type d | gawk -F'/' '{print $NF}')
+        SRB2MACPATH="/usr/local/opt/srb2-apps/$SRB2MACDIR"
+        sudo cp -rfv "$BUILD/build/bin/$SRB2MACDIR" /usr/local/opt/srb2-apps
+        sudo mkdir -p "$SRB2MACPATH/Contents/Resources"
+        sudo cp -rfv "$BUILD/assets/installer/"* "$SRB2MACPATH/Contents/Resources"
+        sudo cp -rfv "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/Contents/Resources"
+        mkdir -p $HOME/Applications
+        SRB2MACLINK=$(printf "%s\n" "$HOME/Applications/$SRB2MACDIR" | gawk '{gsub(".app","");print}')
+        ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
+        
+        # Reload Finder and Dock to update icons
+        sudo killall Finder
+        sudo killall Dock
 
+        # Creating link to libclang_rt in case of issue not opening game
+        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
+       
         cleansource
 
         installtolist
@@ -1049,6 +1063,7 @@ CMAKE
 }
 
 chooseremoveasset() {
+    clear
     if [ -z "$(find "$BUILDPATH/assets" -mindepth 1 -maxdepth 1 | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find assets."
@@ -1081,6 +1096,7 @@ chooseremoveasset() {
 }
 
 chooseremovebuild() {
+    clear
     if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '/srb2/ {print}' | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find builds."
@@ -1113,12 +1129,14 @@ chooseremovebuild() {
 }
 
 chooseuninstall() {
+    clear
     if [ -z "$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
         exit
 
     fi
+
     printf "$MESSAGE%s\n\e[0m" "Please choose installed package by typing number and then pressing enter. Press enter or ctrl+c to quit."
     array=$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | sort)
     arrayname=$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' | sort)
@@ -1132,27 +1150,25 @@ chooseuninstall() {
 
             BUILDINSTALLED=$(printf "%s\n" "$array" | gawk NR=="${n}")
             INSTALLFILES=$(cat "$BUILDINSTALLED")
-            printf "%s\n" "$INSTALLFILES
-Above files will be uninstalled. Are you sure you want to that? Enter "yes" or "no"."
+            printf "$PROMPT\n%s\n\e[0m" "$INSTALLFILES"
+            printf "$MESSAGE%s\n\e[0m" "Above files will be uninstalled. Are you sure you want to that? Enter \"yes\" or \"no\" (\"y\" or \"n\")."
             printf "$PROMPT\n%s\e[0m" "> "
             read -r CONFIRM
 
-            if [ "$OS" = "Darwin" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]); then
+            if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]); then
 
-                 sudo rm -rv "$INSTALLFILES"
-                 rm -f "$BUILDINSTALLED"
-                 printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
-
-            elif [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]); then
-
-                 rm -rv $INSTALLFILES
-                 rm -f "$BUILDINSTALLED"
+                 while read -r FILE; do
+                 rm -rv "$FILE"
+                 done < "$BUILDINSTALLED"
+                 rm "$BUILDINSTALLED"
                  printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
             elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
 
-                 sudo rm -rv $INSTALLFILES
-                 rm -f "$BUILDINSTALLED"
+                 while read -r FILE; do
+                 sudo rm -rv "$FILE"
+                 done < "$BUILDINSTALLED"
+                 rm "$BUILDINSTALLED"
                  printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
             fi
@@ -1249,7 +1265,7 @@ dockerentry() {
     fi
 
     # Download and extract assets
-    printf "$MESSAGE\n%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
+    printf "$MESSAGE\n%s\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
@@ -2986,7 +3002,8 @@ $BINARYPATH
 $DESKTOPPATH
 $DESKTOPOPENGLPATH
 $ICONPATH
-$SRB2MACDIR
+$SRB2MACPATH
+$SRB2MACLINK
 $SRB2DIR
 $SRB2UCPDIR
 $SRB2NPDIR
@@ -3006,9 +3023,9 @@ INSTALL
 
         SRB2PATH="$BINARYPATH"
 
-    elif [ -n "$SRB2MACDIR" ]; then
+    elif [ -n "$SRB2MACPATH" ]; then
 
-        SRB2PATH="$SRB2MACDIR"
+        SRB2PATH="$SRB2MACPATH and $SRB2MACLINK"
 
     elif [ -n "$SRB2DIR" ]; then
 
@@ -3051,6 +3068,7 @@ INSTALL
 }
 
 listinstalled() {
+    clear
     if [ -z "$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
@@ -3062,6 +3080,7 @@ listinstalled() {
 }
 
 upgrade() {
+    clear
     # Make a loop to find the SRB2 source code directories and then update them one by one.
     for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '/srb2/ && !/srb2-2.0/ && !/srb2-final-demo/'); do
 
@@ -3083,6 +3102,7 @@ upgrade() {
 }
 
 usage() {
+    clear
     printf "%s\n" "
 Build and install SRB2/SRB2Kart from source.
 
