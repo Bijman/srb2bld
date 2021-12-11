@@ -163,7 +163,7 @@ chooseinstall() {
         # Some checks, if the game's certain compilation flags were entered
         if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-            ISGME=""
+            ISGME=
 
         else
 
@@ -173,7 +173,7 @@ chooseinstall() {
 
         if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-            ISOPENMPT=""
+            ISOPENMPT=
 
         else
 
@@ -183,7 +183,7 @@ chooseinstall() {
 
         if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-            ISPNG=""
+            ISPNG=
 
         else
 
@@ -193,7 +193,7 @@ chooseinstall() {
 
         if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-            ISSDL2MIXER=""
+            ISSDL2MIXER=
 
         else
 
@@ -201,8 +201,18 @@ chooseinstall() {
 
         fi
 
-                    brew install -f cmake curl $ISGME $ISPNG libogg libvorbis $ISOPENMPT sdl2 $ISSDL2MIXER zlib
-        #            brew install -f cmake autoconf automake pkgconfig libtool gawk stow p7zip curl
+        if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_DISCORDRPC=ON/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_DISCORDRPC:BOOL=ON/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+            ISDISCORDRPC=libdiscord-rpc
+
+        else
+
+            ISDISCORDRPC=
+
+        fi
+
+        brew install -f cmake curl $ISGME $ISPNG libogg libvorbis $ISOPENMPT sdl2 $ISSDL2MIXER zlib
+        # brew install -f cmake autoconf automake pkgconfig libtool gawk stow 7zip curl
         # Make directories for storing essential files
         mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer"
         cd "$BUILD" || exit
@@ -217,7 +227,7 @@ chooseinstall() {
                 curl -RLC - "$SRB2ASSETSURL" -o "$BUILDPATH/assets/SRB2.zip"
 
             fi
-            7z x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+            7zz x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
         fi
 
@@ -242,24 +252,32 @@ chooseinstall() {
 
             done | cat
 
-            7z x -y "$BUILDPATH/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
+            7zz x -y "$BUILDPATH/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
             rm -f "$BUILDPATH/assets/SRB2P_MP"*.rar
             mv "$BUILDPATH/assets/SRB2P-music.pk3" "$BUILD/assets/installer"
+
+            SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+            if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$BUILDPATH/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT")" ]; then
+
+                curl -RLC - "$SRB2ASSETSURL" -o "$BUILDPATH/assets/SRB2.zip"
+
+            fi
+            7zz x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
             curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-x64-Installer.exe -o "$BUILDPATH/assets/SRB2-2.1.exe"
-            7z x -y "$BUILDPATH/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+            7zz x -y "$BUILDPATH/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
             curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "$BUILDPATH/assets/SRB2-2.0.exe"
-            7z x -y "$BUILDPATH/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
+            7zz x -y "$BUILDPATH/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
             curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "$BUILDPATH/assets/SRB2FinalDemo.exe"
-            7z x -y "$BUILDPATH/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
+            7zz x -y "$BUILDPATH/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -269,8 +287,47 @@ chooseinstall() {
                 curl -RLC - "$SRB2KARTASSETSURL" -o "$BUILDPATH/assets/SRB2Kart.exe"
 
             fi
-            7z x -y "$BUILDPATH/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
+            7zz x -y "$BUILDPATH/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
             #        curl -s "https://gitlab.com/api/v4/projects/24705991/releases" | gawk '{gsub('/^{/',"{\n") || gsub('/}$/',"\n}") || gsub('/,/',",\n"); print}' | gawk '/uploads/ {split($0,a,"\\)|\\(");print a[2]"\n"a[4]"\n"a[6]}' | gawk '!/default/ && NF'
+
+        fi
+
+
+        # Modify the game's configuration and assets directory names to avoid conflicts between installed builds
+        if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 Uncapped Plus|' "$BUILD/CMakeLists.txt"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
+
+             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 NetPlus|' "$BUILD/CMakeLists.txt"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+
+             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 2.1 Legacy|' "$BUILD/CMakeLists.txt"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
+
+             sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2_2.0"/' "$BUILD/src/doomdef.h"
+             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 2.0|' "$BUILD/CMakeLists.txt"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+             sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2finaldemo"/' "$BUILD/Final Demo 1.09.4a/src/doomdef.h"
+             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 Final Demo|' "$BUILD/CMakeLists.txt"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+             sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2persona"/' "$BUILD/src/doomdef.h"
+             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 Persona|' "$BUILD/CMakeLists.txt"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
+
+             sed -i 's|Sonic Robo Blast 2 Kart|Sonic Robo Blast 2 Kart Moe Mansion|' "$BUILD/CMakeLists.txt"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+
+             sed -i 's|Sonic Robo Blast 2 Kart|Sonic Robo Blast 2 Kart VR|' "$BUILD/CMakeLists.txt"
 
         fi
 
@@ -369,7 +426,7 @@ chooseinstall() {
 
             fi
             printf "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
-            7z x "$BUILDPATH/libraries/libmpg123/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123"
+            7zz x "$BUILDPATH/libraries/libmpg123/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123"
             "$BUILDPATH/libraries/libmpg123/configure" --prefix=/usr/local/stow/libmpg123
             make -C "$BUILDPATH/libraries/libmpg123" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
             sudo make -C "$BUILDPATH/libraries/libmpg123" install
@@ -522,7 +579,7 @@ chooseinstall() {
         fi
 
         # Download DiscordRPC's source code, build and install it
-        if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_DISCORDRPC=1/) {print substr($0, RSTART, RLENGTH)}')" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+        if [ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
             if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
@@ -1168,6 +1225,11 @@ chooseuninstall() {
                  while read -r FILE; do
                  sudo rm -rv "$FILE"
                  done < "$BUILDINSTALLED"
+                 if [ -z $(find /usr/local/opt/srb2-apps | head -n1) ]; then
+                      
+                     sudo rm -rfv /usr/local/opt/srb2-apps  
+            
+                 fi
                  rm "$BUILDINSTALLED"
                  printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
