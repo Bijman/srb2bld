@@ -296,43 +296,44 @@ chooseinstall() {
         # Modify the game's configuration and assets directory names to avoid conflicts between installed builds
         if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
-             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 Uncapped Plus|' "$BUILD/CMakeLists.txt"
+             MACAPPNAME="Sonic Robo Blast 2 Uncapped Plus"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
 
-             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 NetPlus|' "$BUILD/CMakeLists.txt"
+             MACAPPNAME="Sonic Robo Blast 2 NetPlus"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 2.1 Legacy|' "$BUILD/CMakeLists.txt"
+             MACAPPNAME="Sonic Robo Blast 2 2.1 Legacy"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-             sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2_2.0"/' "$BUILD/src/doomdef.h"
-             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 2.0|' "$BUILD/CMakeLists.txt"
+             MACAPPNAME="Sonic Robo Blast 2 2.0"
+             gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-             sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2finaldemo"/' "$BUILD/Final Demo 1.09.4a/src/doomdef.h"
-             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 Final Demo|' "$BUILD/CMakeLists.txt"
+             MACAPPNAME="Sonic Robo Blast 2 Final Demo"
+             gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2finaldemo\"");print}' "$BUILD/Final Demo 1.09.4a/src/doomdef.h"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-             sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2persona"/' "$BUILD/src/doomdef.h"
-             sed -i 's|Sonic Robo Blast 2|Sonic Robo Blast 2 Persona|' "$BUILD/CMakeLists.txt"
+             MACAPPNAME="Sonic Robo Blast 2 Persona"
+             gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
 
-             sed -i 's|Sonic Robo Blast 2 Kart|Sonic Robo Blast 2 Kart Moe Mansion|' "$BUILD/CMakeLists.txt"
+             MACAPPNAME="Sonic Robo Blast 2 Kart Moe Mansion"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
-             sed -i 's|Sonic Robo Blast 2 Kart|Sonic Robo Blast 2 Kart VR|' "$BUILD/CMakeLists.txt"
+             MACAPPNAME="Sonic Robo Blast 2 Kart VR"
 
         fi
 
         # Exporting environment variables for compiling, installing game and libraries on macOS
         export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
+        export SDKROOT="$SDKROOT"
         export LIBRARY_PATH=/usr/local/lib
         export STOW_DIR=/usr/local/stow
 
@@ -621,7 +622,7 @@ CMAKE
         # Build the game and install it
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing $BUILDNAME. Please wait..."
         mkdir -p "$BUILD/build"
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt $CONF
+        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$MACAPPNAME" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo mkdir -p /usr/local/opt/srb2-apps
 #        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
@@ -634,7 +635,7 @@ CMAKE
         sudo mkdir -p "$SRB2MACPATH/Contents/Resources"
         sudo cp -rfv "$BUILD/assets/installer/"* "$SRB2MACPATH/Contents/Resources"
         sudo cp -rfv "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/Contents/Resources"
-        mkdir -p $HOME/Applications
+        mkdir -p "$HOME/Applications"
         SRB2MACLINK=$(printf "%s\n" "$HOME/Applications/$SRB2MACDIR" | gawk '{gsub(".app","");print}')
         ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
         
@@ -1121,7 +1122,7 @@ CMAKE
 
 chooseremoveasset() {
     clear
-    if [ -z "$(find "$BUILDPATH/assets" -mindepth 1 -maxdepth 1 | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find assets."
         exit
@@ -1130,7 +1131,7 @@ chooseremoveasset() {
 
     printf "$MESSAGE%s\n\e[0m" "Please choose asset by typing number and then pressing enter. Press enter or ctrl+c to quit."
     array=$(find "$BUILDPATH/assets" -mindepth 1 -maxdepth 1 | sort)
-    arrayname=$(find "$BUILDPATH/assets" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' | sort)
+    arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
     printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
@@ -1139,8 +1140,18 @@ chooseremoveasset() {
         read -r n
         if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
-            ASSETNAME=$(printf "%s\n" "$array" | gawk NR=="${n}")
-            rm -Irv "$ASSETNAME"
+            printf "$MESSAGE%s\n\e[0m" " Are you sure you want to remove this asset? Enter \"yes\" or \"no\" (\"y\" or \"n\")."
+            printf "$PROMPT\n%s\e[0m" "> "
+            read -r CONFIRM
+
+            if [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
+
+                 ASSETPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
+                 ASSETNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
+                 sudo rm -rv "$ASSETPATH"
+                 printf "$SUCCESS\n%s\n\e[0m\a" "Removing "$ASSETNAME" is successful."
+
+            fi
             break
 
         else
@@ -1154,7 +1165,7 @@ chooseremoveasset() {
 
 chooseremovebuild() {
     clear
-    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '/srb2/ {print}' | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|installed|libraries/ {print}' 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find builds."
         exit
@@ -1162,8 +1173,8 @@ chooseremovebuild() {
     fi
 
     printf "$MESSAGE%s\n\e[0m" "Please choose build by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '/srb2/ {print}' | sort)
-    arrayname=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' | gawk '/srb2/ {print}' | sort)
+    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|installed|libraries/ {print}' | sort)
+    arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
     printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
@@ -1172,8 +1183,18 @@ chooseremovebuild() {
         read -r n
         if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
-            BUILDNAME=$(printf "%s\n" "$array" | gawk NR=="${n}")
-            rm -Irv "$BUILDNAME"
+            printf "$MESSAGE%s\n\e[0m" " Are you sure you want to remove this build's directory? Enter \"yes\" or \"no\" (\"y\" or \"n\")."
+            printf "$PROMPT\n%s\e[0m" "> "
+            read -r CONFIRM
+
+            if [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
+
+                 BUILDPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
+                 BUILDNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
+                 sudo rm -rv "$BUILDPATH"
+                 printf "$SUCCESS\n%s\n\e[0m\a" "Removing "$BUILDNAME" is successful."
+
+            fi
             break
 
         else
@@ -1187,7 +1208,7 @@ chooseremovebuild() {
 
 chooseuninstall() {
     clear
-    if [ -z "$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
         exit
@@ -1196,7 +1217,7 @@ chooseuninstall() {
 
     printf "$MESSAGE%s\n\e[0m" "Please choose installed package by typing number and then pressing enter. Press enter or ctrl+c to quit."
     array=$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | sort)
-    arrayname=$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' | sort)
+    arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
     printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
