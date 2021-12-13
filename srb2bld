@@ -6,12 +6,20 @@ set -e
 ARCH=$(uname -m)
 OS=$(uname)
 IS64=$(printf "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, RLENGTH)}')
-BUILDPATH="$HOME/.local/share/srb2-builds"
+if [ "$OS" = "Darwin" ]; then
+
+    BUILDPATH="$HOME/Library/srb2-builds"
+
+else
+
+    BUILDPATH="$HOME/.local/share/srb2-builds"
+
+fi
 DEBVER="jessie"
 UBUVER="18.04"
-#SRB2VER=$(curl -Ls https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/tag_name/ {print $4}')
+SRB2VER=$(curl -Ls https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/tag_name/ {print $4}')
 #SRB2VER="SRB2_release_2.2.9"
-SRB2VER="master"
+#SRB2VER="master"
 MINGWVER="10-win32"
 MINGWOLDVER="4.9-win32"
 GCCVER="gcc-10"
@@ -292,42 +300,49 @@ chooseinstall() {
 
         fi
 
-
         # Modify the game's configuration and assets directory names to avoid conflicts between installed builds
-        if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+        if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
 
-             MACAPPNAME="Sonic Robo Blast 2 Uncapped Plus"
+            MACAPPNAME="Sonic Robo Blast 2"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+            MACAPPNAME="Sonic Robo Blast 2 Uncapped Plus"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
 
-             MACAPPNAME="Sonic Robo Blast 2 NetPlus"
+            MACAPPNAME="Sonic Robo Blast 2 NetPlus"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-             MACAPPNAME="Sonic Robo Blast 2 2.1 Legacy"
+            MACAPPNAME="Sonic Robo Blast 2 2.1 Legacy"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-             MACAPPNAME="Sonic Robo Blast 2 2.0"
-             gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
+            MACAPPNAME="Sonic Robo Blast 2 2.0"
+            gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-             MACAPPNAME="Sonic Robo Blast 2 Final Demo"
-             gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2finaldemo\"");print}' "$BUILD/Final Demo 1.09.4a/src/doomdef.h"
+            MACAPPNAME="Sonic Robo Blast 2 Final Demo"
+            gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2finaldemo\"");print}' "$BUILD/Final Demo 1.09.4a/src/doomdef.h"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-             MACAPPNAME="Sonic Robo Blast 2 Persona"
-             gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
+            MACAPPNAME="Sonic Robo Blast 2 Persona"
+            gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
+
+        elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
+
+            MACAPPNAME="Sonic Robo Blast 2 Kart"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
 
-             MACAPPNAME="Sonic Robo Blast 2 Kart Moe Mansion"
+            MACAPPNAME="Sonic Robo Blast 2 Kart Moe Mansion"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
-             MACAPPNAME="Sonic Robo Blast 2 Kart VR"
+            MACAPPNAME="Sonic Robo Blast 2 Kart VR"
 
         fi
 
@@ -617,7 +632,7 @@ chooseinstall() {
  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 CMAKE
 
-        patch -p0 < "$BUILD/framework-last.patch"
+        patch -t -p0 < "$BUILD/framework-last.patch"
 
         # Build the game and install it
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing $BUILDNAME. Please wait..."
@@ -625,10 +640,10 @@ CMAKE
         cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$MACAPPNAME" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo mkdir -p /usr/local/opt/srb2-apps
-#        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
-#        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
-#        sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0" /Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib
-#        sudo cmake --install "$BUILD/build"
+        #        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
+        #        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
+        #        sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0" /Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib
+        #        sudo cmake --install "$BUILD/build"
         SRB2MACDIR=$(find "$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type d | gawk -F'/' '{print $NF}')
         SRB2MACPATH="/usr/local/opt/srb2-apps/$SRB2MACDIR"
         sudo cp -rfv "$BUILD/build/bin/$SRB2MACDIR" /usr/local/opt/srb2-apps
@@ -637,15 +652,16 @@ CMAKE
         sudo cp -rfv "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/Contents/Resources"
         mkdir -p "$HOME/Applications"
         SRB2MACLINK=$(printf "%s\n" "$HOME/Applications/$SRB2MACDIR" | gawk '{gsub(".app","");print}')
-        ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
-        
+        rm -rf "$SRB2MACLINK"
+        ln -s "$SRB2MACPATH" "$SRB2MACLINK"
+
         # Reload Finder and Dock to update icons
         sudo killall Finder
         sudo killall Dock
 
         # Creating link to libclang_rt in case of issue not opening game
         sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
-       
+
         cleansource
 
         installtolist
@@ -664,7 +680,7 @@ CMAKE
 
                 SRB2DIR="$HOME/SRB2"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB2DIR"
                 cp -rf "$BUILD/bin/srb2win.exe" "$SRB2DIR"
@@ -676,7 +692,7 @@ CMAKE
 
                 SRB2UCPDIR="$HOME/SRB2UncappedPlus"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB2UCPDIR"
                 cp -rf "$BUILD/bin/srb2win.exe" "$SRB2UCPDIR"
@@ -688,7 +704,7 @@ CMAKE
 
                 SRB2NPDIR="$HOME/SRB2NetPlus"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB2NPDIR"
                 cp -rf "$BUILD/bin/srb2win.exe" "$SRB2NPDIR"
@@ -700,7 +716,7 @@ CMAKE
 
                 SRB2LEGACYDIR="$HOME/SRB2-2.1-Legacy"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB2LEGACYDIR"
                 cp -rf "$BUILD/bin/Mingw/Release/srb2win.exe" "$SRB2LEGACYDIR"
@@ -712,7 +728,7 @@ CMAKE
 
                 SRB220DIR="$HOME/SRB2-2.0"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB220DIR"
                 cp -rf "$BUILD/bin/Mingw/Release/srb2win.exe" "$SRB220DIR"
@@ -724,7 +740,7 @@ CMAKE
 
                 SRB2FDDIR="$HOME/SRB2FinalDemo"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB2FDDIR"
                 cp -rf "$BUILD/bin/Mingw/Release/srb2win.exe" "$SRB2FDDIR"
@@ -736,7 +752,7 @@ CMAKE
 
                 SRB2PDIR="$HOME/SRB2Persona"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB2PDIR"
                 cp -rf "$BUILD/bin/Mingw/Release/srb2win.exe" "$SRB2PDIR"
@@ -748,7 +764,7 @@ CMAKE
 
                 SRB2KARTDIR="$HOME/SRB2Kart"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB2KARTDIR"
                 cp -rf "$BUILD/bin/Mingw/Release/srb2kart.exe" "$SRB2KARTDIR"
@@ -760,7 +776,7 @@ CMAKE
 
                 SRB2KARTMOEDIR="$HOME/SRB2KartMoeMansion"
                 DEPS=$(while read -r FILE; do
-                find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+                    find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
                 done < "$BUILD/deps")
                 mkdir -p "$SRB2KARTMOEDIR"
                 cp -rf "$BUILD/bin/Mingw/Release/srb2kart.exe" "$SRB2KARTMOEDIR"
@@ -1146,10 +1162,10 @@ chooseremoveasset() {
 
             if [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
 
-                 ASSETPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
-                 ASSETNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
-                 sudo rm -rv "$ASSETPATH"
-                 printf "$SUCCESS\n%s\n\e[0m\a" "Removing "$ASSETNAME" is successful."
+                ASSETPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
+                ASSETNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
+                sudo rm -rv "$ASSETPATH"
+                printf "$SUCCESS\n%s\n\e[0m\a" "Removing "$ASSETNAME" is successful."
 
             fi
             break
@@ -1189,10 +1205,10 @@ chooseremovebuild() {
 
             if [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
 
-                 BUILDPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
-                 BUILDNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
-                 sudo rm -rv "$BUILDPATH"
-                 printf "$SUCCESS\n%s\n\e[0m\a" "Removing "$BUILDNAME" is successful."
+                BUILDPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
+                BUILDNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
+                sudo rm -rv "$BUILDPATH"
+                printf "$SUCCESS\n%s\n\e[0m\a" "Removing "$BUILDNAME" is successful."
 
             fi
             break
@@ -1235,24 +1251,24 @@ chooseuninstall() {
 
             if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]); then
 
-                 while read -r FILE; do
-                 rm -rv "$FILE"
-                 done < "$BUILDINSTALLED"
-                 rm "$BUILDINSTALLED"
-                 printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
+                while read -r FILE; do
+                    rm -rv "$FILE"
+                done < "$BUILDINSTALLED"
+                rm "$BUILDINSTALLED"
+                printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
             elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
 
-                 while read -r FILE; do
-                 sudo rm -rv "$FILE"
-                 done < "$BUILDINSTALLED"
-                 if [ -z $(find /usr/local/opt/srb2-apps | head -n1) ]; then
-                      
-                     sudo rm -rfv /usr/local/opt/srb2-apps  
-            
-                 fi
-                 rm "$BUILDINSTALLED"
-                 printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
+                while read -r FILE; do
+                    sudo rm -rv "$FILE"
+                done < "$BUILDINSTALLED"
+                if [ -z $(find /usr/local/opt/srb2-apps | head -n1) ]; then
+
+                    sudo rm -rfv /usr/local/opt/srb2-apps
+
+                fi
+                rm "$BUILDINSTALLED"
+                printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
             fi
             break
@@ -1469,7 +1485,7 @@ dockerentry() {
 # // Locations for searching the srb2.pk3
 # #if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
 #MUSL
-#        patch -p1 < "\$BUILD/srb2-musl.patch"
+#        patch -t -p1 < "\$BUILD/srb2-musl.patch"
         export LDFLAGS="\$LDFLAGS -lexecinfo"
 
     fi
