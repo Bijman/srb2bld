@@ -205,7 +205,7 @@ chooseinstall() {
 
         else
 
-            ISSDL2MIXER=sdl2_mixer
+            ISSDL2MIXER=libsdl2_mixer
 
         fi
 
@@ -219,7 +219,7 @@ chooseinstall() {
 
         fi
 
-        brew install -f cmake curl $ISGME $ISPNG libogg libvorbis $ISOPENMPT sdl2 $ISSDL2MIXER zlib
+        # brew install -f cmake curl $ISGME $ISPNG libogg libvorbis $ISOPENMPT sdl2 $ISSDL2MIXER zlib
         # brew install -f cmake autoconf automake pkgconfig libtool gawk stow 7zip curl
         # Make directories for storing essential files
         mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer"
@@ -320,17 +320,17 @@ chooseinstall() {
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
             MACAPPNAME="Sonic Robo Blast 2 2.0"
-            gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
+            gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
             MACAPPNAME="Sonic Robo Blast 2 Final Demo"
-            gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2finaldemo\"");print}' "$BUILD/Final Demo 1.09.4a/src/doomdef.h"
+            gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2finaldemo\"");print}' "$BUILD/Final Demo 1.09.4a/src/doomdef.h"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
             MACAPPNAME="Sonic Robo Blast 2 Persona"
-            gawk -i inplace '{gsub("define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
+            gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
 
@@ -430,28 +430,35 @@ chooseinstall() {
         # Download libmpg123's source code, build and install it
         if [ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
-            if [ ! -f "$BUILDPATH/libraries/libmpg123.zip" ]; then
+            if [ ! -d "$BUILDPATH/libraries/libmpg123/.git" ]; then
 
                 printf "$MESSAGE\n%s\n\e[0m" "Downloading libmpg123's source code. Please wait..."
-                mkdir -p "$BUILDPATH/libraries/libmpg123"
-                curl -RLC - "https://deac-riga.dl.sourceforge.net/project/mpg123/mpg123/$MACOSMPG123VER/mpg123-$MACOSMPG123VER.tar.bz2" -o "$BUILDPATH/libraries/libmpg123/libmpg123.zip"
+                #                mkdir -p "$BUILDPATH/libraries/libmpg123"
+                #                curl -RLC - "https://deac-riga.dl.sourceforge.net/project/mpg123/mpg123/$MACOSMPG123VER/mpg123-$MACOSMPG123VER.tar.bz2" -o "$BUILDPATH/libraries/libmpg123/libmpg123.zip"
+                git clone https://github.com/madebr/mpg123.git --branch master "$BUILDPATH/libraries/libmpg123"
 
             else
 
-                make -C "$BUILDPATH/libraries/libmpg123" clean
+                #                make -C "$BUILDPATH/libraries/libmpg123" clean
+                git -C "$BUILDPATH/libraries/libmpg123" clean -dfx
+                git -C "$BUILDPATH/libraries/libmpg123" reset --hard
+                git -C "$BUILDPATH/libraries/libmpg123" pull
 
             fi
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
-            7zz x "$BUILDPATH/libraries/libmpg123/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123"
-            "$BUILDPATH/libraries/libmpg123/configure" --prefix=/usr/local/stow/libmpg123
-            make -C "$BUILDPATH/libraries/libmpg123" -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-            sudo make -C "$BUILDPATH/libraries/libmpg123" install
+            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
+            cd "$BUILDPATH/libraries/libmpg123" || exit
+            #            7zz x "$BUILDPATH/libraries/libmpg123/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123"
+            autoreconf -iv
+            ./configure --prefix=/usr/local/stow/libmpg123
+            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+            sudo make install
             sudo -E stow -v --adopt libmpg123
+            cd "$BUILD" || exit
 
         fi
 
         # Download libmodplug's source code, build and install it
-        if [ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ "$ISOPENMPT" = "libsdl2-mixer" ]; then
+        if [ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
 
             if [ ! -d "$BUILDPATH/libraries/libmodplug/.git" ]; then
 
@@ -491,9 +498,9 @@ chooseinstall() {
             fi
             printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
             cd "$BUILDPATH/libraries/libopenmpt" || exit
-            ./configure --prefix=/usr/local/stow/libopenmpt --without-portaudio --without-portaudiocpp --without-sndfile --without-flac
-            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-            sudo make install
+            gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$BUILDPATH/libraries/libopenmpt/Makefile"
+            make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+            sudo make PREFIX=/usr/local/stow/libopenmpt install
             sudo -E stow -v --adopt libopenmpt
             cd "$BUILD" || exit
 
@@ -535,7 +542,7 @@ chooseinstall() {
 
                 git -C "$BUILDPATH/libraries/libsdl2" clean -dfx
                 git -C "$BUILDPATH/libraries/libsdl2" reset --hard
-                git -C "$BUILDPATH/libraries/libsdl2" fetch origin master
+                git -C "$BUILDPATH/libraries/libsdl2" fetch origin main
 
             fi
             printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
@@ -548,7 +555,7 @@ chooseinstall() {
         fi
 
         # Download libSDL2_mixer's source code, build and install it
-        if [ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2-mixer" ]; then
+        if [ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
 
             if [ ! -d "$BUILDPATH/libraries/libsdl2-mixer/.git" ]; then
 
@@ -631,13 +638,37 @@ chooseinstall() {
 
  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 CMAKE
-
         patch -t -p0 < "$BUILD/framework-last.patch"
+
+#        cat > "$BUILD/remove-no-trigraphs.patch" << CMAKE
+#--- /src/CMakeLists.txt
+#+++ /src/CMakeLists.txt
+#@@ -253,8 +253,6 @@
+#        set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -Wno-absolute-value)
+# endif()
+
+#-set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -Wno-trigraphs)
+#-
+# target_compile_definitions(SRB2SDL2 PRIVATE -DCMAKECONFIG)
+
+ #add_library(SRB2Core STATIC
+#CMAKE
+#        patch -t -p2 < "$BUILD/remove-no-trigraphs.patch"
+
+        gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)","");print}' "$BUILD/src/CMakeLists.txt"
+
+        # Get app icon
+        if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+            curl -L https://mb.srb2.org/data/resource_icons/0/166.jpg -o "$BUILD/build/icon.jpg"
+            makeicns -in "$BUILD/build/icon.jpg" -64 -out "$BUILD/src/sdl/macosx/Srb2mac.icns"
+
+        fi
 
         # Build the game and install it
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing $BUILDNAME. Please wait..."
         mkdir -p "$BUILD/build"
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$MACAPPNAME" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt $CONF
+        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$MACAPPNAME" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo mkdir -p /usr/local/opt/srb2-apps
         #        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
@@ -3213,8 +3244,8 @@ Usage: srb2bld [OPTIONS]
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
-     -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
      -u, --upgrade                          Upgrade SRB2/SRB2Kart build (Linux only).
+     -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
 
   EXAMPLES:
      1. Compile and install SRB2/SRB2Kart build:
@@ -3223,7 +3254,13 @@ Usage: srb2bld [OPTIONS]
      2. Compile and create AppImage of SRB2/SRB2Kart build (Linux only):
             srb2bld --appimage
 
-  Warning! Old builds like SRB2 2.0 and SRB2 Final Demo may not work properly on modern Linux distributions/macOS/Windows.
+     3. List installed SRB2 builds:
+            srb2bld --listinstalled
+
+     4. Uninstall SRB2/SRB2Kart build:
+            srb2bld --uninstall
+
+  Warning! Old builds like SRB2 2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
 "
 }
 
