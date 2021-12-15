@@ -113,8 +113,8 @@ Usage: srb2bld [OPTIONS]
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
-     -u, --upgrade                          Upgrade SRB2/SRB2Kart build (Linux only).
      -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
+     -up, --upgrade                         Upgrade SRB2/SRB2Kart build.
 
   EXAMPLES:
      1. Compile and install SRB2/SRB2Kart build:

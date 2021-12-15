@@ -1178,7 +1178,7 @@ chooseremoveasset() {
 
 chooseremovebuild() {
     clear
-    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|installed|libraries/ {print}' 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|containers|installed|libraries/ {print}' 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find builds."
         exit
@@ -1186,7 +1186,7 @@ chooseremovebuild() {
     fi
 
     printf "$MESSAGE%s\n\e[0m" "Please choose build by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|installed|libraries/ {print}' | sort)
+    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|containers|installed|libraries/ {print}' | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -3178,13 +3178,15 @@ listinstalled() {
 upgrade() {
     clear
     # Make a loop to find the SRB2 source code directories and then update them one by one.
-    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '/srb2/ && !/srb2-2.0/ && !/srb2-final-demo/'); do
+    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk -F'/' '!/assets|containers|installed|libraries/ && !/srb2-2.0/ && !/srb2-final-demo/ {print $NF}' | sort); do
 
         printf "%s\n" "Updating $u"
+        git -C "$BUILDPATH/$u" clean -dfx -e .comrev
+        git -C "$BUILDPATH/$u" reset --hard
         git -C "$BUILDPATH/$u" pull
         printf "%s\n" ""
 
-        if [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
+        if [ -f "$BUILDPATH/installed/$u" ] && [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
 
             export "BUILD=$BUILDPATH/$u"
 
@@ -3210,8 +3212,8 @@ Usage: srb2bld [OPTIONS]
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
-     -u, --upgrade                          Upgrade SRB2/SRB2Kart build (Linux only).
      -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
+     -up, --upgrade                         Upgrade SRB2/SRB2Kart build.
 
   EXAMPLES:
      1. Compile and install SRB2/SRB2Kart build:
