@@ -1,9 +1,7 @@
-If you want to have automated and easier compilation/installation of SRB2 builds, then this is for you.
-
-![srb2bld]()
+srb2bld is a shellscript, that lets user to have automated and simpler process for downloading source code, compilation and installation of various SRB2 related builds.
 
 # Features
-- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, and installing their dependencies (mostly binaries except for MacOS) based on user's set compilation flags on Linux, MacOS and Windows,
+- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, and installing their dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros), MacOS and Windows,
 - Creating AppImages (Linux only),
 - Removing installed SRB2 games, source code and assets,
 - Upgrading installed SRB2 games,
@@ -16,7 +14,7 @@ If you want to have automated and easier compilation/installation of SRB2 builds
 - Curl,
 - Gawk,
 - Docker (Linux and Windows only),
-- GNU Stow.
+- GNU Stow. (Linux and MacOS only)
 
 Windows users need to also have installed Git Bash to run this script.
 
@@ -26,7 +24,8 @@ As for MacOS users, they need to install these additional dependencies:
 - Automake,
 - Pkg-config,
 - Libtool,
-- 7zip.
+- 7zip,
+- Makeicns.
 
 # Dependencies Installation
 **Linux:**
@@ -39,15 +38,20 @@ As for MacOS users, they need to install these additional dependencies:
 
 **Windows:**
 1. Installing Git Bash:
+- Download from [HERE](https://git-scm.com/downloads),
 - Watch this video from 7:19 to 9:33 in [HERE](https://youtu.be/SWYqp7iY_Tc?t=439),
 
 2. Git Bash can be found on start menu,
 
 3. The rest of dependencies are installed, if you followed video.
 
+4. Installing Docker Desktop:
+- Download from [HERE](https://www.docker.com/products/docker-desktop),
+- Watch this video from 6:07 to 8:36 in [HERE](https://youtu.be/_9AWYlt86B8?t=518),
+
 **MacOS:**
 1. In terminal enter this following command:
-- `brew install cmake autoconf automake pkgconfig libtool gawk stow 7zip curl`.
+- `brew install cmake autoconf automake pkgconfig libtool gawk stow 7zip curl makeicns`.
 
 # Installation
 **Linux:**
@@ -56,10 +60,6 @@ As for MacOS users, they need to install these additional dependencies:
 2. Enter `git clone https://github.com/Bijman/srb2bld`,
 
 3. Enter `sudo make install`, which will install to "/usr/bin" or "/usr/local/bin", if path exists, or just place script in your directory and change script's permissions to be executable: `chmod 755 srb2bld`,
-
-4. Check if you set properly environment variables from "Configuration" section,
-
-5. Enter `source ~/.bash_profile` or restart terminal.
 
 **Windows:**
 1. Open Git Bash,
@@ -78,9 +78,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 8. Write new path to executables with environment variable PATH like `export PATH="~/bin:$PATH"` in "~/.bash_profile",
 
-9. Check if you set properly other environment variables from "Configuration" section,
-
-10. Enter: `source ~/.bash_profile` or restart Git Bash.
+9. Enter: `source ~/.bash_profile` or restart Git Bash.
 
 **MacOS:**
 1. Open terminal,
@@ -91,13 +89,19 @@ As for MacOS users, they need to install these additional dependencies:
 
 4. Check if you set properly other environment variables from "Configuration" section,
 
-5. Enter: `source ~/.bash_profile` or restart terminal.
+5. Enter: `source $HOME/.zshrc` or `source ~/.bash_profile` or restart terminal.
 
 # Configuration
+**Linux:**
+1. Add user to the "docker" group: `sudo usermod -aG docker [username]` and then logout or reboot the system.
 
+**Windows:**
+1. User is already added to "docker" group, if Docker Desktop is installed and the system was logged out or rebooted.
+
+**MacOS:**
+1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source $HOME/.bash_profile` or `source $HOME/.zshrc`.
 
 # Usage (from help text)
-
 ```
 Build and install SRB2/SRB2Kart from source.
 

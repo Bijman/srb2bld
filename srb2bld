@@ -8,7 +8,7 @@ OS=$(uname)
 IS64=$(printf "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, RLENGTH)}')
 if [ "$OS" = "Darwin" ]; then
 
-    BUILDPATH="$HOME/Library/srb2-builds"
+    BUILDPATH="$HOME/Library/Application Support/srb2-builds"
 
 else
 
@@ -26,12 +26,12 @@ GCCVER="gcc-10"
 GCCOLDVER="gcc-4.9"
 MACOSVER="10.9"
 MACOSPNGVER="1.6.37"
-MACOSOGGVER="1.3.4"
-MACOSVORBISVER="1.3.6"
+MACOSOGGVER="1.3.5"
+MACOSVORBISVER="1.3.7"
 MACOSMPG123VER="1.25.13"
-MACOSOPENMPTVER="0.4.12"
+MACOSOPENMPTVER="0.5.14"
 MACOSGMEVER="0.6.2"
-MACOSSDL2VER="2.0.12"
+MACOSSDL2VER="2.0.18"
 MACOSSDL2MIXERVER="2.0.4"
 FAILURE="\e[1;91m"
 SUCCESS="\e[1;92m"
@@ -220,7 +220,8 @@ chooseinstall() {
         fi
 
         # brew install -f cmake curl $ISGME $ISPNG libogg libvorbis $ISOPENMPT sdl2 $ISSDL2MIXER zlib
-        # brew install -f cmake autoconf automake pkgconfig libtool gawk stow 7zip curl
+        # brew install -f cmake autoconf automake pkgconfig libtool gawk stow 7zip curl makeicns
+
         # Make directories for storing essential files
         mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer"
         cd "$BUILD" || exit
@@ -296,7 +297,6 @@ chooseinstall() {
 
             fi
             7zz x -y "$BUILDPATH/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
-            #        curl -s "https://gitlab.com/api/v4/projects/24705991/releases" | gawk '{gsub('/^{/',"{\n") || gsub('/}$/',"\n}") || gsub('/,/',",\n"); print}' | gawk '/uploads/ {split($0,a,"\\)|\\(");print a[2]"\n"a[4]"\n"a[6]}' | gawk '!/default/ && NF'
 
         fi
 
@@ -433,13 +433,10 @@ chooseinstall() {
             if [ ! -d "$BUILDPATH/libraries/libmpg123/.git" ]; then
 
                 printf "$MESSAGE\n%s\n\e[0m" "Downloading libmpg123's source code. Please wait..."
-                #                mkdir -p "$BUILDPATH/libraries/libmpg123"
-                #                curl -RLC - "https://deac-riga.dl.sourceforge.net/project/mpg123/mpg123/$MACOSMPG123VER/mpg123-$MACOSMPG123VER.tar.bz2" -o "$BUILDPATH/libraries/libmpg123/libmpg123.zip"
                 git clone https://github.com/madebr/mpg123.git --branch master "$BUILDPATH/libraries/libmpg123"
 
             else
 
-                #                make -C "$BUILDPATH/libraries/libmpg123" clean
                 git -C "$BUILDPATH/libraries/libmpg123" clean -dfx
                 git -C "$BUILDPATH/libraries/libmpg123" reset --hard
                 git -C "$BUILDPATH/libraries/libmpg123" pull
@@ -447,7 +444,6 @@ chooseinstall() {
             fi
             printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
             cd "$BUILDPATH/libraries/libmpg123" || exit
-            #            7zz x "$BUILDPATH/libraries/libmpg123/libmpg123.zip" -o"$BUILDPATH/libraries/libmpg123"
             autoreconf -iv
             ./configure --prefix=/usr/local/stow/libmpg123
             make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
@@ -478,55 +474,6 @@ chooseinstall() {
             cmake --build "$BUILDPATH/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
             sudo cmake --install "$BUILDPATH/libraries/libmodplug/build"
             sudo -E stow -v --adopt libmodplug
-
-        fi
-
-        # Download libopenmpt's source code, build and install it
-        if [ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
-
-            if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-                git clone https://github.com/OpenMPT/openmpt.git --branch "libopenmpt-$MACOSOPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
-
-            else
-
-                git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
-                git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
-                git -C "$BUILDPATH/libraries/libopenmpt" fetch origin master
-
-            fi
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
-            cd "$BUILDPATH/libraries/libopenmpt" || exit
-            gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$BUILDPATH/libraries/libopenmpt/Makefile"
-            make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-            sudo make PREFIX=/usr/local/stow/libopenmpt install
-            sudo -E stow -v --adopt libopenmpt
-            cd "$BUILD" || exit
-
-        fi
-
-        # Download libgme's source code, build and install it
-        if [ ! -f "/usr/local/lib/libgme.dylib" ] && [ "$ISGME" = "libgme" ]; then
-
-            if [ ! -d "$BUILDPATH/libraries/libgme/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
-                git clone https://bitbucket.org/mpyne/game-music-emu.git --branch "$MACOSGMEVER" "$BUILDPATH/libraries/libgme"
-
-            else
-
-                git -C "$BUILDPATH/libraries/libgme" clean -dfx
-                git -C "$BUILDPATH/libraries/libgme" reset --hard
-                git -C "$BUILDPATH/libraries/libgme" fetch origin master
-
-            fi
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
-            mkdir -p "$BUILDPATH/libraries/libgme/build"
-            cmake -S "$BUILDPATH/libraries/libgme" -B "$BUILDPATH/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
-            cmake --build "$BUILDPATH/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$BUILDPATH/libraries/libgme/build"
-            sudo -E stow -v --adopt libgme
 
         fi
 
@@ -601,6 +548,55 @@ chooseinstall() {
 
         fi
 
+        # Download libopenmpt's source code, build and install it
+        if [ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+
+            if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
+
+                printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
+                git clone https://github.com/OpenMPT/openmpt.git --branch "libopenmpt-$MACOSOPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
+
+            else
+
+                git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
+                git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
+                git -C "$BUILDPATH/libraries/libopenmpt" fetch origin master
+
+            fi
+            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
+            cd "$BUILDPATH/libraries/libopenmpt" || exit
+            gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$BUILDPATH/libraries/libopenmpt/Makefile"
+            make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+            sudo make PREFIX=/usr/local/stow/libopenmpt install
+            sudo -E stow -v --adopt libopenmpt
+            cd "$BUILD" || exit
+
+        fi
+
+        # Download libgme's source code, build and install it
+        if [ ! -f "/usr/local/lib/libgme.dylib" ] && [ "$ISGME" = "libgme" ]; then
+
+            if [ ! -d "$BUILDPATH/libraries/libgme/.git" ]; then
+
+                printf "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
+                git clone https://bitbucket.org/mpyne/game-music-emu.git --branch "$MACOSGMEVER" "$BUILDPATH/libraries/libgme"
+
+            else
+
+                git -C "$BUILDPATH/libraries/libgme" clean -dfx
+                git -C "$BUILDPATH/libraries/libgme" reset --hard
+                git -C "$BUILDPATH/libraries/libgme" fetch origin master
+
+            fi
+            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
+            mkdir -p "$BUILDPATH/libraries/libgme/build"
+            cmake -S "$BUILDPATH/libraries/libgme" -B "$BUILDPATH/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
+            cmake --build "$BUILDPATH/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo cmake --install "$BUILDPATH/libraries/libgme/build"
+            sudo -E stow -v --adopt libgme
+
+        fi
+
         # Download DiscordRPC's source code, build and install it
         if [ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
@@ -626,40 +622,14 @@ chooseinstall() {
         fi
 
         # Patching CMakeLists.txt to prevent MacOS from loading external frameworks prior to libraries installed by Homebrew.
-        cat > "$BUILD/framework-last.patch" << CMAKE
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -108,6 +108,7 @@
-
- if(${CMAKE_SYSTEM} MATCHES "Darwin")
-	add_definitions(-DMACOSX)
-+        set(CMAKE_FIND_FRAMEWORK LAST)
- endif()
-
- set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-CMAKE
-        patch -t -p0 < "$BUILD/framework-last.patch"
-
-#        cat > "$BUILD/remove-no-trigraphs.patch" << CMAKE
-#--- /src/CMakeLists.txt
-#+++ /src/CMakeLists.txt
-#@@ -253,8 +253,6 @@
-#        set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -Wno-absolute-value)
-# endif()
-
-#-set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -Wno-trigraphs)
-#-
-# target_compile_definitions(SRB2SDL2 PRIVATE -DCMAKECONFIG)
-
- #add_library(SRB2Core STATIC
-#CMAKE
-#        patch -t -p2 < "$BUILD/remove-no-trigraphs.patch"
+        gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions\(-DMACOSX\)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
 
         gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)","");print}' "$BUILD/src/CMakeLists.txt"
 
         # Get app icon
         if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading icon and converting it to .icns. Please wait..."
             curl -L https://mb.srb2.org/data/resource_icons/0/166.jpg -o "$BUILD/build/icon.jpg"
             makeicns -in "$BUILD/build/icon.jpg" -64 -out "$BUILD/src/sdl/macosx/Srb2mac.icns"
 
@@ -671,10 +641,6 @@ CMAKE
         cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$MACAPPNAME" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo mkdir -p /usr/local/opt/srb2-apps
-        #        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
-        #        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
-        #        sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0" /Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib
-        #        sudo cmake --install "$BUILD/build"
         SRB2MACDIR=$(find "$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type d | gawk -F'/' '{print $NF}')
         SRB2MACPATH="/usr/local/opt/srb2-apps/$SRB2MACDIR"
         sudo cp -rfv "$BUILD/build/bin/$SRB2MACDIR" /usr/local/opt/srb2-apps
