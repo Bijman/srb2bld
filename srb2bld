@@ -749,7 +749,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     # Compile the game's source code.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
-    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
@@ -3244,7 +3244,7 @@ installtomacos() {
 #    fi
 
     # Patching CMakeLists.txt to prevent MacOS from loading external frameworks prior to libraries installed by Homebrew.
-    gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions\(-DMACOSX\)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
+    gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
 
     gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)","");print}' "$BUILD/src/CMakeLists.txt"
 
@@ -3499,6 +3499,8 @@ Usage: srb2bld [OPTIONS]
             srb2bld --uninstall
 
   Warning! Old builds like SRB2 2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
+
+  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DHAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
 "
 }
 

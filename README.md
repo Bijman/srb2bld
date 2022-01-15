@@ -1,7 +1,8 @@
 srb2bld is a shellscript, that lets user to have automated and simpler process for downloading source code, compilation and installation of various SRB2 related builds.
 
 # Features
-- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, and installing their dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros), MacOS and Windows,
+- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR and installing their dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros), MacOS and Windows,
+- Compiles builds on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile successfully)
 - Creating AppImages (Linux only),
 - Removing installed SRB2 games, source code and assets,
 - Upgrading installed SRB2 games,
@@ -130,4 +131,7 @@ Usage: srb2bld [OPTIONS]
             srb2bld --uninstall
 
   Warning! Old builds like SRB2 2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
+
+  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DHAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+
 ```
