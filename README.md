@@ -1,11 +1,11 @@
 srb2bld is a shellscript, that lets user to have automated and simpler process for downloading source code, compilation and installation of various SRB2 related builds.
 
 # Features
-- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR and installing their dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros), MacOS and Windows,
-- Compiles builds on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile successfully)
+- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR and installing their dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros), MacOS and Windows (check "Compatibilty" section in README),
+- Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile successfully)
 - Creating AppImages (Linux only),
-- Removing installed SRB2 games, source code and assets,
-- Upgrading installed SRB2 games,
+- Removing installed SRB2 builds, source code and assets,
+- Upgrading installed SRB2 builds,
 - Runs on Linux, MacOS and Windows (Git Bash).
 
 # Dependencies
@@ -15,7 +15,7 @@ srb2bld is a shellscript, that lets user to have automated and simpler process f
 - Curl,
 - Gawk,
 - Docker (Linux and Windows only),
-- GNU Stow. (Linux and MacOS only)
+- GNU Stow (Linux and MacOS only).
 
 Windows users need to also have installed Git Bash to run this script.
 
@@ -101,6 +101,20 @@ As for MacOS users, they need to install these additional dependencies:
 
 **MacOS:**
 1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source $HOME/.bash_profile` or `source $HOME/.zshrc`.
+
+# Compatibility
+|                       | Linux | Windows | MacOS |
+| :-------------------: | :---: | :-----: | :---: |
+| SRB2                  |  ✅   |    ✅   |   ✅  |
+| SRB2 Uncapped Plus    |  ✅   |    ✅   |   ⛔  |
+| SRB2 NetPlus          |  ✅   |    ✅   |   ❔  |
+| SRB2 2.1 Legacy       |  ✅   |    ✅   |   ❔  |
+| SRB2 2.0              |  ✅   |    ✅   |   ⛔  |
+| SRB2 Final Demo       |  ✅   |    ✅   |   ⛔  |
+| SRB2 Persona          |  ✅   |    ✅   |   ✅  |
+| SRB2 Kart             |  ✅   |    ✅   |   ❔  |
+| SRB2 Kart Moe Mansion |  ✅   |    ✅   |   ⛔  |
+| SRB2 Kart VR          |  ✅   |    ✅   |   ⛔  |
 
 # Usage (from help text)
 ```
