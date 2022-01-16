@@ -386,7 +386,7 @@ dockerentry() {
     cat > "$BUILDPATH/containers/srb2-docker/Entrypoint" << ENTRYPOINT
 #!/bin/bash
 
-    set -e -x
+    set -e
 
     export BUILDPATH="$BUILDPATH"
     export BUILD="$BUILD"
@@ -2757,7 +2757,7 @@ installtomacos() {
     read -r CONF
 
     # Some checks, if the game's certain compilation flags were entered.
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISGME=
 
@@ -2767,7 +2767,7 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_OPENMPT=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_OPENMPT:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISOPENMPT=
 
@@ -2777,7 +2777,7 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISPNG=
 
@@ -2787,7 +2787,7 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISSDL2MIXER=
 
@@ -2797,7 +2797,7 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_DISCORDRPC=ON/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_DISCORDRPC:BOOL=ON/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_DISCORDRPC=ON/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_DISCORDRPC:BOOL=ON/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISDISCORDRPC=libdiscord-rpc
 
@@ -3252,9 +3252,13 @@ installtomacos() {
     #    fi
 
     # Patching CMakeLists.txt to prevent MacOS from loading external frameworks prior to libraries installed by Homebrew.
-    gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
+    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ]; then
 
-    gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)","");print}' "$BUILD/src/CMakeLists.txt"
+        gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
+
+        gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)","");print}' "$BUILD/src/CMakeLists.txt"
+
+    fi
 
     # Get app icon.
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then

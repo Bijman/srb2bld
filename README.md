@@ -1,8 +1,8 @@
 srb2bld is a shellscript, that lets user to have automated and simpler process for downloading source code, compilation and installation of various SRB2 related builds.
 
 # Features
-- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR and installing their dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros), MacOS and Windows (check "Compatibilty" section in README),
-- Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile successfully)
+- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR, and installing their dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros), MacOS and Windows (check "Compatibilty" section in README),
+- Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully)
 - Creating AppImages (Linux only),
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
@@ -31,11 +31,11 @@ As for MacOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following commands:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install coreutils findutils bash curl gawk docker.io`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install coreutils findutils bash curl gawk docker.io stow`,
 
-- Arch/Arch based: `sudo pacman -S coreutils findutils bash curl gawk docker`,
+- Arch/Arch based: `sudo pacman -S coreutils findutils bash curl gawk docker stow`,
 
-- Gentoo/Gentoo based: `sudo emerge -av coreutils findutils bash curl gawk docker`.
+- Gentoo/Gentoo based: `sudo emerge -av coreutils findutils bash curl gawk docker stow`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -103,18 +103,22 @@ As for MacOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source $HOME/.bash_profile` or `source $HOME/.zshrc`.
 
 # Compatibility
-|                       | Linux | Windows | MacOS |
-| :-------------------: | :---: | :-----: | :---: |
-| SRB2                  |  ✅   |    ✅   |   ✅  |
-| SRB2 Uncapped Plus    |  ✅   |    ✅   |   ⛔  |
-| SRB2 NetPlus          |  ✅   |    ✅   |   ❔  |
-| SRB2 2.1 Legacy       |  ✅   |    ✅   |   ❔  |
-| SRB2 2.0              |  ✅   |    ✅   |   ⛔  |
-| SRB2 Final Demo       |  ✅   |    ✅   |   ⛔  |
-| SRB2 Persona          |  ✅   |    ✅   |   ✅  |
-| SRB2 Kart             |  ✅   |    ✅   |   ❔  |
-| SRB2 Kart Moe Mansion |  ✅   |    ✅   |   ⛔  |
-| SRB2 Kart VR          |  ✅   |    ✅   |   ⛔  |
+|                       | Linux x86 | Windows x86 | MacOS x86 |
+| :-------------------: | :-------: | :---------: | :-------: |
+| SRB2                  |     ✅    |     ✅*     |     ✅    |
+| SRB2 Uncapped Plus    |     ✅    |     ✅*     |     ✅**  |
+| SRB2 NetPlus          |     ✅    |     ✅*     |     ⛔    |
+| SRB2 2.1 Legacy       |     ✅    |     ✅*     |     ✅    |
+| SRB2 2.0              |     ✅    |     ✅*     |     ⛔    |
+| SRB2 Final Demo       |     ✅*   |     ✅*     |     ⛔    |
+| SRB2 Persona          |     ✅    |     ✅*     |     ✅    |
+| SRB2 Kart             |     ✅    |     ✅*     |     ✅*** |
+| SRB2 Kart Moe Mansion |     ✅    |     ✅*     |     ⛔    |
+| SRB2 Kart VR          |     ✅    |     ✅*     |     ⛔    |
+
+*Only 32bit binaries are supported.
+**Compiles and runs successfully with patch (for d4d1181ec6f commit).
+***Compiles successfully, but it can throws SIGABRT error, when running game at low hardware performance.
 
 # Usage (from help text)
 ```
