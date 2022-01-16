@@ -8,11 +8,11 @@ OS=$(uname)
 IS64=$(printf "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, RLENGTH)}')
 if [ "$OS" = "Darwin" ]; then
 
-    BUILDPATH="$HOME/Library/Application Support/srb2-builds"
+    BUILDPATH="$HOME/Library/srb2bld"
 
 else
 
-    BUILDPATH="$HOME/.local/share/srb2-builds"
+    BUILDPATH="$HOME/.local/share/srb2bld"
 
 fi
 DEBVER="jessie"
@@ -144,7 +144,7 @@ choosebuild() {
 
     BUILDNAME=$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')
 
-    # Clean the game's source code and exiting shell script in case of error or cancelling.
+    # Clean the game's source code and exit shell script in case of error or cancelling.
     trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script." ; git -C $BUILD clean -dfx -e .comrev ; git -C $BUILD reset --hard ; exit' 1 2 3 6 15
 }
 
@@ -158,6 +158,13 @@ chooseinstall() {
     fi
 
     if [ "$OS" = "Darwin" ]; then
+
+        if [ -z "$SDKROOT" ]; then
+
+            printf "$FAILURE%s\n\e[0m" "Set SDKROOT environment variable to MacOS SDK full path. Usually MacOS .sdk file is located in /Library/Developer/CommandLineTools/SDKs path, if you installed Homebrew. Exiting."
+            exit
+
+        fi
 
         choosebuild
 
@@ -394,7 +401,7 @@ dockerentry() {
     export APPIMAGE="$APPIMAGE"
     export GIT_SSL_NO_VERIFY=1
 
-    # Clean the game's source code and exiting shell script in case of error or cancelling.
+    # Clean the game's source code and exit shell script in case of error or cancelling.
     trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script." ; git -C \$BUILD clean -dfx -e .comrev ; git -C \$BUILD reset --hard ; exit' 1 2 3 6 15 ERR
 
     # Update Docker container.
@@ -1339,7 +1346,7 @@ else
     fi
 
     # Add compilation flags.
-    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
+    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
 
     if [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
@@ -2253,7 +2260,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-old-windows-docker "$BUILDPATH/containers/srb2-old-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-old-windows-docker
+            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-old-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
@@ -2279,27 +2286,27 @@ dockerrun() {
 
         if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]; then
 
-            printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for Windows builds. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for Windows SRB2 builds. Please wait..."
             docker pull "ubuntu:$UBUVER"
-            printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows builds. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2-builds:$BUILDPATH:rw" srb2-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
-            printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for musl based Linux builds. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for musl based Linux SRB2 builds. Please wait..."
             docker pull alpine:latest
-            printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux builds. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-musl-docker "$BUILDPATH/containers/srb2-musl-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-musl-docker
 
         else
 
-            printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux builds. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker pull "ubuntu:$UBUVER"
-            printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux builds. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-docker "$BUILDPATH/containers/srb2-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
             docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-docker
@@ -2750,14 +2757,14 @@ installtomacos() {
     cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
     # Add compilation flags.
-    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
+    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
     printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$MACAPPNAME -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
     printf "$PROMPT\n%s\e[0m" "> "
     read -r CONF
 
     # Some checks, if the game's certain compilation flags were entered.
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISGME=
 
@@ -2767,7 +2774,7 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_OPENMPT=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_OPENMPT:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_OPENMPT:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISOPENMPT=
 
@@ -2777,7 +2784,7 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISPNG=
 
@@ -2787,7 +2794,7 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISSDL2MIXER=
 
@@ -2797,7 +2804,7 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_DISCORDRPC=ON/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /HAVE_DISCORDRPC:BOOL=ON/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_DISCORDRPC=ON/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_DISCORDRPC:BOOL=ON/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISDISCORDRPC=libdiscord-rpc
 
@@ -3267,8 +3274,109 @@ installtomacos() {
 
     fi
 
+    # Modify the game's configuration and assets directory names to avoid conflicts between installed builds.
+    #    if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+    #
+    #         sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2UncappedPlus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2UncappedPlus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2UncappedPlus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|/usr/games/SRB2|/usr/games/SRB2UncappedPlus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2uncappedplus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2uncappedplus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2uncappedplus|' "$BUILD/src/sdl/i_system.c"
+    #
+    #    elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
+    #
+    #         sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2NetPlus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2NetPlus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2NetPlus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|/usr/games/SRB2|/usr/games/SRB2NetPlus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2netplus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2netplus|' "$BUILD/src/sdl/i_system.c"
+    #         sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2netplus|' "$BUILD/src/sdl/i_system.c"
+
+    if [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        sed -i 's/#define DEFAULTDIR ".srb2_21"/#define DEFAULTDIR ".srb2_2.1"/' "$BUILD/src/doomdef.h"
+        sed -i 's/#define DEFAULTDIR "srb2_21"/#define DEFAULTDIR "srb2_2.1"/' "$BUILD/src/doomdef.h"
+
+        #    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
+        #
+        #         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2_2.0"/' "$BUILD/src/doomdef.h"
+        #         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2_2.0"/' "$BUILD/src/doomdef.h"
+        #         sed -i 's|/usr/local/share/games/srb2|/usr/local/share/games/SRB2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/local/games/srb2|/usr/local/games/SRB2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/share/games/srb2|/usr/share/games/SRB2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/games/srb2|/usr/games/SRB2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|d:\\\\\\\srb2|d:\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|e:\\\\\\\srb2|e:\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|f:\\\\\\\srb2|f:\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|g:\\\\\\\srb2|g:\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|h:\\\\\\\srb2|h:\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|i:\\\\\\\srb2|i:\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2-2.0|' "$BUILD/src/sdl/i_system.c"
+        #         gawk -i inplace '{gsub("\\\\$\\\(CC\\\) \\\\$\\\(CFLAGS\\\) -MM \\\*.c","\\\$(CC) \\\$(CFLAGS) -MM \\\$(wildcard *.c)");print}' "$BUILD/src/Makefile"
+        #         gawk -i inplace '{gsub("\\\\$\\\(INTERFACE\\\)/\\\*.c","\\\$(wildcard \\\$(INTERFACE)/*.c)");print}' "$BUILD/src/Makefile"
+        #         gawk -i inplace '{gsub("hardware/\\\*.c","\\\$(wildcard hardware/*.c)");print}' "$BUILD/src/Makefile"
+
+        #    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+        #
+        #         sed -i 's|/usr/local/games/SRB2|/usr/local/share/games/SRB2FinalDemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/games/SRB2|/usr/games/SRB2FinalDemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|d:\\\\\\\srb2|d:\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|e:\\\\\\\srb2|e:\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|f:\\\\\\\srb2|f:\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|g:\\\\\\\srb2|g:\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|h:\\\\\\\srb2|h:\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|i:\\\\\\\srb2|i:\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2finaldemo|' "$BUILD/src/sdl/i_system.c"
+        #         gawk -i inplace '{gsub("\\\\$\\\(CC\\\) \\\\$\\\(CFLAGS\\\) -MM \\\*.c","\\\$(CC) \\\$(CFLAGS) -MM \\\$(wildcard *.c)");print}' "$BUILD/src/makefile"
+        #         gawk -i inplace '{gsub("\\\\$\\\(INTERFACE\\\)/\\\*.c","\\\$(wildcard \\\$(INTERFACE)/*.c)");print}' "$BUILD/src/makefile"
+        #         gawk -i inplace '{gsub("hardware/\\\*.c","\\\$(wildcard hardware/*.c)");print}' "$BUILD/src/makefile"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+        sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2persona"/' "$BUILD/src/doomdef.h"
+        sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2persona"/' "$BUILD/src/doomdef.h"
+        #         sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2Persona|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2Persona|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2Persona|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/games/SRB2|/usr/games/SRB2Persona|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2persona|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2persona|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2persona|' "$BUILD/src/sdl/i_system.c"
+
+        #    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
+
+        #         sed -i 's|/usr/local/share/games/SRB2Kart|/usr/local/share/games/SRB2KartMoeMansion|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/local/games/SRB2Kart|/usr/local/games/SRB2KartMoeMansion|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartMoeMansion|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2KartMoeMansion|' "$BUILD/src/sdl/i_system.c"
+
+        #    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+
+        #         sed -i 's|/usr/local/share/games/SRB2Kart|/usr/local/share/games/SRB2KartVR|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/local/games/SRB2Kart|/usr/local/games/SRB2KartVR|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartVR|' "$BUILD/src/sdl/i_system.c"
+        #         sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2KartVR|' "$BUILD/src/sdl/i_system.c"
+        #         gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -iname libopenvr_api.so 2> /dev/null | head -n1)");print}' "$BUILD/src/sdl/Makefile.cfg"
+        #         gawk -i inplace '{gsub("../libs/openvr/openvr_api.dll","$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -iname libopenvr_api.so 2> /dev/null | head -n1)");print}' "$BUILD/src/sdl/Makefile.cfg"
+
+    fi
+
     # Get app icon.
-    if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+    if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        printf "$MESSAGE\n%s\n\e[0m" "Downloading icon and converting it to .icns. Please wait..."
+        curl -L https://mb.srb2.org/data/resource_icons/3/3248.jpg -o "$BUILD/build/icon.jpg"
+        makeicns -in "$BUILD/build/icon.jpg" -64 -out "$BUILD/src/sdl/macosx/Srb2mac.icns"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Downloading icon and converting it to .icns. Please wait..."
         curl -L https://mb.srb2.org/data/resource_icons/0/166.jpg -o "$BUILD/build/icon.jpg"
@@ -3289,7 +3397,7 @@ installtomacos() {
     sudo cp -rfv "$BUILD/assets/installer/"* "$SRB2MACPATH/Contents/Resources"
     sudo cp -rfv "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/Contents/Resources"
     mkdir -p "$HOME/Applications"
-    SRB2MACLINK=$(printf "%s\n" "$HOME/Applications/$SRB2MACDIR" | gawk '{gsub(".app","");print}')
+    SRB2MACLINK=$(printf "%s\n" "$HOME/Applications/$SRB2MACDIR" | gawk '{gsub("\\.app","");print}')
     rm -rf "$SRB2MACLINK"
     ln -s "$SRB2MACPATH" "$SRB2MACLINK"
 
@@ -3519,7 +3627,7 @@ Usage: srb2bld [OPTIONS]
 
   Warning! Old builds like SRB2 2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
 
-  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DHAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
+  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
 "
 }
 

@@ -1,8 +1,8 @@
 srb2bld is a shellscript, that lets user to have automated and simpler process for downloading source code, compilation and installation of various SRB2 related builds.
 
 # Features
-- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR, and installing their dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros), MacOS and Windows (check "Compatibilty" section in README),
-- Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully)
+- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1 Legacy, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR, and installing their missing dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros, like Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine), MacOS and Windows (check "Compatibilty" section in README),
+- Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
 - Creating AppImages (Linux only),
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
@@ -44,11 +44,11 @@ As for MacOS users, they need to install these additional dependencies:
 
 2. Git Bash can be found on start menu,
 
-3. The rest of dependencies are installed, if you followed video.
+3. The rest of dependencies are installed, if you followed video,
 
 4. Installing Docker Desktop:
 - Download from [HERE](https://www.docker.com/products/docker-desktop),
-- Watch this video from 6:07 to 8:36 in [HERE](https://youtu.be/_9AWYlt86B8?t=518),
+- Watch this video from 6:07 to 8:36 in [HERE](https://youtu.be/_9AWYlt86B8?t=518).
 
 **MacOS:**
 1. In terminal enter this following command:
@@ -60,7 +60,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 2. Enter `git clone https://github.com/Bijman/srb2bld`,
 
-3. Enter `sudo make install`, which will install to "/usr/bin" or "/usr/local/bin", if path exists, or just place script in your directory and change script's permissions to be executable: `chmod 755 srb2bld`,
+3. Enter `sudo make install`, which will install to "/usr/bin" or "/usr/local/bin", if path exists, or just place script in your directory and change script's permissions to be executable: `chmod 755 srb2bld`.
 
 **Windows:**
 1. Open Git Bash,
@@ -90,7 +90,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 4. Check if you set properly other environment variables from "Configuration" section,
 
-5. Enter: `source $HOME/.zshrc` or `source ~/.bash_profile` or restart terminal.
+5. Enter: `source ~/.zshrc` or `source ~/.bash_profile` or restart terminal.
 
 # Configuration
 **Linux:**
@@ -100,13 +100,13 @@ As for MacOS users, they need to install these additional dependencies:
 1. User is already added to "docker" group, if Docker Desktop is installed and the system was logged out or rebooted.
 
 **MacOS:**
-1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source $HOME/.bash_profile` or `source $HOME/.zshrc`.
+1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source ~/.bash_profile` or `source ~/.zshrc`.
 
 # Compatibility
 |                       | Linux x86 | Windows x86 | MacOS x86 |
 | :-------------------: | :-------: | :---------: | :-------: |
 | SRB2                  |     ✅    |     ✅*     |     ✅    |
-| SRB2 Uncapped Plus    |     ✅    |     ✅*     |     ✅**  |
+| SRB2 Uncapped Plus    |     ✅    |     ✅*     |     🟨**  |
 | SRB2 NetPlus          |     ✅    |     ✅*     |     ⛔    |
 | SRB2 2.1 Legacy       |     ✅    |     ✅*     |     ✅    |
 | SRB2 2.0              |     ✅    |     ✅*     |     ⛔    |
@@ -118,7 +118,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 *Only 32bit binaries are supported.
 
-**Compiles and runs successfully with patch (for d4d1181ec6f commit).
+**Compiles and runs successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag.
 
 ***Compiles successfully, but it can throw SIGABRT error, when running game at low hardware performance.
 
@@ -152,6 +152,6 @@ Usage: srb2bld [OPTIONS]
 
   Warning! Old builds like SRB2 2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
 
-  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DHAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
 ```
