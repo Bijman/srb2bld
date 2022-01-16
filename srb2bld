@@ -3260,6 +3260,13 @@ installtomacos() {
 
     fi
 
+    # Patching SRB2 Uncapped Plus' source code to fix error with implicit declaration of function R_ResetFirstLerp is invalid in C99 [-Werror,-Wimplicit-function-declaration]. Thanks Lach for help with this.
+    if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        gawk -i inplace '{gsub("#include \"doomdef.h\"","#include \"r_fps.h\"\n#include \"doomdef.h\"");print}' "$BUILD/src/p_setup.c"
+
+    fi
+
     # Get app icon.
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 

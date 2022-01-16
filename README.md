@@ -117,8 +117,10 @@ As for MacOS users, they need to install these additional dependencies:
 | SRB2 Kart VR          |     ✅    |     ✅*     |     ⛔    |
 
 *Only 32bit binaries are supported.
+
 **Compiles and runs successfully with patch (for d4d1181ec6f commit).
-***Compiles successfully, but it can throws SIGABRT error, when running game at low hardware performance.
+
+***Compiles successfully, but it can throw SIGABRT error, when running game at low hardware performance.
 
 # Usage (from help text)
 ```
