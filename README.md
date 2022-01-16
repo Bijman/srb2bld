@@ -112,7 +112,7 @@ As for MacOS users, they need to install these additional dependencies:
 | SRB2 2.0              |     ✅    |     ✅*     |     ⛔    |
 | SRB2 Final Demo       |     ✅*   |     ✅*     |     ⛔    |
 | SRB2 Persona          |     ✅    |     ✅*     |     ✅    |
-| SRB2 Kart             |     ✅    |     ✅*     |     ✅*** |
+| SRB2 Kart             |     ✅    |     ✅*     |     🟨*** |
 | SRB2 Kart Moe Mansion |     ✅    |     ✅*     |     ⛔    |
 | SRB2 Kart VR          |     ✅    |     ✅*     |     ⛔    |
 
@@ -120,7 +120,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 **Compiles and runs successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag.
 
-***Compiles successfully, but it can throw SIGABRT error, when running game at low hardware performance.
+***Compiles successfully, but it can throw SIGABRT error.
 
 # Usage (from help text)
 ```
