@@ -174,7 +174,7 @@ chooseinstall() {
 
         installtolist
 
-    elif ([ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]) && [ -d "$BUILD/build/AppDir" ]; then
+    elif ([ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]); then
 
         choosebuild
 
@@ -702,7 +702,6 @@ dockerentry() {
          sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
          gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -iname libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/sdl/Makefile.cfg"
-         gawk -i inplace '{gsub("../libs/openvr/openvr_api.dll","\$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -iname libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/sdl/Makefile.cfg"
 
     fi
 
@@ -1354,11 +1353,11 @@ else
 
             if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1366,11 +1365,11 @@ else
 
             if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1378,11 +1377,11 @@ else
 
             if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="$ARCH-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$ARCH-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1583,6 +1582,7 @@ else
     # Download and install FMOD for old SRB2 versions
     if [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]); then
 
+        printf "$MESSAGE\n%s\n\e[0m" "Installing FMOD to build $BUILDNAME. Please wait..."
         sudo mkdir -p "/usr/include/FMOD"
         curl -RLOC - --insecure https://zdoom.org/files/fmod/fmodapi375linux.tar.gz
         sudo tar xvf "fmodapi375linux.tar.gz" --strip-components=3 -C "/usr/lib" "fmodapi375linux/api/libfmod-3.75.so"
@@ -1599,12 +1599,12 @@ if [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$
 
             if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 $ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
@@ -1615,12 +1615,12 @@ if [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$
             mkdir -p "\$BUILD/objs/Mingw/Release"
             if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -C "\$BUILD/src" MINGW=1 SDL=1 \$CONF
+                CC="i686-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2sdl.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 SDL=1 \$CONF
+                CC="$ARCH-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 SDL=1 \$CONF
                 $ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
@@ -1632,14 +1632,12 @@ if [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$
                 cd "\$BUILD/src" || exit
                 gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
                 bash ../comptime.sh
-                CC="i686-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="i686-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+
+#CC="x86_64-w64-mingw32-gcc-win32" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j$(($(nproc) + 1)) MINGW64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 NOGME=1
 
                 # Making list of game's dependencies to copy them to game directory on Windows later.
-                if [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
-
-                    i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
-
-                elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+                if [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
                     i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
@@ -1660,14 +1658,10 @@ if [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$
                 cd "\$BUILD/src" || exit
                 gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
                 bash ../comptime.sh
-                CC="$ARCH-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$ARCH-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/$ARCH-w64-mingw32/include/.:/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 # Making list of game's dependencies to copy them to game directory on Windows later.
-                if [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
-
-                    $ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
-
-                elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+                if [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
                     $ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
@@ -1717,23 +1711,21 @@ if [ "\$(printf "%s\n" "$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$
 
         else
 
+            cd "\$BUILD/src" || exit
+            gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
+            bash ../comptime.sh
+
             if [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
 
-                cd "\$BUILD/src" || exit
-                gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
-                bash ../comptime.sh
                 CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
-                cd "\$BUILD" || exit
 
             else
 
-                cd "\$BUILD/src" || exit
-                gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
-                bash ../comptime.sh
                 CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
-                cd "\$BUILD" || exit
 
             fi
+
+            cd "\$BUILD" || exit
 
         fi
 
@@ -1936,7 +1928,7 @@ DESKTOP
 
     fi
 
-    # Get app icon
+    # Get app icon.
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
 
         ICONSIZE=\$(identify "\$BUILD/srb2.png" | gawk '{print \$3}')
@@ -2207,7 +2199,7 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libfuse-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev fuse imagemagick nasm build-essential mingw-w64 cmake file sudo dash curl git p7zip-full p7zip-rar stow
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libmodplug-dev libjack-dev libfuse-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev fuse imagemagick nasm build-essential mingw-w64 cmake file sudo dash curl git p7zip-full p7zip-rar stow
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/dash srb2 && \
@@ -2226,11 +2218,7 @@ dockerrun() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Restarting Docker daemon. Please wait..."
 
-        if [ -x "$(which docker-machine)" ]; then
-
-            docker-machine restart
-
-        elif [ -x "$(which systemctl)" ]; then
+        if [ -x "$(which systemctl)" ]; then
 
             sudo systemctl restart docker
 
@@ -2260,7 +2248,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-old-windows-docker "$BUILDPATH/containers/srb2-old-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-old-windows-docker
+            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2bld:$BUILDPATH:rw" srb2-old-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
@@ -2291,7 +2279,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2-builds:$BUILDPATH:rw" srb2-windows-docker
+            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2bld:$BUILDPATH:rw" srb2-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
@@ -3297,9 +3285,7 @@ installtomacos() {
 
     if [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        sed -i 's/#define DEFAULTDIR ".srb2_21"/#define DEFAULTDIR ".srb2_2.1"/' "$BUILD/src/doomdef.h"
-        sed -i 's/#define DEFAULTDIR "srb2_21"/#define DEFAULTDIR "srb2_2.1"/' "$BUILD/src/doomdef.h"
-
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2_21\"","#define DEFAULTDIR \"srb2_2.1\"");print}' "$BUILD/src/doomdef.h"
         #    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
         #
         #         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2_2.0"/' "$BUILD/src/doomdef.h"
@@ -3340,8 +3326,7 @@ installtomacos() {
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2persona"/' "$BUILD/src/doomdef.h"
-        sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2persona"/' "$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
         #         sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2Persona|' "$BUILD/src/sdl/i_system.c"
         #         sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2Persona|' "$BUILD/src/sdl/i_system.c"
         #         sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2Persona|' "$BUILD/src/sdl/i_system.c"
@@ -3369,7 +3354,6 @@ installtomacos() {
     fi
 
     # Get app icon.
-
     if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Downloading icon and converting it to .icns. Please wait..."
@@ -3422,6 +3406,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2DIR"
         cp -rf $DEPS "$SRB2DIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$SRB2DIR"
+        printf "@echo off\nsrb2win.exe" > "$SRB2DIR/SRB2 (Standard).bat"
+        printf "@echo off\nsrb2win.exe -opengl" > "$SRB2DIR/SRB2 (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
@@ -3434,6 +3420,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2UCPDIR"
         cp -rf $DEPS "$SRB2UCPDIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$SRB2UCPDIR"
+        printf "@echo off\nsrb2win.exe" > "$SRB2UCPDIR/SRB2 Uncapped Plus (Standard).bat"
+        printf "@echo off\nsrb2win.exe -opengl" > "$SRB2UCPDIR/SRB2 Uncapped Plus (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
 
@@ -3446,6 +3434,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2NPDIR"
         cp -rf $DEPS "$SRB2NPDIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$SRB2NPDIR"
+        printf "@echo off\nsrb2win.exe" > "$SRB2NPDIR/SRB2 NetPlus (Standard).bat"
+        printf "@echo off\nsrb2win.exe -opengl" > "$SRB2NPDIR/SRB2 NetPlus (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
@@ -3458,6 +3448,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2LEGACYDIR"
         cp -rf $DEPS "$SRB2LEGACYDIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/exchndl.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$SRB2LEGACYDIR"
+        printf "@echo off\nsrb2win.exe" > "$SRB2LEGACYDIR/SRB2 2.1 Legacy (Standard).bat"
+        printf "@echo off\nsrb2win.exe -opengl" > "$SRB2LEGACYDIR/SRB2 2.1 Legacy (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
@@ -3468,6 +3460,8 @@ installtowindows() {
         mkdir -p "$SRB220DIR"
         cp -rf "$BUILD/bin/Mingw/Release/srb2win.exe" "$SRB220DIR"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB220DIR"
+        printf "@echo off\nsrb2win.exe" > "$SRB220DIR/SRB2 2.0 (Standard).bat"
+        printf "@echo off\nsrb2win.exe -opengl" > "$SRB220DIR/SRB2 2.0 (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
@@ -3480,6 +3474,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2FDDIR"
         cp -rf $DEPS "$SRB2FDDIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$SRB2FDDIR"
+        printf "@echo off\nsrb2sdl.exe" > "$SRB2FDDIR/SRB2 Final Demo (Standard).bat"
+        printf "@echo off\nsrb2sdl.exe -opengl" > "$SRB2FDDIR/SRB2 Final Demo (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
@@ -3492,6 +3488,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2PDIR"
         cp -rf $DEPS "$SRB2PDIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$SRB2PDIR"
+        printf "@echo off\nsrb2win.exe" > "$SRB2PDIR/SRB2 Persona (Standard).bat"
+        printf "@echo off\nsrb2win.exe -opengl" > "$SRB2PDIR/SRB2 Persona (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
 
@@ -3504,6 +3502,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2KARTDIR"
         cp -rf $DEPS "$SRB2KARTDIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2KARTDIR"
+        printf "@echo off\nsrb2kart.exe" > "$SRB2KARTDIR/SRB2 Kart (Standard).bat"
+        printf "@echo off\nsrb2kart.exe -opengl" > "$SRB2KARTDIR/SRB2 Kart (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
 
@@ -3516,6 +3516,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2KARTMOEDIR"
         cp -rf $DEPS "$SRB2KARTMOEDIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2KARTMOEDIR"
+        printf "@echo off\nsrb2kart.exe" > "$SRB2KARTMOEDIR/SRB2 Kart Moe Mansion (Standard).bat"
+        printf "@echo off\nsrb2kart.exe -opengl" > "$SRB2KARTMOEDIR/SRB2 Kart Moe Mansion (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -3528,6 +3530,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2KARTVRDIR"
         cp -rf $DEPS "$SRB2KARTVRDIR"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2KARTVRDIR"
+        printf "@echo off\nsrb2kart.exe" > "$SRB2KARTVRDIR/SRB2 Kart VR (Standard).bat"
+        printf "@echo off\nsrb2kart.exe -opengl" > "$SRB2KARTVRDIR/SRB2 Kart VR (OpenGL).bat"
 
     fi
 }
