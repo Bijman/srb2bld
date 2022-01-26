@@ -1,7 +1,10 @@
-srb2bld is a shellscript, that lets user to have automated and simpler process for downloading source code, compilation and installation of various SRB2 related builds.
+srb2bld is a shellscript, that automates and simplifies process of downloading source code, configuring, compilation and installation of various SRB2 related builds.
 
 # Features
-- Compiling and installing SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1 Legacy, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR, and installing their missing dependencies (mostly binaries, except for MacOS) based on user's set compilation flags on Linux (glibc and musl based distros, like Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine), MacOS and Windows (check "Compatibilty" section in README),
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1 Legacy, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, MacOS (tested on version 10.14 and 10.15) and Windows. Check "Compatibilty" section for information about which build works for each system and CPU architecture,
+- Ability to set user's flags before compiling,
+- Installing missing dependencies on host system (mostly binaries, except for MacOS) based on user's set compilation flags,
+- Supports installing dependencies for glibc and musl based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine,
 - Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
 - Creating AppImages (Linux only),
 - Removing installed SRB2 builds, source code and assets,
@@ -103,24 +106,31 @@ As for MacOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source ~/.bash_profile` or `source ~/.zshrc`.
 
 # Compatibility
-|                       | Linux x86 | Windows x86 | MacOS x86 |
-| :-------------------: | :-------: | :---------: | :-------: |
-| SRB2                  |     ✅    |     ✅*     |     ✅    |
-| SRB2 Uncapped Plus    |     ✅    |     ✅*     |     🟨**  |
-| SRB2 NetPlus          |     ✅    |     ✅*     |     ⛔    |
-| SRB2 2.1 Legacy       |     ✅    |     ✅*     |     ✅    |
-| SRB2 2.0              |     ✅    |     ✅*     |     ⛔    |
-| SRB2 Final Demo       |     ✅*   |     ✅*     |     ⛔    |
-| SRB2 Persona          |     ✅    |     ✅*     |     ✅    |
-| SRB2 Kart             |     ✅    |     ✅*     |     🟨*** |
-| SRB2 Kart Moe Mansion |     ✅    |     ✅*     |     ⛔    |
-| SRB2 Kart VR          |     ✅    |     ✅*     |     ⛔    |
+|                       | Linux x86/x64 | Windows x86/x64 | MacOS x86/x64 |
+| :-------------------: | :-----------: | :-------------: | :-----------: |
+| SRB2                  |      ✅       |       ✅        |       ✅      |
+| SRB2 Uncapped Plus    |      ✅       |       ✅        |       🟨**    |
+| SRB2 NetPlus          |      ✅       |       ✅        |       ⛔      |
+| SRB2 2.1 Legacy       |      ✅       |       ✅        |       ✅      |
+| SRB2 2.0              |      ✅       |       ✅*       |       ⛔      |
+| SRB2 Final Demo       |      ✅*      |       ✅*       |       ⛔      |
+| SRB2 Persona          |      ✅       |       ✅        |       ✅      |
+| SRB2 Kart             |      ✅       |       ✅        |       🟨***   |
+| SRB2 Kart Moe Mansion |      ✅       |       ✅        |       ⛔      |
+| SRB2 Kart VR          |      ✅       |       ✅*       |       ⛔      |
 
-*Only 32bit binaries are supported.
+**Legend:**
+✅ - Builds and runs successfully.
 
-**Compiles and runs successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag.
+🟨 - Builds successfully, but may encounter errors, when starting game, or get performance issues. Patches may apply.
 
-***Compiles successfully, but it can throw SIGABRT error.
+⛔ - Building failure.
+
+*Only 32bit binaries are currently supported. SRB2 2.0 has issues when compiling/running with OpenGL on Linux and Windows, so only software acceleration for this build for now.
+
+**Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running it.
+
+***Compiles successfully, but it can throw SIGABRT error on some MacOS versions. Runs fine on MacOS 10.14.
 
 # Usage (from help text)
 ```
@@ -144,7 +154,7 @@ Usage: srb2bld [OPTIONS]
      2. Compile and create AppImage of SRB2/SRB2Kart build (Linux only):
             srb2bld --appimage
 
-     3. List installed SRB2 builds:
+     3. List installed SRB2/SRB2Kart builds:
             srb2bld --listinstalled
 
      4. Uninstall SRB2/SRB2Kart build:
