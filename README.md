@@ -18,9 +18,10 @@ srb2bld is a shellscript, that automates and simplifies process of downloading s
 - Curl,
 - Gawk,
 - Docker (Linux and Windows only),
-- GNU Stow (Linux and MacOS only).
+- GNU Stow (Linux and MacOS only),
+- Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GTK+ or KDE desktop environment package).
 
-Windows users need to also have installed Git Bash to run this script.
+Windows users need to also have installed Git Bash to run this script. Also PowerShell is required for updating icons and menu entries.
 
 As for MacOS users, they need to install these additional dependencies:
 - Cmake,
@@ -97,10 +98,10 @@ As for MacOS users, they need to install these additional dependencies:
 
 # Configuration
 **Linux:**
-1. Add user to the "docker" group: `sudo usermod -aG docker [username]` and then logout or reboot the system.
+1. Add user to the "docker" group: `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default`. After that logout or reboot the system.
 
 **Windows:**
-1. User is already added to "docker" group, if Docker Desktop is installed and the system was logged out or rebooted.
+1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system was logged out or rebooted.
 
 **MacOS:**
 1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source ~/.bash_profile` or `source ~/.zshrc`.
@@ -120,6 +121,7 @@ As for MacOS users, they need to install these additional dependencies:
 | SRB2 Kart VR          |      ✅       |       ✅*       |       ⛔      |
 
 **Legend:**
+
 ✅ - Builds and runs successfully.
 
 🟨 - Builds successfully, but may encounter errors, when starting game, or get performance issues. Patches may apply.
@@ -128,7 +130,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 *Only 32bit binaries are currently supported. SRB2 2.0 has issues when compiling/running with OpenGL on Linux and Windows, so only software acceleration for this build for now.
 
-**Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running it.
+**Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
 ***Compiles successfully, but it can throw SIGABRT error on some MacOS versions. Runs fine on MacOS 10.14.
 

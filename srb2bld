@@ -21,10 +21,19 @@ UBUVER="18.04"
 #SRB2VER="SRB2_release_2.2.9"
 SRB2VER="master"
 SRB2PERSONAFILEID="1tV9L2x94vEjMzip97zdOow6N7xrzYwoV"
-MINGWVER="10-win32"
-MINGWOLDVER="4.9-win32"
-GCCVER="10"
-GCCOLDVER="4.9"
+MINGWVER="gcc-10-win32"
+MINGWOLDVER="gcc-4.9-win32"
+if [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
+
+    GCCVER="gcc"
+    GCCOLDVER="gcc-6"
+
+else
+
+    GCCVER="gcc-10"
+    GCCOLDVER="4.9"
+
+fi
 FMODVER="fmodapi375linux"
 OPENVRVER="1.10.30"
 MACOSVER="10.9"
@@ -86,7 +95,7 @@ choosebuild() {
             "1")
 
                 BUILD="$BUILDPATH/srb2"
-                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --branch $SRB2VER"
+                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --recursive --branch $SRB2VER"
                 break
 
                 ;;
@@ -94,7 +103,7 @@ choosebuild() {
             "2")
 
                 BUILD="$BUILDPATH/srb2-uncapped-plus"
-                GIT="git clone https://git.do.srb2.org/Fafabis/SRB2.git --branch uncapped-plus"
+                GIT="git clone https://git.do.srb2.org/Fafabis/SRB2.git --recursive --branch uncapped-plus"
                 break
 
                 ;;
@@ -102,7 +111,7 @@ choosebuild() {
             "3")
 
                 BUILD="$BUILDPATH/srb2-netplus"
-                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --branch master"
+                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --recursive --branch master"
                 break
 
                 ;;
@@ -110,7 +119,7 @@ choosebuild() {
             "4")
 
                 BUILD="$BUILDPATH/srb2-2.1-legacy"
-                GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --branch master"
+                GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --recursive --branch master"
                 break
 
                 ;;
@@ -118,7 +127,7 @@ choosebuild() {
             "5")
 
                 BUILD="$BUILDPATH/srb2-2.0"
-                GIT="git clone https://github.com/STJr/SRB2-Public.git --branch master"
+                GIT="git clone https://github.com/STJr/SRB2-Public.git --recursive --branch master"
                 break
 
                 ;;
@@ -126,7 +135,7 @@ choosebuild() {
             "6")
 
                 BUILD="$BUILDPATH/srb2-final-demo"
-                GIT="git clone https://git.do.srb2.org/SteelT/SRB2-OLD.git"
+                GIT="git clone https://git.do.srb2.org/SteelT/SRB2-OLD.git --recursive --branch master"
                 break
 
                 ;;
@@ -134,7 +143,7 @@ choosebuild() {
             "7")
 
                 BUILD="$BUILDPATH/srb2-persona"
-                GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --branch srb2p_22"
+                GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --recursive --branch srb2p_22"
                 break
 
                 ;;
@@ -142,7 +151,7 @@ choosebuild() {
             "8")
 
                 BUILD="$BUILDPATH/srb2-kart"
-                GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --branch master"
+                GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --recursive --branch master"
                 break
 
                 ;;
@@ -150,7 +159,7 @@ choosebuild() {
             "9")
 
                 BUILD="$BUILDPATH/srb2-kart-moe-mansion"
-                GIT="git clone https://gitlab.com/himie/kart-public.git --branch moe-mansion"
+                GIT="git clone https://gitlab.com/himie/kart-public.git --recursive --branch moe-mansion"
                 break
 
                 ;;
@@ -158,7 +167,7 @@ choosebuild() {
             "10")
 
                 BUILD="$BUILDPATH/srb2-kart-vr"
-                GIT="git clone https://gitlab.com/cschoenig/kart-public.git --branch very-cool-renderer"
+                GIT="git clone https://gitlab.com/cschoenig/kart-public.git --recursive --branch very-cool-renderer"
                 break
 
                 ;;
@@ -831,7 +840,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
               printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-              git clone https://github.com/discord/discord-rpc.git --branch master "\$BUILDPATH/libraries/discord-rpc"
+              git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$BUILDPATH/libraries/discord-rpc"
 
         else
 
@@ -845,7 +854,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
         cd "\$BUILDPATH/libraries/discord-rpc/build" || exit
         cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        CC="gcc-$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/discord-rpc/build"
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/discord-rpc/build"
         sudo make -C "\$BUILDPATH/libraries/discord-rpc/build" install
         cd "\$BUILD" || exit
 
@@ -857,7 +866,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ ! -d "\$BUILDPATH/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --branch "v$OPENVRVER" "\$BUILDPATH/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$BUILDPATH/libraries/libopenvr"
 
         else
 
@@ -872,7 +881,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         cp -rf "\$BUILDPATH/libraries/libopenvr/src/vrcommon" "\$BUILDPATH/libraries/libopenvr/src/vrcore"
         cd "\$BUILDPATH/libraries/libopenvr/build" || exit
         cmake .. -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-        CC="gcc-$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenvr/build"
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenvr/build"
         sudo make -C "\$BUILDPATH/libraries/libopenvr/build" install
         cd "\$BUILD" || exit
 
@@ -889,7 +898,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             cd "\$BUILD/src" || exit
             gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
             bash ../comptime.sh
-            CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
             cd "\$BUILD" || exit
 
         else
@@ -898,7 +907,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             cd "\$BUILD/src" || exit
             gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
             bash ../comptime.sh
-            CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
             cd "\$BUILD" || exit
 
         fi
@@ -907,11 +916,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            CC="gcc-$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
+            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
 
         else
 
-            CC="gcc-$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
+            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
 
         fi
 
@@ -920,11 +929,11 @@ if [ "\$APPIMAGE" = 1 ]; then
         mkdir -p "\$BUILD/objs/Linux/SDL/Release"
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1
 
         else
 
-            CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1
 
         fi
 
@@ -936,7 +945,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             cd "\$BUILD/src" || exit
             gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
             bash ../comptime.sh
-            CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
             cd "\$BUILD" || exit
 
         else
@@ -945,7 +954,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             cd "\$BUILD/src" || exit
             gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
             bash ../comptime.sh
-            CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
             cd "\$BUILD" || exit
 
         fi
@@ -1441,11 +1450,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1453,11 +1462,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1467,17 +1476,17 @@ else
 
                 if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-                    printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                    printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
                 else
 
-                    printf "$NOTICE%s\n\e[0m" "CC="x86_64-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                    printf "$NOTICE%s\n\e[0m" "CC="x86_64-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
                 fi
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1489,11 +1498,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="gcc-$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="gcc-$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1501,11 +1510,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1513,11 +1522,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1542,7 +1551,7 @@ else
         if [ ! -d "\$BUILDPATH/libraries/libopenmpt/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-            git clone https://github.com/OpenMPT/openmpt.git --branch master "\$BUILDPATH/libraries/libopenmpt"
+            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch master "\$BUILDPATH/libraries/libopenmpt"
 
         else
 
@@ -1554,7 +1563,7 @@ else
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
         gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$BUILDPATH/libraries/libopenmpt/Makefile"
-        CC="gcc-$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
         sudo make -C "\$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
         sudo -E stow -v --adopt libopenmpt
 
@@ -1566,7 +1575,7 @@ else
         if [ ! -d "\$BUILDPATH/libraries/libpng12/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng12. Please wait..."
-            git clone https://github.com/glennrp/libpng.git --branch libpng12 "\$BUILDPATH/libraries/libpng12"
+            git clone https://github.com/glennrp/libpng.git --recursive --branch libpng12 "\$BUILDPATH/libraries/libpng12"
 
         else
 
@@ -1579,10 +1588,10 @@ else
         cd "\$BUILDPATH/libraries/libpng12" || exit
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
-            ./configure --prefix=/usr/local/stow/libpng12-lib32 --includedir=/usr/local/stow/libpng12-lib32/include --libdir=/usr/local/stow/libpng12-lib32/lib
-            CC="gcc-$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libpng12"
-            sudo make -C "\$BUILDPATH/libraries/libpng12" install
-            sudo -E stow -v --adopt libpng12-lib32
+        ./configure --prefix=/usr/local/stow/libpng12-lib32 --includedir=/usr/local/stow/libpng12-lib32/include --libdir=/usr/local/stow/libpng12-lib32/lib
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libpng12"
+        sudo make -C "\$BUILDPATH/libraries/libpng12" install
+        sudo -E stow -v --adopt libpng12-lib32
         cd "\$BUILD" || exit
 
     fi
@@ -1593,7 +1602,7 @@ else
         if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
               printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-              git clone https://github.com/discord/discord-rpc.git --branch master "\$BUILDPATH/libraries/discord-rpc"
+              git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$BUILDPATH/libraries/discord-rpc"
 
         else
 
@@ -1625,7 +1634,7 @@ else
         elif [ "\$OS" = "Linux" ]; then
 
               cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
-              CC="gcc-$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/discord-rpc/build"
+              CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/discord-rpc/build"
               sudo make -C "\$BUILDPATH/libraries/discord-rpc/build" install
               sudo -E stow -v --adopt discord-rpc
               cd "\$BUILD" || exit
@@ -1655,7 +1664,7 @@ else
             cp -rf "\$BUILDPATH/libraries/libopenvr/src/vrcommon" "\$BUILDPATH/libraries/libopenvr/src/vrcore"
             cd "\$BUILDPATH/libraries/libopenvr/build" || exit
             cmake .. -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr
-            CC="gcc-$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenvr/build"
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenvr/build"
             sudo make -C "\$BUILDPATH/libraries/libopenvr/build" install
             sudo -E stow -v --adopt libopenvr
             cd "\$BUILD" || exit
@@ -1682,12 +1691,12 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="i686-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="\$ARCH-w64-mingw32-gcc-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
@@ -1698,12 +1707,12 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
             mkdir -p "\$BUILD/objs/Mingw/Release"
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 \$CONF
+                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2sdl.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="\$ARCH-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 SDL=1 \$CONF
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 SDL=1 \$CONF
                 \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
@@ -1719,11 +1728,11 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
                 if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-                    CC="i686-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                    CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 else
 
-                    CC="x86_64-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                    CC="x86_64-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 fi
 
@@ -1774,7 +1783,7 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
                 cd "\$BUILD/src" || exit
                 gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
                 bash ../comptime.sh
-                CC="\$ARCH-w64-mingw32-gcc-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 # Making list of game's dependencies to copy them to game directory on Windows later.
                 if [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
@@ -1803,11 +1812,11 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="gcc-$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             else
 
-                CC="gcc-$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             fi
 
@@ -1816,11 +1825,11 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
             mkdir -p "\$BUILD/objs/Linux/SDL/Release"
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
 
             else
 
-                CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
 
             fi
 
@@ -1833,11 +1842,11 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             else
 
-                CC="gcc-$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             fi
 
@@ -2105,9 +2114,9 @@ ENTRYPOINT
     cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-windows-docker"
 
     # Set CPU architecture for Docker images in case of building old SRB2 versions.
-    if [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
+    if ([ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]) && ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-        ISARM=""
+        ISARM="i386/"
 
     elif ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
@@ -2186,14 +2195,14 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 DOCKERFILE
 
     cat > "$BUILDPATH/containers/srb2-musl-docker/Dockerfile" << DOCKERFILE
-FROM alpine:latest
+FROM "$ISARM"alpine:latest
 
 ENV container docker
 
 RUN printf "%s\n" "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
 apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
@@ -2206,14 +2215,14 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 DOCKERFILE
 
     cat > "$BUILDPATH/containers/srb2-old-musl-docker/Dockerfile" << DOCKERFILE
-FROM "$ISARM/alpine:latest"
+FROM "$ISARM"alpine:latest
 
 ENV container docker
 
-RUN printf "https://dl-cdn.alpinelinux.org/alpine/edge/main\nhttps://dl-cdn.alpinelinux.org/alpine/edge/community\nhttps://dl-cdn.alpinelinux.org/alpine/edge/testing" > /etc/apk/repositories && \
+RUN printf "%s\n" "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
 apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base gcc-6 cmake sudo bash dash gawk curl git p7zip shadow stow
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base gcc6 cmake sudo bash dash gawk curl git p7zip shadow stow
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
@@ -2226,7 +2235,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 DOCKERFILE
 
     cat > "$BUILDPATH/containers/srb2-windows-docker/Dockerfile" << DOCKERFILE
-FROM "debian:latest"
+FROM "$ISARM"debian:latest
 
 ENV container docker \
 DEBIAN_FRONTEND noninteractive
@@ -2255,7 +2264,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 DOCKERFILE
 
     cat > "$BUILDPATH/containers/srb2-old-windows-docker/Dockerfile" << DOCKERFILE
-FROM i386/debian:"$DEBVER"
+FROM "$ISARM"debian:"$DEBVER"
 
 ENV container docker \
 DEBIAN_FRONTEND noninteractive
@@ -2315,7 +2324,7 @@ dockerrun() {
         if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for Windows SRB2 builds. Please wait..."
-            docker pull "i386/debian:$DEBVER"
+            docker pull "$ISARM"debian:"$DEBVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-old-windows-docker "$BUILDPATH/containers/srb2-old-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
@@ -2346,7 +2355,7 @@ dockerrun() {
         if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for Windows SRB2 builds. Please wait..."
-            docker pull "debian:latest"
+            docker pull "$ISARM"debian:latest
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
@@ -2355,7 +2364,7 @@ dockerrun() {
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for musl based Linux SRB2 builds. Please wait..."
-            docker pull alpine:latest
+            docker pull "$ISARM"alpine:latest
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-musl-docker "$BUILDPATH/containers/srb2-musl-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
@@ -2364,7 +2373,7 @@ dockerrun() {
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux SRB2 builds. Please wait..."
-            docker pull "ubuntu:$UBUVER"
+            docker pull "$ISARM"ubuntu:"$UBUVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-docker "$BUILDPATH/containers/srb2-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
@@ -2920,7 +2929,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libpng/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng's source code. Please wait..."
-            git clone git://git.code.sf.net/p/libpng/code.git --branch "v$MACOSPNGVER" "$BUILDPATH/libraries/libpng"
+            git clone git://git.code.sf.net/p/libpng/code.git --recursive --branch "v$MACOSPNGVER" "$BUILDPATH/libraries/libpng"
 
         else
 
@@ -2945,7 +2954,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libogg/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libogg's source code. Please wait..."
-            git clone https://gitlab.xiph.org/xiph/ogg.git --branch "v$MACOSOGGVER" "$BUILDPATH/libraries/libogg"
+            git clone https://gitlab.xiph.org/xiph/ogg.git --recursive --branch "v$MACOSOGGVER" "$BUILDPATH/libraries/libogg"
 
         else
 
@@ -2970,7 +2979,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libvorbis/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libvorbis' source code. Please wait..."
-            git clone https://gitlab.xiph.org/xiph/vorbis.git --branch "v$MACOSVORBISVER" "$BUILDPATH/libraries/libvorbis"
+            git clone https://gitlab.xiph.org/xiph/vorbis.git --recursive --branch "v$MACOSVORBISVER" "$BUILDPATH/libraries/libvorbis"
 
         else
 
@@ -2997,7 +3006,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libmpg123/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libmpg123's source code. Please wait..."
-            git clone https://github.com/madebr/mpg123.git --branch master "$BUILDPATH/libraries/libmpg123"
+            git clone https://github.com/madebr/mpg123.git --recursive --branch master "$BUILDPATH/libraries/libmpg123"
 
         else
 
@@ -3024,7 +3033,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libmodplug/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libmodplug's source code. Please wait..."
-            git clone https://github.com/Konstanty/libmodplug.git --branch master "$BUILDPATH/libraries/libmodplug"
+            git clone https://github.com/Konstanty/libmodplug.git --recursive --branch master "$BUILDPATH/libraries/libmodplug"
 
         else
 
@@ -3049,7 +3058,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libsdl2/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2's source code. Please wait..."
-            git clone https://github.com/libsdl-org/SDL.git --branch "release-$MACOSSDL2VER" "$BUILDPATH/libraries/libsdl2"
+            git clone https://github.com/libsdl-org/SDL.git --recursive --branch "release-$MACOSSDL2VER" "$BUILDPATH/libraries/libsdl2"
 
         else
 
@@ -3074,7 +3083,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libsdl2-mixer/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixer's source code. Please wait..."
-            git clone https://github.com/libsdl-org/SDL_mixer.git --branch "release-$MACOSSDL2MIXERVER" "$BUILDPATH/libraries/libsdl2-mixer"
+            git clone https://github.com/libsdl-org/SDL_mixer.git --recursive --branch "release-$MACOSSDL2MIXERVER" "$BUILDPATH/libraries/libsdl2-mixer"
 
         else
 
@@ -3122,7 +3131,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-            git clone https://github.com/OpenMPT/openmpt.git --branch "libopenmpt-$MACOSOPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
+            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "libopenmpt-$MACOSOPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
 
         else
 
@@ -3148,7 +3157,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libgme/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
-            git clone https://bitbucket.org/mpyne/game-music-emu.git --branch "$MACOSGMEVER" "$BUILDPATH/libraries/libgme"
+            git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$MACOSGMEVER" "$BUILDPATH/libraries/libgme"
 
         else
 
@@ -3173,7 +3182,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-            git clone https://github.com/discord/discord-rpc.git --branch master "$BUILDPATH/libraries/discord-rpc"
+            git clone https://github.com/discord/discord-rpc.git --recursive --branch master "$BUILDPATH/libraries/discord-rpc"
 
         else
 
@@ -3198,7 +3207,7 @@ installtomacos() {
         if [ ! -d "$BUILDPATH/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "$BUILDPATH/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --recursive --branch "v$OPENVRVER" "$BUILDPATH/libraries/libopenvr"
 
         else
 
