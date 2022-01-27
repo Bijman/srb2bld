@@ -2337,7 +2337,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-old-musl-docker "$BUILDPATH/containers/srb2-old-musl-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-old-musl-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local:/usr/local:rw" srb2-old-musl-docker
 
         else
 
@@ -2346,7 +2346,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-old-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local:/usr/local:rw" srb2-old-docker
 
         fi
 
@@ -2368,7 +2368,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-musl-docker "$BUILDPATH/containers/srb2-musl-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-musl-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local:/usr/local:rw" srb2-musl-docker
 
         else
 
@@ -2377,7 +2377,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-docker "$BUILDPATH/containers/srb2-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local/stow:/usr/local/stow:rw" --volume="/usr/local/lib:/usr/local/lib:rw" srb2-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local:/usr/local:rw" srb2-docker
 
         fi
 
