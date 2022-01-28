@@ -31,7 +31,7 @@ if [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, R
 else
 
     GCCVER="gcc-10"
-    GCCOLDVER="4.9"
+    GCCOLDVER="gcc-4.9"
 
 fi
 FMODVER="fmodapi375linux"
@@ -73,8 +73,7 @@ appimage() {
     export APPIMAGENAME=$(find "$BUILDPATH" -iname "*.AppImage" | gawk -F'/' '{print $NF}')
     mv "$BUILD/"*.AppImage .
 
-    git -C "$BUILD" clean -dfx -e .comrev
-    git -C "$BUILD" reset --hard
+    cleansource
 
     printf "$SUCCESS\n%s\n\e[0m\a" "AppImage for $BUILDNAME is done. Look for $APPIMAGENAME in $(pwd) path."
 }
@@ -84,7 +83,7 @@ choosebuild() {
     while
 
         printf "$MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 2.1 Legacy" "Build SRB2 2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart VR"; do printf "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart VR"; do printf "%s\n" "$((i += 1))) $loop"; done
         printf "#? "
         read -r choose
     do
@@ -186,7 +185,7 @@ choosebuild() {
     BUILDNAME=$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')
 
     # Clean the game's source code and exit shell script in case of error or cancelling script.
-    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script." ; git -C $BUILD clean -dfx -e .comrev ; git -C $BUILD reset --hard ; exit' 1 2 3 6 15
+    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; git -C $BUILD clean -qdfx -e .comrev ; git -C $BUILD reset -q --hard ; exit' 1 2 3 6 15
 }
 
 chooseinstall() {
@@ -386,6 +385,13 @@ chooseuninstall() {
                     rm -rfv "$FILE"
                 done < "$BUILDINSTALLED"
                 rm -f "$BUILDINSTALLED"
+
+                if [ -z $(find "$HOME/SRB2 Games" -maxdepth 1 -mindepth 1 2> /dev/null | head -n1) ]; then
+
+                    rm -rfv "$HOME/SRB2 Games"
+
+                fi
+
                 printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
             elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
@@ -394,7 +400,7 @@ chooseuninstall() {
                     sudo rm -rfv "$FILE"
                 done < "$BUILDINSTALLED"
 
-                if [ -z $(find /usr/local/opt/srb2-apps 2> /dev/null | head -n1) ]; then
+                if [ -z $(find /usr/local/opt/srb2-apps -maxdepth 1 -mindepth 1 2> /dev/null | head -n1) ]; then
 
                     sudo rm -rfv /usr/local/opt/srb2-apps
 
@@ -405,7 +411,7 @@ chooseuninstall() {
                 # Refreshing menu icons.
                 if [ -x "$(which gtk-update-icon-cache 2> /dev/null)" ]; then
 
-                    sudo gtk-update-icon-cache --force --ignore-theme-index /usr/local/share/icons/hicolor
+                    sudo gtk-update-icon-cache -qft /usr/local/share/icons/hicolor
 
                 elif [ -x "$(which kbuildsycoca5 2> /dev/null)" ]; then
 
@@ -430,8 +436,8 @@ chooseuninstall() {
 
 cleansource() {
     # Clean build's directory after compiling.
-    git -C "$BUILD" clean -dfx -e .comrev
-    git -C "$BUILD" reset --hard
+    git -C "$BUILD" clean -qdfx -e .comrev
+    git -C "$BUILD" reset -q --hard
 }
 
 defaultmessage() {
@@ -465,7 +471,7 @@ dockerentry() {
     # export GIT_SSL_NO_VERIFY=1
 
     # Clean the game's source code and exit shell script in case of error or cancelling.
-    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script." ; git -C \$BUILD clean -dfx -e .comrev ; git -C \$BUILD reset --hard ; exit' 1 2 3 6 15 ERR
+    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; git -C \$BUILD clean -qdfx -e .comrev ; git -C \$BUILD reset -q --hard ; exit' 1 2 3 6 15 ERR
 
     # Update Docker container.
     printf "$MESSAGE\n%s\n\e[0m" "Updating Docker container. Please wait..."
@@ -724,17 +730,18 @@ dockerentry() {
          sed -i '/#include "exchndl.h"/d' "$BUILD/src/sdl/i_main.c"
          sed -i '/ExcHndlInit()/d' "$BUILD/src/sdl/i_main.c"
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+         # Linking windres and dllwrap for compiling specific builds.
+         if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-            sudo ln -sf /usr/bin/i686-w64-mingw32-windres /usr/bin/windres
-            sudo ln -sf /usr/bin/i686-w64-mingw32-dllwrap /usr/bin/dllwrap
+             sudo ln -sf /usr/bin/i686-w64-mingw32-windres /usr/bin/windres
+             sudo ln -sf /usr/bin/i686-w64-mingw32-dllwrap /usr/bin/dllwrap
 
-        else
+         else
 
-            sudo ln -sf "/usr/bin/\$ARCH-w64-mingw32-windres" /usr/bin/windres
-            sudo ln -sf "/usr/bin/\$ARCH-w64-mingw32-dllwrap" /usr/bin/dllwrap
+             sudo ln -sf "/usr/bin/\$ARCH-w64-mingw32-windres" /usr/bin/windres
+             sudo ln -sf "/usr/bin/\$ARCH-w64-mingw32-dllwrap" /usr/bin/dllwrap
 
-        fi
+         fi
 
     fi
 
@@ -844,9 +851,10 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         else
 
-              git -C "\$BUILDPATH/libraries/discord-rpc" clean -dfx
-              git -C "\$BUILDPATH/libraries/discord-rpc" reset --hard
-              git -C "\$BUILDPATH/libraries/discord-rpc" pull
+              printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+              git -C "\$BUILDPATH/libraries/discord-rpc" clean -qdfx
+              git -C "\$BUILDPATH/libraries/discord-rpc" reset -q --hard
+              git -C "\$BUILDPATH/libraries/discord-rpc" pull --rebase
 
         fi
 
@@ -865,13 +873,14 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ ! -d "\$BUILDPATH/libraries/libopenvr/.git" ]; then
 
-            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
             git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$BUILDPATH/libraries/libopenvr"
 
         else
 
-            git -C "\$BUILDPATH/libraries/libopenvr" clean -dfx
-            git -C "\$BUILDPATH/libraries/libopenvr" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            git -C "\$BUILDPATH/libraries/libopenvr" clean -qdfx
+            git -C "\$BUILDPATH/libraries/libopenvr" reset -q --hard
             git -C "\$BUILDPATH/libraries/libopenvr" fetch origin master
 
         fi
@@ -927,13 +936,28 @@ if [ "\$APPIMAGE" = 1 ]; then
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
         mkdir -p "\$BUILD/objs/Linux/SDL/Release"
+
+        # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
+        if [ "\$OS" = "Linux" ] && [ -f /usr/local/lib/libpng12.so.0 ]; then
+
+            sudo -E stow -D --adopt libpng12-lib32
+
+        fi
+
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1
 
         else
 
             CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1
+
+        fi
+
+        # Renabling libpng12.
+        if [ "\$OS" = "Linux" ] && [ -d /usr/local/stow/libpng12 ]; then
+
+            sudo -E stow --adopt libpng12-lib32
 
         fi
 
@@ -1079,7 +1103,7 @@ DESKTOP
         cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
 [Desktop Entry]
 Type=Application
-Name=Sonic Robo Blast 2 2.1 Legacy
+Name=Sonic Robo Blast 2 v2.1 Legacy
 Comment=Open source 3D Sonic platformer based on Doom Legacy engine
 Icon=icon
 Exec=AppRun
@@ -1106,7 +1130,7 @@ DESKTOP
         cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
 [Desktop Entry]
 Type=Application
-Name=Sonic Robo Blast 2 2.0
+Name=Sonic Robo Blast 2 v2.0
 Comment=Open source 3D Sonic platformer based on Doom Legacy engine
 Icon=icon
 Exec=AppRun
@@ -1320,7 +1344,7 @@ APPRUNBIN
 
         cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
 
 DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
         cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
@@ -1454,7 +1478,7 @@ else
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1462,11 +1486,23 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            fi
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            else
+
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1474,19 +1510,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
-
-                    printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
-
-                else
-
-                    printf "$NOTICE%s\n\e[0m" "CC="x86_64-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
-
-                fi
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1510,7 +1538,7 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
@@ -1555,9 +1583,10 @@ else
 
         else
 
-            git -C "\$BUILDPATH/libraries/libopenmpt" clean -dfx
-            git -C "\$BUILDPATH/libraries/libopenmpt" reset --hard
-            git -C "\$BUILDPATH/libraries/libopenmpt" pull
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
+            git -C "\$BUILDPATH/libraries/libopenmpt" clean -qdfx
+            git -C "\$BUILDPATH/libraries/libopenmpt" reset -q --hard
+            git -C "\$BUILDPATH/libraries/libopenmpt" pull --rebase
 
         fi
 
@@ -1574,13 +1603,14 @@ else
 
         if [ ! -d "\$BUILDPATH/libraries/libpng12/.git" ]; then
 
-            printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng12. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng12's source code. Please wait..."
             git clone https://github.com/glennrp/libpng.git --recursive --branch libpng12 "\$BUILDPATH/libraries/libpng12"
 
         else
 
-            git -C "\$BUILDPATH/libraries/libpng12" clean -dfx
-            git -C "\$BUILDPATH/libraries/libpng12" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12. Please wait..."
+            git -C "\$BUILDPATH/libraries/libpng12" clean -qdfx
+            git -C "\$BUILDPATH/libraries/libpng12" reset -q --hard
             git -C "\$BUILDPATH/libraries/libpng12" fetch origin master
 
         fi
@@ -1588,7 +1618,7 @@ else
         cd "\$BUILDPATH/libraries/libpng12" || exit
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
-        ./configure --prefix=/usr/local/stow/libpng12-lib32 --includedir=/usr/local/stow/libpng12-lib32/include --libdir=/usr/local/stow/libpng12-lib32/lib
+        ./configure --prefix=/usr/local/stow/libpng12-lib32
         CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libpng12"
         sudo make -C "\$BUILDPATH/libraries/libpng12" install
         sudo -E stow -v --adopt libpng12-lib32
@@ -1606,9 +1636,10 @@ else
 
         else
 
-              git -C "\$BUILDPATH/libraries/discord-rpc" clean -dfx
-              git -C "\$BUILDPATH/libraries/discord-rpc" reset --hard
-              git -C "\$BUILDPATH/libraries/discord-rpc" pull
+              printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+              git -C "\$BUILDPATH/libraries/discord-rpc" clean -qdfx
+              git -C "\$BUILDPATH/libraries/discord-rpc" reset -q --hard
+              git -C "\$BUILDPATH/libraries/discord-rpc" pull --rebase
 
         fi
 
@@ -1648,13 +1679,14 @@ else
 
         if [ ! -d "\$BUILDPATH/libraries/libopenvr/.git" ]; then
 
-            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
             git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$BUILDPATH/libraries/libopenvr"
 
         else
 
-            git -C "\$BUILDPATH/libraries/libopenvr" clean -dfx
-            git -C "\$BUILDPATH/libraries/libopenvr" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            git -C "\$BUILDPATH/libraries/libopenvr" clean -qdfx
+            git -C "\$BUILDPATH/libraries/libopenvr" reset -q --hard
             git -C "\$BUILDPATH/libraries/libopenvr" fetch origin master
 
         fi
@@ -1696,8 +1728,8 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
             else
 
-                CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
-                \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+                CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
 
@@ -1705,15 +1737,30 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
             mkdir -p "\$BUILD/objs/Mingw/SDL/Release"
             mkdir -p "\$BUILD/objs/Mingw/Release"
+
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -C "\$BUILD/src" MINGW=1 SDL=1 \$CONF
+                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2sdl.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NONX86=1 SDL=1 \$CONF
-                \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 \$CONF
+                \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+
+            fi
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2kart.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+
+            else
+
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2kart.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
 
@@ -1726,13 +1773,13 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
                 gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
                 bash ../comptime.sh
 
-                if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+                if [ "\$IS64" = "64" ]; then
 
-                    CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                    CC="x86_64-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 else
 
-                    CC="x86_64-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                    CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 fi
 
@@ -1749,9 +1796,9 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
                     fi
 
-                elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+                elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ]; then
 
-                    if [ "\$IS64" = "64" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-kart-vr" ]; then
+                    if [ "\$IS64" = "64" ]; then
 
                         x86_64-w64-mingw32-objdump -x "\$BUILD/bin/Mingw64/Release/srb2kart.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
@@ -1796,7 +1843,7 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
                 else
 
-                    \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+                    \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/srb2win\$IS64.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
                 fi
 
@@ -1823,9 +1870,17 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
             mkdir -p "\$BUILD/objs/Linux/SDL/Release"
+
+            # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
+            if [ "\$OS" = "Linux" ] && [ -f /usr/local/lib/libpng12.so.0 ]; then
+
+                sudo -E stow -D --adopt libpng12-lib32
+
+            fi
+
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
 
             else
 
@@ -1850,6 +1905,13 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
             fi
 
+            # Renabling libpng12.
+            if [ "\$OS" = "Linux" ] && [ -d /usr/local/stow/libpng12 ]; then
+
+                sudo -E stow --adopt libpng12-lib32
+
+            fi
+
             cd "\$BUILD" || exit
 
         fi
@@ -1857,8 +1919,6 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
     fi
 
     COMREV=\$(git rev-parse --short HEAD)
-
-    printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
 
     # Create desktop file.
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
@@ -1924,7 +1984,7 @@ DESKTOP
 [Desktop Entry]
 Version=\$COMREV
 Type=Application
-Name=Sonic Robo Blast 2 2.1 Legacy (Software)
+Name=Sonic Robo Blast 2 v2.1 Legacy (Software)
 Comment=Open source 3D Sonic platformer based on Doom Legacy engine
 Icon=srb2legacy
 Exec=srb2legacy -software
@@ -1935,7 +1995,7 @@ NoDisplay=false
 DESKTOP
 
     cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2legacy-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2legacy-opengl.desktop"
-    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 2.1 Legacy \\\(Software\\\)","Name=Sonic Robo Blast 2 2.1 Legacy (OpenGL)") || gsub("Exec=srb2legacy -software","Exec=srb2legacy -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2legacy-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 v2.1 Legacy \\\(Software\\\)","Name=Sonic Robo Blast 2 v2.1 Legacy (OpenGL)") || gsub("Exec=srb2legacy -software","Exec=srb2legacy -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2legacy-opengl.desktop"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
@@ -1943,7 +2003,7 @@ DESKTOP
 [Desktop Entry]
 Version=\$COMREV
 Type=Application
-Name=Sonic Robo Blast 2 2.0 (Software)
+Name=Sonic Robo Blast 2 v2.0 (Software)
 Comment=Open source 3D Sonic platformer based on Doom Legacy engine
 Icon=srb2_2.0
 Exec=srb2_2.0 -software
@@ -1954,7 +2014,7 @@ NoDisplay=false
 DESKTOP
 
     cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2_2.0-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2_2.0-opengl.desktop"
-    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 2.0 \\\(Software\\\)","Name=Sonic Robo Blast 2 2.0 (OpenGL)") || gsub("Exec=srb2_2.0 -software","Exec=srb2_2.0 -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2_2.0-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 v2.0 \\\(Software\\\)","Name=Sonic Robo Blast 2 v2.0 (OpenGL)") || gsub("Exec=srb2_2.0 -software","Exec=srb2_2.0 -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2_2.0-opengl.desktop"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
@@ -2384,8 +2444,8 @@ dockerrun() {
     fi
 
     CONTAINER_ID=$(docker ps -alq)
-    docker stop "$CONTAINER_ID"
-    docker container rm "$CONTAINER_ID"
+    docker stop "$CONTAINER_ID" > /dev/null
+    docker container rm "$CONTAINER_ID" > /dev/null
 }
 
 installtolinux() {
@@ -2494,7 +2554,7 @@ installtolinux() {
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2persona-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2persona.png"
-        printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2p binary, assets and desktop files to /usr/local/bin and /usr/local/share/games."
+        printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2p binary, assets to /usr/local/bin and /usr/local/share/games."
         sudo install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2" "/usr/local/bin/srb2p"
         sudo install -d "/usr/local/share/games/SRB2Persona"
         sudo cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2Persona"
@@ -2551,7 +2611,7 @@ installtolinux() {
     # Refreshing menu icons.
     if [ -x "$(which gtk-update-icon-cache 2> /dev/null)" ]; then
 
-        sudo gtk-update-icon-cache --force --ignore-theme-index /usr/local/share/icons/hicolor
+        sudo gtk-update-icon-cache -qft /usr/local/share/icons/hicolor
 
     elif [ -x "$(which kbuildsycoca5 2> /dev/null)" ]; then
 
@@ -2885,11 +2945,11 @@ installtomacos() {
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 2.1 Legacy"
+        MACAPPNAME="Sonic Robo Blast 2 v2.1 Legacy"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 2.0"
+        MACAPPNAME="Sonic Robo Blast 2 v2.0"
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
@@ -2933,8 +2993,9 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libpng" clean -dfx
-            git -C "$BUILDPATH/libraries/libpng" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libpng" clean -qdfx
+            git -C "$BUILDPATH/libraries/libpng" reset -q --hard
             git -C "$BUILDPATH/libraries/libpng" fetch origin master
 
         fi
@@ -2958,8 +3019,9 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libogg" clean -dfx
-            git -C "$BUILDPATH/libraries/libogg" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libogg's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libogg" clean -qdfx
+            git -C "$BUILDPATH/libraries/libogg" reset -q --hard
             git -C "$BUILDPATH/libraries/libpng" fetch origin master
 
         fi
@@ -2983,8 +3045,9 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libvorbis" clean -dfx
-            git -C "$BUILDPATH/libraries/libvorbis" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libvorbis' source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libvorbis" clean -qdfx
+            git -C "$BUILDPATH/libraries/libvorbis" reset -q --hard
             git -C "$BUILDPATH/libraries/libvorbis" fetch origin master
 
         fi
@@ -3010,9 +3073,10 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libmpg123" clean -dfx
-            git -C "$BUILDPATH/libraries/libmpg123" reset --hard
-            git -C "$BUILDPATH/libraries/libmpg123" pull
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmpg123's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libmpg123" clean -qdfx
+            git -C "$BUILDPATH/libraries/libmpg123" reset -q --hard
+            git -C "$BUILDPATH/libraries/libmpg123" pull --rebase
 
         fi
 
@@ -3037,9 +3101,10 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libmodplug" clean -dfx
-            git -C "$BUILDPATH/libraries/libmodplug" reset --hard
-            git -C "$BUILDPATH/libraries/libmodplug" pull
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmodplug's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libmodplug" clean -qdfx
+            git -C "$BUILDPATH/libraries/libmodplug" reset -q --hard
+            git -C "$BUILDPATH/libraries/libmodplug" pull --rebase
 
         fi
 
@@ -3062,8 +3127,9 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libsdl2" clean -dfx
-            git -C "$BUILDPATH/libraries/libsdl2" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libsdl2" clean -qdfx
+            git -C "$BUILDPATH/libraries/libsdl2" reset -q --hard
             git -C "$BUILDPATH/libraries/libsdl2" fetch origin main
 
         fi
@@ -3087,8 +3153,9 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libsdl2-mixer" clean -dfx
-            git -C "$BUILDPATH/libraries/libsdl2-mixer" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixer's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libsdl2-mixer" clean -qdfx
+            git -C "$BUILDPATH/libraries/libsdl2-mixer" reset -q --hard
             git -C "$BUILDPATH/libraries/libsdl2-mixer" fetch origin master
 
         fi
@@ -3135,8 +3202,9 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libopenmpt" clean -dfx
-            git -C "$BUILDPATH/libraries/libopenmpt" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libopenmpt" clean -qdfx
+            git -C "$BUILDPATH/libraries/libopenmpt" reset -q --hard
             git -C "$BUILDPATH/libraries/libopenmpt" fetch origin master
 
         fi
@@ -3161,8 +3229,9 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/libgme" clean -dfx
-            git -C "$BUILDPATH/libraries/libgme" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/libgme" clean -qdfx
+            git -C "$BUILDPATH/libraries/libgme" reset -q --hard
             git -C "$BUILDPATH/libraries/libgme" fetch origin master
 
         fi
@@ -3186,9 +3255,10 @@ installtomacos() {
 
         else
 
-            git -C "$BUILDPATH/libraries/discord-rpc" clean -dfx
-            git -C "$BUILDPATH/libraries/discord-rpc" reset --hard
-            git -C "$BUILDPATH/libraries/discord-rpc" pull
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+            git -C "$BUILDPATH/libraries/discord-rpc" clean -qdfx
+            git -C "$BUILDPATH/libraries/discord-rpc" reset -q --hard
+            git -C "$BUILDPATH/libraries/discord-rpc" pull --rebase
 
         fi
 
@@ -3206,13 +3276,14 @@ installtomacos() {
 
         if [ ! -d "$BUILDPATH/libraries/libopenvr/.git" ]; then
 
-            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr. Please wait..."
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
             git clone https://github.com/ValveSoftware/openvr.git --recursive --recursive --branch "v$OPENVRVER" "$BUILDPATH/libraries/libopenvr"
 
         else
 
-            git -C "$BUILDPATH/libraries/libopenvr" clean -dfx
-            git -C "$BUILDPATH/libraries/libopenvr" reset --hard
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            git -C "$BUILDPATH/libraries/libopenvr" clean -qdfx
+            git -C "$BUILDPATH/libraries/libopenvr" reset -q --hard
             git -C "$BUILDPATH/libraries/libopenvr" fetch origin master
 
         fi
@@ -3300,13 +3371,15 @@ installtomacos() {
 }
 
 installtowindows() {
-    # Installing build's binary, assets, libraries, icons and desktop file to the system.
+    # Installing build's binary, assets, libraries, icons and desktop files to the system.
+    printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop files to the system. Please wait..."
+
     if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
 
         SRB2WINDIR="SRB2"
         SRB2WINMENUDIR="Sonic Robo Blast 2"
         SRB2WINBIN="srb2win$IS64.exe"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
@@ -3316,15 +3389,15 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
-        SRB2WINDIR="SRB2UncappedPlus"
+        SRB2WINDIR="SRB2 Uncapped Plus"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Uncapped PLUS"
         SRB2WINBIN="srb2win$IS64.exe"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
@@ -3334,15 +3407,15 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
 
-        SRB2WINDIR="SRB2NetPlus"
+        SRB2WINDIR="SRB2 NetPlus"
         SRB2WINMENUDIR="Sonic Robo Blast 2 NetPlus"
         SRB2WINBIN="srb2win$IS64.exe"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
@@ -3352,15 +3425,15 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        SRB2WINDIR="SRB2-2.1-Legacy"
-        SRB2WINMENUDIR="Sonic Robo Blast 2 2.1 Legacy"
+        SRB2WINDIR="SRB2 v2.1 Legacy"
+        SRB2WINMENUDIR="Sonic Robo Blast 2 v2.1 Legacy"
         SRB2WINBIN="srb2win.exe"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
@@ -3370,27 +3443,29 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/exchndl.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-        SRB2WINDIR="SRB2-2.0"
-        SRB2WINMENUDIR="Sonic Robo Blast 2 2.0"
+        SRB2WINDIR="SRB2 v2.0"
+        SRB2WINMENUDIR="Sonic Robo Blast 2 v2.0"
         SRB2WINBIN="srb2win.exe"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        cp -rf "$BUILD/build/AppDir/usr/lib/r_opengl.dll" "$BUILD/build/AppDir/usr/lib/fmod.dll" "$SRB2WINPATH"
+        touch "$SRB2WINPATH/md2.dat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-        SRB2WINDIR="SRB2FinalDemo"
+        SRB2WINDIR="SRB2 Final Demo"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Final Demo"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINBIN="srb2sdl.exe"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
@@ -3401,14 +3476,14 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        SRB2WINDIR="SRB2Persona"
+        SRB2WINDIR="SRB2 Persona"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Persona"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINBIN="srb2win.exe"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
@@ -3419,15 +3494,15 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
 
-        SRB2WINDIR="SRB2Kart"
+        SRB2WINDIR="SRB2 Kart"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Kart"
         SRB2WINBIN="srb2kart.exe"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
@@ -3437,15 +3512,15 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
 
-        SRB2WINDIR="SRB2KartMoeMansion"
+        SRB2WINDIR="SRB2 Kart Moe Mansion"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Kart Moe Mansion"
         SRB2WINBIN="srb2kart.exe"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
@@ -3455,15 +3530,15 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
-        SRB2WINDIR="SRB2KartVR"
+        SRB2WINDIR="SRB2 Kart VR"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Kart VR"
         SRB2WINBIN="srb2kart.exe"
-        SRB2WINPATH="$HOME/$SRB2WINDIR"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
@@ -3473,8 +3548,8 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
-        printf "@echo off\n$SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
-        printf "@echo off\n$SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
     fi
 
@@ -3484,26 +3559,26 @@ installtowindows() {
         cat > "$BUILD/build/winmenugen.ps1" << WINMENUGEN
 New-Item -Force -ItemType Directory -Path "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
 
-\$SourceFilePath = "\$HOME/$SRB2WINDIR/$SRB2WINDIR (Software).bat"
+\$SourceFilePath = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINDIR (Software).bat"
 \$ShortcutPath = "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR/$SRB2WINDIR (Software).bat.lnk"
 \$WScriptObj = New-Object -ComObject ("WScript.Shell")
 \$shortcut = \$WscriptObj.CreateShortcut(\$ShortcutPath)
 \$shortcut.TargetPath = \$SourceFilePath
-\$shortcut.WorkingDirectory = "\$HOME/$SRB2WINDIR"
-\$shortcut.IconLocation = "\$HOME/$SRB2WINDIR/$SRB2WINBIN"
+\$shortcut.WorkingDirectory = "\$HOME/SRB2 Games/$SRB2WINDIR"
+\$shortcut.IconLocation = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINBIN"
 \$shortcut.Save()
 
-\$SourceFilePath = "\$HOME/$SRB2WINDIR/$SRB2WINDIR (OpenGL).bat"
+\$SourceFilePath = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINDIR (OpenGL).bat"
 \$ShortcutPath = "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR/$SRB2WINDIR (OpenGL).bat.lnk"
 \$WScriptObj = New-Object -ComObject ("WScript.Shell")
 \$shortcut = \$WscriptObj.CreateShortcut(\$ShortcutPath)
 \$shortcut.TargetPath = \$SourceFilePath
-\$shortcut.WorkingDirectory = "\$HOME/$SRB2WINDIR"
-\$shortcut.IconLocation = "\$HOME/$SRB2WINDIR/$SRB2WINBIN"
+\$shortcut.WorkingDirectory = "\$HOME/SRB2 Games/$SRB2WINDIR"
+\$shortcut.IconLocation = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINBIN"
 \$shortcut.Save()
 WINMENUGEN
 
-        powershell -File "$BUILD/build/winmenugen.ps1"
+        powershell -File "$BUILD/build/winmenugen.ps1" > /dev/null
 
     fi
 
@@ -3533,10 +3608,10 @@ upgrade() {
 
     for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '!/assets|containers|installed|libraries/ && !/srb2-2.0/ && !/srb2-final-demo/ {print $NF}' | sort); do
 
-        printf "$MESSAGE\n%s\n\e[0m" "Updating $u. Please wait..."
-        git -C "$BUILDPATH/$u" clean -dfx -e .comrev
-        git -C "$BUILDPATH/$u" reset --hard
-        git -C "$BUILDPATH/$u" pull
+        printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $u. Please wait..."
+        git -C "$BUILDPATH/$u" clean -qdfx -e .comrev
+        git -C "$BUILDPATH/$u" reset -q --hard
+        git -C "$BUILDPATH/$u" pull --rebase
 
         if [ -f "$BUILDPATH/installed/$u" ] && [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
 
@@ -3602,7 +3677,7 @@ Usage: srb2bld [OPTIONS]
      4. Uninstall SRB2/SRB2Kart build:
             srb2bld --uninstall
 
-  Warning! Old builds like SRB2 2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
+  Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
 
   If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
 "

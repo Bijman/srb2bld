@@ -21,9 +21,9 @@ https://user-images.githubusercontent.com/16626326/151419100-655773a8-97da-4188-
 - Gawk,
 - Docker (Linux and Windows only),
 - GNU Stow (Linux and MacOS only),
-- Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GTK+ or KDE desktop environment package).
+- Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package).
 
-Windows users need to also have installed Git Bash to run this script. Also PowerShell is required for updating icons and menu entries.
+Windows users need to also have installed Git Bash to run this script. Also PowerShell is required for updating icons and menu entries (usually it is installed out-of-box on Windows 7 or later).
 
 As for MacOS users, they need to install these additional dependencies:
 - Cmake,
@@ -109,18 +109,18 @@ As for MacOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source ~/.bash_profile` or `source ~/.zshrc`.
 
 # Compatibility
-|                       | Linux x86/x64 | Windows x86/x64 | MacOS x86/x64 |
-| :-------------------: | :-----------: | :-------------: | :-----------: |
-| SRB2                  |      ✅       |       ✅        |       ✅      |
-| SRB2 Uncapped Plus    |      ✅       |       ✅        |       🟨**    |
-| SRB2 NetPlus          |      ✅       |       ✅        |       ⛔      |
-| SRB2 2.1 Legacy       |      ✅       |       ✅        |       ✅      |
-| SRB2 2.0              |      ✅       |       ✅*       |       ⛔      |
-| SRB2 Final Demo       |      ✅*      |       ✅*       |       ⛔      |
-| SRB2 Persona          |      ✅       |       ✅        |       ✅      |
-| SRB2 Kart             |      ✅       |       ✅        |       🟨***   |
-| SRB2 Kart Moe Mansion |      ✅       |       ✅        |       ⛔      |
-| SRB2 Kart VR          |      ✅       |       ✅*       |       ⛔      |
+|                       | Linux glibc x86/x64 | Linux musl x86/x64 | Windows x86/x64 | MacOS x86/x64 |
+| :-------------------: | :-----------------: | :----------------: | :-------------: | :-----------: |
+| SRB2                  |          ✅         |         ✅         |       ✅        |       ✅      |
+| SRB2 Uncapped Plus    |          ✅         |         ✅         |       ✅        |       🟨**    |
+| SRB2 NetPlus          |          ✅         |         ✅         |       ✅        |       ⛔      |
+| SRB2 2.1 Legacy       |          ✅         |         ✅         |       ✅        |       ✅      |
+| SRB2 2.0              |          ✅         |         ✅         |       ✅        |       ⛔      |
+| SRB2 Final Demo       |          ✅*        |         ⛔         |       ✅*       |       ⛔      |
+| SRB2 Persona          |          ✅         |         ⛔         |       ✅        |       ✅      |
+| SRB2 Kart             |          ✅         |         ✅         |       ✅        |       🟨***   |
+| SRB2 Kart Moe Mansion |          ✅         |         ✅         |       ✅        |       ⛔      |
+| SRB2 Kart VR          |          ✅         |         ✅         |       ✅*       |       ⛔      |
 
 **Legend:**
 
@@ -130,7 +130,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 ⛔ - Building failure.
 
-*Only 32bit binaries are currently supported. SRB2 2.0 has issues when compiling/running with OpenGL on Linux and Windows, so only software acceleration for this build for now.
+*Only 32bit binaries are currently supported. SRB2 2.0 has issues when compiling/running with OpenGL on Linux, so only software acceleration for this build for now.
 
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
