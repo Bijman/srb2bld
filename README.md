@@ -115,7 +115,7 @@ As for MacOS users, they need to install these additional dependencies:
 | SRB2 Uncapped Plus    |          ✅         |         ✅         |       ✅        |       🟨**    |
 | SRB2 NetPlus          |          ✅         |         ✅         |       ✅        |       ⛔      |
 | SRB2 2.1 Legacy       |          ✅         |         ✅         |       ✅        |       ✅      |
-| SRB2 2.0              |          ✅         |         ✅         |       ✅        |       ⛔      |
+| SRB2 2.0              |          ✅         |         ✅         |       ✅*       |       ⛔      |
 | SRB2 Final Demo       |          ✅*        |         ⛔         |       ✅*       |       ⛔      |
 | SRB2 Persona          |          ✅         |         ⛔         |       ✅        |       ✅      |
 | SRB2 Kart             |          ✅         |         ✅         |       ✅        |       🟨***   |
@@ -130,7 +130,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 ⛔ - Building failure.
 
-*Only 32bit binaries are currently supported. SRB2 2.0 has issues when compiling/running with OpenGL on Linux, so only software acceleration for this build for now.
+*Only 32bit binaries are currently supported. SRB2 2.0 has graphical issues when running with OpenGL on Linux.
 
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 

@@ -8,13 +8,14 @@ OS=$(uname)
 IS64=$(printf "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, RLENGTH)}')
 if [ "$OS" = "Darwin" ]; then
 
-    BUILDPATH="$HOME/Library/srb2bld"
+    SRB2BLDROOT="$HOME/Library/srb2bld"
 
 else
 
-    BUILDPATH="$HOME/.local/share/srb2bld"
+    SRB2BLDROOT="$HOME/.local/share/srb2bld"
 
 fi
+BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
 #SRB2VER=$(curl -Ls https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/tag_name/ {print $4}')
@@ -257,7 +258,7 @@ chooseinstall() {
 
 chooseremoveasset() {
     clear
-    if [ -z "$(find "$BUILDPATH/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find assets."
         exit
@@ -266,7 +267,7 @@ chooseremoveasset() {
 
     # Remove asset.
     printf "$MESSAGE%s\n\e[0m" "Please choose asset by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$BUILDPATH/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
+    array=$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -304,7 +305,7 @@ chooseremoveasset() {
 
 chooseremovebuild() {
     clear
-    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|containers|installed|libraries/ {print}' 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find builds."
         exit
@@ -313,7 +314,7 @@ chooseremovebuild() {
 
     # Remove build.
     printf "$MESSAGE%s\n\e[0m" "Please choose build by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 | gawk '!/assets|containers|installed|libraries/ {print}' 2> /dev/null | sort)
+    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -351,7 +352,7 @@ chooseremovebuild() {
 
 chooseuninstall() {
     clear
-    if [ -z "$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
         exit
@@ -360,7 +361,7 @@ chooseuninstall() {
 
     # Uninstall build on system.
     printf "$MESSAGE%s\n\e[0m" "Please choose installed package by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
+    array=$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -446,14 +447,14 @@ defaultmessage() {
 
 dockerentry() {
     # Prepare containers path.
-    if [ ! -d "$BUILDPATH/containers/srb2-docker" ]; then
+    if [ ! -d "$SRB2BLDROOT/containers/srb2-docker" ]; then
 
-        mkdir -p "$BUILDPATH/containers/srb2-docker"
+        mkdir -p "$SRB2BLDROOT/containers/srb2-docker"
 
     fi
 
     # Create entrypoint shell script for Docker container.
-    cat > "$BUILDPATH/containers/srb2-docker/Entrypoint" << ENTRYPOINT
+    cat > "$SRB2BLDROOT/containers/srb2-docker/Entrypoint" << ENTRYPOINT
 #!/bin/bash
 
     set -e
@@ -461,6 +462,7 @@ dockerentry() {
     export ARCH="$ARCH"
     export OS="$OS"
     export IS64="$IS64"
+    export SRB2BLDROOT="$SRB2BLDROOT"
     export BUILDPATH="$BUILDPATH"
     export BUILD="$BUILD"
     export GIT="$GIT"
@@ -495,7 +497,7 @@ dockerentry() {
     fi
 
     # Make directories for storing essential files.
-    mkdir -p "\$BUILDPATH/assets" "\$BUILDPATH/libraries" "\$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
+    mkdir -p "\$SRB2BLDROOT/builds" "\$SRB2BLDROOT/assets" "\$SRB2BLDROOT/libraries" "\$BUILD/build/AppDir/usr/"{bin,games,lib,share/applications}
     cd "\$BUILD" || exit
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
@@ -513,13 +515,13 @@ dockerentry() {
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$BUILDPATH/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-           curl -RLC - "\$SRB2ASSETSURL" -o "\$BUILDPATH/assets/SRB2.zip"
+           curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
-        7z x -y "\$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        7z x -y "\$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
         find "\$BUILD/build/AppDir/usr/games/SRB2/models" -type d -exec chmod 755 {} \;
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -551,17 +553,17 @@ dockerentry() {
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         curl -c /tmp/cookie -s -L "https://drive.google.com/uc?export=download&id=$SRB2PERSONAFILEID" > /dev/null
-        curl -RLb /tmp/cookie -C - "https://drive.google.com/uc?export=download&confirm=\$(gawk '/download/ {print \$NF}' /tmp/cookie)&id=$SRB2PERSONAFILEID" -o "\$BUILDPATH/assets/SRB2P_MP.rar"
-        7z x -y "\$BUILDPATH/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        curl -RLb /tmp/cookie -C - "https://drive.google.com/uc?export=download&confirm=\$(gawk '/download/ {print \$NF}' /tmp/cookie)&id=$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$BUILDPATH/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-           curl -RLC - "\$SRB2ASSETSURL" -o "\$BUILDPATH/assets/SRB2.zip"
+           curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
-        7z x -y "\$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        7z x -y "\$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
         find "\$BUILD/build/AppDir/usr/games/SRB2/models" -type d -exec chmod 755 {} \;
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -592,8 +594,8 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe -o "\$BUILDPATH/assets/SRB2-2.1.exe"
-        7z x -y "\$BUILDPATH/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe -o "\$SRB2BLDROOT/assets/SRB2-2.1.exe"
+        7z x -y "\$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
@@ -617,30 +619,30 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
-        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "\$BUILDPATH/assets/SRB2-2.0.exe"
-        7z x -y "\$BUILDPATH/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "\$SRB2BLDROOT/assets/SRB2-2.0.exe"
+        7z x -y "\$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
-            7z x -y "\$BUILDPATH/assets/SRB2-2.0.exe" "*.dll" -o"\$BUILD/build/AppDir/usr/lib"
+            7z x -y "\$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.dll" -o"\$BUILD/build/AppDir/usr/lib"
 
         fi
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
-        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "\$BUILDPATH/assets/SRB2FinalDemo.exe"
-        7z x -y "\$BUILDPATH/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
+        7z x -y "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-            if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$BUILDPATH/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+            if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-                curl -RLC - "\$SRB2ASSETSURL" -o "\$BUILDPATH/assets/SRB2.zip"
+                curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
             fi
 
-            7z x -y "\$BUILDPATH/assets/SRB2.zip" "*.dll" -o"\$BUILD/build/AppDir/usr/lib"
+            7z x -y "\$SRB2BLDROOT/assets/SRB2.zip" "*.dll" -o"\$BUILD/build/AppDir/usr/lib"
             mv "\$BUILD/build/AppDir/usr/lib/SDL2_mixer_ext.dll" "\$BUILD/build/AppDir/usr/lib/SDL2_mixer.dll"
 
         fi
@@ -649,13 +651,13 @@ dockerentry() {
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         SRB2KARTASSETSURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
-        if [ "\$(curl -sLI "\$SRB2KARTASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$BUILDPATH/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "\$(curl -sLI "\$SRB2KARTASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RLC - "\$SRB2KARTASSETSURL" -o "\$BUILDPATH/assets/SRB2Kart.exe"
+            curl -RLC - "\$SRB2KARTASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
-        7z x -y "\$BUILDPATH/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+        7z x -y "\$SRB2BLDROOT/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
         find "\$BUILD/build/AppDir/usr/games/SRB2Kart/mdls" -type d -exec chmod 755 {} \;
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -844,26 +846,26 @@ if [ "\$APPIMAGE" = 1 ]; then
     if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         # Download DiscordRPC source code and build it.
-        if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
+        if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
               printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-              git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$BUILDPATH/libraries/discord-rpc"
+              git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$SRB2BLDROOT/libraries/discord-rpc"
 
         else
 
               printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
-              git -C "\$BUILDPATH/libraries/discord-rpc" clean -qdfx
-              git -C "\$BUILDPATH/libraries/discord-rpc" reset -q --hard
-              git -C "\$BUILDPATH/libraries/discord-rpc" pull --rebase
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --rebase
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building DiscordRPC. Please wait..."
-        mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
-        cd "\$BUILDPATH/libraries/discord-rpc/build" || exit
+        mkdir -p "\$SRB2BLDROOT/libraries/discord-rpc/build"
+        cd "\$SRB2BLDROOT/libraries/discord-rpc/build" || exit
         cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/discord-rpc/build"
-        sudo make -C "\$BUILDPATH/libraries/discord-rpc/build" install
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
+        sudo make -C "\$SRB2BLDROOT/libraries/discord-rpc/build" install
         cd "\$BUILD" || exit
 
     fi
@@ -871,27 +873,27 @@ if [ "\$APPIMAGE" = 1 ]; then
     # Download libopenvr's source code, build and install it.
     if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-        if [ ! -d "\$BUILDPATH/libraries/libopenvr/.git" ]; then
+        if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$BUILDPATH/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
-            git -C "\$BUILDPATH/libraries/libopenvr" clean -qdfx
-            git -C "\$BUILDPATH/libraries/libopenvr" reset -q --hard
-            git -C "\$BUILDPATH/libraries/libopenvr" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" fetch origin master
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
-        mkdir -p "\$BUILDPATH/libraries/libopenvr/build"
-        cp -rf "\$BUILDPATH/libraries/libopenvr/src/vrcommon" "\$BUILDPATH/libraries/libopenvr/src/vrcore"
-        cd "\$BUILDPATH/libraries/libopenvr/build" || exit
+        mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
+        cp -rf "\$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "\$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
+        cd "\$SRB2BLDROOT/libraries/libopenvr/build" || exit
         cmake .. -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenvr/build"
-        sudo make -C "\$BUILDPATH/libraries/libopenvr/build" install
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenvr/build"
+        sudo make -C "\$SRB2BLDROOT/libraries/libopenvr/build" install
         cd "\$BUILD" || exit
 
     fi
@@ -1576,24 +1578,24 @@ else
     # Download libopenmpt's source code, build and install it for musl based Linux OS.
     if [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libopenmpt.so ]; then
 
-        if [ ! -d "\$BUILDPATH/libraries/libopenmpt/.git" ]; then
+        if [ ! -d "\$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch master "\$BUILDPATH/libraries/libopenmpt"
+            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch master "\$SRB2BLDROOT/libraries/libopenmpt"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
-            git -C "\$BUILDPATH/libraries/libopenmpt" clean -qdfx
-            git -C "\$BUILDPATH/libraries/libopenmpt" reset -q --hard
-            git -C "\$BUILDPATH/libraries/libopenmpt" pull --rebase
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --rebase
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
-        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$BUILDPATH/libraries/libopenmpt/Makefile"
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-        sudo make -C "\$BUILDPATH/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
+        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+        sudo make -C "\$SRB2BLDROOT/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
         sudo -E stow -v --adopt libopenmpt
 
     fi
@@ -1601,26 +1603,26 @@ else
     # Download libpng12's source code, build and install it.
     if [ "\$OS" = "Linux" ] && [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ ! -f /usr/local/lib/libpng12.so.0 ]; then
 
-        if [ ! -d "\$BUILDPATH/libraries/libpng12/.git" ]; then
+        if [ ! -d "\$SRB2BLDROOT/libraries/libpng12/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng12's source code. Please wait..."
-            git clone https://github.com/glennrp/libpng.git --recursive --branch libpng12 "\$BUILDPATH/libraries/libpng12"
+            git clone https://github.com/glennrp/libpng.git --recursive --branch libpng12 "\$SRB2BLDROOT/libraries/libpng12"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12. Please wait..."
-            git -C "\$BUILDPATH/libraries/libpng12" clean -qdfx
-            git -C "\$BUILDPATH/libraries/libpng12" reset -q --hard
-            git -C "\$BUILDPATH/libraries/libpng12" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libpng12" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libpng12" fetch origin master
 
         fi
 
-        cd "\$BUILDPATH/libraries/libpng12" || exit
+        cd "\$SRB2BLDROOT/libraries/libpng12" || exit
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
         ./configure --prefix=/usr/local/stow/libpng12-lib32
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libpng12"
-        sudo make -C "\$BUILDPATH/libraries/libpng12" install
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libpng12"
+        sudo make -C "\$SRB2BLDROOT/libraries/libpng12" install
         sudo -E stow -v --adopt libpng12-lib32
         cd "\$BUILD" || exit
 
@@ -1629,44 +1631,44 @@ else
     # Download DiscordRPC source code, build and install it.
     if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
 
-        if [ ! -d "\$BUILDPATH/libraries/discord-rpc/.git" ]; then
+        if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
               printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-              git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$BUILDPATH/libraries/discord-rpc"
+              git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$SRB2BLDROOT/libraries/discord-rpc"
 
         else
 
               printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
-              git -C "\$BUILDPATH/libraries/discord-rpc" clean -qdfx
-              git -C "\$BUILDPATH/libraries/discord-rpc" reset -q --hard
-              git -C "\$BUILDPATH/libraries/discord-rpc" pull --rebase
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --rebase
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
-        mkdir -p "\$BUILDPATH/libraries/discord-rpc/build"
-        cd "\$BUILDPATH/libraries/discord-rpc/build" || exit
+        mkdir -p "\$SRB2BLDROOT/libraries/discord-rpc/build"
+        cd "\$SRB2BLDROOT/libraries/discord-rpc/build" || exit
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             DISCORDRPCURL="\$(curl -s https://api.github.com/repos/discord/discord-rpc/releases/latest | gawk -F'"' '/browser_download_url.*discord-rpc-win.zip/ {print \$4}')"
-            curl -RLC - "\$DISCORDRPCURL" -o "\$BUILDPATH/libraries/discord-rpc/discord-rpc-win.zip"
+            curl -RLC - "\$DISCORDRPCURL" -o "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip"
 
             if ([ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]) || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-                7z e -y "\$BUILDPATH/libraries/discord-rpc/discord-rpc-win.zip" "discord-rpc/win32-dynamic/bin/discord-rpc.dll" -o"\$BUILD/build/AppDir/usr/lib"
+                7z e -y "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip" "discord-rpc/win32-dynamic/bin/discord-rpc.dll" -o"\$BUILD/build/AppDir/usr/lib"
 
             else
 
-                7z e -y "\$BUILDPATH/libraries/discord-rpc/discord-rpc-win.zip" "discord-rpc/win64-dynamic/bin/discord-rpc.dll" -o"\$BUILD/build/AppDir/usr/lib"
+                7z e -y "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip" "discord-rpc/win64-dynamic/bin/discord-rpc.dll" -o"\$BUILD/build/AppDir/usr/lib"
 
             fi
 
         elif [ "\$OS" = "Linux" ]; then
 
               cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
-              CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/discord-rpc/build"
-              sudo make -C "\$BUILDPATH/libraries/discord-rpc/build" install
+              CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
+              sudo make -C "\$SRB2BLDROOT/libraries/discord-rpc/build" install
               sudo -E stow -v --adopt discord-rpc
               cd "\$BUILD" || exit
 
@@ -1677,27 +1679,27 @@ else
     # Download libopenvr's source code, build and install it.
     if [ "\$OS" = "Linux" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] && [ ! -f "/usr/local/lib/libopenvr_api.so" ]; then
 
-        if [ ! -d "\$BUILDPATH/libraries/libopenvr/.git" ]; then
+        if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$BUILDPATH/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
-            git -C "\$BUILDPATH/libraries/libopenvr" clean -qdfx
-            git -C "\$BUILDPATH/libraries/libopenvr" reset -q --hard
-            git -C "\$BUILDPATH/libraries/libopenvr" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" fetch origin master
 
         fi
 
             printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
-            mkdir -p "\$BUILDPATH/libraries/libopenvr/build"
-            cp -rf "\$BUILDPATH/libraries/libopenvr/src/vrcommon" "\$BUILDPATH/libraries/libopenvr/src/vrcore"
-            cd "\$BUILDPATH/libraries/libopenvr/build" || exit
+            mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
+            cp -rf "\$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "\$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
+            cd "\$SRB2BLDROOT/libraries/libopenvr/build" || exit
             cmake .. -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr
-            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$BUILDPATH/libraries/libopenvr/build"
-            sudo make -C "\$BUILDPATH/libraries/libopenvr/build" install
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenvr/build"
+            sudo make -C "\$SRB2BLDROOT/libraries/libopenvr/build" install
             sudo -E stow -v --adopt libopenvr
             cd "\$BUILD" || exit
 
@@ -2163,15 +2165,15 @@ DESKTOP
 fi
 
 ENTRYPOINT
-    chmod +x "$BUILDPATH/containers/srb2-docker/Entrypoint"
+    chmod +x "$SRB2BLDROOT/containers/srb2-docker/Entrypoint"
 
     # Prepare Docker images.
-    rm -rf "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-old-docker" "$BUILDPATH/containers/srb2-musl-docker" "$BUILDPATH/containers/srb2-old-musl-docker" "$BUILDPATH/containers/srb2-windows-docker" "$BUILDPATH/containers/srb2-old-windows-docker"
-    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-docker"
-    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-musl-docker"
-    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-musl-docker"
-    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-windows-docker"
-    cp -rf "$BUILDPATH/containers/srb2-docker" "$BUILDPATH/containers/srb2-old-windows-docker"
+    rm -rf "$SRB2BLDROOT/containers/srb2-old-docker" "$SRB2BLDROOT/containers/srb2-old-docker" "$SRB2BLDROOT/containers/srb2-musl-docker" "$SRB2BLDROOT/containers/srb2-old-musl-docker" "$SRB2BLDROOT/containers/srb2-windows-docker" "$SRB2BLDROOT/containers/srb2-old-windows-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-old-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-musl-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-old-musl-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-windows-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-old-windows-docker"
 
     # Set CPU architecture for Docker images in case of building old SRB2 versions.
     if ([ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]) && ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
@@ -2197,7 +2199,7 @@ ENTRYPOINT
     fi
 
     # Create Dockerfiles.
-    cat > "$BUILDPATH/containers/srb2-docker/Dockerfile" << DOCKERFILE
+    cat > "$SRB2BLDROOT/containers/srb2-docker/Dockerfile" << DOCKERFILE
 FROM "$ISARM"ubuntu:"$UBUVER"
 
 ENV container docker \
@@ -2225,7 +2227,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 
 DOCKERFILE
 
-    cat > "$BUILDPATH/containers/srb2-old-docker/Dockerfile" << DOCKERFILE
+    cat > "$SRB2BLDROOT/containers/srb2-old-docker/Dockerfile" << DOCKERFILE
 FROM "$ISARM"debian:"$DEBVER"
 
 ENV container docker \
@@ -2254,7 +2256,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 
 DOCKERFILE
 
-    cat > "$BUILDPATH/containers/srb2-musl-docker/Dockerfile" << DOCKERFILE
+    cat > "$SRB2BLDROOT/containers/srb2-musl-docker/Dockerfile" << DOCKERFILE
 FROM "$ISARM"alpine:latest
 
 ENV container docker
@@ -2274,7 +2276,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 
 DOCKERFILE
 
-    cat > "$BUILDPATH/containers/srb2-old-musl-docker/Dockerfile" << DOCKERFILE
+    cat > "$SRB2BLDROOT/containers/srb2-old-musl-docker/Dockerfile" << DOCKERFILE
 FROM "$ISARM"alpine:latest
 
 ENV container docker
@@ -2294,7 +2296,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 
 DOCKERFILE
 
-    cat > "$BUILDPATH/containers/srb2-windows-docker/Dockerfile" << DOCKERFILE
+    cat > "$SRB2BLDROOT/containers/srb2-windows-docker/Dockerfile" << DOCKERFILE
 FROM "$ISARM"debian:latest
 
 ENV container docker \
@@ -2323,7 +2325,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 
 DOCKERFILE
 
-    cat > "$BUILDPATH/containers/srb2-old-windows-docker/Dockerfile" << DOCKERFILE
+    cat > "$SRB2BLDROOT/containers/srb2-old-windows-docker/Dockerfile" << DOCKERFILE
 FROM "$ISARM"debian:"$DEBVER"
 
 ENV container docker \
@@ -2386,27 +2388,27 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for Windows SRB2 builds. Please wait..."
             docker pull "$ISARM"debian:"$DEBVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
-            docker build --rm -t srb2-old-windows-docker "$BUILDPATH/containers/srb2-old-windows-docker"
+            docker build --rm -t srb2-old-windows-docker "$SRB2BLDROOT/containers/srb2-old-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2bld:$BUILDPATH:rw" srb2-old-windows-docker
+            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2bld:$SRB2BLDROOT:rw" srb2-old-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for musl based Linux SRB2 builds. Please wait..."
             docker pull "$ISARM"alpine:latest
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
-            docker build --rm -t srb2-old-musl-docker "$BUILDPATH/containers/srb2-old-musl-docker"
+            docker build --rm -t srb2-old-musl-docker "$SRB2BLDROOT/containers/srb2-old-musl-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local:/usr/local:rw" srb2-old-musl-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-old-musl-docker
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker pull "$ISARM"debian:"$DEBVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
-            docker build --rm -t srb2-old-docker "$BUILDPATH/containers/srb2-old-docker"
+            docker build --rm -t srb2-old-docker "$SRB2BLDROOT/containers/srb2-old-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local:/usr/local:rw" srb2-old-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-old-docker
 
         fi
 
@@ -2417,27 +2419,27 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for Windows SRB2 builds. Please wait..."
             docker pull "$ISARM"debian:latest
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
-            docker build --rm -t srb2-windows-docker "$BUILDPATH/containers/srb2-windows-docker"
+            docker build --rm -t srb2-windows-docker "$SRB2BLDROOT/containers/srb2-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2bld:$BUILDPATH:rw" srb2-windows-docker
+            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2bld:$SRB2BLDROOT:rw" srb2-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for musl based Linux SRB2 builds. Please wait..."
             docker pull "$ISARM"alpine:latest
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
-            docker build --rm -t srb2-musl-docker "$BUILDPATH/containers/srb2-musl-docker"
+            docker build --rm -t srb2-musl-docker "$SRB2BLDROOT/containers/srb2-musl-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local:/usr/local:rw" srb2-musl-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-musl-docker
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker pull "$ISARM"ubuntu:"$UBUVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
-            docker build --rm -t srb2-docker "$BUILDPATH/containers/srb2-docker"
+            docker build --rm -t srb2-docker "$SRB2BLDROOT/containers/srb2-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$BUILDPATH:$BUILDPATH:rw" --volume="/usr/local:/usr/local:rw" srb2-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-docker
 
         fi
 
@@ -2762,8 +2764,8 @@ installtolinux() {
 }
 
 installtolist() {
-    mkdir -p "$BUILDPATH/installed"
-    cat > "$BUILDPATH/installed/$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" << INSTALL
+    mkdir -p "$SRB2BLDROOT/installed"
+    cat > "$SRB2BLDROOT/installed/$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" << INSTALL
 $SRB2ASSETLNXPATH
 $SRB2BINARYLNXPATH
 $SRB2DESKTOPLNXPATH
@@ -2775,7 +2777,7 @@ $SRB2MACPATH
 $SRB2MACLINK
 INSTALL
 
-    gawk -i inplace 'NF{print}' "$BUILDPATH/installed/$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
+    gawk -i inplace 'NF{print}' "$SRB2BLDROOT/installed/$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
 
     COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
     printf "%s\n" "$COMREV" > "$BUILD/.comrev"
@@ -2869,7 +2871,7 @@ installtomacos() {
     fi
 
     # Make directories for storing essential files.
-    mkdir -p "$BUILDPATH/assets" "$BUILDPATH/libraries" "$BUILD/assets/installer"
+    mkdir -p "$SRB2BLDROOT/builds" "$SRB2BLDROOT/assets" "$SRB2BLDROOT/libraries" "$BUILD/assets/installer"
     cd "$BUILD" || exit
 
     # Download and extract assets.
@@ -2877,56 +2879,56 @@ installtomacos() {
     if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
 
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$BUILDPATH/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RLC - "$SRB2ASSETSURL" -o "$BUILDPATH/assets/SRB2.zip"
+            curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
-        7zz x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+        7zz x -y "$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
     fi
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
         curl -c /tmp/cookie -s -L "https://drive.google.com/uc?export=download&id=$SRB2PERSONAFILEID" > /dev/null
-        curl -RLb /tmp/cookie -C - "https://drive.google.com/uc?export=download&confirm=$(gawk '/download/ {print $NF}' /tmp/cookie)&id=$SRB2PERSONAFILEID" -o "$BUILDPATH/assets/SRB2P_MP.rar"
-        7zz x -y "$BUILDPATH/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
+        curl -RLb /tmp/cookie -C - "https://drive.google.com/uc?export=download&confirm=$(gawk '/download/ {print $NF}' /tmp/cookie)&id=$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        7zz x -y "$SRB2BLDROOT/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
 
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$BUILDPATH/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RLC - "$SRB2ASSETSURL" -o "$BUILDPATH/assets/SRB2.zip"
+            curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
-        7zz x -y "$BUILDPATH/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+        7zz x -y "$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-x64-Installer.exe -o "$BUILDPATH/assets/SRB2-2.1.exe"
-        7zz x -y "$BUILDPATH/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"$BUILD/assets/installer"
+        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-x64-Installer.exe -o "$SRB2BLDROOT/assets/SRB2-2.1.exe"
+        7zz x -y "$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "$BUILDPATH/assets/SRB2-2.0.exe"
-        7zz x -y "$BUILDPATH/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
+        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "$SRB2BLDROOT/assets/SRB2-2.0.exe"
+        7zz x -y "$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "$BUILDPATH/assets/SRB2FinalDemo.exe"
-        7zz x -y "$BUILDPATH/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
+        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
+        7zz x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
         SRB2KARTASSETSURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
-        if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$BUILDPATH/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RLC - "$SRB2KARTASSETSURL" -o "$BUILDPATH/assets/SRB2Kart.exe"
+            curl -RLC - "$SRB2KARTASSETSURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
-        7zz x -y "$BUILDPATH/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
+        7zz x -y "$SRB2BLDROOT/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
 
     fi
 
@@ -2986,25 +2988,25 @@ installtomacos() {
     printf "$MESSAGE\n%s\n\e[0m" "Building and installing dependencies. Please wait..."
     if [ ! -f "/usr/local/lib/libpng.dylib" ] && [ "$ISPNG" = "libpng" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libpng/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libpng/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng's source code. Please wait..."
-            git clone git://git.code.sf.net/p/libpng/code.git --recursive --branch "v$MACOSPNGVER" "$BUILDPATH/libraries/libpng"
+            git clone git://git.code.sf.net/p/libpng/code.git --recursive --branch "v$MACOSPNGVER" "$SRB2BLDROOT/libraries/libpng"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libpng" clean -qdfx
-            git -C "$BUILDPATH/libraries/libpng" reset -q --hard
-            git -C "$BUILDPATH/libraries/libpng" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libpng" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libpng" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
-        mkdir -p "$BUILDPATH/libraries/libpng/build"
-        cmake -S "$BUILDPATH/libraries/libpng" -B "$BUILDPATH/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng
-        cmake --build "$BUILDPATH/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo cmake --install "$BUILDPATH/libraries/libpng/build"
+        mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
+        cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng
+        cmake --build "$SRB2BLDROOT/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libpng/build"
         sudo -E stow -v --adopt libpng
 
     fi
@@ -3012,25 +3014,25 @@ installtomacos() {
     # Download libogg's source code, build and install it.
     if [ ! -f "/usr/local/lib/libogg.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libogg/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libogg/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libogg's source code. Please wait..."
-            git clone https://gitlab.xiph.org/xiph/ogg.git --recursive --branch "v$MACOSOGGVER" "$BUILDPATH/libraries/libogg"
+            git clone https://gitlab.xiph.org/xiph/ogg.git --recursive --branch "v$MACOSOGGVER" "$SRB2BLDROOT/libraries/libogg"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libogg's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libogg" clean -qdfx
-            git -C "$BUILDPATH/libraries/libogg" reset -q --hard
-            git -C "$BUILDPATH/libraries/libpng" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libogg" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libogg" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
-        mkdir -p "$BUILDPATH/libraries/libogg/build"
-        cmake -S "$BUILDPATH/libraries/libogg" -B "$BUILDPATH/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg
-        cmake --build "$BUILDPATH/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo cmake --install "$BUILDPATH/libraries/libogg/build"
+        mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
+        cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg
+        cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libogg/build"
         sudo -E stow -v --adopt libogg
 
     fi
@@ -3038,22 +3040,22 @@ installtomacos() {
     # Download libvorbis' source code, build and install it.
     if [ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libvorbis/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libvorbis/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libvorbis' source code. Please wait..."
-            git clone https://gitlab.xiph.org/xiph/vorbis.git --recursive --branch "v$MACOSVORBISVER" "$BUILDPATH/libraries/libvorbis"
+            git clone https://gitlab.xiph.org/xiph/vorbis.git --recursive --branch "v$MACOSVORBISVER" "$SRB2BLDROOT/libraries/libvorbis"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libvorbis' source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libvorbis" clean -qdfx
-            git -C "$BUILDPATH/libraries/libvorbis" reset -q --hard
-            git -C "$BUILDPATH/libraries/libvorbis" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libvorbis" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libvorbis" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libvorbis" fetch origin master
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
-        cd "$BUILDPATH/libraries/libvorbis" || exit
+        cd "$SRB2BLDROOT/libraries/libvorbis" || exit
         ./autogen.sh
         ./configure --prefix=/usr/local/stow/libvorbis
         make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
@@ -3066,22 +3068,22 @@ installtomacos() {
     # Download libmpg123's source code, build and install it.
     if [ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libmpg123/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libmpg123/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libmpg123's source code. Please wait..."
-            git clone https://github.com/madebr/mpg123.git --recursive --branch master "$BUILDPATH/libraries/libmpg123"
+            git clone https://github.com/madebr/mpg123.git --recursive --branch master "$SRB2BLDROOT/libraries/libmpg123"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmpg123's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libmpg123" clean -qdfx
-            git -C "$BUILDPATH/libraries/libmpg123" reset -q --hard
-            git -C "$BUILDPATH/libraries/libmpg123" pull --rebase
+            git -C "$SRB2BLDROOT/libraries/libmpg123" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libmpg123" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libmpg123" pull --rebase
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
-        cd "$BUILDPATH/libraries/libmpg123" || exit
+        cd "$SRB2BLDROOT/libraries/libmpg123" || exit
         autoreconf -iv
         ./configure --prefix=/usr/local/stow/libmpg123
         make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
@@ -3094,25 +3096,25 @@ installtomacos() {
     # Download libmodplug's source code, build and install it.
     if [ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libmodplug/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libmodplug/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libmodplug's source code. Please wait..."
-            git clone https://github.com/Konstanty/libmodplug.git --recursive --branch master "$BUILDPATH/libraries/libmodplug"
+            git clone https://github.com/Konstanty/libmodplug.git --recursive --branch master "$SRB2BLDROOT/libraries/libmodplug"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmodplug's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libmodplug" clean -qdfx
-            git -C "$BUILDPATH/libraries/libmodplug" reset -q --hard
-            git -C "$BUILDPATH/libraries/libmodplug" pull --rebase
+            git -C "$SRB2BLDROOT/libraries/libmodplug" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libmodplug" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libmodplug" pull --rebase
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
-        mkdir -p "$BUILDPATH/libraries/libmodplug/build"
-        cmake -S "$BUILDPATH/libraries/libmodplug" -B "$BUILDPATH/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug
-        cmake --build "$BUILDPATH/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo cmake --install "$BUILDPATH/libraries/libmodplug/build"
+        mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
+        cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug
+        cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
         sudo -E stow -v --adopt libmodplug
 
     fi
@@ -3120,25 +3122,25 @@ installtomacos() {
     # Download libSDL2's source code, build and install it.
     if [ ! -f "/usr/local/lib/libSDL2.dylib" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libsdl2/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libsdl2/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2's source code. Please wait..."
-            git clone https://github.com/libsdl-org/SDL.git --recursive --branch "release-$MACOSSDL2VER" "$BUILDPATH/libraries/libsdl2"
+            git clone https://github.com/libsdl-org/SDL.git --recursive --branch "release-$MACOSSDL2VER" "$SRB2BLDROOT/libraries/libsdl2"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libsdl2" clean -qdfx
-            git -C "$BUILDPATH/libraries/libsdl2" reset -q --hard
-            git -C "$BUILDPATH/libraries/libsdl2" fetch origin main
+            git -C "$SRB2BLDROOT/libraries/libsdl2" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libsdl2" fetch origin main
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
-        mkdir -p "$BUILDPATH/libraries/libsdl2/build"
-        cmake -S "$BUILDPATH/libraries/libsdl2" -B "$BUILDPATH/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2
-        cmake --build "$BUILDPATH/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo cmake --install "$BUILDPATH/libraries/libsdl2/build"
+        mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
+        cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2
+        cmake --build "$SRB2BLDROOT/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
         sudo -E stow -v --adopt libsdl2
 
     fi
@@ -3146,22 +3148,22 @@ installtomacos() {
     # Download libSDL2_mixer's source code, build and install it.
     if [ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libsdl2-mixer/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixer/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixer's source code. Please wait..."
-            git clone https://github.com/libsdl-org/SDL_mixer.git --recursive --branch "release-$MACOSSDL2MIXERVER" "$BUILDPATH/libraries/libsdl2-mixer"
+            git clone https://github.com/libsdl-org/SDL_mixer.git --recursive --branch "release-$MACOSSDL2MIXERVER" "$SRB2BLDROOT/libraries/libsdl2-mixer"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixer's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libsdl2-mixer" clean -qdfx
-            git -C "$BUILDPATH/libraries/libsdl2-mixer" reset -q --hard
-            git -C "$BUILDPATH/libraries/libsdl2-mixer" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" fetch origin master
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixer. Please wait..."
-        cd "$BUILDPATH/libraries/libsdl2-mixer" || exit
+        cd "$SRB2BLDROOT/libraries/libsdl2-mixer" || exit
         ./configure \
             --disable-dependency-tracking \
             --disable-music-flac \
@@ -3195,23 +3197,23 @@ installtomacos() {
     # Download libopenmpt's source code, build and install it.
     if [ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libopenmpt/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "libopenmpt-$MACOSOPENMPTVER" "$BUILDPATH/libraries/libopenmpt"
+            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "libopenmpt-$MACOSOPENMPTVER" "$SRB2BLDROOT/libraries/libopenmpt"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libopenmpt" clean -qdfx
-            git -C "$BUILDPATH/libraries/libopenmpt" reset -q --hard
-            git -C "$BUILDPATH/libraries/libopenmpt" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" fetch origin master
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
-        cd "$BUILDPATH/libraries/libopenmpt" || exit
-        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$BUILDPATH/libraries/libopenmpt/Makefile"
+        cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
+        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
         make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
         sudo make PREFIX=/usr/local/stow/libopenmpt install
         sudo -E stow -v --adopt libopenmpt
@@ -3222,25 +3224,25 @@ installtomacos() {
     # Download libgme's source code, build and install it.
     if [ ! -f "/usr/local/lib/libgme.dylib" ] && [ "$ISGME" = "libgme" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libgme/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libgme/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
-            git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$MACOSGMEVER" "$BUILDPATH/libraries/libgme"
+            git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$MACOSGMEVER" "$SRB2BLDROOT/libraries/libgme"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/libgme" clean -qdfx
-            git -C "$BUILDPATH/libraries/libgme" reset -q --hard
-            git -C "$BUILDPATH/libraries/libgme" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libgme" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libgme" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libgme" fetch origin master
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
-        mkdir -p "$BUILDPATH/libraries/libgme/build"
-        cmake -S "$BUILDPATH/libraries/libgme" -B "$BUILDPATH/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
-        cmake --build "$BUILDPATH/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo cmake --install "$BUILDPATH/libraries/libgme/build"
+        mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
+        cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
+        cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libgme/build"
         sudo -E stow -v --adopt libgme
 
     fi
@@ -3248,25 +3250,25 @@ installtomacos() {
     # Download DiscordRPC's source code, build and install it.
     if [ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
-        if [ ! -d "$BUILDPATH/libraries/discord-rpc/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-            git clone https://github.com/discord/discord-rpc.git --recursive --branch master "$BUILDPATH/libraries/discord-rpc"
+            git clone https://github.com/discord/discord-rpc.git --recursive --branch master "$SRB2BLDROOT/libraries/discord-rpc"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
-            git -C "$BUILDPATH/libraries/discord-rpc" clean -qdfx
-            git -C "$BUILDPATH/libraries/discord-rpc" reset -q --hard
-            git -C "$BUILDPATH/libraries/discord-rpc" pull --rebase
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" pull --rebase
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
-        mkdir -p "$BUILDPATH/libraries/discord-rpc/build"
-        cmake -S "$BUILDPATH/libraries/discord-rpc" -B "$BUILDPATH/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
-        cmake --build "$BUILDPATH/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo cmake --install "$BUILDPATH/libraries/discord-rpc/build"
+        mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
+        cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
+        cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
         sudo -E stow -v --adopt discord-rpc
 
     fi
@@ -3274,26 +3276,26 @@ installtomacos() {
     # Download libopenvr's source code, build and install it.
     if [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ] && [ ! -f "/usr/local/lib/libopenvr_api.dylib" ]; then
 
-        if [ ! -d "$BUILDPATH/libraries/libopenvr/.git" ]; then
+        if [ ! -d "$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --recursive --recursive --branch "v$OPENVRVER" "$BUILDPATH/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --recursive --branch "v$OPENVRVER" "$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
-            git -C "$BUILDPATH/libraries/libopenvr" clean -qdfx
-            git -C "$BUILDPATH/libraries/libopenvr" reset -q --hard
-            git -C "$BUILDPATH/libraries/libopenvr" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libopenvr" fetch origin master
 
         fi
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
-        mkdir -p "$BUILDPATH/libraries/libopenvr/build"
-        cp -rf "$BUILDPATH/libraries/libopenvr/src/vrcommon" "$BUILDPATH/libraries/libopenvr/src/vrcore"
-        cmake -S "$BUILDPATH/libraries/libopenvr" -B "$BUILDPATH/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr
-        cmake --build "$BUILDPATH/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo cmake --install "$BUILDPATH/libraries/libopenvr/build"
+        mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
+        cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
+        cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr
+        cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
         sudo -E stow -v --adopt libopenvr
 
     fi
@@ -3318,6 +3320,10 @@ installtomacos() {
     if [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2_21\"","#define DEFAULTDIR \"srb2_2.1\"");print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
@@ -3586,34 +3592,34 @@ WINMENUGEN
 
 listinstalled() {
     clear
-    if [ -z "$(find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
         exit
 
     fi
 
-    find "$BUILDPATH/installed" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' 2> /dev/null | sort
+    find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' 2> /dev/null | sort
 }
 
 upgrade() {
     clear
     # Make a loop to find the SRB2 source code directories and then update them one by one.
-    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '!/assets|containers|installed|libraries/ && !/srb2-2.0/ && !/srb2-final-demo/ {print $NF}' | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '!/srb2-2.0/ {print $NF}' | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
         exit
 
     fi
 
-    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '!/assets|containers|installed|libraries/ && !/srb2-2.0/ && !/srb2-final-demo/ {print $NF}' | sort); do
+    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '!/srb2-2.0/ {print $NF}' | sort); do
 
         printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $u. Please wait..."
         git -C "$BUILDPATH/$u" clean -qdfx -e .comrev
         git -C "$BUILDPATH/$u" reset -q --hard
         git -C "$BUILDPATH/$u" pull --rebase
 
-        if [ -f "$BUILDPATH/installed/$u" ] && [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
+        if [ -f "$SRB2BLDROOT/installed/$u" ] && [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Upgrading $u. Please wait..."
 
