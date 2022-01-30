@@ -3,15 +3,15 @@ srb2bld is a shellscript, that automates and simplifies process of downloading s
 https://user-images.githubusercontent.com/16626326/151419100-655773a8-97da-4188-b692-ac51799f6970.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 2.1 Legacy, SRB2 2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, MacOS (tested on version 10.14 and 10.15) and Windows. Check "Compatibilty" section for information about which build works for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, macOS (tested on version 10.14 and 10.15) and Windows. Check "Compatibilty" section for information about which build works for each system and CPU architecture,
 - Ability to set user's flags before compiling,
-- Installing missing dependencies on host system (mostly binaries, except for MacOS) based on user's set compilation flags,
+- Installing missing dependencies on host system (mostly binaries, except for macOS) based on user's set compilation flags,
 - Supports installing dependencies for glibc and musl based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine,
 - Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
 - Creating AppImages (Linux only),
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
-- Runs on Linux, MacOS and Windows (Git Bash).
+- Runs on Linux, macOS and Windows (Git Bash).
 
 # Dependencies
 - GNU Coreutils,
@@ -20,12 +20,12 @@ https://user-images.githubusercontent.com/16626326/151419100-655773a8-97da-4188-
 - Curl,
 - Gawk,
 - Docker (Linux and Windows only),
-- GNU Stow (Linux and MacOS only),
+- GNU Stow (Linux and macOS only),
 - Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package).
 
 Windows users need to also have installed Git Bash to run this script. Also PowerShell is required for updating icons and menu entries (usually it is installed out-of-box on Windows 7 or later).
 
-As for MacOS users, they need to install these additional dependencies:
+As for macOS users, they need to install these additional dependencies:
 - Cmake,
 - Autoconf,
 - Automake,
@@ -56,7 +56,7 @@ As for MacOS users, they need to install these additional dependencies:
 - Download from [HERE](https://www.docker.com/products/docker-desktop),
 - Watch this video from 6:07 to 8:36 in [HERE](https://youtu.be/_9AWYlt86B8?t=518).
 
-**MacOS:**
+**macOS:**
 1. In terminal enter this following command:
 - `brew install cmake autoconf automake pkgconfig libtool gawk stow 7zip curl makeicns`.
 
@@ -87,7 +87,7 @@ As for MacOS users, they need to install these additional dependencies:
 
 9. Enter: `source ~/.bash_profile` or restart Git Bash.
 
-**MacOS:**
+**macOS:**
 1. Open terminal,
 
 2. Enter `git clone https://github.com/Bijman/srb2bld`,
@@ -105,22 +105,22 @@ As for MacOS users, they need to install these additional dependencies:
 **Windows:**
 1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system was logged out or rebooted.
 
-**MacOS:**
+**macOS:**
 1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source ~/.bash_profile` or `source ~/.zshrc`.
 
 # Compatibility
-|                       | Linux glibc x86/x64 | Linux musl x86/x64 | Windows x86/x64 | MacOS x86/x64 |
-| :-------------------: | :-----------------: | :----------------: | :-------------: | :-----------: |
-| SRB2                  |          ✅         |         ✅         |       ✅        |       ✅      |
-| SRB2 Uncapped Plus    |          ✅         |         ✅         |       ✅        |       🟨**    |
-| SRB2 NetPlus          |          ✅         |         ✅         |       ✅        |       ⛔      |
-| SRB2 2.1 Legacy       |          ✅         |         ✅         |       ✅        |       ✅      |
-| SRB2 2.0              |          ✅         |         ✅         |       ✅*       |       ⛔      |
-| SRB2 Final Demo       |          ✅*        |         ⛔         |       ✅*       |       ⛔      |
-| SRB2 Persona          |          ✅         |         ⛔         |       ✅        |       ✅      |
-| SRB2 Kart             |          ✅         |         ✅         |       ✅        |       🟨***   |
-| SRB2 Kart Moe Mansion |          ✅         |         ✅         |       ✅        |       ⛔      |
-| SRB2 Kart VR          |          ✅         |         ✅         |       ✅*       |       ⛔      |
+|                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Windows x86/x64 | macOS x86/x64 |
+| :-------------------: | :-------------------: | :------------------: | :-------------: | :-----------: |
+| SRB2                  |          ✅           |         ✅           |       ✅        |       ✅      |
+| SRB2 Uncapped Plus    |          ✅           |         ✅           |       ✅        |       🟨**    |
+| SRB2 NetPlus          |          ✅           |         ✅           |       ✅        |       ⛔      |
+| SRB2 v2.1 Legacy      |          ✅           |         ✅           |       ✅        |       ✅      |
+| SRB2 v2.0             |          ✅           |         ✅           |       ✅*       |       ⛔      |
+| SRB2 Final Demo       |          ✅*          |         ⛔           |       ✅*       |       ⛔      |
+| SRB2 Persona          |          ✅           |         ⛔           |       ✅        |       ✅      |
+| SRB2 Kart             |          ✅           |         ✅           |       ✅        |       🟨***   |
+| SRB2 Kart Moe Mansion |          ✅           |         ✅           |       ✅        |       ⛔      |
+| SRB2 Kart VR          |          ✅           |         ✅           |       ✅*       |       ⛔      |
 
 **Legend:**
 
@@ -130,11 +130,11 @@ As for MacOS users, they need to install these additional dependencies:
 
 ⛔ - Building failure.
 
-*Only 32bit binaries are currently supported. SRB2 2.0 has graphical issues when running with OpenGL on Linux.
+*Only 32bit binaries are currently supported. SRB2 v2.0 has graphical issues when running with OpenGL on Linux.
 
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
-***Compiles successfully, but it can throw SIGABRT error on some MacOS versions. Runs fine on MacOS 10.14.
+***Compiles successfully, but it can throw SIGABRT error on some macOS versions. Runs fine on macOS 10.14.
 
 # Usage (from help text)
 ```
@@ -143,7 +143,9 @@ Build and install SRB2/SRB2Kart from source.
 Usage: srb2bld [OPTIONS]
   OPTIONS:
      -h, --help                             Show this help text.
-     -a, --appimage                         Compile and create AppImage of SRB2/SRB2Kart build (Linux only).
+     -ab, --appbundle                       Compile and create App Bundle of SRB2/SRB2Kart build (macOS only).
+     -ai, --appimage                        Compile and create AppImage of SRB2/SRB2Kart build (Linux only).
+     -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
      -i, --install                          Compile and install SRB2/SRB2Kart build.
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
@@ -164,8 +166,11 @@ Usage: srb2bld [OPTIONS]
      4. Uninstall SRB2/SRB2Kart build:
             srb2bld --uninstall
 
-  Warning! Old builds like SRB2 2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
+     5. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
+            srb2bld --compatibility
 
-  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+  Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+
+  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
 ```

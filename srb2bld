@@ -10,6 +10,10 @@ if [ "$OS" = "Darwin" ]; then
 
     SRB2BLDROOT="$HOME/Library/srb2bld"
 
+elif [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]; then
+
+    SRB2BLDROOT="$HOME/AppData/Roaming/srb2bld"
+
 else
 
     SRB2BLDROOT="$HOME/.local/share/srb2bld"
@@ -46,15 +50,38 @@ MACOSOPENMPTVER="0.5.14"
 MACOSGMEVER="0.6.2"
 MACOSSDL2VER="2.0.18"
 MACOSSDL2MIXERVER="2.0.4"
+COMPTABLEURL="https://gist.githubusercontent.com/Bijman/dae1e123800af25ef28689bd644a4516/raw/e10baffe9d55749b59b21f5ecdb640f947aa622c/srb2bldcompile.txt"
 FAILURE="\e[1;91m"
 SUCCESS="\e[1;92m"
 NOTICE="\e[1;93m"
 MESSAGE="\e[1;94m"
 PROMPT="\e[1;97m"
 
+appbundle() {
+    clear
+    # Blocking access to this option for users that uses OS other than macOS since App Bundles are macOS exclusive.
+    if [ "$OS" != "Darwin" ]; then
+
+        printf "$FAILURE%s\n\e[0m" "Currently building App Bundles is only available for macOS. Exiting."
+        exit
+
+    fi
+
+    choosebuild
+
+    # We have to export this in order to make App Bundle.
+    export APPBUNDLE=1
+
+    installtomacos
+
+    cleansource
+
+    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $APPIMAGENAME in $(pwd) path."
+}
+
 appimage() {
     clear
-    # Blocking access to this option for users that uses OS othe than Linux since AppImages are Linux exclusive.
+    # Blocking access to this option for users that uses OS other than Linux since AppImages are Linux exclusive.
     if [ "$OS" != "Linux" ] || [ -z "$(ldd --version 2>&1 | gawk '/Free Software Foundation/ {print}')" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Currently building AppImages is only available for Linux with glibc. Exiting."
@@ -64,7 +91,7 @@ appimage() {
 
     choosebuild
 
-    # We have to export this in order to have to make AppImage in Docker container.
+    # We have to export this in order to make AppImage in Docker container.
     export APPIMAGE=1
 
     dockerentry
@@ -79,8 +106,53 @@ appimage() {
     printf "$SUCCESS\n%s\n\e[0m\a" "AppImage for $BUILDNAME is done. Look for $APPIMAGENAME in $(pwd) path."
 }
 
+buildname() {
+    if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 Uncapped PLUS"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 NetPlus"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 v2.1 Legacy"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 v2.0"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 Final Demo"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 Persona"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 Kart"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 Kart Moe Mansion"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 Kart VR"
+
+    fi
+}
+
 choosebuild() {
     clear
+    # Choose and download build.
     while
 
         printf "$MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
@@ -183,7 +255,7 @@ choosebuild() {
 
     done
 
-    BUILDNAME=$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')
+    buildname
 
     # Clean the game's source code and exit shell script in case of error or cancelling script.
     trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; git -C $BUILD clean -qdfx -e .comrev ; git -C $BUILD reset -q --hard ; exit' 1 2 3 6 15
@@ -191,9 +263,10 @@ choosebuild() {
 
 chooseinstall() {
     clear
+    # Install build.
     if [ "$OS" != "Linux" ] && [ "$OS" != "Darwin" ] && [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" != "MINGW64" ] && [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" != "MINGW" ]; then
 
-        printf "$FAILURE%s\n\e[0m" "Currently building and installing is only available for Linux, MacOS and Windows. Exiting."
+        printf "$FAILURE%s\n\e[0m" "Currently building and installing is only available for Linux, macOS and Windows. Exiting."
         exit
 
     fi
@@ -203,7 +276,7 @@ chooseinstall() {
 
         if [ -z "$SDKROOT" ]; then
 
-            printf "$FAILURE%s\n\e[0m" "Set SDKROOT environment variable to MacOS SDK full path. Usually MacOS .sdk file is located in /Library/Developer/CommandLineTools/SDKs path, if you installed Homebrew. Exiting."
+            printf "$FAILURE%s\n\e[0m" "Set SDKROOT environment variable to macOS SDK full path. Usually macOS .sdk file is located in /Library/Developer/CommandLineTools/SDKs path, if you installed Homebrew. Exiting."
             exit
 
         fi
@@ -441,20 +514,26 @@ cleansource() {
     git -C "$BUILD" reset -q --hard
 }
 
+compatibility() {
+    clear
+    # Show compatibility table for compiling SRB2 builds for each OS.
+    curl -s "$COMPTABLEURL"
+}
+
 defaultmessage() {
     printf "$NOTICE%s\n\e[0m" "Use srb2bld --help to check usage of this shell script."
 }
 
 dockerentry() {
     # Prepare containers path.
-    if [ ! -d "$SRB2BLDROOT/containers/srb2-docker" ]; then
+    if [ ! -d "$SRB2BLDROOT/containers/srb2-linux-glibc-docker" ]; then
 
-        mkdir -p "$SRB2BLDROOT/containers/srb2-docker"
+        mkdir -p "$SRB2BLDROOT/containers/srb2-linux-glibc-docker"
 
     fi
 
     # Create entrypoint shell script for Docker container.
-    cat > "$SRB2BLDROOT/containers/srb2-docker/Entrypoint" << ENTRYPOINT
+    cat > "$SRB2BLDROOT/containers/srb2-linux-glibc-docker/Entrypoint" << ENTRYPOINT
 #!/bin/bash
 
     set -e
@@ -515,7 +594,7 @@ dockerentry() {
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
            curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
@@ -557,7 +636,7 @@ dockerentry() {
         7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
            curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
@@ -636,7 +715,7 @@ dockerentry() {
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-            if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+            if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
                 curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
@@ -651,7 +730,7 @@ dockerentry() {
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         SRB2KARTASSETSURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
-        if [ "\$(curl -sLI "\$SRB2KARTASSETSURL" | gawk -F'last-modified: ' '/last-modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "\$(curl -sLI "\$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
             curl -RLC - "\$SRB2KARTASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2Kart.exe"
 
@@ -2165,15 +2244,15 @@ DESKTOP
 fi
 
 ENTRYPOINT
-    chmod +x "$SRB2BLDROOT/containers/srb2-docker/Entrypoint"
+    chmod +x "$SRB2BLDROOT/containers/srb2-linux-glibc-docker/Entrypoint"
 
     # Prepare Docker images.
-    rm -rf "$SRB2BLDROOT/containers/srb2-old-docker" "$SRB2BLDROOT/containers/srb2-old-docker" "$SRB2BLDROOT/containers/srb2-musl-docker" "$SRB2BLDROOT/containers/srb2-old-musl-docker" "$SRB2BLDROOT/containers/srb2-windows-docker" "$SRB2BLDROOT/containers/srb2-old-windows-docker"
-    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-old-docker"
-    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-musl-docker"
-    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-old-musl-docker"
-    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-windows-docker"
-    cp -rf "$SRB2BLDROOT/containers/srb2-docker" "$SRB2BLDROOT/containers/srb2-old-windows-docker"
+    rm -rf "$SRB2BLDROOT/containers/srb2-old-linux-glibc-docker" "$SRB2BLDROOT/containers/srb2-old-linux-glibc-docker" "$SRB2BLDROOT/containers/srb2-musl-docker" "$SRB2BLDROOT/containers/srb2-old-musl-docker" "$SRB2BLDROOT/containers/srb2-windows-docker" "$SRB2BLDROOT/containers/srb2-old-windows-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-linux-glibc-docker" "$SRB2BLDROOT/containers/srb2-old-linux-glibc-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-linux-glibc-docker" "$SRB2BLDROOT/containers/srb2-musl-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-linux-glibc-docker" "$SRB2BLDROOT/containers/srb2-old-musl-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-linux-glibc-docker" "$SRB2BLDROOT/containers/srb2-windows-docker"
+    cp -rf "$SRB2BLDROOT/containers/srb2-linux-glibc-docker" "$SRB2BLDROOT/containers/srb2-old-windows-docker"
 
     # Set CPU architecture for Docker images in case of building old SRB2 versions.
     if ([ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]) && ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
@@ -2199,7 +2278,7 @@ ENTRYPOINT
     fi
 
     # Create Dockerfiles.
-    cat > "$SRB2BLDROOT/containers/srb2-docker/Dockerfile" << DOCKERFILE
+    cat > "$SRB2BLDROOT/containers/srb2-linux-glibc-docker/Dockerfile" << DOCKERFILE
 FROM "$ISARM"ubuntu:"$UBUVER"
 
 ENV container docker \
@@ -2227,7 +2306,7 @@ ENTRYPOINT [ "/home/srb2/Entrypoint" ]
 
 DOCKERFILE
 
-    cat > "$SRB2BLDROOT/containers/srb2-old-docker/Dockerfile" << DOCKERFILE
+    cat > "$SRB2BLDROOT/containers/srb2-old-linux-glibc-docker/Dockerfile" << DOCKERFILE
 FROM "$ISARM"debian:"$DEBVER"
 
 ENV container docker \
@@ -2390,7 +2469,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-old-windows-docker "$SRB2BLDROOT/containers/srb2-old-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2bld:$SRB2BLDROOT:rw" srb2-old-windows-docker
+            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-old-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
@@ -2406,9 +2485,9 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker pull "$ISARM"debian:"$DEBVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
-            docker build --rm -t srb2-old-docker "$SRB2BLDROOT/containers/srb2-old-docker"
+            docker build --rm -t srb2-old-linux-glibc-docker "$SRB2BLDROOT/containers/srb2-old-linux-glibc-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-old-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-old-linux-glibc-docker
 
         fi
 
@@ -2421,7 +2500,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-windows-docker "$SRB2BLDROOT/containers/srb2-windows-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\.local\\share\\srb2bld:$SRB2BLDROOT:rw" srb2-windows-docker
+            winpty docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$(whoami)\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
@@ -2437,9 +2516,9 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker pull "$ISARM"ubuntu:"$UBUVER"
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
-            docker build --rm -t srb2-docker "$SRB2BLDROOT/containers/srb2-docker"
+            docker build --rm -t srb2-linux-glibc-docker "$SRB2BLDROOT/containers/srb2-linux-glibc-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-linux-glibc-docker
 
         fi
 
@@ -2765,7 +2844,7 @@ installtolinux() {
 
 installtolist() {
     mkdir -p "$SRB2BLDROOT/installed"
-    cat > "$SRB2BLDROOT/installed/$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" << INSTALL
+    cat > "$SRB2BLDROOT/installed/$BUILDNAME" << INSTALL
 $SRB2ASSETLNXPATH
 $SRB2BINARYLNXPATH
 $SRB2DESKTOPLNXPATH
@@ -2777,7 +2856,7 @@ $SRB2MACPATH
 $SRB2MACLINK
 INSTALL
 
-    gawk -i inplace 'NF{print}' "$SRB2BLDROOT/installed/$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
+    gawk -i inplace 'NF{print}' "$SRB2BLDROOT/installed/$BUILDNAME"
 
     COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
     printf "%s\n" "$COMREV" > "$BUILD/.comrev"
@@ -2814,7 +2893,7 @@ installtomacos() {
 
     # Add compilation flags.
     printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
-    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$MACAPPNAME -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$SRB2MACAPPNAME -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
     printf "$PROMPT\n%s\e[0m" "> "
     read -r CONF
@@ -2879,7 +2958,7 @@ installtomacos() {
     if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
 
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
             curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
 
@@ -2896,7 +2975,7 @@ installtomacos() {
         7zz x -y "$SRB2BLDROOT/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
 
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
             curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
 
@@ -2922,7 +3001,7 @@ installtomacos() {
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
         SRB2KARTASSETSURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
-        if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '/Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+        if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
             curl -RLC - "$SRB2KARTASSETSURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
 
@@ -2935,46 +3014,46 @@ installtomacos() {
     # Modify the game's configuration and assets directory names to avoid conflicts between installed builds.
     if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2"
+        SRB2MACAPPNAME="$BUILDNAME"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 Uncapped PLUS"
+        SRB2MACAPPNAME="$BUILDNAME"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 NetPlus"
+        SRB2MACAPPNAME="$BUILDNAME"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 v2.1 Legacy"
+        SRB2MACAPPNAME="$BUILDNAME"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 v2.0"
+        SRB2MACAPPNAME="$BUILDNAME"
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 Final Demo"
+        SRB2MACAPPNAME="$BUILDNAME"
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2finaldemo\"");print}' "$BUILD/src/doomdef.h"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 Persona"
+        SRB2MACAPPNAME="$BUILDNAME"
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 Kart"
+        SRB2MACAPPNAME="$BUILDNAME"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 Kart Moe Mansion"
+        SRB2MACAPPNAME="$BUILDNAME"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
-        MACAPPNAME="Sonic Robo Blast 2 Kart VR"
+        SRB2MACAPPNAME="$BUILDNAME"
 
     fi
 
@@ -3004,7 +3083,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
-        cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng
+        cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libpng/build"
         sudo -E stow -v --adopt libpng
@@ -3030,7 +3109,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
-        cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg
+        cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libogg/build"
         sudo -E stow -v --adopt libogg
@@ -3112,7 +3191,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
-        cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug
+        cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
         sudo -E stow -v --adopt libmodplug
@@ -3138,7 +3217,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
-        cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2
+        cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2 -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
         sudo -E stow -v --adopt libsdl2
@@ -3240,7 +3319,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
-        cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
+        cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libgme/build"
         sudo -E stow -v --adopt libgme
@@ -3266,7 +3345,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
-        cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
+        cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
         sudo -E stow -v --adopt discord-rpc
@@ -3293,14 +3372,14 @@ installtomacos() {
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
         cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
-        cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr
+        cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
         sudo -E stow -v --adopt libopenvr
 
     fi
 
-    # Patching CMakeLists.txt to prevent MacOS from loading external frameworks prior to libraries installed by Homebrew.
+    # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
     if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ]; then
 
         gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
@@ -3349,31 +3428,53 @@ installtomacos() {
     # Compile the game's source code.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME. Please wait..."
     mkdir -p "$BUILD/build"
-    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$MACAPPNAME" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib $CONF
+    #install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
+    #install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
+    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$SRB2MACAPPNAME" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib $CONF
+    #-DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON
     cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-    sudo mkdir -p /usr/local/opt/srb2-apps
+
+    # Fixing linking of libraries to SRB2 binary.
+    install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/stow/libsdl2/lib/libSDL2-2.0.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
+    install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/stow/libopenmpt/lib/libopenmpt.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
+    install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/stow/libgme/lib/libgme.0.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
+    install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
+    install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/stow/libpng/lib/libpng16.16.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
+    sudo install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "/usr/local/lib/libSDL2_mixer.dylib"
+    sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.0.dylib" "/usr/local/lib/libvorbis.dylib"
+
+    SRB2MACPATH="/usr/local/opt/srb2-apps"
+    # Creating App Bundle.
+    if [ "$APPBUNDLE" = 1 ]; then
+
+        make -C "$BUILD/build" package
+        mv "$HOME/Library/srb2bld/builds/srb2/build/package/"*.dmg .
 
     # Installing build's binary, assets, libraries, icons and desktop file to the system.
-    SRB2MACDIR=$(find "$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type d | gawk -F'/' '{print $NF}')
-    SRB2MACPATH="/usr/local/opt/srb2-apps/$SRB2MACDIR"
-    printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
-    sudo cp -rf "$BUILD/build/bin/$SRB2MACDIR" /usr/local/opt/srb2-apps
-    sudo mkdir -p "$SRB2MACPATH/Contents/Resources"
-    sudo cp -rf "$BUILD/assets/installer/"* "$SRB2MACPATH/Contents/Resources"
-    sudo cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/Contents/Resources"
-    mkdir -p "$HOME/Applications"
+    else
 
-    # Making symbolic link to .app file in $HOME/Applications.
-    SRB2MACLINK=$(printf "%s\n" "$HOME/Applications/$SRB2MACDIR" | gawk '{gsub("\\.app","");print}')
-    rm -rf "$SRB2MACLINK"
-    ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
+        printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
+        sudo mkdir -p /usr/local/opt/srb2-apps
+        sudo make -C "$BUILD/build" install
+        #        sudo cp -rf "$BUILD/build/bin/$SRB2MACAPPNAME.app" /usr/local/opt/srb2-apps
+        #        sudo mkdir -p "$SRB2MACPATH/$SRB2MACAPPNAME.app/Contents/Resources"
+        #        sudo cp -rf "$BUILD/assets/installer/"* "$SRB2MACPATH/$SRB2MACAPPNAME.app/Contents/Resources"
+        sudo cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/Contents/Resources"
+        mkdir -p "$HOME/Applications"
 
-    # Reload Finder and Dock to update icons.
-    sudo killall Finder
-    sudo killall Dock
+        # Making symbolic link to .app file in $HOME/Applications.
+        SRB2MACLINK=$(printf "%s\n" "$HOME/Applications/$SRB2MACAPPNAME.app" | gawk '{gsub("\\.app","");print}')
+        rm -rf "$SRB2MACLINK"
+        ln -sf "$SRB2MACPATH/$SRB2MACAPPNAME.app" "$SRB2MACLINK"
 
-    # Creating link to libclang_rt in case of issue not opening game.
-    sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
+        # Reload Finder and Dock to update icons.
+        sudo killall Finder
+        sudo killall Dock
+
+        # Creating link to libclang_rt in case of issue not opening game.
+        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
+
+    fi
 }
 
 installtowindows() {
@@ -3592,6 +3693,7 @@ WINMENUGEN
 
 listinstalled() {
     clear
+    # List installed games.
     if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
@@ -3625,29 +3727,43 @@ upgrade() {
 
             export "BUILD=$BUILDPATH/$u"
 
-            export "BUILDNAME=$u"
+            buildname
 
-            dockerentry
-
-            dockerrun
+            export "BUILDNAME=$BUILDNAME"
 
             if [ "$OS" = "Darwin" ]; then
 
                 installtomacos
 
-            elif ([ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]) && [ -d "$BUILD/build/AppDir" ]; then
+                cleansource
+
+                installtolist
+
+            else
+
+                dockerentry
+
+                dockerrun
+
+            fi
+
+            if ([ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]) && [ -d "$BUILD/build/AppDir" ]; then
 
                 installtowindows
+
+                cleansource
+
+                installtolist
 
             elif [ "$OS" = "Linux" ] && [ -d "$BUILD/build/AppDir" ]; then
 
                 installtolinux
 
+                cleansource
+
+                installtolist
+
             fi
-
-            cleansource
-
-            installtolist
 
         fi
 
@@ -3662,7 +3778,9 @@ Build and install SRB2/SRB2Kart from source.
 Usage: srb2bld [OPTIONS]
   OPTIONS:
      -h, --help                             Show this help text.
-     -a, --appimage                         Compile and create AppImage of SRB2/SRB2Kart build (Linux only).
+     -ab, --appbundle                       Compile and create App Bundle of SRB2/SRB2Kart build (macOS only).
+     -ai, --appimage                        Compile and create AppImage of SRB2/SRB2Kart build (Linux only).
+     -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
      -i, --install                          Compile and install SRB2/SRB2Kart build.
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
@@ -3683,9 +3801,12 @@ Usage: srb2bld [OPTIONS]
      4. Uninstall SRB2/SRB2Kart build:
             srb2bld --uninstall
 
-  Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/MacOS/Windows.
+     5. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
+            srb2bld --compatibility
 
-  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (MacOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
+  Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+
+  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
 "
 }
 
@@ -3705,9 +3826,21 @@ case "$1" in
 
         ;;
 
-    -a | --appimage)
+    -ab | --appbundle)
+
+        appbundle
+
+        ;;
+
+    -ai | --appimage)
 
         appimage
+
+        ;;
+
+    -c | --compatibility)
+
+        compatibility
 
         ;;
 
