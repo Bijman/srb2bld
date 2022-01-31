@@ -83,14 +83,21 @@ appbundle() {
 
     choosebuild
 
-    # We have to export this in order to make App Bundle.
-    export APPBUNDLE=1
+    # We have to set this in order to make App Bundle in installtomacos function.
+    APPBUNDLE=1
+
+    # Set current working directory.
+    MACOSPWD="$(pwd)"
 
     installtomacos
 
+    # Set name of App Bundle in message.
+    APPBUNDLENAME=$(find "$BUILDPATH" -iname "*.dmg" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}')
+    mv "$BUILD/build/package/"*.dmg "$MACOSPWD"
+
     cleansource
 
-    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $APPIMAGENAME in $(pwd) path."
+    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $APPBUNDLENAME in $MACOSPWD path."
 }
 
 appimage() {
@@ -105,19 +112,23 @@ appimage() {
 
     choosebuild
 
-    # We have to export this in order to make AppImage in Docker container.
-    export APPIMAGE=1
+    # We have to set this in order to make AppImage in Docker container.
+    APPIMAGE=1
+
+    # Set current working directory.
+    LNXPWD="$(pwd)"
 
     dockerentry
 
     dockerrun
 
-    export APPIMAGENAME=$(find "$BUILDPATH" -iname "*.AppImage" | gawk -F'/' '{print $NF}')
-    mv "$BUILD/"*.AppImage .
+    # Set name of AppImage in message.
+    APPIMAGENAME=$(find "$BUILDPATH" -iname "*.AppImage" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}')
+    mv "$BUILD/"*.AppImage "$LNXPWD"
 
     cleansource
 
-    printf "$SUCCESS\n%s\n\e[0m\a" "AppImage for $BUILDNAME is done. Look for $APPIMAGENAME in $(pwd) path."
+    printf "$SUCCESS\n%s\n\e[0m\a" "AppImage for $BUILDNAME is done. Look for $APPIMAGENAME in $LNXPWD path."
 }
 
 buildname() {
@@ -375,7 +386,7 @@ chooseremoveasset() {
                 SRB2ASSETLNXPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
                 SRB2ASSETLNXNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
                 rm -fv "$SRB2ASSETLNXPATH"
-                printf "$SUCCESS\n%s\n\e[0m\a" "Removing "$SRB2ASSETLNXNAME" is successful."
+                printf "$SUCCESS\n%s\n\e[0m\a" "Removing $SRB2ASSETLNXNAME is successful."
 
             fi
             break
@@ -422,7 +433,7 @@ chooseremovebuild() {
                 BUILDPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
                 BUILDNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
                 rm -rfv "$BUILDPATH"
-                printf "$SUCCESS\n%s\n\e[0m\a" "Removing "$BUILDNAME" is successful."
+                printf "$SUCCESS\n%s\n\e[0m\a" "Removing $BUILDNAME is successful."
 
             fi
             break
@@ -474,7 +485,7 @@ chooseuninstall() {
                 done < "$BUILDINSTALLED"
                 rm -f "$BUILDINSTALLED"
 
-                if [ -z $(find "$HOME/SRB2 Games" -maxdepth 1 -mindepth 1 2> /dev/null | head -n1) ]; then
+                if [ -z "$(find "$HOME/SRB2 Games" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
 
                     rm -rfv "$HOME/SRB2 Games"
 
@@ -488,7 +499,7 @@ chooseuninstall() {
                     $SUDO rm -rfv "$FILE"
                 done < "$BUILDINSTALLED"
 
-                if [ -z $(find /usr/local/opt/srb2-apps -maxdepth 1 -mindepth 1 2> /dev/null | head -n1) ]; then
+                if [ -z "$(find /usr/local/opt/srb2-apps -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
 
                     $SUDO rm -rfv /usr/local/opt/srb2-apps
 
@@ -501,9 +512,9 @@ chooseuninstall() {
 
                     $SUDO gtk-update-icon-cache -qft /usr/local/share/icons/hicolor
 
-                elif [ -x "$(which kbuildsycoca5 2> /dev/null)" ]; then
+                elif [ -x "$(find /usr/bin -iname "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
 
-                    $SUDO kbuildsycoca5 --noincremental
+                    $SUDO "$(find /usr/bin -iname "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" --noincremental
 
                 fi
 
@@ -603,12 +614,7 @@ dockerentry() {
 
     # Update Docker container.
     printf "$MESSAGE\n%s\n\e[0m" "Updating Docker container. Please wait..."
-
-    if [ -x "\$(which sudo 2> /dev/null)" ]; then
-
-        sudo_ping
-
-    fi
+    sudo_ping
 
     if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
 
@@ -2597,7 +2603,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2 binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/lsdl2srb2" "/usr/local/bin/srb2"
@@ -2612,7 +2618,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2ucp"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2uncappedplus-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2uncappedplus-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2uncappedplus.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2ucp binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/lsdl2srb2" "/usr/local/bin/srb2ucp"
@@ -2627,7 +2633,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2np"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2netplus-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2netplus-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2netplus.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2np binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/lsdl2srb2" "/usr/local/bin/srb2np"
@@ -2642,7 +2648,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2legacy"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2legacy-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2legacy-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2legacy.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2legacy binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/Linux$IS64/Release/srb2legacy" "/usr/local/bin/srb2legacy"
@@ -2657,7 +2663,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2_2.0"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2_2.0-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2_2.0-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2_2.0.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2_2.0 binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdlsrb2" "/usr/local/bin/srb2_2.0"
@@ -2672,7 +2678,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2fd"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2finaldemo-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2finaldemo-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2finaldemo.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2fd binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/Linux/Release/lsdl2srb2" "/usr/local/bin/srb2fd"
@@ -2687,7 +2693,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2p"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2persona-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2persona-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2persona.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2p binary, assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2" "/usr/local/bin/srb2p"
@@ -2702,7 +2708,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2kart"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2kart-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2kart-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kart.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2kart binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2kart" "/usr/local/bin/srb2kart"
@@ -2717,7 +2723,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2kartmoe"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2kartmoemansion-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2kartmoemansion-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kartmoemansion.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2kartmoe binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2kart" "/usr/local/bin/srb2kartmoe"
@@ -2732,7 +2738,7 @@ installtolinux() {
         SRB2BINARYLNXPATH="/usr/local/bin/srb2kartvr"
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2kartvr-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2kartvr-opengl.desktop"
-        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kartvr.png"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2kartvr binary and assets to /usr/local/bin and /usr/local/share/games."
         $SUDO install -Dm755 "$BUILD/bin/Linux$IS64/Release/lsdl2srb2kart" "/usr/local/bin/srb2kartvr"
@@ -2748,9 +2754,9 @@ installtolinux() {
 
         $SUDO gtk-update-icon-cache -qft /usr/local/share/icons/hicolor
 
-    elif [ -x "$(which kbuildsycoca5 2> /dev/null)" ]; then
+    elif [ -x "$(find /usr/bin -iname "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
 
-        $SUDO kbuildsycoca5 --noincremental
+        $SUDO "$(find /usr/bin -iname "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" --noincremental
 
     fi
 
@@ -2933,6 +2939,7 @@ INSTALL
 }
 
 installtomacos() {
+
     # Download source code.
     printf "$MESSAGE\n%s\n\e[0m" "Downloading $BUILDNAME's source code. Please wait..."
     if [ ! -d "$BUILD/.git" ]; then
@@ -2947,7 +2954,7 @@ installtomacos() {
 
     # Add compilation flags.
     printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
-    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$SRB2MACAPPNAME -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
     printf "$PROMPT\n%s\e[0m" "> "
     read -r CONF
@@ -3062,52 +3069,6 @@ installtomacos() {
         fi
 
         7zz x -y "$SRB2BLDROOT/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
-
-    fi
-
-    # Modify the game's configuration and assets directory names to avoid conflicts between installed builds.
-    if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2finaldemo\"");print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
-
-        SRB2MACAPPNAME="$BUILDNAME"
 
     fi
 
@@ -3471,6 +3432,15 @@ installtomacos() {
 
     fi
 
+    # Compile the game's source code.
+    printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME. Please wait..."
+    mkdir -p "$BUILD/build"
+    install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
+    install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
+    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib $CONF
+    #-DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON
+    cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+
     # Get app icon.
     if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
@@ -3486,47 +3456,39 @@ installtomacos() {
 
     fi
 
-    # Compile the game's source code.
-    printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME. Please wait..."
-    mkdir -p "$BUILD/build"
-    #install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
-    #install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
-    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$SRB2MACAPPNAME" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib $CONF
-    #-DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON
-    cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-
     # Fixing linking of libraries to binary.
-    install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/stow/libsdl2/lib/libSDL2-2.0.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
-    install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/stow/libopenmpt/lib/libopenmpt.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
-    install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/stow/libgme/lib/libgme.0.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
-    install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
-    install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/stow/libpng/lib/libpng16.16.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/macOS/Sonic Robo Blast 2"
-    $SUDO install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "/usr/local/lib/libSDL2_mixer.dylib"
-    $SUDO install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.0.dylib" "/usr/local/lib/libvorbis.dylib"
+    install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/stow/libsdl2/lib/libSDL2-2.0.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
+    install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/stow/libopenmpt/lib/libopenmpt.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
+    install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/stow/libgme/lib/libgme.0.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
+    #    install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
+    install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/stow/libpng/lib/libpng16.16.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
+    #    $SUDO install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "/usr/local/lib/libSDL2_mixer.dylib"
+    #    $SUDO install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.0.dylib" "/usr/local/lib/libvorbis.dylib"
 
-    SRB2MACPATH="/usr/local/opt/srb2-apps"
-    # Creating App Bundle.
+    # Building App Bundle.
     if [ "$APPBUNDLE" = 1 ]; then
 
+        printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's App Bundle. Please wait..."
+        mkdir -p "$BUILD/build/bin/$SRB2MACAPPNAME.app/Contents/Resources"
+        cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$BUILD/build/bin/$SRB2MACAPPNAME.app/Contents/Resources"
         make -C "$BUILD/build" package
-        mv "$HOME/Library/srb2bld/builds/srb2/build/package/"*.dmg .
 
     # Installing build's binary, assets, libraries, icons and desktop file to the system.
     else
 
+        SRB2MACPATH="/usr/local/opt/srb2-apps"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
-        $SUDO mkdir -p /usr/local/opt/srb2-apps
+        #        $SUDO mkdir -p /usr/local/opt/srb2-apps
         $SUDO make -C "$BUILD/build" install
-        #        $SUDO cp -rf "$BUILD/build/bin/$SRB2MACAPPNAME.app" /usr/local/opt/srb2-apps
-        #        $SUDO mkdir -p "$SRB2MACPATH/$SRB2MACAPPNAME.app/Contents/Resources"
-        #        $SUDO cp -rf "$BUILD/assets/installer/"* "$SRB2MACPATH/$SRB2MACAPPNAME.app/Contents/Resources"
-        $SUDO cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/Contents/Resources"
+        $SUDO cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/$SRB2MACAPPNAME.app/Contents/Resources"
+        #        $SUDO cp -rf "$BUILD/build/bin/$BUILDNAME.app" /usr/local/opt/srb2-apps
+        #        $SUDO mkdir -p "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
+        #        $SUDO cp -rf "$BUILD/assets/installer/"* "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
         mkdir -p "$HOME/Applications"
 
         # Making symbolic link to .app file in $HOME/Applications.
-        SRB2MACLINK=$(printf "%s\n" "$HOME/Applications/$SRB2MACAPPNAME.app" | gawk '{gsub("\\.app","");print}')
-        rm -rf "$SRB2MACLINK"
-        ln -sf "$SRB2MACPATH/$SRB2MACAPPNAME.app" "$SRB2MACLINK"
+        rm -rf "$HOME/Applications/$BUILDNAME.app"
+        ln -sf "$SRB2MACPATH/$BUILDNAME.app" "$HOME/Applications/$BUILDNAME.app"
 
         # Reload Finder and Dock to update icons.
         $SUDO killall Finder
@@ -3762,7 +3724,7 @@ listinstalled() {
 
     fi
 
-    find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 | gawk -F'/' '{print $NF}' 2> /dev/null | sort
+    find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort
 }
 
 sudo_ping() {
