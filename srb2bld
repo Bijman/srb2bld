@@ -2954,7 +2954,7 @@ installtomacos() {
 
     # Add compilation flags.
     printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
-    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
     printf "$PROMPT\n%s\e[0m" "> "
     read -r CONF
@@ -3437,8 +3437,7 @@ installtomacos() {
     mkdir -p "$BUILD/build"
     install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.1.dylib
     install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.1.dylib
-    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib $CONF
-    #-DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON
+    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
     cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
 
     # Get app icon.
@@ -3469,8 +3468,8 @@ installtomacos() {
     if [ "$APPBUNDLE" = 1 ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's App Bundle. Please wait..."
-        mkdir -p "$BUILD/build/bin/$SRB2MACAPPNAME.app/Contents/Resources"
-        cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$BUILD/build/bin/$SRB2MACAPPNAME.app/Contents/Resources"
+        mkdir -p "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
+        cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
         make -C "$BUILD/build" package
 
     # Installing build's binary, assets, libraries, icons and desktop file to the system.
@@ -3480,15 +3479,16 @@ installtomacos() {
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
         #        $SUDO mkdir -p /usr/local/opt/srb2-apps
         $SUDO make -C "$BUILD/build" install
-        $SUDO cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/$SRB2MACAPPNAME.app/Contents/Resources"
+        $SUDO cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
         #        $SUDO cp -rf "$BUILD/build/bin/$BUILDNAME.app" /usr/local/opt/srb2-apps
         #        $SUDO mkdir -p "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
         #        $SUDO cp -rf "$BUILD/assets/installer/"* "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
         mkdir -p "$HOME/Applications"
 
         # Making symbolic link to .app file in $HOME/Applications.
-        rm -rf "$HOME/Applications/$BUILDNAME.app"
-        ln -sf "$SRB2MACPATH/$BUILDNAME.app" "$HOME/Applications/$BUILDNAME.app"
+        SRB2MACLINK="$HOME/Applications/$BUILDNAME.app"
+        rm -rf "$SRB2MACLINK"
+        ln -sf "$SRB2MACPATH/$BUILDNAME.app" "$SRB2MACLINK"
 
         # Reload Finder and Dock to update icons.
         $SUDO killall Finder
