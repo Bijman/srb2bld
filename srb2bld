@@ -92,8 +92,9 @@ appbundle() {
     installtomacos
 
     # Set name of App Bundle in message.
-    APPBUNDLENAME=$(find "$BUILDPATH" -iname "*.dmg" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}')
-    mv "$BUILD/build/package/"*.dmg "$MACOSPWD"
+    COMREV=$(git -C "$BUILD/build" rev-parse --short HEAD)
+    APPBUNDLENAME=$(find "$BUILD" -iname "*.dmg" 2> /dev/null | gawk -F'/' '{print $NF}' | uniq -d)
+    mv "$BUILD/build/$APPBUNDLENAME.dmg" "$MACOSPWD/$BUILDNAME-$COMREV.dmg"
 
     cleansource
 
@@ -123,7 +124,7 @@ appimage() {
     dockerrun
 
     # Set name of AppImage in message.
-    APPIMAGENAME=$(find "$BUILDPATH" -iname "*.AppImage" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}')
+    APPIMAGENAME=$(find "$BUILD" -iname "*.AppImage" 2> /dev/null | gawk -F'/' '{print $NF}')
     mv "$BUILD/"*.AppImage "$LNXPWD"
 
     cleansource
@@ -283,7 +284,7 @@ choosebuild() {
     buildname
 
     # Clean the game's source code and exit shell script in case of error or cancelling script.
-    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; git -C $BUILD clean -qdfx -e .comrev ; git -C $BUILD reset -q --hard ; exit' 1 2 3 6 15
+    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; git -C $BUILD clean -qdfx -e .comrev ; git -C $BUILD reset -q --hard ; exit || git -C $BUILD clean -qdfx -e .comrev ; git -C $BUILD reset -q --hard ; exit' 0 1 2 3 6 15
 }
 
 chooseinstall() {
@@ -2939,7 +2940,6 @@ INSTALL
 }
 
 installtomacos() {
-
     # Download source code.
     printf "$MESSAGE\n%s\n\e[0m" "Downloading $BUILDNAME's source code. Please wait..."
     if [ ! -d "$BUILD/.git" ]; then
@@ -3438,24 +3438,58 @@ installtomacos() {
     makeicns -in "$BUILD/src/win32/Srb2win.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
 
     # Fix linking of libraries to binary.
-    install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/stow/libsdl2/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-    install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/stow/libopenmpt/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-    install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/stow/libgme/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-    install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-    install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/stow/libpng/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-    install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlidec.dylib
-    install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/opt/brotli/lib/libbrotlicommon.1.dylib" /usr/local/opt/brotli/lib/libbrotlienc.dylib
-    sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.dylib" /usr/local/stow/libvorbis/lib/libvorbis.dylib
-    sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.dylib" /usr/local/stow/libvorbis/lib/libvorbisfile.dylib
-    sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.dylib" /usr/local/stow/libopenmpt/lib/libopenmpt.dylib
-    sudo install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" /usr/local/stow/libsdl2-mixer/lib/libSDL2_mixer.dylib
-    sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/stow/libsdl2/lib/libSDL2.dylib" /usr/local/stow/libsdl2-mixer/lib/libSDL2_mixer.dylib
+    if [ -f /usr/local/lib/libbrotlicommon.dylib ]; then
+
+        install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlidec.dylib
+        install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlienc.dylib
+
+    fi
+
+    if [ -f /usr/local/lib/libSDL2.dylib ]; then
+
+        install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" /usr/local/lib/libSDL2_mixer.dylib
+
+    fi
+
+    if [ -f /usr/local/lib/libopenmpt.dylib ]; then
+
+        install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libgme.dylib ]; then
+
+        install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libmodplug.dylib ]; then
+
+        install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        sudo install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
+
+    fi
+
+    if [ -f /usr/local/lib/libpng.dylib ]; then
+
+        install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libogg.dylib ]; then
+
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbis.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbisfile.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libopenmpt.dylib
+
+    fi
 
     # Building App Bundle.
     if [ "$APPBUNDLE" = 1 ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's App Bundle. Please wait..."
-        make -C "$BUILD/build" -k -j$(($(sysctl -n hw.logicalcpu) + 1)) package
+        make -C "$BUILD/build" package
 
     # Installing build's binary, assets, libraries, icons and desktop file to the system.
     else
@@ -3468,13 +3502,6 @@ installtomacos() {
         SRB2MACLINK="/Applications/$BUILDNAME.app"
         sudo rm -rf "$SRB2MACLINK"
         sudo ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
-
-        # Reload Finder and Dock to update icons.
-        sudo killall Finder
-        sudo killall Dock
-
-        # Creating link to libclang_rt in case of issue not opening game.
-        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
 
     fi
 }
