@@ -3,12 +3,12 @@ srb2bld is a shellscript, that automates and simplifies process of downloading s
 https://user-images.githubusercontent.com/16626326/151817083-7702cfb9-3733-4f4d-834f-841f99269c05.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, macOS (tested on version 10.14 and 10.15) and Windows. Check "Compatibilty" section for information about which build works for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, macOS (tested on version 10.14 and 10.15) and Windows. Check "Compatibilty" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for macOS) based on user's set compilation flags,
 - Supports installing dependencies for glibc and musl based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine,
 - Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
-- Creating AppImages (Linux only),
+- Creating AppImages (Linux only) and App Bundles (macOS only),
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
 - Runs on Linux, macOS and Windows (Git Bash).

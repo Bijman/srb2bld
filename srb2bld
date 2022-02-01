@@ -3080,12 +3080,7 @@ installtomacos() {
 
     # Download libpng's source code, build and install it.
     printf "$MESSAGE\n%s\n\e[0m" "Building and installing dependencies. Please wait..."
-
-    if [ -x "$(which sudo 2> /dev/null)" ]; then
-
-        sudo_ping
-
-    fi
+    sudo_ping
 
     if [ ! -f "/usr/local/lib/libpng.dylib" ] && [ "$ISPNG" = "libpng" ]; then
 
@@ -3107,8 +3102,8 @@ installtomacos() {
         mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
         cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        $SUDO cmake --install "$SRB2BLDROOT/libraries/libpng/build"
-        $SUDO -E stow -v --adopt libpng
+        sudo cmake --install "$SRB2BLDROOT/libraries/libpng/build"
+        sudo -E stow -v --adopt libpng
 
     fi
 
@@ -3133,8 +3128,8 @@ installtomacos() {
         mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
         cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        $SUDO cmake --install "$SRB2BLDROOT/libraries/libogg/build"
-        $SUDO -E stow -v --adopt libogg
+        sudo cmake --install "$SRB2BLDROOT/libraries/libogg/build"
+        sudo -E stow -v --adopt libogg
 
     fi
 
@@ -3160,8 +3155,8 @@ installtomacos() {
         ./autogen.sh
         ./configure --prefix=/usr/local/stow/libvorbis
         make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-        $SUDO make install
-        $SUDO -E stow -v --adopt libvorbis
+        sudo make install
+        sudo -E stow -v --adopt libvorbis
         cd "$BUILD" || exit
 
     fi
@@ -3188,8 +3183,8 @@ installtomacos() {
         autoreconf -iv
         ./configure --prefix=/usr/local/stow/libmpg123
         make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-        $SUDO make install
-        $SUDO -E stow -v --adopt libmpg123
+        sudo make install
+        sudo -E stow -v --adopt libmpg123
         cd "$BUILD" || exit
 
     fi
@@ -3215,8 +3210,8 @@ installtomacos() {
         mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
         cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        $SUDO cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
-        $SUDO -E stow -v --adopt libmodplug
+        sudo cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
+        sudo -E stow -v --adopt libmodplug
 
     fi
 
@@ -3241,8 +3236,8 @@ installtomacos() {
         mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
         cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2 -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        $SUDO cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
-        $SUDO -E stow -v --adopt libsdl2
+        sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
+        sudo -E stow -v --adopt libsdl2
 
     fi
 
@@ -3289,8 +3284,8 @@ installtomacos() {
             --enable-music-wave \
             --prefix=/usr/local/stow/libsdl2-mixer
         make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-        $SUDO make install
-        $SUDO -E stow -v --adopt libsdl2-mixer
+        sudo make install
+        sudo -E stow -v --adopt libsdl2-mixer
         cd "$BUILD" || exit
 
     fi
@@ -3316,8 +3311,8 @@ installtomacos() {
         cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
         gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
         make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-        $SUDO make PREFIX=/usr/local/stow/libopenmpt install
-        $SUDO -E stow -v --adopt libopenmpt
+        sudo make PREFIX=/usr/local/stow/libopenmpt install
+        sudo -E stow -v --adopt libopenmpt
         cd "$BUILD" || exit
 
     fi
@@ -3343,8 +3338,8 @@ installtomacos() {
         mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
         cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        $SUDO cmake --install "$SRB2BLDROOT/libraries/libgme/build"
-        $SUDO -E stow -v --adopt libgme
+        sudo cmake --install "$SRB2BLDROOT/libraries/libgme/build"
+        sudo -E stow -v --adopt libgme
 
     fi
 
@@ -3369,8 +3364,8 @@ installtomacos() {
         mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
         cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        $SUDO cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
-        $SUDO -E stow -v --adopt discord-rpc
+        sudo cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
+        sudo -E stow -v --adopt discord-rpc
 
     fi
 
@@ -3396,8 +3391,8 @@ installtomacos() {
         cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
         cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
         cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        $SUDO cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
-        $SUDO -E stow -v --adopt libopenvr
+        sudo cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
+        sudo -E stow -v --adopt libopenvr
 
     fi
 
@@ -3441,28 +3436,24 @@ installtomacos() {
     cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
 
     # Get app icon.
-    if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+    if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Downloading icon and converting it to .icns. Please wait..."
-        curl -L https://mb.srb2.org/data/resource_icons/3/3248.jpg -o "$BUILD/build/icon.jpg"
-        makeicns -in "$BUILD/build/icon.jpg" -64 -out "$BUILD/src/sdl/macosx/Srb2mac.icns"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
-
-        printf "$MESSAGE\n%s\n\e[0m" "Downloading icon and converting it to .icns. Please wait..."
-        curl -L https://mb.srb2.org/data/resource_icons/0/166.jpg -o "$BUILD/build/icon.jpg"
-        makeicns -in "$BUILD/build/icon.jpg" -64 -out "$BUILD/src/sdl/macosx/Srb2mac.icns"
+        makeicns -in "$BUILD/src/win32/Srb2win.ico" -64 -out "$BUILD/src/sdl/macosx/Srb2mac.icns"
 
     fi
 
     # Fixing linking of libraries to binary.
-    install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/stow/libsdl2/lib/libSDL2-2.0.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
-    install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/stow/libopenmpt/lib/libopenmpt.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
-    install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/stow/libgme/lib/libgme.0.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
-    #    install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
-    install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/stow/libpng/lib/libpng16.16.dylib" "$BUILD/build/bin/Sonic Robo Blast 2.app/Contents/MacOS/Sonic Robo Blast 2"
-    #    $SUDO install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "/usr/local/lib/libSDL2_mixer.dylib"
-    #    $SUDO install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.0.dylib" "/usr/local/lib/libvorbis.dylib"
+    install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/stow/libsdl2/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+    install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/stow/libopenmpt/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+    install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/stow/libgme/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+    install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+    install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/stow/libpng/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+    sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.dylib" "/usr/local/lib/libvorbis.dylib"
+    sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.dylib" "/usr/local/lib/libvorbisfile.dylib"
+    sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/stow/libogg/lib/libogg.dylib" "/usr/local/lib/libopenmpt.dylib"
+    sudo install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/stow/libmodplug/lib/libmodplug.dylib" "/usr/local/lib/libSDL2_mixer.dylib"
+    sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/stow/libsdl2/lib/libSDL2.dylib" "/usr/local/lib/libSDL2_mixer.dylib"
 
     # Building App Bundle.
     if [ "$APPBUNDLE" = 1 ]; then
@@ -3477,12 +3468,12 @@ installtomacos() {
 
         SRB2MACPATH="/usr/local/opt/srb2-apps"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
-        #        $SUDO mkdir -p /usr/local/opt/srb2-apps
-        $SUDO make -C "$BUILD/build" install
-        $SUDO cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
-        #        $SUDO cp -rf "$BUILD/build/bin/$BUILDNAME.app" /usr/local/opt/srb2-apps
-        #        $SUDO mkdir -p "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
-        #        $SUDO cp -rf "$BUILD/assets/installer/"* "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
+        #        sudo mkdir -p /usr/local/opt/srb2-apps
+        sudo make -C "$BUILD/build" install
+        sudo cp -rf "$BUILD/src/sdl/macosx/Srb2mac.icns" "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
+        #        sudo cp -rf "$BUILD/build/bin/$BUILDNAME.app" /usr/local/opt/srb2-apps
+        #        sudo mkdir -p "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
+        #        sudo cp -rf "$BUILD/assets/installer/"* "$SRB2MACPATH/$BUILDNAME.app/Contents/Resources"
         mkdir -p "$HOME/Applications"
 
         # Making symbolic link to .app file in $HOME/Applications.
@@ -3491,11 +3482,11 @@ installtomacos() {
         ln -sf "$SRB2MACPATH/$BUILDNAME.app" "$SRB2MACLINK"
 
         # Reload Finder and Dock to update icons.
-        $SUDO killall Finder
-        $SUDO killall Dock
+        sudo killall Finder
+        sudo killall Dock
 
         # Creating link to libclang_rt in case of issue not opening game.
-        $SUDO ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
+        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib
 
     fi
 }
