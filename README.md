@@ -1,6 +1,6 @@
 srb2bld is a shellscript, that automates and simplifies process of downloading source code, configuring, compilation and installation of various SRB2 related builds.
 
-https://user-images.githubusercontent.com/16626326/151817083-7702cfb9-3733-4f4d-834f-841f99269c05.mp4
+https://user-images.githubusercontent.com/16626326/152060337-b15c6235-76f8-4d95-aa44-d94196980f59.mp4
 
 # Features
 - Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, macOS (tested on version 10.14/Mojave and 10.15/Catalina) and Windows. Check "Compatibilty" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,

@@ -94,7 +94,17 @@ appbundle() {
     # Set name of App Bundle in message.
     COMREV=$(git -C "$BUILD/build" rev-parse --short HEAD)
     APPBUNDLENAME=$(find "$BUILD" -iname "*.dmg" 2> /dev/null | gawk -F'/' '{print $NF}' | uniq -d)
-    mv "$BUILD/build/$APPBUNDLENAME.dmg" "$MACOSPWD/$BUILDNAME-$COMREV.dmg"
+
+    # Rename App Bundle and move it to working directory.
+    if [ -d "$BUILD/build/package" ]; then
+
+        mv "$BUILD/build/package/$APPBUNDLENAME" "$MACOSPWD/$BUILDNAME-$COMREV.dmg"
+
+    else
+
+        mv "$BUILD/build/$APPBUNDLENAME" "$MACOSPWD/$BUILDNAME-$COMREV.dmg"
+
+    fi
 
     cleansource
 
@@ -282,9 +292,6 @@ choosebuild() {
     done
 
     buildname
-
-    # Clean the game's source code and exit shell script in case of error or cancelling script.
-    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; git -C $BUILD clean -qdfx -e .comrev ; git -C $BUILD reset -q --hard ; exit || git -C $BUILD clean -qdfx -e .comrev ; git -C $BUILD reset -q --hard ; exit' 0 1 2 3 6 15
 }
 
 chooseinstall() {
@@ -607,7 +614,7 @@ dockerentry() {
         done &
         SUDO_PID=$!
 
-        trap "sudo_ping stop" 0
+        trap 'sudo_ping stop' 0
     }
 
     # Clean the game's source code and exit shell script in case of error or cancelling.
@@ -615,6 +622,7 @@ dockerentry() {
 
     # Update Docker container.
     printf "$MESSAGE\n%s\n\e[0m" "Updating Docker container. Please wait..."
+
     sudo_ping
 
     if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
@@ -3078,9 +3086,10 @@ installtomacos() {
     export LIBRARY_PATH=/usr/local/lib
     export STOW_DIR=/usr/local/stow
 
+    sudo_ping
+
     # Download libpng's source code, build and install it.
     printf "$MESSAGE\n%s\n\e[0m" "Building and installing dependencies. Please wait..."
-    sudo_ping
 
     if [ ! -f "/usr/local/lib/libpng.dylib" ] && [ "$ISPNG" = "libpng" ]; then
 
@@ -3108,7 +3117,7 @@ installtomacos() {
     fi
 
     # Download libogg's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libogg.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+    if [ ! -f "/usr/local/lib/libogg.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libogg/.git" ]; then
 
@@ -3134,7 +3143,7 @@ installtomacos() {
     fi
 
     # Download libvorbis' source code, build and install it.
-    if [ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+    if [ ! -f "/usr/local/lib/libvorbis.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libvorbis/.git" ]; then
 
@@ -3162,7 +3171,7 @@ installtomacos() {
     fi
 
     # Download libmpg123's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
+    if [ ! -f "/usr/local/lib/libmpg123.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libmpg123/.git" ]; then
 
@@ -3190,7 +3199,7 @@ installtomacos() {
     fi
 
     # Download libmodplug's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
+    if [ ! -f "/usr/local/lib/libmodplug.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libmodplug/.git" ]; then
 
@@ -3498,7 +3507,7 @@ installtomacos() {
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
         sudo make -C "$BUILD/build" install
 
-        # Making symbolic link to .app file in $HOME/Applications.
+        # Making symbolic link to .app file in /Applications.
         SRB2MACLINK="/Applications/$BUILDNAME.app"
         sudo rm -rf "$SRB2MACLINK"
         sudo ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
@@ -3764,7 +3773,8 @@ sudo_ping() {
     done &
     SUDO_PID=$!
 
-    trap "sudo_ping stop" 0
+    # Clean the game's source code and exit shell script in case of error or cancelling script.
+    trap 'sudo_ping stop; printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 0 1 2 3 6 15
 }
 
 upgrade() {
