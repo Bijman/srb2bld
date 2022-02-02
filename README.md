@@ -147,6 +147,8 @@ Usage: srb2bld [OPTIONS]
      -ai, --appimage                        Compile and create AppImage of SRB2/SRB2Kart build (Linux only).
      -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
      -i, --install                          Compile and install SRB2/SRB2Kart build.
+     -la, --listasset                       List downloaded SRB2/SRB2Kart assets.
+     -lb, --listbuild                       List downloaded SRB2/SRB2Kart builds.
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.

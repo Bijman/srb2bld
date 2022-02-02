@@ -89,10 +89,12 @@ appbundle() {
     # Set current working directory.
     MACOSPWD="$(pwd)"
 
+    # Have commit revision as part of name for App Bundle.
+    COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
+
     installtomacos
 
     # Set name of App Bundle in message.
-    COMREV=$(git -C "$BUILD/build" rev-parse --short HEAD)
     APPBUNDLENAME=$(find "$BUILD" -iname "*.dmg" 2> /dev/null | gawk -F'/' '{print $NF}' | uniq -d)
 
     # Rename App Bundle and move it to working directory.
@@ -108,7 +110,7 @@ appbundle() {
 
     cleansource
 
-    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $APPBUNDLENAME in $MACOSPWD path."
+    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $BUILDNAME-$COMREV.dmg in $MACOSPWD path."
 }
 
 appimage() {
@@ -128,6 +130,9 @@ appimage() {
 
     # Set current working directory.
     LNXPWD="$(pwd)"
+
+    # Have commit revision as part of name for AppImage.
+    COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
 
     dockerentry
 
@@ -480,8 +485,8 @@ chooseuninstall() {
         if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
             BUILDINSTALLED=$(printf "%s\n" "$array" | gawk NR=="${n}")
-            INSTALLFILES=$(cat "$BUILDINSTALLED")
-            printf "$PROMPT\n%s\n\e[0m" "$INSTALLFILES"
+            INSTALLEDFILES=$(cat "$BUILDINSTALLED")
+            printf "$PROMPT\n%s\n\e[0m" "$INSTALLEDFILES"
             printf "$MESSAGE%s\n\e[0m" "Above files will be uninstalled. Are you sure you want to that? Enter \"yes\" or \"no\" (\"y\" or \"n\")."
             printf "$PROMPT\n%s\e[0m" "> "
             read -r CONFIRM
@@ -1165,7 +1170,7 @@ if [ "\$APPIMAGE" = 1 ]; then
     fi
 
     # Create desktop file.
-    COMREV=\$(git rev-parse --short HEAD)
+    COMREV=\$(git -C "\$BUILD" rev-parse --short HEAD)
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
 
@@ -2068,9 +2073,9 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
     fi
 
-    COMREV=\$(git rev-parse --short HEAD)
-
     # Create desktop file.
+    COMREV=\$(git -C "\$BUILD" rev-parse --short HEAD)
+
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/srb2-software.desktop" << DESKTOP
@@ -3086,11 +3091,11 @@ installtomacos() {
     export LIBRARY_PATH=/usr/local/lib
     export STOW_DIR=/usr/local/stow
 
+    printf "$MESSAGE\n%s\n\e[0m" "Building and installing dependencies. Please wait..."
+
     sudo_ping
 
     # Download libpng's source code, build and install it.
-    printf "$MESSAGE\n%s\n\e[0m" "Building and installing dependencies. Please wait..."
-
     if [ ! -f "/usr/local/lib/libpng.dylib" ] && [ "$ISPNG" = "libpng" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libpng/.git" ]; then
@@ -3436,6 +3441,9 @@ installtomacos() {
 
     fi
 
+    # Set name of App Bundle.
+    gawk -i inplace '{gsub("\\$TARGET_NAME","'"$BUILDNAME-$COMREV"'");print}' "$BUILD/src/sdl/macosx/Srb2mac.xcodeproj/project.pbxproj"
+
     # Compile the game's source code.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME. Please wait..."
     mkdir -p "$BUILD/build"
@@ -3505,7 +3513,7 @@ installtomacos() {
 
         SRB2MACPATH="/usr/local/opt/srb2-apps/$BUILDNAME.app"
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
-        sudo make -C "$BUILD/build" install
+        sudo -E make -C "$BUILD/build" install
 
         # Making symbolic link to .app file in /Applications.
         SRB2MACLINK="/Applications/$BUILDNAME.app"
@@ -3729,6 +3737,32 @@ WINMENUGEN
 
 }
 
+listasset() {
+    clear
+    # List installed games.
+    if [ -z "$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+
+        printf "$FAILURE%s\n\e[0m" "Can't find downloaded assets."
+        exit
+
+    fi
+
+    find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort
+}
+
+listbuild() {
+    clear
+    # List installed games.
+    if [ -z "$(find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+
+        printf "$FAILURE%s\n\e[0m" "Can't find downloaded builds."
+        exit
+
+    fi
+
+    find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort
+}
+
 listinstalled() {
     clear
     # List installed games.
@@ -3855,6 +3889,8 @@ Usage: srb2bld [OPTIONS]
      -ai, --appimage                        Compile and create AppImage of SRB2/SRB2Kart build (Linux only).
      -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
      -i, --install                          Compile and install SRB2/SRB2Kart build.
+     -la, --listasset                       List downloaded SRB2/SRB2Kart assets.
+     -lb, --listbuild                       List downloaded SRB2/SRB2Kart builds.
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
@@ -3920,6 +3956,18 @@ case "$1" in
     -i | --install)
 
         chooseinstall
+
+        ;;
+
+    -la | --listasset)
+
+        listasset
+
+        ;;
+
+    -lb | --listbuild)
+
+        listbuild
 
         ;;
 
