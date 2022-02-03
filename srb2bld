@@ -64,7 +64,7 @@ MACOSOPENMPTVER="0.5.14"
 MACOSGMEVER="0.6.2"
 MACOSSDL2VER="2.0.18"
 MACOSSDL2MIXERVER="2.0.4"
-COMPTABLEURL="https://gist.githubusercontent.com/Bijman/dae1e123800af25ef28689bd644a4516/raw/99d9aecac90e61e76373d9ae02cce3b69bcab5db/srb2bldcompile.txt"
+COMPTABLEURL="https://gist.githubusercontent.com/Bijman/dae1e123800af25ef28689bd644a4516/raw"
 FAILURE="\e[1;91m"
 SUCCESS="\e[1;92m"
 NOTICE="\e[1;93m"
@@ -89,14 +89,13 @@ appbundle() {
     # Set current working directory.
     MACOSPWD="$(pwd)"
 
+    installtomacos
+
     # Have commit revision as part of name for App Bundle.
     COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
 
-    installtomacos
-
     # Set name of App Bundle in message.
     APPBUNDLENAME=$(find "$BUILD" -iname "*.dmg" 2> /dev/null | gawk -F'/' '{print $NF}' | uniq -d)
-
     # Rename App Bundle and move it to working directory.
     if [ -d "$BUILD/build/package" ]; then
 
@@ -131,15 +130,16 @@ appimage() {
     # Set current working directory.
     LNXPWD="$(pwd)"
 
-    # Have commit revision as part of name for AppImage.
-    COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
-
     dockerentry
 
     dockerrun
 
+    # Have commit revision as part of name for AppImage.
+    COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
+
     # Set name of AppImage in message.
     APPIMAGENAME=$(find "$BUILD" -iname "*.AppImage" 2> /dev/null | gawk -F'/' '{print $NF}')
+
     mv "$BUILD/"*.AppImage "$LNXPWD"
 
     cleansource
@@ -470,7 +470,7 @@ chooseuninstall() {
 
     fi
 
-    # Uninstall build on system.
+    # Uninstall build from the system.
     printf "$MESSAGE%s\n\e[0m" "Please choose installed package by typing number and then pressing enter. Press enter or ctrl+c to quit."
     array=$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
@@ -555,7 +555,7 @@ cleansource() {
 compatibility() {
     clear
     # Show compatibility table for compiling SRB2 builds for each OS.
-    curl -s "$COMPTABLEURL"
+    curl -sL "$COMPTABLEURL"
 }
 
 defaultmessage() {
@@ -1051,6 +1051,13 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     fi
 
+    # Temporarily disabling libpng12 to avoid compiling errors.
+    if [ -f /usr/local/lib/libpng12.so ]; then
+
+        sudo -E stow -D --adopt libpng12-lib32
+
+    fi
+
     # Compile the game's source code.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
 
@@ -1092,13 +1099,6 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         mkdir -p "\$BUILD/objs/Linux/SDL/Release"
 
-        # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-        if [ "\$OS" = "Linux" ] && [ -f /usr/local/lib/libpng12.so.0 ]; then
-
-            sudo -E stow -D --adopt libpng12-lib32
-
-        fi
-
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
             CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1
@@ -1106,13 +1106,6 @@ if [ "\$APPIMAGE" = 1 ]; then
         else
 
             CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1
-
-        fi
-
-        # Renabling libpng12.
-        if [ "\$OS" = "Linux" ] && [ -d /usr/local/stow/libpng12 ]; then
-
-            sudo -E stow --adopt libpng12-lib32
 
         fi
 
@@ -1137,6 +1130,13 @@ if [ "\$APPIMAGE" = 1 ]; then
             cd "\$BUILD" || exit
 
         fi
+
+    fi
+
+    # Renabling libpng12.
+    if [ -d /usr/local/stow/libpng12-lib32 ]; then
+
+        sudo -E stow --adopt libpng12-lib32
 
     fi
 
@@ -1754,7 +1754,7 @@ else
     fi
 
     # Download libpng12's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ ! -f /usr/local/lib/libpng12.so.0 ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ ! -f /usr/local/lib/libpng12.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libpng12/.git" ]; then
 
@@ -1823,14 +1823,15 @@ else
               CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
               sudo make -C "\$SRB2BLDROOT/libraries/discord-rpc/build" install
               sudo -E stow -v --adopt discord-rpc
-              cd "\$BUILD" || exit
 
         fi
+
+        cd "\$BUILD" || exit
 
     fi
 
     # Download libopenvr's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] && [ ! -f "/usr/local/lib/libopenvr_api.so" ]; then
+    if [ "\$OS" = "Linux" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] && [ ! -f /usr/local/lib/libopenvr_api.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
@@ -2010,6 +2011,13 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
      elif [ "\$OS" = "Linux" ]; then
 
+        # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
+        if [ -f /usr/local/lib/libpng12.so ]; then
+
+            sudo -E stow -D --adopt libpng12-lib32
+
+        fi
+
         if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
@@ -2025,13 +2033,6 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
             mkdir -p "\$BUILD/objs/Linux/SDL/Release"
-
-            # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-            if [ "\$OS" = "Linux" ] && [ -f /usr/local/lib/libpng12.so.0 ]; then
-
-                sudo -E stow -D --adopt libpng12-lib32
-
-            fi
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
@@ -2060,14 +2061,14 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
 
             fi
 
-            # Renabling libpng12.
-            if [ "\$OS" = "Linux" ] && [ -d /usr/local/stow/libpng12 ]; then
-
-                sudo -E stow --adopt libpng12-lib32
-
-            fi
-
             cd "\$BUILD" || exit
+
+        fi
+
+        # Renabling libpng12.
+        if [ -d /usr/local/stow/libpng12-lib32 ]; then
+
+            sudo -E stow --adopt libpng12-lib32
 
         fi
 
@@ -2782,7 +2783,7 @@ installtolinux() {
 
         fi
 
-        printf "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME on system. Please wait..."
+        printf "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
         PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ {print "'"$LIBPATH"'"$1}' | sort -u); do
 
             if [ -x "$(which emerge 2> /dev/null)" ]; then
@@ -2869,7 +2870,7 @@ installtolinux() {
 
     if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u)" ]; then
 
-        printf "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME on system. Please wait..."
+        printf "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
         PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u); do
 
             if [ -x "$(which apk 2> /dev/null)" ]; then
@@ -3885,8 +3886,8 @@ Build and install SRB2/SRB2Kart from source.
 Usage: srb2bld [OPTIONS]
   OPTIONS:
      -h, --help                             Show this help text.
-     -ab, --appbundle                       Compile and create App Bundle of SRB2/SRB2Kart build (macOS only).
-     -ai, --appimage                        Compile and create AppImage of SRB2/SRB2Kart build (Linux only).
+     -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart build, which is packaged in DMG file (macOS only).
+     -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart build (Linux only).
      -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
      -i, --install                          Compile and install SRB2/SRB2Kart build.
      -la, --listasset                       List downloaded SRB2/SRB2Kart assets.

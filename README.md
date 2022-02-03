@@ -21,6 +21,7 @@ https://user-images.githubusercontent.com/16626326/152060337-b15c6235-76f8-4d95-
 - Gawk,
 - Docker (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
+- FUSE (Linux only),
 - Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package).
 
 Windows users need to also have installed Git Bash to run this script. Also PowerShell is required for updating icons and menu entries (usually it is installed out-of-box on Windows 7 or later).
@@ -37,11 +38,11 @@ As for macOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following commands:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install coreutils findutils bash curl gawk docker.io stow`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install coreutils findutils bash curl gawk docker.io stow fuse`,
 
-- Arch/Arch based: `sudo pacman -S coreutils findutils bash curl gawk docker stow`,
+- Arch/Arch based: `sudo pacman -S coreutils findutils bash curl gawk docker stow fuse`,
 
-- Gentoo/Gentoo based: `sudo emerge -av coreutils findutils bash curl gawk docker stow`.
+- Gentoo/Gentoo based: `sudo emerge -av coreutils findutils bash curl gawk docker stow fuse`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -109,18 +110,18 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source ~/.bash_profile` or `source ~/.zshrc`.
 
 # Compatibility
-|                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Windows x86/x64 | macOS x86/x64 |
-| :-------------------: | :-------------------: | :------------------: | :-------------: | :-----------: |
-| SRB2                  |          ✅           |         ✅           |       ✅        |       ✅      |
-| SRB2 Uncapped Plus    |          ✅           |         ✅           |       ✅        |       🟨**    |
-| SRB2 NetPlus          |          ✅           |         ✅           |       ✅        |       ⛔      |
-| SRB2 v2.1 Legacy      |          ✅           |         ✅           |       ✅        |       ✅      |
-| SRB2 v2.0             |          ✅           |         ✅           |       ✅*       |       ⛔      |
-| SRB2 Final Demo       |          ✅*          |         ⛔           |       ✅*       |       ⛔      |
-| SRB2 Persona          |          ✅           |         ⛔           |       ✅        |       ✅      |
-| SRB2 Kart             |          ✅           |         ✅           |       ✅        |       🟨***   |
-| SRB2 Kart Moe Mansion |          ✅           |         ✅           |       ✅        |       ⛔      |
-| SRB2 Kart VR          |          ✅           |         ✅           |       ✅*       |       ⛔      |
+|                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
+| :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
+| SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 Uncapped Plus    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
+| SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 v2.0             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| SRB2 Final Demo       |          ✅*          |         ⛔           |        ✅*        |        ✅*      |       ⛔      |
+| SRB2 Persona          |          ✅           |         ⛔           |        ✅         |        ✅       |       ✅      |
+| SRB2 Kart             |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
+| SRB2 Kart Moe Mansion |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 Kart VR          |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 
 **Legend:**
 
@@ -143,8 +144,8 @@ Build and install SRB2/SRB2Kart from source.
 Usage: srb2bld [OPTIONS]
   OPTIONS:
      -h, --help                             Show this help text.
-     -ab, --appbundle                       Compile and create App Bundle of SRB2/SRB2Kart build (macOS only).
-     -ai, --appimage                        Compile and create AppImage of SRB2/SRB2Kart build (Linux only).
+     -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart build, which is packaged in DMG file (macOS only).
+     -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart build (Linux only).
      -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
      -i, --install                          Compile and install SRB2/SRB2Kart build.
      -la, --listasset                       List downloaded SRB2/SRB2Kart assets.
