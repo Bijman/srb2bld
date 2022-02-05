@@ -8,7 +8,7 @@ https://user-images.githubusercontent.com/16626326/152060337-b15c6235-76f8-4d95-
 - Installing missing dependencies on host system (mostly binaries, except for macOS) based on user's set compilation flags,
 - Supports installing dependencies for glibc and musl based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine,
 - Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
-- Creating AppImages (Linux only) and App Bundles (macOS only),
+- Creating customisable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
 - Runs on Linux, macOS and Windows (Git Bash).
@@ -101,7 +101,7 @@ As for macOS users, they need to install these additional dependencies:
 
 # Configuration
 **Linux:**
-1. Add user to the "docker" group: `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default`. After that logout or reboot the system.
+1. Add user to the "docker" group: `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. After that, logout or reboot the system.
 
 **Windows:**
 1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system was logged out or rebooted.
@@ -115,6 +115,7 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Uncapped Plus    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 v2.0             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 Final Demo       |          ✅*          |         ⛔           |        ✅*        |        ✅*      |       ⛔      |
@@ -135,7 +136,7 @@ As for macOS users, they need to install these additional dependencies:
 
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
-***Compiles successfully, but it can throw SIGABRT error on some macOS versions. Runs fine on macOS 10.14/Mojave.
+***Compiles successfully, but it can throw SIGABRT error on some macOS versions. Compiled build runs fine on macOS 10.14/Mojave.
 
 # Usage (from help text)
 ```
@@ -174,6 +175,6 @@ Usage: srb2bld [OPTIONS]
 
   Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
 
-  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+  If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
 ```

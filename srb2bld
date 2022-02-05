@@ -91,25 +91,23 @@ appbundle() {
 
     installtomacos
 
-    # Have commit revision as part of name for App Bundle.
-    COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
-
     # Set name of App Bundle in message.
-    APPBUNDLENAME=$(find "$BUILD" -iname "*.dmg" 2> /dev/null | gawk -F'/' '{print $NF}' | uniq -d)
+    APPBUNDLENAME=$(find "$BUILD" -iname "*.dmg" 2> /dev/null | gawk -F'/' '{print $NF}' | sort | uniq -d)
+
     # Rename App Bundle and move it to working directory.
     if [ -d "$BUILD/build/package" ]; then
 
-        mv "$BUILD/build/package/$APPBUNDLENAME" "$MACOSPWD/$BUILDNAME-$COMREV.dmg"
+        mv "$BUILD/build/package/$APPBUNDLENAME" "$MACOSPWD/$(print "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg"
 
     else
 
-        mv "$BUILD/build/$APPBUNDLENAME" "$MACOSPWD/$BUILDNAME-$COMREV.dmg"
+        mv "$BUILD/build/$APPBUNDLENAME" "$MACOSPWD/$(print "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg"
 
     fi
 
     cleansource
 
-    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $BUILDNAME-$COMREV.dmg in $MACOSPWD path."
+    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $(print "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg in $MACOSPWD path."
 }
 
 appimage() {
@@ -160,6 +158,10 @@ buildname() {
 
         BUILDNAME="Sonic Robo Blast 2 NetPlus"
 
+    elif [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 VR"
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
         BUILDNAME="Sonic Robo Blast 2 v2.1 Legacy"
@@ -197,7 +199,7 @@ choosebuild() {
     while
 
         printf "$MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart VR"; do printf "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart VR"; do printf "%s\n" "$((i += 1))) $loop"; done
         printf "#? "
         read -r choose
     do
@@ -231,13 +233,21 @@ choosebuild() {
 
             "4")
 
+                BUILD="$BUILDPATH/srb2-vr"
+                GIT="git clone https://git.do.srb2.org/chreas/SRB2.git --recursive --branch openvr"
+                break
+
+                ;;
+
+            "5")
+
                 BUILD="$BUILDPATH/srb2-2.1-legacy"
                 GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --recursive --branch master"
                 break
 
                 ;;
 
-            "5")
+            "6")
 
                 BUILD="$BUILDPATH/srb2-2.0"
                 GIT="git clone https://github.com/STJr/SRB2-Public.git --recursive --branch master"
@@ -245,7 +255,7 @@ choosebuild() {
 
                 ;;
 
-            "6")
+            "7")
 
                 BUILD="$BUILDPATH/srb2-final-demo"
                 GIT="git clone https://git.do.srb2.org/SteelT/SRB2-OLD.git --recursive --branch master"
@@ -253,7 +263,7 @@ choosebuild() {
 
                 ;;
 
-            "7")
+            "8")
 
                 BUILD="$BUILDPATH/srb2-persona"
                 GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --recursive --branch srb2p_22"
@@ -261,7 +271,7 @@ choosebuild() {
 
                 ;;
 
-            "8")
+            "9")
 
                 BUILD="$BUILDPATH/srb2-kart"
                 GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --recursive --branch master"
@@ -269,7 +279,7 @@ choosebuild() {
 
                 ;;
 
-            "9")
+            "10")
 
                 BUILD="$BUILDPATH/srb2-kart-moe-mansion"
                 GIT="git clone https://gitlab.com/himie/kart-public.git --recursive --branch moe-mansion"
@@ -277,7 +287,7 @@ choosebuild() {
 
                 ;;
 
-            "10")
+            "11")
 
                 BUILD="$BUILDPATH/srb2-kart-vr"
                 GIT="git clone https://gitlab.com/cschoenig/kart-public.git --recursive --branch very-cool-renderer"
@@ -609,6 +619,7 @@ dockerentry() {
         if [ $? -eq 1 ]; then
 
             return
+
         fi
 
         while true; do
@@ -619,16 +630,15 @@ dockerentry() {
         done &
         SUDO_PID=$!
 
-        trap 'sudo_ping stop' 0
+        trap 'sudo_ping stop ; exit' 0
+
     }
 
-    # Clean the game's source code and exit shell script in case of error or cancelling.
+    # Clean the game's source code and exit shell script in case of error or cancelling script
     trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; git -C \$BUILD clean -qdfx -e .comrev ; git -C \$BUILD reset -q --hard ; exit' 1 2 3 6 15 ERR
 
     # Update Docker container.
     printf "$MESSAGE\n%s\n\e[0m" "Updating Docker container. Please wait..."
-
-    sudo_ping
 
     if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
 
@@ -665,7 +675,7 @@ dockerentry() {
 
     # Download and extract assets.
     printf "$MESSAGE\n%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
-    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
         if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
@@ -679,7 +689,18 @@ dockerentry() {
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
-            if [ "\$IS64" = "64" ]; then
+            if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+
+                cp -f "\$BUILD/libs/curl/lib32/libcurl.dll" "\$BUILD/build/AppDir/usr/lib"
+                rm -rf "\$BUILD/libs/dll-binaries/i686/Old"
+                cp -f "\$BUILD/libs/dll-binaries/i686/"* "\$BUILD/build/AppDir/usr/lib"
+                rm -rf "\$BUILD/libs/libopenmpt/bin/x86/mingw"
+                cp -f "\$BUILD/libs/libopenmpt/bin/x86/"* "\$BUILD/build/AppDir/usr/lib"
+                cp -f "\$BUILD/libs/SDL2/i686-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
+                cp -f "\$BUILD/libs/SDLMixerX/i686-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
+                cp -f "\$BUILD/libs/openvr/openvr_api.dll" "\$BUILD/build/AppDir/usr/lib"
+
+            elif [ "\$IS64" = "64" ]; then
 
                 cp -f "\$BUILD/libs/curl/lib64/libcurl-x64.dll" "\$BUILD/build/AppDir/usr/lib"
                 rm -rf "\$BUILD/libs/dll-binaries/x86_64/Old"
@@ -815,15 +836,7 @@ dockerentry() {
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
-            if [ "\$IS64" = "64" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ]); then
-
-                cp -f "\$BUILD/libs/curl/lib64/libcurl-x64.dll" "\$BUILD/build/AppDir/usr/lib"
-                rm -rf "\$BUILD/libs/dll-binaries/x86_64/Old"
-                cp -f "\$BUILD/libs/dll-binaries/x86_64/"* "\$BUILD/build/AppDir/usr/lib"
-                cp -f "\$BUILD/libs/SDL2/x86_64-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
-                cp -f "\$BUILD/libs/SDL2_mixer/x86_64-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
-
-            elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+            if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
                 cp -f "\$BUILD/libs/curl/lib32/libcurl.dll" "\$BUILD/build/AppDir/usr/lib"
                 rm -rf "\$BUILD/libs/dll-binaries/i686/Old"
@@ -831,6 +844,14 @@ dockerentry() {
                 cp -f "\$BUILD/libs/SDL2/i686-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
                 cp -f "\$BUILD/libs/SDL2_mixer/i686-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
                 cp -f "\$BUILD/libs/openvr/openvr_api.dll" "\$BUILD/build/AppDir/usr/lib"
+
+            elif [ "\$IS64" = "64" ]; then
+
+                cp -f "\$BUILD/libs/curl/lib64/libcurl-x64.dll" "\$BUILD/build/AppDir/usr/lib"
+                rm -rf "\$BUILD/libs/dll-binaries/x86_64/Old"
+                cp -f "\$BUILD/libs/dll-binaries/x86_64/"* "\$BUILD/build/AppDir/usr/lib"
+                cp -f "\$BUILD/libs/SDL2/x86_64-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
+                cp -f "\$BUILD/libs/SDL2_mixer/x86_64-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
 
             else
 
@@ -886,7 +907,7 @@ dockerentry() {
          sed -i '/ExcHndlInit()/d' "$BUILD/src/sdl/i_main.c"
 
          # Linking windres and dllwrap for compiling specific builds.
-         if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+         if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
              sudo ln -sf /usr/bin/i686-w64-mingw32-windres /usr/bin/windres
              sudo ln -sf /usr/bin/i686-w64-mingw32-dllwrap /usr/bin/dllwrap
@@ -920,6 +941,17 @@ dockerentry() {
          sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2netplus|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2netplus|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2netplus|' "\$BUILD/src/sdl/i_system.c"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+
+         sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2VR|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2VR|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2VR|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/games/SRB2|/usr/games/SRB2VR|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
+         gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -iname libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/Makefile.d/nix.mk"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
@@ -996,35 +1028,98 @@ dockerentry() {
 # AppImage creation.
 if [ "\$APPIMAGE" = 1 ]; then
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+    # Display content of Makefile for a good view of available compilation flags.
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
-        # Download DiscordRPC source code and build it.
-        if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
+        gawk '/^#/,/ / {print}' "\$BUILD/src/makefile"
 
-              printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-              git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$SRB2BLDROOT/libraries/discord-rpc"
+    else
+
+        gawk '/^#/,/ / {print}' "\$BUILD/src/"*akefile
+
+    fi
+
+    # Add compilation flags.
+    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
+
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            else
+
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            fi
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            else
+
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            fi
 
         else
 
-              printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
-              git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
-              git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
-              git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            else
+
+                printf "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            fi
 
         fi
 
-        printf "$MESSAGE\n%s\n\e[0m" "Building DiscordRPC. Please wait..."
-        mkdir -p "\$SRB2BLDROOT/libraries/discord-rpc/build"
-        cd "\$SRB2BLDROOT/libraries/discord-rpc/build" || exit
-        cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
-        sudo make -C "\$SRB2BLDROOT/libraries/discord-rpc/build" install
-        cd "\$BUILD" || exit
+    printf "$PROMPT\n%s\e[0m" "> "
+    read -r CONF
+
+    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+
+        CONF=\$(printf "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1","");print}')
+        printf "$FAILURE\n%s\n\e[0m" "Entering OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Exiting."
+        exit
+
+    fi
+
+    # Download DiscordRPC source code, build and install it.
+    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
+            git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$SRB2BLDROOT/libraries/discord-rpc"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+            git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase
+
+        fi
+
+            printf "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
+            mkdir -p "\$SRB2BLDROOT/libraries/discord-rpc/build"
+            cd "\$SRB2BLDROOT/libraries/discord-rpc/build" || exit
+            cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
+            sudo make -C "\$SRB2BLDROOT/libraries/discord-rpc/build" install
+            cd "\$BUILD" || exit
 
     fi
 
     # Download libopenvr's source code, build and install it.
-    if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
@@ -1040,58 +1135,36 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         fi
 
-        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
-        mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
-        cp -rf "\$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "\$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
-        cd "\$SRB2BLDROOT/libraries/libopenvr/build" || exit
-        cmake .. -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenvr/build"
-        sudo make -C "\$SRB2BLDROOT/libraries/libopenvr/build" install
-        cd "\$BUILD" || exit
-
-    fi
-
-    # Temporarily disabling libpng12 to avoid compiling errors.
-    if [ -f /usr/local/lib/libpng12.so ]; then
-
-        sudo -E stow -D --adopt libpng12-lib32
+            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
+            mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
+            cp -rf "\$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "\$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
+            cd "\$SRB2BLDROOT/libraries/libopenvr/build" || exit
+            cmake .. -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenvr/build"
+            sudo make -C "\$SRB2BLDROOT/libraries/libopenvr/build" install
+            cd "\$BUILD" || exit
 
     fi
 
     # Compile the game's source code.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+    # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
+    if [ -f /usr/local/lib/libpng12.so ]; then
+
+        sudo -E stow -D --adopt libpng12-lib32
+
+    fi
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            # Running comptime.sh before compiling to avoid errors.
-            cd "\$BUILD/src" || exit
-            gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
-            bash ../comptime.sh
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
-            cd "\$BUILD" || exit
+            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         else
 
-            # Running comptime.sh before compiling to avoid errors.
-            cd "\$BUILD/src" || exit
-            gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
-            bash ../comptime.sh
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 HAVE_DISCORDRPC=1
-            cd "\$BUILD" || exit
-
-        fi
-
-    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
-
-        if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
-
-            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
-
-        else
-
-            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
+            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         fi
 
@@ -1101,35 +1174,32 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
 
         else
 
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
 
         fi
 
     else
 
+        # Running comptime.sh before compiling to avoid errors.
+        cd "\$BUILD/src" || exit
+        gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
+        bash ../comptime.sh
+
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            # Running comptime.sh before compiling to avoid errors.
-            cd "\$BUILD/src" || exit
-            gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
-            bash ../comptime.sh
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
-            cd "\$BUILD" || exit
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         else
 
-            # Running comptime.sh before compiling to avoid errors.
-            cd "\$BUILD/src" || exit
-            gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
-            bash ../comptime.sh
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1
-            cd "\$BUILD" || exit
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         fi
+
+        cd "\$BUILD" || exit
 
     fi
 
@@ -1251,6 +1321,37 @@ Exec=AppRun -opengl
 [Desktop Action Software]
 Name=Software renderer
 Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 VR
+Comment=Modified open source 3D Sonic VR platformer with improved framerate and additional features
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;OpenVR;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRBVR
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+
+[Desktop Action OpenVR]
+Name=OpenVR runtime
+Exec=AppRun -openvr -win
 DESKTOP
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
@@ -1426,7 +1527,7 @@ Icon=icon
 Exec=AppRun
 Categories=Game;
 Keywords=sonic;kart;racing;
-Actions=OpenGL;Software;
+Actions=OpenGL;Software;OpenVR;
 Terminal=false
 NoDisplay=false
 X-AppImage-Name=SRB2KartVR
@@ -1440,6 +1541,10 @@ Exec=AppRun -opengl
 [Desktop Action Software]
 Name=Software renderer
 Exec=AppRun -software
+
+[Desktop Action OpenVR]
+Name=OpenVR runtime
+Exec=AppRun -openvr -win
 DESKTOP
 
     fi
@@ -1489,7 +1594,7 @@ export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:\$HERE/usr/lib"
 
 APPRUN
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2"
@@ -1499,10 +1604,17 @@ APPRUNBIN
 
         cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
+    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]); then
 
-DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
+        DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
         cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
+
+    fi
+
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+
+        OPENVRLIBPATH=\$(find /lib* /usr/lib* -iname libopenvr_api.so)
+        cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
@@ -1526,7 +1638,7 @@ APPRUNBIN
 
         cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
-    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+    elif [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
@@ -1534,7 +1646,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
 exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
 APPRUNBIN
 
-DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
+        DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
         cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
         cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
@@ -1551,6 +1663,7 @@ DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
     # Build AppImage.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's AppImage. Please wait..."
     ISARM=\$(printf "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}')
+    IS64=\$(getconf LONG_BIT)
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
@@ -1594,6 +1707,7 @@ DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
 
     fi
 
+    # Preparing appimagetool and removing libraries in AppDir that can throw errors when running AppImage.
     chmod +x "\$BUILD/appimagetool"
     rm -rf "\$BUILD/build/AppDir/usr/share/doc" "\$BUILD/build/AppDir/usr/lib/libgcc_s.so"* "\$BUILD/build/AppDir/usr/lib/libstdc++.so"* "\$BUILD/build/AppDir/usr/lib/libc.so"* "\$BUILD/build/AppDir/usr/lib/ld-linux"*
     cd "\$BUILD/build/AppDir" || exit
@@ -1605,9 +1719,14 @@ DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
     cd "\$BUILD/build/AppDir/usr" || exit
     ln -sf "lib" "lib32"
     cd "\$BUILD" || exit
-    "\$BUILD/appimagetool" -n "\$BUILD/build/AppDir"
+
+    # Export commit revision name before creating AppImage.
+    export VERSION="\$COMREV"
+    "\$BUILD/appimagetool" -n "\$BUILD/build/AppDir" 2> /dev/null
 
 else
+
+    sudo_ping
 
     # Display content of Makefile for a good view of available compilation flags.
     if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
@@ -1624,8 +1743,19 @@ else
     printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
 
     if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                printf "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            else
+
+                printf "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            fi
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
@@ -1720,9 +1850,9 @@ else
      printf "$PROMPT\n%s\e[0m" "> "
      read -r CONF
 
-    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
-        CONF=\$(printf "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1","");print}')
+        CONF=\$(printf "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1","");print}')
         printf "$FAILURE\n%s\n\e[0m" "Entering OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Exiting."
         exit
 
@@ -1782,7 +1912,7 @@ else
     fi
 
     # Download DiscordRPC source code, build and install it.
-    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
+    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
@@ -1807,7 +1937,7 @@ else
             DISCORDRPCURL="\$(curl -s https://api.github.com/repos/discord/discord-rpc/releases/latest | gawk -F'"' '/browser_download_url.*discord-rpc-win.zip/ {print \$4}')"
             curl -RLC - "\$DISCORDRPCURL" -o "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip"
 
-            if ([ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]) || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+            if ([ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]) || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
                 7z e -y "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip" "discord-rpc/win32-dynamic/bin/discord-rpc.dll" -o"\$BUILD/build/AppDir/usr/lib"
 
@@ -1831,7 +1961,7 @@ else
     fi
 
     # Download libopenvr's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] && [ ! -f /usr/local/lib/libopenvr_api.so ]; then
+    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libopenvr_api.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
@@ -1875,7 +2005,28 @@ else
 
 if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+
+            # Running comptime.sh before compiling to avoid errors.
+            cd "\$BUILD/src" || exit
+            gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
+            bash ../comptime.sh
+
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                i686-w64-mingw32-objdump -x "\$BUILD/bin/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+
+            else
+
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/srb2win\$IS64.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+
+            fi
+
+            cd "\$BUILD" || exit
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
@@ -2134,6 +2285,27 @@ DESKTOP
     cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2netplus-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2netplus-opengl.desktop"
     gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 NetPlus \\\(Software\\\)","Name=Sonic Robo Blast 2 NetPlus (OpenGL)") || gsub("Exec=srb2np -software","Exec=srb2np -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2netplus-opengl.desktop"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2vr-software.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 VR (Software)
+Comment=Modified open source 3D Sonic VR platformer with improved framerate and additional features
+Icon=srb2vr
+Exec=srb2vr -software
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2vr-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2vr-opengl.desktop"
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2vr-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2vr-openvr.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 VR \\\(Software\\\)","Name=Sonic Robo Blast 2 VR (OpenGL)") || gsub("Exec=srb2vr -software","Exec=srb2vr -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2vr-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 VR \\\(Software\\\)","Name=Sonic Robo Blast 2 VR (OpenVR)") || gsub("Exec=srb2vr -software","Exec=srb2vr -openvr -win");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2vr-openvr.desktop"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/srb2legacy-software.desktop" << DESKTOP
@@ -2286,6 +2458,10 @@ DESKTOP
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2netplus.png"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+
+        cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2vr.png"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2legacy.png"
@@ -2339,14 +2515,6 @@ ENTRYPOINT
         ISARM="i386/"
 
     elif ([ "$ARCH" = "armhf" ] || [ "$ARCH" = "aarch64" ]) && [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-        ISARM="armhf/"
-
-    elif [ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]; then
-
-        ISARM=""
-
-    else
 
         ISARM="armhf/"
 
@@ -2657,6 +2825,21 @@ installtolinux() {
         $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
         $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
 
+    elif [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
+
+        SRB2ASSETLNXPATH="/usr/local/share/games/SRB2VR"
+        SRB2BINARYLNXPATH="/usr/local/bin/srb2vr"
+        SRB2DESKTOPLNXPATH="/usr/local/share/applications/srb2vr-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2vr-opengl.desktop"
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
+        SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2vr.png"
+        printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2vr binary, assets, libraries, icons and desktop file to the system. Please wait..."
+        $SUDO install -Dm755 "$BUILD/bin/lsdl2srb2" "/usr/local/bin/srb2vr"
+        $SUDO install -d "/usr/local/share/games/SRB2VR"
+        $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2VR"
+        $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
+        $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
         SRB2ASSETLNXPATH="/usr/local/share/games/SRB2legacy"
@@ -2962,13 +3145,16 @@ installtomacos() {
 
     fi
 
+    # Have commit revision as part of name for App Bundle.
+    COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
+
     # Display content of CMakeLists for a good view of available compilation flags.
     mkdir -p "$BUILD/build"
     cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
     # Add compilation flags.
     printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
-    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
     printf "$PROMPT\n%s\e[0m" "> "
     read -r CONF
@@ -3030,7 +3216,7 @@ installtomacos() {
 
     # Download and extract assets.
     printf "$MESSAGE\n%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
-    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
+    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
 
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
         if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
@@ -3090,6 +3276,7 @@ installtomacos() {
     export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
     export SDKROOT="$SDKROOT"
     export LIBRARY_PATH=/usr/local/lib
+    export PKG_CONFIG_PATH=/usr/local/pkgconfig
     export STOW_DIR=/usr/local/stow
 
     printf "$MESSAGE\n%s\n\e[0m" "Building and installing dependencies. Please wait..."
@@ -3115,7 +3302,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
-        cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
+        cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng -DCMAKE_MACOSX_RPATH=OFF
         cmake --build "$SRB2BLDROOT/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libpng/build"
         sudo -E stow -v --adopt libpng
@@ -3141,7 +3328,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
-        cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
+        cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg -DCMAKE_MACOSX_RPATH=OFF
         cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libogg/build"
         sudo -E stow -v --adopt libogg
@@ -3223,7 +3410,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
-        cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
+        cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug -DCMAKE_MACOSX_RPATH=OFF
         cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
         sudo -E stow -v --adopt libmodplug
@@ -3249,7 +3436,8 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
-        cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DHIDAPI=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2 -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
+        cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DSDL_HIDAPI_JOYSTICK=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2 -DCMAKE_MACOSX_RPATH=OFF
+        #-DSDL_RPATH=OFF -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON
         cmake --build "$SRB2BLDROOT/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
         sudo -E stow -v --adopt libsdl2
@@ -3351,7 +3539,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
-        cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
+        cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme -DCMAKE_MACOSX_RPATH=OFF
         cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libgme/build"
         sudo -E stow -v --adopt libgme
@@ -3359,7 +3547,7 @@ installtomacos() {
     fi
 
     # Download DiscordRPC's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+    if [ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
@@ -3377,7 +3565,7 @@ installtomacos() {
 
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
-        cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
+        cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc -DCMAKE_MACOSX_RPATH=OFF
         cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
         sudo -E stow -v --adopt discord-rpc
@@ -3385,12 +3573,12 @@ installtomacos() {
     fi
 
     # Download libopenvr's source code, build and install it.
-    if [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ] && [ ! -f "/usr/local/lib/libopenvr_api.dylib" ]; then
+    if [ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && ([ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --recursive --recursive --branch "v$OPENVRVER" "$SRB2BLDROOT/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
@@ -3404,7 +3592,7 @@ installtomacos() {
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
         cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
-        cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr -DCMAKE_MACOSX_RPATH=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib
+        cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr -DCMAKE_MACOSX_RPATH=OFF
         cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
         sudo -E stow -v --adopt libopenvr
@@ -3442,56 +3630,36 @@ installtomacos() {
 
     fi
 
-    # Set name of App Bundle.
-    gawk -i inplace '{gsub("\\$TARGET_NAME","'"$BUILDNAME-$COMREV"'");print}' "$BUILD/src/sdl/macosx/Srb2mac.xcodeproj/project.pbxproj"
-
     # Compile the game's source code.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME. Please wait..."
     mkdir -p "$BUILD/build"
-    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
+    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
     cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
 
     # Get app icon.
     mkdir -p "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
     makeicns -in "$BUILD/src/win32/Srb2win.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
+    gawk -i inplace -v RS= '{sub("<key>CFBundleIconFile</key>\n	<string></string>","<key>CFBundleIconFile</key>\n	<string>Srb2mac</string>");print}' "$BUILD/build/bin/$BUILDNAME.app/Contents/Info.plist"
 
-    # Fix linking of libraries to binary.
+    # Fix paths of installed libraries.
     if [ -f /usr/local/lib/libbrotlicommon.dylib ]; then
 
-        install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlidec.dylib
-        install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlienc.dylib
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlidec.dylib
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlienc.dylib
 
     fi
 
     if [ -f /usr/local/lib/libSDL2.dylib ]; then
 
-        install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
         sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" /usr/local/lib/libSDL2_mixer.dylib
-
-    fi
-
-    if [ -f /usr/local/lib/libopenmpt.dylib ]; then
-
-        install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-
-    fi
-
-    if [ -f /usr/local/lib/libgme.dylib ]; then
-
-        install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        sudo install_name_tool -change "libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" /usr/local/lib/libSDL2_mixer.dylib
 
     fi
 
     if [ -f /usr/local/lib/libmodplug.dylib ]; then
 
-        install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
         sudo install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
-
-    fi
-
-    if [ -f /usr/local/lib/libpng.dylib ]; then
-
-        install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        sudo install_name_tool -change "libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
 
     fi
 
@@ -3500,6 +3668,53 @@ installtomacos() {
         sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbis.dylib
         sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbisfile.dylib
         sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libopenmpt.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbis.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbisfile.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libopenmpt.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libSDL2_mixer.dylib
+
+    fi
+
+    # Fix linking of libraries to build's binary.
+    if [ -f /usr/local/lib/libSDL2.dylib ]; then
+
+        install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libmodplug.dylib ]; then
+
+        install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME" install_name_tool -change "libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libopenmpt.dylib ]; then
+
+        install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libopenmpt.dylib" "/usr/local/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libgme.dylib ]; then
+
+        install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libgme.0.dylib" "/usr/local/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libpng.dylib ]; then
+
+        install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libpng16.16.dylib" "/usr/local/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libdiscord-rpc.dylib ]; then
+
+        install_name_tool -change "@rpath/libdiscord-rpc.dylib" "/usr/local/lib/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libdiscord-rpc.dylib" "/usr/local/lib/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
     fi
 
@@ -3507,7 +3722,7 @@ installtomacos() {
     if [ "$APPBUNDLE" = 1 ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's App Bundle. Please wait..."
-        make -C "$BUILD/build" package
+        make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) -C "$BUILD/build" package
 
     # Installing build's binary, assets, libraries, icons and desktop file to the system.
     else
@@ -3581,6 +3796,25 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
         printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
+
+        SRB2WINDIR="SRB2 VR"
+        SRB2WINMENUDIR="Sonic Robo Blast 2 VR"
+        SRB2WINBIN="srb2win.exe"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        DEPS=$(while read -r FILE; do
+            find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+        done < "$BUILD/deps")
+        mkdir -p "$SRB2WINPATH"
+        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf $DEPS "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
+        printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -openvr -win" > "$SRB2WINPATH/$SRB2WINDIR (OpenVR).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
@@ -3704,6 +3938,7 @@ installtowindows() {
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
         printf "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         printf "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+        printf "@echo off\nstart $SRB2WINBIN -openvr -win" > "$SRB2WINPATH/$SRB2WINDIR (OpenVR).bat"
 
     fi
 
@@ -3733,6 +3968,25 @@ New-Item -Force -ItemType Directory -Path "\$HOME/Start Menu/Programs/$SRB2WINME
 WINMENUGEN
 
         powershell -File "$BUILD/build/winmenugen.ps1" > /dev/null
+
+        if [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+
+            cat > "$BUILD/build/winvrmenugen.ps1" << WINVRMENUGEN
+New-Item -Force -ItemType Directory -Path "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+
+\$SourceFilePath = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINDIR (OpenVR).bat"
+\$ShortcutPath = "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR/$SRB2WINDIR (OpenVR).bat.lnk"
+\$WScriptObj = New-Object -ComObject ("WScript.Shell")
+\$shortcut = \$WscriptObj.CreateShortcut(\$ShortcutPath)
+\$shortcut.TargetPath = \$SourceFilePath
+\$shortcut.WorkingDirectory = "\$HOME/SRB2 Games/$SRB2WINDIR"
+\$shortcut.IconLocation = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINBIN"
+\$shortcut.Save()
+WINVRMENUGEN
+
+            powershell -File "$BUILD/build/winvrmenugen.ps1" > /dev/null
+
+        fi
 
     fi
 
@@ -3798,6 +4052,7 @@ sudo_ping() {
     if [ $? -eq 1 ]; then
 
         return
+
     fi
 
     while true; do
@@ -3809,20 +4064,20 @@ sudo_ping() {
     SUDO_PID=$!
 
     # Clean the game's source code and exit shell script in case of error or cancelling script.
-    trap 'sudo_ping stop; printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 0 1 2 3 6 15
+    trap 'sudo_ping stop ; printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 0 1 2 3 6 15
 }
 
 upgrade() {
     clear
     # Make a loop to find the SRB2 source code directories and then update them one by one.
-    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '!/srb2-2.0/ {print $NF}' | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
         exit
 
     fi
 
-    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '!/srb2-2.0/ {print $NF}' | sort); do
+    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort); do
 
         printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $u. Please wait..."
         git -C "$BUILDPATH/$u" clean -qdfx -e .comrev
@@ -3916,7 +4171,7 @@ Usage: srb2bld [OPTIONS]
 
   Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
 
-  If you want to compile and install some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
+  If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
 "
 }
 
