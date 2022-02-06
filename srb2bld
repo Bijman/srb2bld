@@ -53,8 +53,9 @@ else
 
 fi
 
-FMODVER="fmodapi375linux"
-OPENVRVER="1.10.30"
+LNXFMODVER="fmodapi375linux"
+LNXOPENVRVER="1.10.30"
+#LNXSDL2MIXERXVER="2.5.0"
 MACOSVER="10.9"
 MACOSPNGVER="1.6.37"
 MACOSOGGVER="1.3.5"
@@ -64,6 +65,8 @@ MACOSOPENMPTVER="0.5.14"
 MACOSGMEVER="0.6.2"
 MACOSSDL2VER="2.0.18"
 MACOSSDL2MIXERVER="2.0.4"
+MACOSSDL2MIXERXVER="2.5.0"
+MACOSOPENVRVER="1.10.30"
 COMPTABLEURL="https://gist.githubusercontent.com/Bijman/dae1e123800af25ef28689bd644a4516/raw"
 FAILURE="\e[1;91m"
 SUCCESS="\e[1;92m"
@@ -495,7 +498,7 @@ chooseuninstall() {
         if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
             BUILDINSTALLED=$(printf "%s\n" "$array" | gawk NR=="${n}")
-            INSTALLEDFILES=$(cat "$BUILDINSTALLED")
+            INSTALLEDFILES=$(gawk '/\/usr\/local/ {print}' "$BUILDINSTALLED")
             printf "$PROMPT\n%s\n\e[0m" "$INSTALLEDFILES"
             printf "$MESSAGE%s\n\e[0m" "Above files will be uninstalled. Are you sure you want to that? Enter \"yes\" or \"no\" (\"y\" or \"n\")."
             printf "$PROMPT\n%s\e[0m" "> "
@@ -503,9 +506,12 @@ chooseuninstall() {
 
             if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]); then
 
+                gawk -i inplace -v RS= '{sub("---------------\n[A-Z]*=1","");print}' "$BUILDINSTALLED"
+
                 while read -r FILE; do
                     rm -rfv "$FILE"
                 done < "$BUILDINSTALLED"
+
                 rm -f "$BUILDINSTALLED"
 
                 if [ -z "$(find "$HOME/SRB2 Games" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
@@ -518,17 +524,19 @@ chooseuninstall() {
 
             elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
 
+                gawk -i inplace -v RS= '{sub("---------------\n[A-Z]*=1","");print}' "$BUILDINSTALLED"
+
                 while read -r FILE; do
                     $SUDO rm -rfv "$FILE"
                 done < "$BUILDINSTALLED"
+
+                rm -f "$BUILDINSTALLED"
 
                 if [ -z "$(find /usr/local/opt/srb2-apps -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
 
                     $SUDO rm -rfv /usr/local/opt/srb2-apps
 
                 fi
-
-                rm -f "$BUILDINSTALLED"
 
                 # Refreshing menu icons.
                 if [ -x "$(which gtk-update-icon-cache 2> /dev/null)" ]; then
@@ -594,6 +602,7 @@ dockerentry() {
     export BUILD="$BUILD"
     export GIT="$GIT"
     export APPIMAGE="$APPIMAGE"
+    export UPGRADE="$UPGRADE"
     export STOW_DIR=/usr/local/stow
 
     # Some old Docker images don't have up-to-date SSL certifications, so this is workaround.
@@ -1040,7 +1049,7 @@ if [ "\$APPIMAGE" = 1 ]; then
     fi
 
     # Add compilation flags.
-    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
+    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
 
         if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
@@ -1091,6 +1100,33 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     fi
 
+    # Download libSDL2_mixerX's source code, build and install it.
+    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
+            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch master "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+        mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" || exit
+        cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
+        cd "\$BUILD" || exit
+
+    fi
+
     # Download DiscordRPC source code, build and install it.
     if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
 
@@ -1124,7 +1160,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$SRB2BLDROOT/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$LNXOPENVRVER" "\$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
@@ -1728,6 +1764,12 @@ else
 
     sudo_ping
 
+if [ -n "\$UPGRADE" ]; then
+
+    export CONF="\$(gawk '/---------------/ {getline;print}' "\$SRB2BLDROOT/installed/\$UPGRADE")"
+
+else
+
     # Display content of Makefile for a good view of available compilation flags.
     if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
@@ -1740,7 +1782,7 @@ else
     fi
 
     # Add compilation flags.
-    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
+    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
 
     if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
         if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
@@ -1850,6 +1892,8 @@ else
      printf "$PROMPT\n%s\e[0m" "> "
      read -r CONF
 
+fi
+
     if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
         CONF=\$(printf "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1","");print}')
@@ -1911,6 +1955,34 @@ else
 
     fi
 
+    # Download libSDL2_mixerX's source code, build and install it.
+    if [ "\$OS" = "Linux" ] && [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
+            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch master "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+        mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
+        sudo -E stow -v --adopt libsdl2-mixerx
+        cd "\$BUILD" || exit
+
+    fi
+
     # Download DiscordRPC source code, build and install it.
     if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
 
@@ -1966,7 +2038,7 @@ else
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "\$SRB2BLDROOT/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$LNXOPENVRVER" "\$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
@@ -1994,9 +2066,9 @@ else
 
         printf "$MESSAGE\n%s\n\e[0m" "Installing FMOD to build $BUILDNAME. Please wait..."
         sudo mkdir -p "/usr/include/FMOD"
-        curl -kRLOC - "https://zdoom.org/files/fmod/$FMODVER.tar.gz"
-        sudo tar xvf "$FMODVER.tar.gz" --wildcards --strip-components=3 -C "/usr/lib" "$FMODVER/api/libfmod-"*.so
-        sudo tar xvf "$FMODVER.tar.gz" --strip-components=3 -C "/usr/include/FMOD" "$FMODVER/api/inc"
+        curl -kRLOC - "https://zdoom.org/files/fmod/$LNXFMODVER.tar.gz"
+        sudo tar xvf "$LNXFMODVER.tar.gz" --wildcards --strip-components=3 -C "/usr/lib" "$LNXFMODVER/api/libfmod-"*.so
+        sudo tar xvf "$LNXFMODVER.tar.gz" --strip-components=3 -C "/usr/include/FMOD" "$LNXFMODVER/api/inc"
 
     fi
 
@@ -2224,6 +2296,9 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
         fi
 
     fi
+
+    # Saving configuration flags for future upgrades.
+    printf "%s\n" "\$CONF" > "\$BUILD/conf"
 
     # Create desktop file.
     COMREV=\$(git -C "\$BUILD" rev-parse --short HEAD)
@@ -2773,6 +2848,17 @@ dockerrun() {
 }
 
 installtolinux() {
+    # Saving configuration flags to variable.
+    if [ -n "$(cat "$BUILD/conf")" ]; then
+
+        CONF=$(cat "$BUILD/conf")
+
+    fi
+
+    # Adding path to commit revision file.
+    COMREVFILEPATH="$BUILD/.comrev"
+
+    # Making missing directory path.
     if [ ! -d "/usr/local/bin" ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Creating /usr/local/bin and /usr/local/games directory paths"
@@ -2780,6 +2866,7 @@ installtolinux() {
 
     fi
 
+    # Installing build.
     if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
 
         SRB2ASSETLNXPATH="/usr/local/share/games/SRB2"
@@ -3102,7 +3189,7 @@ installtolinux() {
 
 installtolist() {
     mkdir -p "$SRB2BLDROOT/installed"
-    cat > "$SRB2BLDROOT/installed/$BUILDNAME" << INSTALL
+    cat > "$SRB2BLDROOT/installed/$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" << INSTALL
 $SRB2ASSETLNXPATH
 $SRB2BINARYLNXPATH
 $SRB2DESKTOPLNXPATH
@@ -3112,9 +3199,12 @@ $SRB2WINPATH
 $SRB2WINMENUPATH
 $SRB2MACPATH
 $SRB2MACLINK
+$COMREVFILEPATH
+---------------
+$CONF
 INSTALL
 
-    gawk -i inplace 'NF{print}' "$SRB2BLDROOT/installed/$BUILDNAME"
+    gawk -i inplace 'NF{print}' "$SRB2BLDROOT/installed/$(printf "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
 
     COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
     printf "%s\n" "$COMREV" > "$BUILD/.comrev"
@@ -3153,13 +3243,23 @@ installtomacos() {
     cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
     # Add compilation flags.
-    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for complilation:"
+    printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
     printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
     printf "$PROMPT\n%s\e[0m" "> "
     read -r CONF
 
     # Some checks, if the game's certain compilation flags were entered.
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+        ISPNG=
+
+    else
+
+        ISPNG=libpng
+
+    fi
+
     if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_GME:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISGME=
@@ -3180,16 +3280,6 @@ installtomacos() {
 
     fi
 
-    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
-
-        ISPNG=
-
-    else
-
-        ISPNG=libpng
-
-    fi
-
     if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_SDL2_USEMIXER:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         ISSDL2MIXER=
@@ -3197,6 +3287,16 @@ installtomacos() {
     else
 
         ISSDL2MIXER=libsdl2_mixer
+
+    fi
+
+    if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_MIXERX=ON/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_MIXERX:BOOL=ON/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+
+        ISSDL2MIXERX=libsdl2_mixerx
+
+    else
+
+        ISSDL2MIXERX=
 
     fi
 
@@ -3276,6 +3376,8 @@ installtomacos() {
     export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
     export SDKROOT="$SDKROOT"
     export LIBRARY_PATH=/usr/local/lib
+    export C_INCLUDE_PATH=/usr/include:/usr/local/include
+    export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
     export PKG_CONFIG_PATH=/usr/local/pkgconfig
     export STOW_DIR=/usr/local/stow
 
@@ -3310,7 +3412,7 @@ installtomacos() {
     fi
 
     # Download libogg's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libogg.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ]); then
+    if [ ! -f "/usr/local/lib/libogg.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libogg/.git" ]; then
 
@@ -3336,7 +3438,7 @@ installtomacos() {
     fi
 
     # Download libvorbis' source code, build and install it.
-    if [ ! -f "/usr/local/lib/libvorbis.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ]); then
+    if [ ! -f "/usr/local/lib/libvorbis.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libvorbis/.git" ]; then
 
@@ -3364,7 +3466,7 @@ installtomacos() {
     fi
 
     # Download libmpg123's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libmpg123.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ]); then
+    if [ ! -f "/usr/local/lib/libmpg123.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libmpg123/.git" ]; then
 
@@ -3392,7 +3494,7 @@ installtomacos() {
     fi
 
     # Download libmodplug's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libmodplug.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ]); then
+    if [ ! -f "/usr/local/lib/libmodplug.dylib" ] && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libmodplug/.git" ]; then
 
@@ -3493,6 +3595,32 @@ installtomacos() {
 
     fi
 
+    # Download libSDL2_mixerX's source code, build and install it.
+    if [ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
+            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$MACOSSDL2MIXERXVER" "$SRB2BLDROOT/libraries/libsdl2-mixerx"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" fetch origin master
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        cmake -S "$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx -DCMAKE_MACOSX_RPATH=OFF
+        cmake --build "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        sudo -E stow -v --adopt libsdl2-mixerx
+
+    fi
+
     # Download libopenmpt's source code, build and install it.
     if [ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
@@ -3578,7 +3706,7 @@ installtomacos() {
         if [ ! -d "$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
-            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$OPENVRVER" "$SRB2BLDROOT/libraries/libopenvr"
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$MACOSOPENVRVER" "$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
@@ -3731,6 +3859,18 @@ installtomacos() {
         printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
         sudo -E make -C "$BUILD/build" install
 
+        # Saving configuration flags for future upgrades.
+        printf "%s\n" "$CONF" > "$BUILD/conf"
+
+        if [ -n "$(cat "$BUILD/conf")" ]; then
+
+            CONF=$(cat "$BUILD/conf")
+
+        fi
+
+        # Adding path to commit revision file.
+        COMREVFILEPATH="$BUILD/.comrev"
+
         # Making symbolic link to .app file in /Applications.
         SRB2MACLINK="/Applications/$BUILDNAME.app"
         sudo rm -rf "$SRB2MACLINK"
@@ -3740,6 +3880,16 @@ installtomacos() {
 }
 
 installtowindows() {
+    # Saving configuration flags to variable.
+    if [ -n "$(cat "$BUILD/conf")" ]; then
+
+        CONF=$(cat "$BUILD/conf")
+
+    fi
+
+    # Adding path to commit revision file.
+    COMREVFILEPATH="$BUILD/.comrev"
+
     # Installing build's binary, assets, libraries, icons and desktop files to the system.
     printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop files to the system. Please wait..."
 
@@ -3989,7 +4139,6 @@ WINVRMENUGEN
         fi
 
     fi
-
 }
 
 listasset() {
@@ -4084,15 +4233,15 @@ upgrade() {
         git -C "$BUILDPATH/$u" reset -q --hard
         git -C "$BUILDPATH/$u" pull --recurse-submodules --rebase
 
-        if [ -f "$SRB2BLDROOT/installed/$u" ] && [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
+        if [ -f "$BUILDPATH/$u/.comrev" ] && [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Upgrading $u. Please wait..."
 
+            export "UPGRADE=$u"
+
             export "BUILD=$BUILDPATH/$u"
 
-            buildname
-
-            export "BUILDNAME=$BUILDNAME"
+            export "BUILDNAME=$u"
 
             if [ "$OS" = "Darwin" ]; then
 
