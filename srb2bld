@@ -34,8 +34,9 @@ fi
 BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
-#SRB2VER=$(curl -Ls https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/tag_name/ {print $4}')
-#SRB2VER="SRB2_release_2.2.9"
+SRB2GITURL="https://git.do.srb2.org/STJr/SRB2.git"
+# Uncomment below SRB2GITURL variable and set your URL to Git repo for custom build of SRB2. Set GitHub branch with SRB2VER too, if necessary. If you have downloaded original SRB2 repo, delete it first with "srb2bld -rb" command.
+#SRB2GITURL=""
 SRB2VER="master"
 SRB2PERSONAFILEID="1tV9L2x94vEjMzip97zdOow6N7xrzYwoV"
 MINGWVER="gcc-10-win32"
@@ -213,7 +214,7 @@ choosebuild() {
             "1")
 
                 BUILD="$BUILDPATH/srb2"
-                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --recursive --branch $SRB2VER"
+                GIT="git clone $SRB2GITURL --recursive --branch $SRB2VER"
                 break
 
                 ;;
@@ -1113,7 +1114,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
 
         fi
 
@@ -1140,7 +1141,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase
+            git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
 
         fi
 
@@ -1766,7 +1767,7 @@ else
 
 if [ -n "\$UPGRADE" ]; then
 
-    export CONF="\$(gawk '/---------------/ {getline;print}' "\$SRB2BLDROOT/installed/\$UPGRADE")"
+    export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline;print}' "\$SRB2BLDROOT/installed/\$UPGRADE")"
 
 else
 
@@ -1915,7 +1916,7 @@ fi
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
 
         fi
 
@@ -1968,7 +1969,7 @@ fi
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
 
         fi
 
@@ -1996,7 +1997,7 @@ fi
               printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
-              git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
 
         fi
 
@@ -3244,10 +3245,19 @@ installtomacos() {
 
     # Add compilation flags.
     printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-    printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
-    printf "$PROMPT\n%s\e[0m" "> "
-    read -r CONF
+    if [ -n "$UPGRADE" ]; then
+
+        export CONF="$(gawk '/---------------/ {gsub("---------------","");getline;print}' "$SRB2BLDROOT/installed/$UPGRADE")"
+
+    else
+
+        printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+        printf "$PROMPT\n%s\e[0m" "> "
+        read -r CONF
+
+    fi
 
     # Some checks, if the game's certain compilation flags were entered.
     if [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(printf "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
@@ -3478,7 +3488,7 @@ installtomacos() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmpg123's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libmpg123" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libmpg123" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libmpg123" pull --recurse-submodules --rebase
+            git -C "$SRB2BLDROOT/libraries/libmpg123" pull --recurse-submodules --rebase --autostash
 
         fi
 
@@ -3506,7 +3516,7 @@ installtomacos() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmodplug's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libmodplug" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libmodplug" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libmodplug" pull --recurse-submodules --rebase
+            git -C "$SRB2BLDROOT/libraries/libmodplug" pull --recurse-submodules --rebase --autostash
 
         fi
 
@@ -3687,7 +3697,7 @@ installtomacos() {
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
 
         fi
 
@@ -4231,7 +4241,7 @@ upgrade() {
         printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $u. Please wait..."
         git -C "$BUILDPATH/$u" clean -qdfx -e .comrev
         git -C "$BUILDPATH/$u" reset -q --hard
-        git -C "$BUILDPATH/$u" pull --recurse-submodules --rebase
+        git -C "$BUILDPATH/$u" pull --recurse-submodules --rebase --autostash
 
         if [ -f "$BUILDPATH/$u/.comrev" ] && [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
 
