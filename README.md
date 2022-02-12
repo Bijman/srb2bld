@@ -1,4 +1,4 @@
-srb2bld is a shellscript, that automates and simplifies process of downloading source code, configuring, compilation and installation of various SRB2 related builds.
+srb2bld is a shellscript, that automates and simplifies process of downloading source code, configuring, compilation, installation and creating portable executable bundles of various SRB2 related builds.
 
 https://user-images.githubusercontent.com/16626326/152710164-9012f542-5922-4958-a2fd-6480ef0e0339.mp4
 
@@ -32,17 +32,17 @@ As for macOS users, they need to install these additional dependencies:
 - Automake,
 - Pkg-config,
 - Libtool,
-- 7zip,
+- p7zip,
 - Makeicns.
 
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following commands:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install coreutils findutils bash curl gawk docker.io stow fuse`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install build-essential git coreutils findutils bash curl gawk docker.io stow fuse`,
 
-- Arch/Arch based: `sudo pacman -S coreutils findutils bash curl gawk docker stow fuse`,
+- Arch/Arch based: `sudo pacman -S base-devel git coreutils findutils bash curl gawk docker stow fuse`,
 
-- Gentoo/Gentoo based: `sudo emerge -av coreutils findutils bash curl gawk docker stow fuse`.
+- Gentoo/Gentoo based: `sudo emerge -av coreutils git findutils bash curl gawk docker stow fuse`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -59,7 +59,8 @@ As for macOS users, they need to install these additional dependencies:
 
 **macOS:**
 1. In terminal enter this following command:
-- `brew install cmake autoconf automake pkgconfig libtool gawk stow 7zip curl makeicns`.
+- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip curl makeicns`,
+- MacPorts: `sudo port install cmake autoconf automake pkgconfig libtool gawk stow p7zip curl makeicns`.
 
 # Installation
 **Linux:**
@@ -67,47 +68,52 @@ As for macOS users, they need to install these additional dependencies:
 
 2. Enter `git clone https://github.com/Bijman/srb2bld`,
 
-3. Enter `sudo make install`, which will install to "/usr/bin" or "/usr/local/bin", if path exists, or just place script in your directory and change script's permissions to be executable: `chmod 755 srb2bld`.
+3. Go to downloaded directory: `cd srb2bld`,
+
+4. Enter `sudo make install`, which will install to "/usr/bin" or "/usr/local/bin", if path exists. Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
+
+5. Check if you set properly other settings from "Configuration" section of README.
 
 **Windows:**
 1. Open Git Bash,
 
-2. Go to your user directory (usually "C:/Users/[Your username]"): `cd ~`,
+2. Go to your user directory (usually "C:/Users/[your username]"): `cd ~`,
 
 3. Enter `git clone https://github.com/Bijman/srb2bld`,
 
 4. Create directory "bin" with command: `mkdir ~/bin`,
 
-5. Copy script to "~/bin": `cp /path/to/srb2bld ~/bin` (keep in mind, that "/path/to/srb2bld" is not literal path, so type your path to srb2bld script),
+5. Copy script to "~/bin": `cp ~/srb2bld/srb2bld ~/bin`,
 
 6. Change script's permissions to be executable: `chmod 755 ~/bin/srb2bld`,
 
 7. Open text editor for "~/.bash_profile": `nano ~/.bash_profile`,
 
-8. Write new path to executables with environment variable PATH like `export PATH="~/bin:$PATH"` in "~/.bash_profile",
+8. In opened text editor from previous step write new path to executables with environment variable PATH like `export PATH="~/bin:$PATH"` in "~/.bash_profile",
 
-9. Enter: `source ~/.bash_profile` or restart Git Bash.
+9. Enter `source ~/.bash_profile` or restart Git Bash.
 
 **macOS:**
 1. Open terminal,
 
 2. Enter `git clone https://github.com/Bijman/srb2bld`,
 
-3. Enter `sudo make install`, which will install to "/usr/local/bin", or just place script in your directory and change script's permissions to be executable: `chmod 755 srb2bld`,
+3. Go to downloaded directory: `cd srb2bld`,
 
-4. Check if you set properly other environment variables from "Configuration" section,
+4. Enter `sudo make install`, which will install to "/usr/bin" or "/usr/local/bin", if path exists. Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
 
-5. Enter: `source ~/.zshrc` or `source ~/.bash_profile` or restart terminal.
+5. Check if you set properly other settings from "Configuration" section of README.
 
 # Configuration
 **Linux:**
-1. Add user to the "docker" group: `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. After that, logout or reboot the system.
+1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. After that, logout or reboot the system.
 
 **Windows:**
-1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system was logged out or rebooted.
+1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system is logged out or rebooted.
 
 **macOS:**
-1. Set SDKROOT environment variable in .zshrc or .bash_profile: `export SDKROOT=[path-to-sdk-file]` and then restart terminal or `source ~/.bash_profile` or `source ~/.zshrc`.
+1. Set SDKROOT environment variable in "~/.zshrc" or "~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew),
+2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
 # Compatibility
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
@@ -173,8 +179,21 @@ Usage: srb2bld [OPTIONS]
      5. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
             srb2bld --compatibility
 
-  Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+  NOTES:
+     1. Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
 
-  If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+     2. Warning for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled, that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depends on those libraries.
 
+     3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+
+     4. If on Linux you get error with "/dev/fuse" when running script, then load fuse module with "sudo modprobe fuse". You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 ```
+
+# Notes
+1. Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+
+2. Warning for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled, that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depends on those libraries.
+
+3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+
+4. If on Linux you get error with "/dev/fuse" when running script, then load fuse module with `sudo modprobe fuse`. You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
