@@ -101,17 +101,17 @@ appbundle() {
     # Rename App Bundle and move it to working directory.
     if [ -d "$BUILD/build/package" ]; then
 
-        mv "$BUILD/build/package/$APPBUNDLENAME" "$MACOSPWD/$(print "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg"
+        mv "$BUILD/build/package/$APPBUNDLENAME" "$MACOSPWD/$(printf "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg"
 
     else
 
-        mv "$BUILD/build/$APPBUNDLENAME" "$MACOSPWD/$(print "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg"
+        mv "$BUILD/build/$APPBUNDLENAME" "$MACOSPWD/$(printf "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg"
 
     fi
 
     cleansource
 
-    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $(print "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg in $MACOSPWD path."
+    printf "$SUCCESS\n%s\n\e[0m\a" "App Bundle for $BUILDNAME is done. Look for $(printf "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_");print}')-$COMREV.dmg in $MACOSPWD path."
 }
 
 appimage() {
@@ -404,11 +404,11 @@ chooseremoveasset() {
 
         if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
-            printf "$MESSAGE%s\n\e[0m" " Are you sure you want to remove this asset? Enter \"yes\" or \"no\" (\"y\" or \"n\")."
+            printf "$MESSAGE\n%s\n\e[0m" "Are you sure you want to remove this asset? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\")."
             printf "$PROMPT\n%s\e[0m" "> "
             read -r CONFIRM
 
-            if [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
+            if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
                 SRB2ASSETLNXPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
                 SRB2ASSETLNXNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
@@ -451,11 +451,11 @@ chooseremovebuild() {
 
         if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
-            printf "$MESSAGE%s\n\e[0m" " Are you sure you want to remove this build's directory? Enter \"yes\" or \"no\" (\"y\" or \"n\")."
+            printf "$MESSAGE\n%s\n\e[0m" "Are you sure you want to remove this build's directory? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\")."
             printf "$PROMPT\n%s\e[0m" "> "
             read -r CONFIRM
 
-            if [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
+            if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
                 BUILDPATH=$(printf "%s\n" "$array" | gawk NR=="${n}")
                 BUILDNAME=$(printf "%s\n" "$arrayname" | gawk NR=="${n}")
@@ -501,13 +501,13 @@ chooseuninstall() {
             BUILDINSTALLED=$(printf "%s\n" "$array" | gawk NR=="${n}")
             INSTALLEDFILES=$(gawk '/\/usr\/local/ {print}' "$BUILDINSTALLED")
             printf "$PROMPT\n%s\n\e[0m" "$INSTALLEDFILES"
-            printf "$MESSAGE%s\n\e[0m" "Above files will be uninstalled. Are you sure you want to that? Enter \"yes\" or \"no\" (\"y\" or \"n\")."
+            printf "$MESSAGE\n%s\n\e[0m" "Above files will be uninstalled. Are you sure you want to that? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\")."
             printf "$PROMPT\n%s\e[0m" "> "
             read -r CONFIRM
 
-            if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]); then
+            if [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$(printf "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ] && ([ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]); then
 
-                gawk -i inplace -v RS= '{sub("---------------\n[A-Z]*=1","");print}' "$BUILDINSTALLED"
+                gawk -i inplace -v RS= '{gsub("---------------\n[A-Z]*=1|---------------","");print}' "$BUILDINSTALLED"
 
                 while read -r FILE; do
                     rm -rfv "$FILE"
@@ -523,9 +523,9 @@ chooseuninstall() {
 
                 printf "$SUCCESS\n%s\n\e[0m\a" "Uninstallation of $(printf "%s\n" "$BUILDINSTALLED" | gawk -F'/' '{print $NF}') is successful."
 
-            elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
+            elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
-                gawk -i inplace -v RS= '{sub("---------------\n[A-Z]*=1","");print}' "$BUILDINSTALLED"
+                gawk -i inplace -v RS= '{gsub("---------------\n[A-Z]*=1|---------------","");print}' "$BUILDINSTALLED"
 
                 while read -r FILE; do
                     $SUDO rm -rfv "$FILE"
@@ -1771,10 +1771,12 @@ else
 
     sudo_ping
 
+# Upgrade build. Making sure, that there are only used compilation flags.
 if [ -n "\$UPGRADE" ]; then
 
     export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline;print}' "\$SRB2BLDROOT/installed/\$UPGRADE")"
 
+# Otherwise set compilation flags, build and install as usual.
 else
 
     # Display content of Makefile for a good view of available compilation flags.
@@ -3249,53 +3251,83 @@ installtomacos() {
 
     fi
 
+    # Exporting environment variables for compiling, installing game and libraries on macOS.
+    export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
+    export SDKROOT="$SDKROOT"
+    export LIBRARY_PATH=/usr/local/lib:/opt/homebrew/lib
+    export C_INCLUDE_PATH=/usr/include:/usr/local/include:/usr/local/include/SDL2:/opt/homebrew/include:/opt/homebrew/include/SDL2
+    export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
+    export PKG_CONFIG_PATH=/usr/local/pkgconfig:/opt/homebrew/pkgconfig
+    export STOW_DIR=/usr/local/stow
+
     # Have commit revision as part of name for App Bundle.
     COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
 
-    # Display content of CMakeLists for a good view of available compilation flags.
+    # Change prefix depending on, if /opt/homebrew/lib exists.
+    if [ -d /opt/homebrew/lib ]; then
+
+        LIBPATH="/opt/homebrew/lib"
+
+    else
+
+        LIBPATH="/usr/local/lib"
+
+    fi
+
     mkdir -p "$BUILD/build"
-    cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
-    # Warning for MacOS users.
-    printf "$NOTICE\n%s\n\e[0m" "WARNING for macOS users: this script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled, that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depends on those libraries. Possible changes that would be applied:
+    # Upgrade build. Making sure, that there are only used compilation flags.
+    if [ -n "$UPGRADE" ]; then
 
-        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlidec.dylib
-        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlienc.dylib
+        export CONF="$(gawk '/---------------/ {gsub("---------------","");getline;print}' "$SRB2BLDROOT/installed/$UPGRADE")"
 
-        sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" /usr/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" /usr/local/lib/libSDL2_mixer.dylib
+    # Otherwise set compilation flags, build and install as usual.
+    else
 
-        sudo install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
+        # Warning for MacOS users.
+        printf "$NOTICE\n%s\n\e[0m" "WARNING for macOS users: this script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries. Possible changes that would be applied. Save those below commands to text file and revert those changes after process:
 
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbis.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbisfile.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libopenmpt.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbis.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbisfile.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libopenmpt.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libSDL2_mixer.dylib
+        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib "$LIBPATH/libclang_rt.ubsan_osx_dynamic.dylib"
+        sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "$LIBPATH/libclang_rt.ubsan_osx_dynamic.dylib" "$LIBPATH/libgme.dylib"
+
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "$LIBPATH/libbrotlicommon.dylib" "$LIBPATH/libbrotlidec.dylib"
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "$LIBPATH/libbrotlicommon.dylib" "$LIBPATH/libbrotlienc.dylib"
+
+        sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "$LIBPATH/libSDL2.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+        sudo install_name_tool -change "libSDL2-2.0.dylib" "$LIBPATH/libSDL2.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+
+        sudo install_name_tool -change "@rpath/libmodplug.dylib" "$LIBPATH/libmodplug.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+        sudo install_name_tool -change "libmodplug.dylib" "$LIBPATH/libmodplug.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libvorbis.dylib"
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libvorbisfile.dylib"
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libopenmpt.dylib"
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+        sudo install_name_tool -change "libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libvorbis.dylib"
+        sudo install_name_tool -change "libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libvorbisfile.dylib"
+        sudo install_name_tool -change "libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libopenmpt.dylib"
+        sudo install_name_tool -change "libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libSDL2_mixer.dylib"
 
 Press y/yes to continue, or n/no or ctrl+c to quit."
 
-    read -r CONFIRM
+        read -r CONFIRM
 
-    if [ "$CONFIRM" = y ] || [ "$CONFIRM" = yes ]; then
+        if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
-        # Add compilation flags.
-        printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+            # Display content of CMakeLists for a good view of available compilation flags.
+            cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
-        if [ -n "$UPGRADE" ]; then
-
-            export CONF="$(gawk '/---------------/ {gsub("---------------","");getline;print}' "$SRB2BLDROOT/installed/$UPGRADE")"
-
-        else
-
-            printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+            # Add compilation flags.
+            printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+            printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=$LIBPATH/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=$LIBPATH/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             printf "$PROMPT\n%s\e[0m" "> "
             read -r CONF
+
+        else
+
+            printf "$NOTICE\n%s\n\e[0m" "Exiting."
+            exit
 
         fi
 
@@ -3360,573 +3392,581 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        # Make directories for storing essential files.
-        mkdir -p "$SRB2BLDROOT/builds" "$SRB2BLDROOT/assets" "$SRB2BLDROOT/libraries" "$BUILD/assets/installer"
-        cd "$BUILD" || exit
+    fi
 
-        # Download and extract assets.
-        printf "$MESSAGE\n%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
-        if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
+    # Make directories for storing essential files.
+    mkdir -p "$SRB2BLDROOT/builds" "$SRB2BLDROOT/assets" "$SRB2BLDROOT/libraries" "$BUILD/assets/installer"
+    cd "$BUILD" || exit
 
-            SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-            if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+    # Download and extract assets.
+    printf "$MESSAGE\n%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
+    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
 
-                curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
+        SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            fi
-
-            7z x -y "$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+            curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
-        if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+        7z x -y "$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
-            curl -c /tmp/cookie -s -L "https://drive.google.com/uc?export=download&id=$SRB2PERSONAFILEID" > /dev/null
-            curl -RLb /tmp/cookie -C - "https://drive.google.com/uc?export=download&confirm=$(gawk '/download/ {print $NF}' /tmp/cookie)&id=$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
-            7z x -y "$SRB2BLDROOT/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
+    fi
 
-            SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-            if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+    if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-                curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
+        curl -c /tmp/cookie -s -L "https://drive.google.com/uc?export=download&id=$SRB2PERSONAFILEID" > /dev/null
+        curl -RLb /tmp/cookie -C - "https://drive.google.com/uc?export=download&confirm=$(gawk '/download/ {print $NF}' /tmp/cookie)&id=$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        7z x -y "$SRB2BLDROOT/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
 
-            fi
+        SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            7z x -y "$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
-
-            curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-x64-Installer.exe -o "$SRB2BLDROOT/assets/SRB2-2.1.exe"
-            7z x -y "$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"$BUILD/assets/installer"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
-
-            curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "$SRB2BLDROOT/assets/SRB2-2.0.exe"
-            7z x -y "$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-            curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
-            7z x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
-
-            SRB2KARTASSETSURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
-            if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
-
-                curl -RLC - "$SRB2KARTASSETSURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
-
-            fi
-
-            7z x -y "$SRB2BLDROOT/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
+            curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
-        # Exporting environment variables for compiling, installing game and libraries on macOS.
-        export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
-        export SDKROOT="$SDKROOT"
-        export LIBRARY_PATH=/usr/local/lib:/opt/homebrew/lib
-        export C_INCLUDE_PATH=/usr/include:/usr/local/include:/opt/homebrew/include
-        export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
-        export PKG_CONFIG_PATH=/usr/local/pkgconfig:/opt/homebrew/pkgconfig
-        export STOW_DIR=/usr/local/stow
+        7z x -y "$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
-        printf "$MESSAGE\n%s\n\e[0m" "Building and installing dependencies. Please wait..."
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        sudo_ping
+        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-x64-Installer.exe -o "$SRB2BLDROOT/assets/SRB2-2.1.exe"
+        7z x -y "$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"$BUILD/assets/installer"
 
-        # Download libpng's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libpng.dylib" ] || [ ! -f "/opt/homebrew/lib/libpng.dylib" ]) && [ "$ISPNG" = "libpng" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-            if [ ! -d "$SRB2BLDROOT/libraries/libpng/.git" ]; then
+        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "$SRB2BLDROOT/assets/SRB2-2.0.exe"
+        7z x -y "$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng's source code. Please wait..."
-                git clone git://git.code.sf.net/p/libpng/code.git --recursive --branch "v$MACOSPNGVER" "$SRB2BLDROOT/libraries/libpng"
+    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-            else
+        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
+        7z x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libpng" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libpng" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
-            fi
+        SRB2KARTASSETSURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+        if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
-            mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
-            cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng -DCMAKE_MACOSX_RPATH=OFF
-            cmake --build "$SRB2BLDROOT/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$SRB2BLDROOT/libraries/libpng/build"
-            sudo -E stow -v --adopt libpng
+            curl -RLC - "$SRB2KARTASSETSURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
-        # Download libogg's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libogg.dylib" ] || [ ! -f "/opt/homebrew/lib/libogg.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+        7z x -y "$SRB2BLDROOT/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
 
-            if [ ! -d "$SRB2BLDROOT/libraries/libogg/.git" ]; then
+    fi
 
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libogg's source code. Please wait..."
-                git clone https://gitlab.xiph.org/xiph/ogg.git --recursive --branch "v$MACOSOGGVER" "$SRB2BLDROOT/libraries/libogg"
+    printf "$MESSAGE\n%s\n\e[0m" "Building and installing dependencies. Please wait..."
 
-            else
+    sudo_ping
 
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libogg's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libogg" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libogg" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
+    # Download libpng's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "/opt/homebrew/lib/libpng.dylib" ]) && [ "$ISPNG" = "libpng" ]; then
 
-            fi
+        if [ ! -d "$SRB2BLDROOT/libraries/libpng/.git" ]; then
 
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
-            mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
-            cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg -DCMAKE_MACOSX_RPATH=OFF
-            cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$SRB2BLDROOT/libraries/libogg/build"
-            sudo -E stow -v --adopt libogg
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng's source code. Please wait..."
+            git clone git://git.code.sf.net/p/libpng/code.git --recursive --branch "v$MACOSPNGVER" "$SRB2BLDROOT/libraries/libpng"
 
-        fi
-
-        # Download libvorbis' source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] || [ ! -f "/opt/homebrew/lib/libvorbis.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libvorbis/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libvorbis' source code. Please wait..."
-                git clone https://gitlab.xiph.org/xiph/vorbis.git --recursive --branch "v$MACOSVORBISVER" "$SRB2BLDROOT/libraries/libvorbis"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libvorbis' source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libvorbis" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libvorbis" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libvorbis" fetch origin master
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
-            cd "$SRB2BLDROOT/libraries/libvorbis" || exit
-            ./autogen.sh
-            ./configure --prefix=/usr/local/stow/libvorbis
-            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-            sudo make install
-            sudo -E stow -v --adopt libvorbis
-            cd "$BUILD" || exit
-
-        fi
-
-        # Download libmpg123's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] || [ ! -f "/opt/homebrew/lib/libmpg123.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libmpg123/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libmpg123's source code. Please wait..."
-                git clone https://github.com/madebr/mpg123.git --recursive --branch master "$SRB2BLDROOT/libraries/libmpg123"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmpg123's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libmpg123" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libmpg123" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libmpg123" pull --recurse-submodules --rebase --autostash
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
-            cd "$SRB2BLDROOT/libraries/libmpg123" || exit
-            autoreconf -iv
-            ./configure --prefix=/usr/local/stow/libmpg123
-            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-            sudo make install
-            sudo -E stow -v --adopt libmpg123
-            cd "$BUILD" || exit
-
-        fi
-
-        # Download libmodplug's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] || [ ! -f "/opt/homebrew/lib/libmodplug.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libmodplug/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libmodplug's source code. Please wait..."
-                git clone https://github.com/Konstanty/libmodplug.git --recursive --branch master "$SRB2BLDROOT/libraries/libmodplug"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmodplug's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libmodplug" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libmodplug" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libmodplug" pull --recurse-submodules --rebase --autostash
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
-            mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
-            cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug -DCMAKE_MACOSX_RPATH=OFF
-            cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
-            sudo -E stow -v --adopt libmodplug
-
-        fi
-
-        # Download libSDL2's source code, build and install it.
-        if [ ! -f "/usr/local/lib/libSDL2.dylib" ] || [ ! -f "/opt/homebrew/lib/libSDL2.dylib" ]; then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libsdl2/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2's source code. Please wait..."
-                git clone https://github.com/libsdl-org/SDL.git --recursive --branch "release-$MACOSSDL2VER" "$SRB2BLDROOT/libraries/libsdl2"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libsdl2" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libsdl2" fetch origin main
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
-            mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
-            cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DSDL_HIDAPI_JOYSTICK=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2 -DCMAKE_MACOSX_RPATH=OFF
-            #-DSDL_RPATH=OFF -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON
-            cmake --build "$SRB2BLDROOT/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
-            sudo -E stow -v --adopt libsdl2
-
-        fi
-
-        # Download libSDL2_mixer's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] || [ ! -f "/opt/homebrew/lib/libSDL2_mixer.dylib" ]) && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixer/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixer's source code. Please wait..."
-                git clone https://github.com/libsdl-org/SDL_mixer.git --recursive --branch "release-$MACOSSDL2MIXERVER" "$SRB2BLDROOT/libraries/libsdl2-mixer"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixer's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" fetch origin master
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixer. Please wait..."
-            cd "$SRB2BLDROOT/libraries/libsdl2-mixer" || exit
-            ./configure \
-                --disable-dependency-tracking \
-                --disable-music-flac \
-                --disable-music-flac-shared \
-                --enable-music-midi \
-                --disable-music-midi-fluidsynth \
-                --disable-music-midi-fluidsynth-shared \
-                --enable-music-midi-native \
-                --disable-music-midi-timidity \
-                --enable-music-mod \
-                --disable-music-mod-mikmod \
-                --disable-music-mod-mikmod-shared \
-                --enable-music-mod-modplug \
-                --disable-music-mod-modplug-shared \
-                --enable-music-mp3 \
-                --enable-music-mp3-mpg123 \
-                --disable-music-mp3-mpg123-shared \
-                --enable-music-ogg \
-                --disable-music-ogg-shared \
-                --disable-music-opus \
-                --disable-music-opus-shared \
-                --enable-music-wave \
-                --prefix=/usr/local/stow/libsdl2-mixer
-            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-            sudo make install
-            sudo -E stow -v --adopt libsdl2-mixer
-            cd "$BUILD" || exit
-
-        fi
-
-        # Download libSDL2_mixerX's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] || [ ! -f "/opt/homebrew/lib/libSDL2_mixer_ext.dylib" ]) && [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
-                git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$MACOSSDL2MIXERXVER" "$SRB2BLDROOT/libraries/libsdl2-mixerx"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" fetch origin master
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
-            mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-            cmake -S "$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx -DCMAKE_MACOSX_RPATH=OFF
-            cmake --build "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-            sudo -E stow -v --adopt libsdl2-mixerx
-
-        fi
-
-        # Download libopenmpt's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] || [ ! -f "/opt/homebrew/lib/libopenmpt.dylib" ]) && [ "$ISOPENMPT" = "libopenmpt" ]; then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-                git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "libopenmpt-$MACOSOPENMPTVER" "$SRB2BLDROOT/libraries/libopenmpt"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libopenmpt" fetch origin master
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
-            cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
-            gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
-            make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-            sudo make PREFIX=/usr/local/stow/libopenmpt install
-            sudo -E stow -v --adopt libopenmpt
-            cd "$BUILD" || exit
-
-        fi
-
-        # Download libgme's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libgme.dylib" ] || [ ! -f "/opt/homebrew/lib/libgme.dylib" ]) && [ "$ISGME" = "libgme" ]; then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libgme/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
-                git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$MACOSGMEVER" "$SRB2BLDROOT/libraries/libgme"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libgme" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libgme" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libgme" fetch origin master
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
-            mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
-            cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme -DCMAKE_MACOSX_RPATH=OFF
-            cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$SRB2BLDROOT/libraries/libgme/build"
-            sudo -E stow -v --adopt libgme
-
-        fi
-
-        # Download DiscordRPC's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] || [ ! -f "/opt/homebrew/lib/libdiscord-rpc.dylib" ]) && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-                git clone https://github.com/discord/discord-rpc.git --recursive --branch master "$SRB2BLDROOT/libraries/discord-rpc"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
-            mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
-            cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc -DCMAKE_MACOSX_RPATH=OFF
-            cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
-            sudo -E stow -v --adopt discord-rpc
-
-        fi
-
-        # Download libopenvr's source code, build and install it.
-        if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] || [ ! -f "/opt/homebrew/lib/libopenvr_api.dylib" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
-
-                printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
-                git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$MACOSOPENVRVER" "$SRB2BLDROOT/libraries/libopenvr"
-
-            else
-
-                printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
-                git -C "$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libopenvr" fetch origin master
-
-            fi
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
-            mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
-            cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
-            cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr -DCMAKE_MACOSX_RPATH=OFF
-            cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-            sudo cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
-            sudo -E stow -v --adopt libopenvr
-
-        fi
-
-        # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
-        if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ]; then
-
-            gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
-
-            gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)","");print}' "$BUILD/src/CMakeLists.txt"
-
-        fi
-
-        # Patching SRB2 Uncapped Plus' source code to fix error with implicit declaration of function R_ResetFirstLerp is invalid in C99 [-Werror,-Wimplicit-function-declaration]. Thanks Lach for help with this.
-        if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
-
-            gawk -i inplace '{gsub("#include \"doomdef.h\"","#include \"r_fps.h\"\n#include \"doomdef.h\"");print}' "$BUILD/src/p_setup.c"
-
-        fi
-
-        # Modify the game's configuration and assets directory names to avoid conflicts between installed builds.
-        if [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
-
-            gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2_21\"","#define DEFAULTDIR \"srb2_2.1\"");print}' "$BUILD/src/doomdef.h"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
-
-            gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
-
-            gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
-
-        fi
-
-        # Compile the game's source code.
-        printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME. Please wait..."
-        mkdir -p "$BUILD/build"
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY=/usr/local/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY=/usr/local/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
-        cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-
-        # Get app icon.
-        mkdir -p "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
-        makeicns -in "$BUILD/src/win32/Srb2win.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
-        gawk -i inplace -v RS= '{sub("<key>CFBundleIconFile</key>\n	<string></string>","<key>CFBundleIconFile</key>\n	<string>Srb2mac</string>");print}' "$BUILD/build/bin/$BUILDNAME.app/Contents/Info.plist"
-
-        # Fix paths of installed libraries.
-        if [ -f /usr/local/lib/libbrotlicommon.dylib ]; then
-
-            sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlidec.dylib
-            sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlienc.dylib
-
-        fi
-
-        if [ -f /usr/local/lib/libSDL2.dylib ]; then
-
-            sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" /usr/local/lib/libSDL2_mixer.dylib
-            sudo install_name_tool -change "libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" /usr/local/lib/libSDL2_mixer.dylib
-
-        fi
-
-        if [ -f /usr/local/lib/libmodplug.dylib ]; then
-
-            sudo install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
-            sudo install_name_tool -change "libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
-
-        fi
-
-        if [ -f /usr/local/lib/libogg.dylib ]; then
-
-            sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbis.dylib
-            sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbisfile.dylib
-            sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libopenmpt.dylib
-            sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libSDL2_mixer.dylib
-            sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbis.dylib
-            sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbisfile.dylib
-            sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libopenmpt.dylib
-            sudo install_name_tool -change "libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libSDL2_mixer.dylib
-
-        fi
-
-        # Fix linking of libraries to build's binary.
-        if [ -f /usr/local/lib/libSDL2.dylib ]; then
-
-            install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-            install_name_tool -change "libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-
-        fi
-
-        if [ -f /usr/local/lib/libmodplug.dylib ]; then
-
-            install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME" install_name_tool -change "libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-
-        fi
-
-        if [ -f /usr/local/lib/libopenmpt.dylib ]; then
-
-            install_name_tool -change "bin/libopenmpt.dylib" "/usr/local/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-            install_name_tool -change "libopenmpt.dylib" "/usr/local/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-
-        fi
-
-        if [ -f /usr/local/lib/libgme.dylib ]; then
-
-            install_name_tool -change "@rpath/libgme.0.dylib" "/usr/local/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-            install_name_tool -change "libgme.0.dylib" "/usr/local/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-
-        fi
-
-        if [ -f /usr/local/lib/libpng.dylib ]; then
-
-            install_name_tool -change "@rpath/libpng16.16.dylib" "/usr/local/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-            install_name_tool -change "libpng16.16.dylib" "/usr/local/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-
-        fi
-
-        if [ -f /usr/local/lib/libdiscord-rpc.dylib ]; then
-
-            install_name_tool -change "@rpath/libdiscord-rpc.dylib" "/usr/local/lib/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-            install_name_tool -change "libdiscord-rpc.dylib" "/usr/local/lib/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-
-        fi
-
-        # Building App Bundle.
-        if [ "$APPBUNDLE" = 1 ]; then
-
-            printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's App Bundle. Please wait..."
-            make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) -C "$BUILD/build" package
-
-        # Installing build's binary, assets, libraries, icons and desktop file to the system.
         else
 
-            SRB2MACPATH="/usr/local/opt/srb2-apps/$BUILDNAME.app"
-            printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
-            sudo -E make -C "$BUILD/build" install
-
-            # Saving configuration flags for future upgrades.
-            printf "%s\n" "$CONF" > "$BUILD/conf"
-
-            if [ -n "$(cat "$BUILD/conf")" ]; then
-
-                CONF=$(cat "$BUILD/conf")
-
-            fi
-
-            # Adding path to commit revision file.
-            COMREVFILEPATH="$BUILD/.comrev"
-
-            # Making symbolic link to .app file in /Applications.
-            SRB2MACLINK="/Applications/$BUILDNAME.app"
-            sudo rm -rf "$SRB2MACLINK"
-            sudo ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libpng" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libpng" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
 
         fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
+        cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng -DCMAKE_MACOSX_RPATH=OFF
+        cmake --build "$SRB2BLDROOT/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libpng/build"
+        sudo -E stow -v --adopt libpng
+
+    fi
+
+    # Download libogg's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "/opt/homebrew/lib/libogg.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libogg/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libogg's source code. Please wait..."
+            git clone https://gitlab.xiph.org/xiph/ogg.git --recursive --branch "v$MACOSOGGVER" "$SRB2BLDROOT/libraries/libogg"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libogg's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libogg" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libogg" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
+        cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg -DCMAKE_MACOSX_RPATH=OFF
+        cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libogg/build"
+        sudo -E stow -v --adopt libogg
+
+    fi
+
+    # Download libvorbis' source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "/opt/homebrew/lib/libvorbis.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libvorbis/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libvorbis' source code. Please wait..."
+            git clone https://gitlab.xiph.org/xiph/vorbis.git --recursive --branch "v$MACOSVORBISVER" "$SRB2BLDROOT/libraries/libvorbis"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libvorbis' source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libvorbis" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libvorbis" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libvorbis" fetch origin master
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
+        cd "$SRB2BLDROOT/libraries/libvorbis" || exit
+        ./autogen.sh
+        ./configure --prefix=/usr/local/stow/libvorbis
+        make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+        sudo make install
+        sudo -E stow -v --adopt libvorbis
+        cd "$BUILD" || exit
+
+    fi
+
+    # Download libmpg123's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "/opt/homebrew/lib/libmpg123.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libmpg123/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libmpg123's source code. Please wait..."
+            git clone https://github.com/madebr/mpg123.git --recursive --branch master "$SRB2BLDROOT/libraries/libmpg123"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmpg123's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libmpg123" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libmpg123" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libmpg123" pull --recurse-submodules --rebase --autostash
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
+        cd "$SRB2BLDROOT/libraries/libmpg123" || exit
+        autoreconf -iv
+        ./configure --prefix=/usr/local/stow/libmpg123
+        make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+        sudo make install
+        sudo -E stow -v --adopt libmpg123
+        cd "$BUILD" || exit
+
+    fi
+
+    # Download libmodplug's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "/opt/homebrew/lib/libmodplug.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libmodplug/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libmodplug's source code. Please wait..."
+            git clone https://github.com/Konstanty/libmodplug.git --recursive --branch master "$SRB2BLDROOT/libraries/libmodplug"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmodplug's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libmodplug" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libmodplug" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libmodplug" pull --recurse-submodules --rebase --autostash
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
+        cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug -DCMAKE_MACOSX_RPATH=OFF
+        cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
+        sudo -E stow -v --adopt libmodplug
+
+    fi
+
+    # Download libSDL2's source code, build and install it.
+    if [ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2.dylib" ]; then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libsdl2/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2's source code. Please wait..."
+            git clone https://github.com/libsdl-org/SDL.git --recursive --branch "release-$MACOSSDL2VER" "$SRB2BLDROOT/libraries/libsdl2"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libsdl2" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libsdl2" fetch origin main
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
+        cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DSDL_HIDAPI_JOYSTICK=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2 -DCMAKE_MACOSX_RPATH=OFF
+        #-DSDL_RPATH=OFF -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON
+        cmake --build "$SRB2BLDROOT/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
+        sudo -E stow -v --adopt libsdl2
+
+    fi
+
+    # Download libSDL2_mixer's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2_mixer.dylib" ]) && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixer/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixer's source code. Please wait..."
+            git clone https://github.com/libsdl-org/SDL_mixer.git --recursive --branch "release-$MACOSSDL2MIXERVER" "$SRB2BLDROOT/libraries/libsdl2-mixer"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixer's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" fetch origin main
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixer. Please wait..."
+        cd "$SRB2BLDROOT/libraries/libsdl2-mixer" || exit
+        ./configure \
+            --disable-dependency-tracking \
+            --disable-music-flac \
+            --disable-music-flac-shared \
+            --enable-music-midi \
+            --disable-music-midi-fluidsynth \
+            --disable-music-midi-fluidsynth-shared \
+            --enable-music-midi-native \
+            --disable-music-midi-timidity \
+            --enable-music-mod \
+            --disable-music-mod-mikmod \
+            --disable-music-mod-mikmod-shared \
+            --enable-music-mod-modplug \
+            --disable-music-mod-modplug-shared \
+            --enable-music-mp3 \
+            --enable-music-mp3-mpg123 \
+            --disable-music-mp3-mpg123-shared \
+            --enable-music-ogg \
+            --disable-music-ogg-shared \
+            --disable-music-opus \
+            --disable-music-opus-shared \
+            --enable-music-wave \
+            --prefix=/usr/local/stow/libsdl2-mixer
+        make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+        sudo make install
+        sudo -E stow -v --adopt libsdl2-mixer
+        cd "$BUILD" || exit
+
+    fi
+
+    # Download libSDL2_mixerX's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2_mixer_ext.dylib" ]) && [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
+            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$MACOSSDL2MIXERXVER" "$SRB2BLDROOT/libraries/libsdl2-mixerx"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" fetch origin master
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        cmake -S "$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx -DCMAKE_MACOSX_RPATH=OFF
+        cmake --build "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+        sudo -E stow -v --adopt libsdl2-mixerx
+
+    fi
+
+    # Download libopenmpt's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "/opt/homebrew/lib/libopenmpt.dylib" ]) && [ "$ISOPENMPT" = "libopenmpt" ]; then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
+            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "libopenmpt-$MACOSOPENMPTVER" "$SRB2BLDROOT/libraries/libopenmpt"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" fetch origin master
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
+        cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
+        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
+        make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+        sudo make PREFIX=/usr/local/stow/libopenmpt install
+        sudo -E stow -v --adopt libopenmpt
+        cd "$BUILD" || exit
+
+    fi
+
+    # Download libgme's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "/opt/homebrew/lib/libgme.dylib" ]) && [ "$ISGME" = "libgme" ]; then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libgme/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
+            git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$MACOSGMEVER" "$SRB2BLDROOT/libraries/libgme"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libgme" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libgme" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libgme" fetch origin master
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
+        cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme -DCMAKE_MACOSX_RPATH=OFF
+        cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libgme/build"
+        sudo -E stow -v --adopt libgme
+
+    fi
+
+    # Download DiscordRPC's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "/opt/homebrew/lib/libdiscord-rpc.dylib" ]) && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
+            git clone https://github.com/discord/discord-rpc.git --recursive --branch master "$SRB2BLDROOT/libraries/discord-rpc"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
+        cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc -DCMAKE_MACOSX_RPATH=OFF
+        cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
+        sudo -E stow -v --adopt discord-rpc
+
+    fi
+
+    # Download libopenvr's source code, build and install it.
+    if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "/opt/homebrew/lib/libopenvr_api.dylib" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+
+        if [ ! -d "$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
+            git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$MACOSOPENVRVER" "$SRB2BLDROOT/libraries/libopenvr"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            git -C "$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libopenvr" fetch origin master
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
+        mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
+        cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
+        cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr -DCMAKE_MACOSX_RPATH=OFF
+        cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+        sudo cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
+        sudo -E stow -v --adopt libopenvr
+
+    fi
+
+    # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
+    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ]; then
+
+        gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
+
+        gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)","");print}' "$BUILD/src/CMakeLists.txt"
+
+    fi
+
+    # Patching SRB2 Uncapped Plus' source code to fix error with implicit declaration of function R_ResetFirstLerp is invalid in C99 [-Werror,-Wimplicit-function-declaration]. Thanks Lach for help with this.
+    if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        gawk -i inplace '{gsub("#include \"doomdef.h\"","#include \"r_fps.h\"\n#include \"doomdef.h\"");print}' "$BUILD/src/p_setup.c"
+
+    fi
+
+    # Modify the game's configuration and assets directory names to avoid conflicts between installed builds.
+    if [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2_21\"","#define DEFAULTDIR \"srb2_2.1\"");print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0\"");print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona\"");print}' "$BUILD/src/doomdef.h"
+
+    fi
+
+    # Compile the game's source code.
+    printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME. Please wait..."
+    mkdir -p "$BUILD/build"
+    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=/usr/local/include/gme -DGME_LIBRARY="$LIBPATH/libgme.dylib" -DOPENMPT_INCLUDE_DIR=/usr/local/include/libopenmpt -DOPENMPT_LIBRARY="$LIBPATH/libopenmpt.dylib" -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
+    cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+
+    # Get app icon.
+    mkdir -p "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
+    makeicns -in "$BUILD/src/win32/Srb2win.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
+    gawk -i inplace -v RS= '{sub("<key>CFBundleIconFile</key>\n	<string></string>","<key>CFBundleIconFile</key>\n	<string>Srb2mac</string>");print}' "$BUILD/build/bin/$BUILDNAME.app/Contents/Info.plist"
+
+    # Fix paths of installed libraries.
+    if [ -f /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib ]; then
+
+        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib "$LIBPATH/libclang_rt.ubsan_osx_dynamic.dylib"
+
+        sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "$LIBPATH/libclang_rt.ubsan_osx_dynamic.dylib" "$LIBPATH/libgme.dylib"
+
+    fi
+
+    if [ -f /usr/local/lib/libbrotlicommon.dylib ] || [ -f /opt/homebrew/lib/libbrotlicommon.dylib ]; then
+
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "$LIBPATH/libbrotlicommon.dylib" "$LIBPATH/libbrotlidec.dylib"
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "$LIBPATH/libbrotlicommon.dylib" "$LIBPATH/libbrotlienc.dylib"
+
+    fi
+
+    if [ -f /usr/local/lib/libSDL2.dylib ] || [ -f /opt/homebrew/lib/libSDL2.dylib ]; then
+
+        sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "$LIBPATH/libSDL2.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+        sudo install_name_tool -change "libSDL2-2.0.dylib" "$LIBPATH/libSDL2.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+
+    fi
+
+    if [ -f /usr/local/lib/libmodplug.dylib ] || [ -f /opt/homebrew/lib/libmodplug.dylib ]; then
+
+        sudo install_name_tool -change "@rpath/libmodplug.dylib" "$LIBPATH/libmodplug.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+        sudo install_name_tool -change "libmodplug.dylib" "$LIBPATH/libmodplug.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+
+    fi
+
+    if [ -f /usr/local/lib/libogg.dylib ] || [ -f /opt/homebrew/lib/libogg.dylib ]; then
+
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libvorbis.dylib"
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libvorbisfile.dylib"
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libopenmpt.dylib"
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+        sudo install_name_tool -change "libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libvorbis.dylib"
+        sudo install_name_tool -change "libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libvorbisfile.dylib"
+        sudo install_name_tool -change "libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libopenmpt.dylib"
+        sudo install_name_tool -change "libogg.0.dylib" "$LIBPATH/libogg.dylib" "$LIBPATH/libSDL2_mixer.dylib"
+
+    fi
+
+    # Fix linking of libraries to build's binary.
+    if [ -f /usr/local/lib/libSDL2.dylib ] || [ -f /opt/homebrew/lib/libSDL2.dylib ]; then
+
+        install_name_tool -change "@rpath/libSDL2-2.0.dylib" "$LIBPATH/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libSDL2-2.0.dylib" "$LIBPATH/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libmodplug.dylib ] || [ -f /opt/homebrew/lib/libmodplug.dylib ]; then
+
+        install_name_tool -change "@rpath/libmodplug.dylib" "$LIBPATH/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libmodplug.dylib" "$LIBPATH/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libopenmpt.dylib ] || [ -f /opt/homebrew/lib/libopenmpt.dylib ]; then
+
+        install_name_tool -change "bin/libopenmpt.dylib" "$LIBPATH/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libopenmpt.dylib" "$LIBPATH/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libgme.dylib ] || [ -f /opt/homebrew/lib/libgme.dylib ]; then
+
+        install_name_tool -change "@rpath/libgme.0.dylib" "$LIBPATH/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libgme.0.dylib" "$LIBPATH/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libpng.dylib ] || [ -f /opt/homebrew/lib/libpng.dylib ]; then
+
+        install_name_tool -change "@rpath/libpng16.16.dylib" "$LIBPATH/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libpng16.16.dylib" "$LIBPATH/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libdiscord-rpc.dylib ] || [ -f /opt/homebrew/lib/libdiscord-rpc.dylib ]; then
+
+        install_name_tool -change "@rpath/libdiscord-rpc.dylib" "$LIBPATH/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libdiscord-rpc.dylib" "$LIBPATH/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    if [ -f /usr/local/lib/libopenvr_api.dylib ] || [ -f /opt/homebrew/lib/libopenvr_api.dylib ]; then
+
+        install_name_tool -change "@rpath/libopenvr_api.dylib" "$LIBPATH/libopenvr_api.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libopenvr_api.dylib" "$LIBPATH/libopenvr_api.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+    fi
+
+    # Building App Bundle.
+    if [ "$APPBUNDLE" = 1 ]; then
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's App Bundle. Please wait..."
+        make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) -C "$BUILD/build" package
+
+    # Installing build's binary, assets, libraries, icons and desktop file to the system.
+    else
+
+        SRB2MACPATH="/usr/local/opt/srb2-apps/$BUILDNAME.app"
+        printf "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
+        sudo -E make -C "$BUILD/build" install
+
+        # Saving configuration flags for future upgrades.
+        printf "%s\n" "$CONF" > "$BUILD/conf"
+
+        if [ -n "$(cat "$BUILD/conf")" ]; then
+
+            CONF=$(cat "$BUILD/conf")
+
+        fi
+
+        # Adding path to commit revision file.
+        COMREVFILEPATH="$BUILD/.comrev"
+
+        # Making symbolic link to .app file in /Applications.
+        SRB2MACLINK="/Applications/$BUILDNAME.app"
+        sudo rm -rf "$SRB2MACLINK"
+        sudo ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
+
     fi
 }
 

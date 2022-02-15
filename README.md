@@ -6,7 +6,7 @@ https://user-images.githubusercontent.com/16626326/152710164-9012f542-5922-4958-
 - Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, macOS (tested on version 10.14/Mojave and 10.15/Catalina) and Windows. Check "Compatibilty" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for macOS) based on user's set compilation flags,
-- Supports installing dependencies for glibc and musl based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine,
+- Supports installing SRB2 builds and its dependencies for glibc and musl based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine,
 - Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
 - Creating customisable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
