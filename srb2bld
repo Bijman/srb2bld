@@ -696,7 +696,7 @@ dockerentry() {
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
         if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-           curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "\$SRB2ASSETSURL" > "\$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
@@ -742,14 +742,20 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-        curl -c /tmp/cookie -s -L "https://drive.google.com/uc?export=download&id=$SRB2PERSONAFILEID" > /dev/null
-        curl -RLb /tmp/cookie -C - "https://drive.google.com/uc?export=download&confirm=\$(gawk '/download/ {print \$NF}' /tmp/cookie)&id=$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        until [ -f "\$BUILD/build/cookie" ] && [ -n \$(gawk '/download/ {print \$NF}' "\$BUILD/build/cookie") ]; do
+
+            curl -sLc "\$BUILD/build/cookie" "https://drive.google.com/uc?id=$SRB2PERSONAFILEID" > /dev/null
+            sleep 5
+
+        done
+
+        curl -RLb "\$BUILD/build/cookie" "https://drive.google.com/uc?confirm=\$(gawk '/download/ {print \$NF}' "\$BUILD/build/cookie")&id=$SRB2PERSONAFILEID" > "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
         7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
         if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-           curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "\$SRB2ASSETSURL" > "\$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
@@ -784,7 +790,12 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe -o "\$SRB2BLDROOT/assets/SRB2-2.1.exe"
+        if [ ! -f "\$SRB2BLDROOT/assets/SRB2-2.1.exe" ]; then
+
+            curl -RL https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe > "\$SRB2BLDROOT/assets/SRB2-2.1.exe"
+
+        fi
+
         7z x -y "\$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -809,7 +820,12 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
-        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "\$SRB2BLDROOT/assets/SRB2-2.0.exe"
+        if [ ! -f "\$SRB2BLDROOT/assets/SRB2-2.0.exe" ]; then
+
+            curl -RL https://archive.org/download/srb20ya-v20/SRB2_v206.exe > "\$SRB2BLDROOT/assets/SRB2-2.0.exe"
+
+        fi
+
         7z x -y "\$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -820,7 +836,12 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
-        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
+        if [ ! -f "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" ]; then
+
+            curl -RL https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe > "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
+
+        fi
+
         7z x -y "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -828,7 +849,7 @@ dockerentry() {
             SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
             if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-                curl -RLC - "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
+                curl -RL "\$SRB2ASSETSURL" > "\$SRB2BLDROOT/assets/SRB2.zip"
 
             fi
 
@@ -843,7 +864,7 @@ dockerentry() {
         SRB2KARTASSETSURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
         if [ "\$(curl -sLI "\$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RLC - "\$SRB2KARTASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2Kart.exe"
+            curl -RL "\$SRB2KARTASSETSURL" > "\$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
@@ -2016,7 +2037,7 @@ fi
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             DISCORDRPCURL="\$(curl -s https://api.github.com/repos/discord/discord-rpc/releases/latest | gawk -F'"' '/browser_download_url.*discord-rpc-win.zip/ {print \$4}')"
-            curl -RLC - "\$DISCORDRPCURL" -o "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip"
+            curl -RL "\$DISCORDRPCURL" > "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip"
 
             if ([ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]) || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -3405,7 +3426,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
         if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "$SRB2ASSETSURL" > "$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
@@ -3415,14 +3436,20 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        curl -c /tmp/cookie -s -L "https://drive.google.com/uc?export=download&id=$SRB2PERSONAFILEID" > /dev/null
-        curl -RLb /tmp/cookie -C - "https://drive.google.com/uc?export=download&confirm=$(gawk '/download/ {print $NF}' /tmp/cookie)&id=$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
-        7z x -y "$SRB2BLDROOT/assets/SRB2P_MP"*.rar "*.pk3" "*.wad" -o"$BUILD/assets/installer"
+        until [ -f "$BUILD/build/cookie" ] && [ -n $(gawk '/download/ {print $NF}' "$BUILD/build/cookie") ]; do
+
+            curl -sLc "$BUILD/build/cookie" "https://drive.google.com/uc?id=$SRB2PERSONAFILEID" > /dev/null
+            sleep 5
+
+        done
+
+        curl -RLb "$BUILD/build/cookie" "https://drive.google.com/uc?confirm=$(gawk '/download/ {print $NF}' "$BUILD/build/cookie")&id=$SRB2PERSONAFILEID" > "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        unrar x -y "$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" "$BUILD/assets/installer"
 
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
         if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RLC - "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "$SRB2ASSETSURL" > "$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
@@ -3430,17 +3457,32 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-x64-Installer.exe -o "$SRB2BLDROOT/assets/SRB2-2.1.exe"
+        if [ ! -f "$SRB2BLDROOT/assets/SRB2-2.1.exe" ]; then
+
+            curl -RL https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe > "$SRB2BLDROOT/assets/SRB2-2.1.exe"
+
+        fi
+
         7z x -y "$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "$SRB2BLDROOT/assets/SRB2-2.0.exe"
+        if [ ! -f "$SRB2BLDROOT/assets/SRB2-2.0.exe" ]; then
+
+            curl -RL https://archive.org/download/srb20ya-v20/SRB2_v206.exe > "$SRB2BLDROOT/assets/SRB2-2.0.exe"
+
+        fi
+
         7z x -y "$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
+        if [ ! -f "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" ]; then
+
+            curl -RL https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe > "$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
+
+        fi
+
         7z x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
@@ -3448,7 +3490,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         SRB2KARTASSETSURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
         if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RLC - "$SRB2KARTASSETSURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
+            curl -RL "$SRB2KARTASSETSURL" > "$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
