@@ -1,9 +1,9 @@
-srb2bld is a shellscript, that automates and simplifies process of downloading source code, configuring, compilation, installation and creating portable executable bundles of various SRB2 related builds.
+srb2bld is a shell script, that automates and simplifies process of downloading source code, configuring, compilation, installation and creating portable executable bundles of various SRB2 related builds.
 
 https://user-images.githubusercontent.com/16626326/152710164-9012f542-5922-4958-a2fd-6480ef0e0339.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, macOS (tested on version 10.14/Mojave and 10.15/Catalina) and Windows. Check "Compatibilty" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, macOS (tested on version 10.14/Mojave and 10.15/Catalina) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc and musl based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine,
@@ -41,9 +41,17 @@ As for macOS users, they need to install these additional dependencies:
 1. In terminal enter this following commands:
 - Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install build-essential git coreutils findutils bash curl gawk docker.io stow fuse`,
 
-- Arch/Arch based: `sudo pacman -S base-devel git coreutils findutils bash curl gawk docker stow fuse`,
+- Arch/Arch based: `sudo pacman -S --needed base-devel git coreutils findutils bash curl gawk docker stow fuse`,
 
-- Gentoo/Gentoo based: `sudo emerge -av coreutils git findutils bash curl gawk docker stow fuse`.
+- Gentoo/Gentoo based: `sudo emerge -av coreutils git findutils bash curl gawk docker stow fuse`,
+
+- Fedora/Fedora based: `sudo dnf install @development-tools git coreutils findutils bash curl gawk docker stow fuse`,
+
+- OpenSUSE/OpenSUSE base: `sudo zypper in -t pattern devel_basis && sudo zypper in git coreutils findutils bash curl gawk docker stow fuse`,
+
+- Void/Void based: `sudo xbps-install -S base-devel git coreutils findutils bash curl gawk docker stow fuse`,
+
+- Alpine/Alpine based: `sudo apk add build-base git coreutils findutils bash curl gawk docker stow fuse`.
 
 **Windows:**
 1. Installing Git Bash:

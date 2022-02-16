@@ -666,7 +666,7 @@ dockerentry() {
         printf "$MESSAGE\n%s\n\e[0m" "Downloading $BUILDNAME's source code. Please wait..."
         \$GIT "\$BUILD"
 
-    elif [ "\$APPIMAGE" = 1 ]; then
+    elif [ "\$APPIMAGE" = 1 ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $BUILDNAME. Please wait..."
         git -C "\$BUILD" clean -qdfx -e .comrev
