@@ -96,7 +96,7 @@ appbundle() {
     installtomacos
 
     # Set name of App Bundle in message.
-    APPBUNDLENAME=$(find "$BUILD" -iname "*.dmg" 2> /dev/null | gawk -F'/' '{print $NF}' | sort | uniq -d)
+    APPBUNDLENAME=$(find "$BUILD" -name "*.dmg" 2> /dev/null | gawk -F'/' '{print $NF}' | sort | uniq -d)
 
     # Rename App Bundle and move it to working directory.
     if [ -d "$BUILD/build/package" ]; then
@@ -140,7 +140,7 @@ appimage() {
     COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
 
     # Set name of AppImage in message.
-    APPIMAGENAME=$(find "$BUILD" -iname "*.AppImage" 2> /dev/null | gawk -F'/' '{print $NF}')
+    APPIMAGENAME=$(find "$BUILD" -name "*.AppImage" 2> /dev/null | gawk -F'/' '{print $NF}')
 
     mv "$BUILD/"*.AppImage "$LNXPWD"
 
@@ -383,7 +383,7 @@ chooseinstall() {
 
 chooseremoveasset() {
     clear
-    if [ -z "$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find assets."
         exit
@@ -392,7 +392,7 @@ chooseremoveasset() {
 
     # Remove asset.
     printf "$MESSAGE%s\n\e[0m" "Please choose asset by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
+    array=$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -430,7 +430,7 @@ chooseremoveasset() {
 
 chooseremovebuild() {
     clear
-    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find builds."
         exit
@@ -439,7 +439,7 @@ chooseremovebuild() {
 
     # Remove build.
     printf "$MESSAGE%s\n\e[0m" "Please choose build by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
+    array=$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -477,7 +477,7 @@ chooseremovebuild() {
 
 chooseuninstall() {
     clear
-    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed builds."
         exit
@@ -486,7 +486,7 @@ chooseuninstall() {
 
     # Uninstall build from the system.
     printf "$MESSAGE%s\n\e[0m" "Please choose installed package by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
+    array=$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -544,9 +544,9 @@ chooseuninstall() {
 
                     $SUDO gtk-update-icon-cache -qft /usr/local/share/icons/hicolor
 
-                elif [ -x "$(find /usr/bin -iname "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
+                elif [ -x "$(find /usr/bin -name "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
 
-                    $SUDO "$(find /usr/bin -iname "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" --noincremental
+                    $SUDO "$(find /usr/bin -name "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" --noincremental
 
                 fi
 
@@ -973,7 +973,7 @@ dockerentry() {
          sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
-         gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -iname libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/Makefile.d/nix.mk"
+         gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -name libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/Makefile.d/nix.mk"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
@@ -1043,7 +1043,7 @@ dockerentry() {
          sed -i 's|/usr/local/games/SRB2Kart|/usr/local/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
-         gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -iname libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/sdl/Makefile.cfg"
+         gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -name libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/sdl/Makefile.cfg"
 
     fi
 
@@ -1651,18 +1651,18 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
     if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]); then
 
-        DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
+        DISCORDLIBPATH=\$(find /lib* /usr/lib* -name libdiscord-rpc.so)
         cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
-        OPENVRLIBPATH=\$(find /lib* /usr/lib* -iname libopenvr_api.so)
+        OPENVRLIBPATH=\$(find /lib* /usr/lib* -name libopenvr_api.so)
         cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
 
     fi
@@ -1685,7 +1685,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
     elif [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
 
@@ -1695,13 +1695,13 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
 exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
 APPRUNBIN
 
-        DISCORDLIBPATH=\$(find /lib* /usr/lib* -iname libdiscord-rpc.so)
+        DISCORDLIBPATH=\$(find /lib* /usr/lib* -name libdiscord-rpc.so)
         cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
-        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -iname \$l; done) "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
         if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-              OPENVRLIBPATH=\$(find /lib* /usr/lib* -iname libopenvr_api.so)
+              OPENVRLIBPATH=\$(find /lib* /usr/lib* -name libopenvr_api.so)
               cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
 
         fi
@@ -3054,9 +3054,9 @@ installtolinux() {
 
         $SUDO gtk-update-icon-cache -qft /usr/local/share/icons/hicolor
 
-    elif [ -x "$(find /usr/bin -iname "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
+    elif [ -x "$(find /usr/bin -name "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
 
-        $SUDO "$(find /usr/bin -iname "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" --noincremental
+        $SUDO "$(find /usr/bin -name "kbuildsycoca*" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" --noincremental
 
     fi
 
@@ -3857,7 +3857,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     gawk -i inplace -v RS= '{sub("<key>CFBundleIconFile</key>\n	<string></string>","<key>CFBundleIconFile</key>\n	<string>Srb2mac</string>");print}' "$BUILD/build/bin/$BUILDNAME.app/Contents/Info.plist"
 
     # Fix paths of installed libraries.
-    if [ -f "$(find /Library/Developer/CommandLineTools/usr/lib/clang -iname libclang_rt.ubsan_osx_dynamic.dylib | head -n1)" ]; then
+    if [ -f "$(find /Library/Developer/CommandLineTools/usr/lib/clang -name libclang_rt.ubsan_osx_dynamic.dylib | head -n1)" ]; then
 
         sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib "$LIBPATH/libclang_rt.ubsan_osx_dynamic.dylib"
 
@@ -4247,32 +4247,32 @@ WINVRMENUGEN
 listasset() {
     clear
     # List installed games.
-    if [ -z "$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find downloaded assets."
         exit
 
     fi
 
-    find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort
+    find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | gawk -F'/' '{print $NF}' | sort
 }
 
 listbuild() {
     clear
     # List installed games.
-    if [ -z "$(find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find downloaded builds."
         exit
 
     fi
 
-    find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort
+    find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort
 }
 
 listconfig() {
     clear
-    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed builds."
         exit
@@ -4281,7 +4281,7 @@ listconfig() {
 
     # List configuration flags for installed build.
     printf "$MESSAGE%s\n\e[0m" "Please choose installed build by typing number and then pressing enter. Press enter or ctrl+c to quit."
-    array=$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
+    array=$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)
     arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
@@ -4311,14 +4311,14 @@ listconfig() {
 listinstalled() {
     clear
     # List installed games.
-    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed builds."
         exit
 
     fi
 
-    find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort
+    find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | gawk -F'/' '{print $NF}' | sort
 }
 
 sudo_ping() {
@@ -4360,14 +4360,14 @@ sudo_ping() {
 upgrade() {
     clear
     # Make a loop to find the SRB2 source code directories and then update them one by one.
-    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort)" ]; then
+    if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort)" ]; then
 
         printf "$FAILURE%s\n\e[0m" "Can't find installed builds."
         exit
 
     fi
 
-    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort); do
+    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort); do
 
         printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $u. Please wait..."
         git -C "$BUILDPATH/$u" clean -qdfx -e .comrev
