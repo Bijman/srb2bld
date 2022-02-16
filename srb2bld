@@ -479,7 +479,7 @@ chooseuninstall() {
     clear
     if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
-        printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
+        printf "$FAILURE%s\n\e[0m" "Can't find installed builds."
         exit
 
     fi
@@ -742,7 +742,7 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-        until [ -f "\$BUILD/build/cookie" ] && [ -n \$(gawk '/download/ {print \$NF}' "\$BUILD/build/cookie") ]; do
+        until [ -f "\$BUILD/build/cookie" ] && [ -n "\$(gawk '/download/ {print \$NF}' "\$BUILD/build/cookie")" ]; do
 
             curl -sLc "\$BUILD/build/cookie" "https://drive.google.com/uc?id=$SRB2PERSONAFILEID" > /dev/null
             sleep 5
@@ -790,12 +790,7 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        if [ ! -f "\$SRB2BLDROOT/assets/SRB2-2.1.exe" ]; then
-
-            curl -RL https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe > "\$SRB2BLDROOT/assets/SRB2-2.1.exe"
-
-        fi
-
+        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe -o "\$SRB2BLDROOT/assets/SRB2-2.1.exe"
         7z x -y "\$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -820,12 +815,7 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
-        if [ ! -f "\$SRB2BLDROOT/assets/SRB2-2.0.exe" ]; then
-
-            curl -RL https://archive.org/download/srb20ya-v20/SRB2_v206.exe > "\$SRB2BLDROOT/assets/SRB2-2.0.exe"
-
-        fi
-
+        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "\$SRB2BLDROOT/assets/SRB2-2.0.exe"
         7z x -y "\$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -836,12 +826,7 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
-        if [ ! -f "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" ]; then
-
-            curl -RL https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe > "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
-
-        fi
-
+        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
         7z x -y "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
@@ -3436,7 +3421,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        until [ -f "$BUILD/build/cookie" ] && [ -n $(gawk '/download/ {print $NF}' "$BUILD/build/cookie") ]; do
+        until [ -f "$BUILD/build/cookie" ] && [ -n "$(gawk '/download/ {print $NF}' "$BUILD/build/cookie")" ]; do
 
             curl -sLc "$BUILD/build/cookie" "https://drive.google.com/uc?id=$SRB2PERSONAFILEID" > /dev/null
             sleep 5
@@ -3457,32 +3442,17 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
-        if [ ! -f "$SRB2BLDROOT/assets/SRB2-2.1.exe" ]; then
-
-            curl -RL https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe > "$SRB2BLDROOT/assets/SRB2-2.1.exe"
-
-        fi
-
+        curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe -o "$SRB2BLDROOT/assets/SRB2-2.1.exe"
         7z x -y "$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
-        if [ ! -f "$SRB2BLDROOT/assets/SRB2-2.0.exe" ]; then
-
-            curl -RL https://archive.org/download/srb20ya-v20/SRB2_v206.exe > "$SRB2BLDROOT/assets/SRB2-2.0.exe"
-
-        fi
-
+        curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "$SRB2BLDROOT/assets/SRB2-2.0.exe"
         7z x -y "$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-        if [ ! -f "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" ]; then
-
-            curl -RL https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe > "$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
-
-        fi
-
+        curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
         7z x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
@@ -3887,7 +3857,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     gawk -i inplace -v RS= '{sub("<key>CFBundleIconFile</key>\n	<string></string>","<key>CFBundleIconFile</key>\n	<string>Srb2mac</string>");print}' "$BUILD/build/bin/$BUILDNAME.app/Contents/Info.plist"
 
     # Fix paths of installed libraries.
-    if [ -f /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib ]; then
+    if [ -f "$(find /Library/Developer/CommandLineTools/usr/lib/clang -iname libclang_rt.ubsan_osx_dynamic.dylib | head -n1)" ]; then
 
         sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib "$LIBPATH/libclang_rt.ubsan_osx_dynamic.dylib"
 
@@ -4300,12 +4270,50 @@ listbuild() {
     find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort
 }
 
+listconfig() {
+    clear
+    if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
+
+        printf "$FAILURE%s\n\e[0m" "Can't find installed builds."
+        exit
+
+    fi
+
+    # List configuration flags for installed build.
+    printf "$MESSAGE%s\n\e[0m" "Please choose installed build by typing number and then pressing enter. Press enter or ctrl+c to quit."
+    array=$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)
+    arrayname=$(printf "%s\n" "$array" | gawk -F'/' '{print $NF}')
+    count="$(printf "%s\n" "$array" | wc -l)"
+    n=""
+    printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
+    while true; do
+
+        printf "#? "
+        read -r n
+
+        if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
+
+            CONF=$(printf "%s\n" "$array" | gawk NR=="${n}")
+            printf "%s\n" ""
+            gawk '/---------------/ {gsub("---------------","");getline;print}' "$CONF"
+            break
+
+        else
+
+            printf "$NOTICE\n%s\n\e[0m" "No option has been chosen."
+            exit
+
+        fi
+
+    done
+}
+
 listinstalled() {
     clear
     # List installed games.
     if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 2> /dev/null | sort)" ]; then
 
-        printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
+        printf "$FAILURE%s\n\e[0m" "Can't find installed builds."
         exit
 
     fi
@@ -4354,7 +4362,7 @@ upgrade() {
     # Make a loop to find the SRB2 source code directories and then update them one by one.
     if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '{print $NF}' | sort)" ]; then
 
-        printf "$FAILURE%s\n\e[0m" "Can't find installed packages."
+        printf "$FAILURE%s\n\e[0m" "Can't find installed builds."
         exit
 
     fi
@@ -4429,6 +4437,7 @@ Usage: srb2bld [OPTIONS]
      -i, --install                          Compile and install SRB2/SRB2Kart build.
      -la, --listasset                       List downloaded SRB2/SRB2Kart assets.
      -lb, --listbuild                       List downloaded SRB2/SRB2Kart builds.
+     -lc, --listconfig                      List compilation flags of installed SRB2/SRB2Kart builds.
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
@@ -4511,6 +4520,12 @@ case "$1" in
     -lb | --listbuild)
 
         listbuild
+
+        ;;
+
+    -lc | --listconfig)
+
+        listconfig
 
         ;;
 
