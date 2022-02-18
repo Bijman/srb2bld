@@ -35,10 +35,10 @@ BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
 SRB2GITURL="https://git.do.srb2.org/STJr/SRB2.git"
-# Uncomment below SRB2GITURL variable and set your URL to Git repo for custom build of SRB2. Set GitHub branch with SRB2VER too, if necessary. If you have downloaded original SRB2 repo, delete it first with "srb2bld -rb" command.
+# Uncomment below SRB2GITURL variable and set your URL to Git repo for custom build of SRB2. Set GitHub branch with SRB2GITVER too, if necessary. If you have downloaded original SRB2 repo, delete it first with "srb2bld -rb" command.
 #SRB2GITURL=""
-SRB2VER="master"
-SRB2PERSONAFILEID="1tV9L2x94vEjMzip97zdOow6N7xrzYwoV"
+SRB2GITVER="master"
+SRB2PERSONAFILEID="vjartyfqu3mdmjj"
 MINGWVER="gcc-10-win32"
 MINGWOLDVER="gcc-4.9-win32"
 
@@ -214,7 +214,7 @@ choosebuild() {
             "1")
 
                 BUILD="$BUILDPATH/srb2"
-                GIT="git clone $SRB2GITURL --recursive --branch $SRB2VER"
+                GIT="git clone $SRB2GITURL --recursive --branch $SRB2GITVER"
                 break
 
                 ;;
@@ -742,14 +742,7 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-        until [ -f "\$BUILD/build/cookie" ] && [ -n "\$(gawk '/download/ {print \$NF}' "\$BUILD/build/cookie")" ]; do
-
-            curl -sLc "\$BUILD/build/cookie" "https://drive.google.com/uc?id=$SRB2PERSONAFILEID" > /dev/null
-            sleep 5
-
-        done
-
-        curl -RLb "\$BUILD/build/cookie" "https://drive.google.com/uc?confirm=\$(gawk '/download/ {print \$NF}' "\$BUILD/build/cookie")&id=$SRB2PERSONAFILEID" > "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
         7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
@@ -3146,8 +3139,7 @@ installtolinux() {
         else
 
             ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u
-            printf "$FAILURE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these missing libraries."
-            exit
+            printf "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
 
         fi
 
@@ -3194,8 +3186,7 @@ installtolinux() {
         else
 
             ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u
-            printf "$FAILURE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these missing libraries."
-            exit
+            printf "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
 
         fi
 
@@ -3301,9 +3292,9 @@ installtomacos() {
     else
 
         # Warning for MacOS users.
-        printf "$NOTICE\n%s\n\e[0m" "WARNING for macOS users: this script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries. Possible changes that would be applied. Save those below commands to text file and revert those changes after process:
+        printf "$NOTICE\n%s\n\e[0m" "WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affect libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries. Possible changes that would be applied. Save those below commands to text file and revert those changes after process:
 
-        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib"
+        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib
         sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" /usr/local/lib/libgme.dylib
 
         sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/usr/local/lib/libbrotlicommon.dylib" /usr/local/lib/libbrotlidec.dylib
@@ -3313,7 +3304,7 @@ installtomacos() {
         sudo install_name_tool -change "libSDL2-2.0.dylib" "/usr/local/lib/libSDL2.dylib" /usr/local/lib/libSDL2_mixer.dylib
 
         sudo install_name_tool -change "@rpath/libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" "/usr/local/lib/libSDL2_mixer.dylib"
+        sudo install_name_tool -change "libmodplug.dylib" "/usr/local/lib/libmodplug.dylib" /usr/local/lib/libSDL2_mixer.dylib
 
         sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbis.dylib
         sudo install_name_tool -change "@rpath/libogg.0.dylib" "/usr/local/lib/libogg.dylib" /usr/local/lib/libvorbisfile.dylib
@@ -3449,14 +3440,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        until [ -f "$BUILD/build/cookie" ] && [ -n "$(gawk '/download/ {print $NF}' "$BUILD/build/cookie")" ]; do
-
-            curl -sLc "$BUILD/build/cookie" "https://drive.google.com/uc?id=$SRB2PERSONAFILEID" > /dev/null
-            sleep 5
-
-        done
-
-        curl -RLb "$BUILD/build/cookie" "https://drive.google.com/uc?confirm=$(gawk '/download/ {print $NF}' "$BUILD/build/cookie")&id=$SRB2PERSONAFILEID" > "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
         unrar x -y "$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" "$BUILD/assets/installer"
 
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
@@ -3894,8 +3878,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     # Fix paths of installed libraries.
     if [ -f "$(find /Library/Developer/CommandLineTools/usr/lib/clang -name libclang_rt.ubsan_osx_dynamic.dylib | head -n1)" ]; then
 
-        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib"
-
+        sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib
         sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" /usr/local/lib/libgme.dylib
 
     fi
@@ -4313,53 +4296,44 @@ installtowindows() {
 
     fi
 
-    # Using PowerShell script to create menu entry for Windows.
-    if [ -x "$(which powershell 2> /dev/null)" ]; then
+    # Using VBScript to create menu entry for Windows.
+    cat > "$BUILD/build/CreateShortcut.vbs" << WINMENUSHORTCUT
+Set oWS = CreateObject("WScript.Shell")
+strHomeFolder = oWS.ExpandEnvironmentStrings("%USERPROFILE%")
 
-        cat > "$BUILD/build/winmenugen.ps1" << WINMENUGEN
-New-Item -Force -ItemType Directory -Path "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+Set oFSO = CreateObject("Scripting.FileSystemObject")
+oFSO.CreateFolder strHomeFolder & "\\Start Menu\\Programs\\$SRB2WINMENUDIR"
 
-\$SourceFilePath = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINDIR (Software).bat"
-\$ShortcutPath = "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR/$SRB2WINDIR (Software).bat.lnk"
-\$WScriptObj = New-Object -ComObject ("WScript.Shell")
-\$shortcut = \$WscriptObj.CreateShortcut(\$ShortcutPath)
-\$shortcut.TargetPath = \$SourceFilePath
-\$shortcut.WorkingDirectory = "\$HOME/SRB2 Games/$SRB2WINDIR"
-\$shortcut.IconLocation = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINBIN"
-\$shortcut.Save()
+Set oWS = WScript.CreateObject("WScript.Shell")
+sLinkFile = strHomeFolder & "\\Start Menu\\Programs\\$SRB2WINMENUDIR\\$SRB2WINDIR (Software).bat.lnk"
+Set oLink = oWS.CreateShortcut(sLinkFile)
+oLink.TargetPath = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR\\$SRB2WINDIR (Software).bat"
+oLink.WorkingDirectory = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR"
+oLink.IconLocation = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR\\$SRB2WINBIN"
+oLink.Save
 
-\$SourceFilePath = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINDIR (OpenGL).bat"
-\$ShortcutPath = "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR/$SRB2WINDIR (OpenGL).bat.lnk"
-\$WScriptObj = New-Object -ComObject ("WScript.Shell")
-\$shortcut = \$WscriptObj.CreateShortcut(\$ShortcutPath)
-\$shortcut.TargetPath = \$SourceFilePath
-\$shortcut.WorkingDirectory = "\$HOME/SRB2 Games/$SRB2WINDIR"
-\$shortcut.IconLocation = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINBIN"
-\$shortcut.Save()
-WINMENUGEN
+sLinkFile = strHomeFolder & "\\Start Menu\\Programs\\$SRB2WINMENUDIR\\$SRB2WINDIR (OpenGL).bat.lnk"
+Set oLink = oWS.CreateShortcut(sLinkFile)
+oLink.TargetPath = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR\\$SRB2WINDIR (OpenGL).bat"
+oLink.WorkingDirectory = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR"
+oLink.IconLocation = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR\\$SRB2WINBIN"
+oLink.Save
+WINMENUSHORTCUT
 
-        powershell -File "$BUILD/build/winmenugen.ps1" > /dev/null
+    if [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
-        if [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
-
-            cat > "$BUILD/build/winvrmenugen.ps1" << WINVRMENUGEN
-New-Item -Force -ItemType Directory -Path "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
-
-\$SourceFilePath = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINDIR (OpenVR).bat"
-\$ShortcutPath = "\$HOME/Start Menu/Programs/$SRB2WINMENUDIR/$SRB2WINDIR (OpenVR).bat.lnk"
-\$WScriptObj = New-Object -ComObject ("WScript.Shell")
-\$shortcut = \$WscriptObj.CreateShortcut(\$ShortcutPath)
-\$shortcut.TargetPath = \$SourceFilePath
-\$shortcut.WorkingDirectory = "\$HOME/SRB2 Games/$SRB2WINDIR"
-\$shortcut.IconLocation = "\$HOME/SRB2 Games/$SRB2WINDIR/$SRB2WINBIN"
-\$shortcut.Save()
-WINVRMENUGEN
-
-            powershell -File "$BUILD/build/winvrmenugen.ps1" > /dev/null
-
-        fi
+        cat >> "$BUILD/build/CreateShortcut.vbs" << WINMENUSHORTCUT
+sLinkFile = strHomeFolder & "\\Start Menu\\Programs\\$SRB2WINMENUDIR\\$SRB2WINDIR (OpenVR).bat.lnk"
+Set oLink = oWS.CreateShortcut(sLinkFile)
+oLink.TargetPath = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR\\$SRB2WINDIR (OpenVR).bat"
+oLink.WorkingDirectory = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR"
+oLink.IconLocation = strHomeFolder & "\\SRB2 Games\\$SRB2WINDIR\\$SRB2WINBIN"
+oLink.Save
+WINMENUSHORTCUT
 
     fi
+
+    cscript "$BUILD/build/CreateShortcut.vbs" 2> /dev/null
 }
 
 listasset() {
@@ -4579,9 +4553,9 @@ Usage: srb2bld [OPTIONS]
             srb2bld --compatibility
 
   NOTES:
-     1. Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+     1. Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
 
-     2. Warning for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled, that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depends on those libraries.
+     2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affect libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
      3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
 

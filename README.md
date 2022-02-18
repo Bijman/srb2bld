@@ -7,7 +7,7 @@ https://user-images.githubusercontent.com/16626326/152710164-9012f542-5922-4958-
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc and musl based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and Alpine,
-- Compiling builds also on ARM CPU (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
+- Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
 - Creating customisable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
@@ -19,12 +19,13 @@ https://user-images.githubusercontent.com/16626326/152710164-9012f542-5922-4958-
 - Findutils,
 - Curl,
 - Gawk,
+- Ncurses,
 - Docker (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
 - FUSE (Linux only),
 - Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package).
 
-Windows users need to also have installed Git Bash to run this script. Also PowerShell is required for updating icons and menu entries (usually it is installed out-of-box on Windows 7 or later).
+Windows users need to also have installed Git Bash to run this script.
 
 As for macOS users, they need to install these additional dependencies:
 - Cmake,
@@ -39,19 +40,23 @@ As for macOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following commands:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install build-essential git coreutils findutils bash curl gawk docker.io stow fuse`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git coreutils findutils bash ncurses curl gawk docker.io stow fuse`,
 
-- Arch/Arch based: `sudo pacman -S --needed base-devel git coreutils findutils bash curl gawk docker stow fuse`,
+- Arch/Arch based: `sudo pacman -S --needed make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Gentoo/Gentoo based: `sudo emerge -av coreutils git findutils bash curl gawk docker stow fuse`,
+- Gentoo/Gentoo based: `sudo emerge -av git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Fedora/Fedora based: `sudo dnf install @development-tools git coreutils findutils bash curl gawk docker stow fuse`,
+- Fedora/Fedora based: `sudo dnf install make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- OpenSUSE/OpenSUSE base: `sudo zypper in -t pattern devel_basis && sudo zypper in git coreutils findutils bash curl gawk docker stow fuse`,
+- OpenSUSE/OpenSUSE base: `sudo zypper in make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Void/Void based: `sudo xbps-install -S base-devel git coreutils findutils bash curl gawk docker stow fuse`,
+- Void/Void based: `sudo xbps-install -S make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Alpine/Alpine based: `sudo apk add build-base git coreutils findutils bash curl gawk docker stow fuse`.
+- Alpine/Alpine based: `sudo apk add make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+
+- Solus/Solus based: `sudo eopkg it make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+
+- NixOS/NixOS based: `sudo nix-env -i gnumake git coreutils findutils bash ncurses curl gawk stow fuse` or set in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system.
 
 **Windows:**
 1. Installing Git Bash:
@@ -98,7 +103,7 @@ As for macOS users, they need to install these additional dependencies:
 
 7. Open text editor for "~/.bash_profile": `nano ~/.bash_profile`,
 
-8. In opened text editor from previous step write new path to executables with environment variable PATH like `export PATH="~/bin:$PATH"` in "~/.bash_profile",
+8. In the opened text editor from previous step write new path to executables with environment variable PATH like `export PATH="~/bin:$PATH"` in "~/.bash_profile",
 
 9. Enter `source ~/.bash_profile` or restart Git Bash.
 
@@ -147,7 +152,7 @@ As for macOS users, they need to install these additional dependencies:
 
 ⛔ - Building failure.
 
-*Only 32bit binaries are currently supported. SRB2 v2.0 has graphical issues when running with OpenGL on Linux.
+*Only 32bit binaries are currently supported. SRB2 v2.0 has graphical issues when running with OpenGL on Linux and Windows.
 
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
@@ -190,9 +195,9 @@ Usage: srb2bld [OPTIONS]
             srb2bld --compatibility
 
   NOTES:
-     1. Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+     1. Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
 
-     2. Warning for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled, that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depends on those libraries.
+     2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affect libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
      3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
@@ -200,9 +205,9 @@ Usage: srb2bld [OPTIONS]
 ```
 
 # Notes
-1. Warning! Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+1. Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
 
-2. Warning for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled, that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depends on those libraries.
+2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affect libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
 3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
