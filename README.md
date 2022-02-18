@@ -48,7 +48,7 @@ As for macOS users, they need to install these additional dependencies:
 
 - Fedora/Fedora based: `sudo dnf install make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- OpenSUSE/OpenSUSE base: `sudo zypper in make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- OpenSUSE/OpenSUSE based: `sudo zypper in make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
 - Void/Void based: `sudo xbps-install -S make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
@@ -56,7 +56,7 @@ As for macOS users, they need to install these additional dependencies:
 
 - Solus/Solus based: `sudo eopkg it make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- NixOS/NixOS based: `sudo nix-env -i gnumake git coreutils findutils bash ncurses curl gawk stow fuse` or set in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system.
+- NixOS/NixOS based: `sudo nix-env -i gnumake git coreutils findutils bash ncurses curl gawk stow fuse` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -73,7 +73,7 @@ As for macOS users, they need to install these additional dependencies:
 
 **macOS:**
 1. In terminal enter this following command:
-- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip unrar curl makeicns`,
+- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl makeicns`,
 - MacPorts: `sudo port install cmake autoconf automake pkgconfig libtool gawk stow p7zip unrar curl makeicns`.
 
 # Installation
@@ -197,9 +197,9 @@ Usage: srb2bld [OPTIONS]
   NOTES:
      1. Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
 
-     2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affect libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
+     2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
-     3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+     3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
      4. If on Linux you get error with "/dev/fuse" when running script, then load fuse module with "sudo modprobe fuse". You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 ```
@@ -207,8 +207,8 @@ Usage: srb2bld [OPTIONS]
 # Notes
 1. Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
 
-2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affect libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
+2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
-3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type HAVE_DISCORDRPC=1 (Linux/Windows) or -DSRB2_CONFIG_HAVE_DISCORDRPC=ON (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
 4. If on Linux you get error with "/dev/fuse" when running script, then load fuse module with `sudo modprobe fuse`. You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
