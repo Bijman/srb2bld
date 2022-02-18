@@ -68,6 +68,7 @@ MACOSSDL2VER="2.0.18"
 MACOSSDL2MIXERVER="2.0.4"
 MACOSSDL2MIXERXVER="2.5.0"
 MACOSOPENVRVER="1.10.30"
+MACPORTPREFIX="/opt/local"
 COMPTABLEURL="https://gist.githubusercontent.com/Bijman/dae1e123800af25ef28689bd644a4516/raw"
 FAILURE="\e[1;91m"
 SUCCESS="\e[1;92m"
@@ -3251,23 +3252,39 @@ installtomacos() {
     # Exporting environment variables for compiling, installing game and libraries on macOS.
     export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
     export SDKROOT="$SDKROOT"
-    export LIBRARY_PATH=/usr/local/lib:/opt/homebrew/lib:/opt/local/lib
-    export C_INCLUDE_PATH=/usr/include:/usr/local/include:/usr/local/include/SDL2:/opt/homebrew/include:/opt/homebrew/include/SDL2:/opt/local/include:/opt/local/include/SDL2
+    export MACPORTPREFIX="$MACPORTPREFIX"
+    export LIBRARY_PATH="/usr/lib:/usr/local/lib:$(brew --prefix)/lib:$MACPORTPREFIX/lib:$LIBRARY_PATH"
+    export C_INCLUDE_PATH="/usr/include:/usr/local/include:$(brew --prefix)/include:$C_INCLUDE_PATH"
     export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
-    export PKG_CONFIG_PATH=/usr/local/pkgconfig:/opt/homebrew/pkgconfig:/opt/local/lib/pkgconfig
-    export STOW_DIR=/usr/local/stow
+    export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig:$MACPORTPREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+    export STOW_DIR="/usr/local/stow"
 
     # Have commit revision as part of name for App Bundle.
     COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
 
-    # Change prefix depending on, if library is /opt/homebrew/lib or /opt/local/lib or /usr/local/lib.
+    # Change prefix depending on, if library is in /opt/homebrew/lib or $MACPORTPREFIX/lib or /usr/local/lib.
+
+    if [ -f "/opt/homebrew/lib/libSDL2.dylib" ]; then
+
+        LIBSDL2PREFIX="/opt/homebrew"
+
+    elif [ -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]; then
+
+        LIBSDL2PREFIX="$MACPORTPREFIX"
+
+    else
+
+        LIBSDL2PREFIX="/usr/local"
+
+    fi
+
     if [ -f "/opt/homebrew/lib/libgme.dylib" ]; then
 
         LIBGMEPREFIX="/opt/homebrew"
 
-    elif [ -f "/opt/local/lib/libgme.dylib" ]; then
+    elif [ -f "$MACPORTPREFIX/lib/libgme.dylib" ]; then
 
-        LIBGMEPREFIX="/opt/local"
+        LIBGMEPREFIX="$MACPORTPREFIX"
 
     else
 
@@ -3279,9 +3296,9 @@ installtomacos() {
 
         LIBOPENMPTPREFIX="/opt/homebrew"
 
-    elif [ -f "/opt/local/lib/libopenmpt.dylib" ]; then
+    elif [ -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]; then
 
-        LIBOPENMPTPREFIX="/opt/local"
+        LIBOPENMPTPREFIX="$MACPORTPREFIX"
 
     else
 
@@ -3341,23 +3358,23 @@ installtomacos() {
         sudo install_name_tool -change "libogg.0.dylib" "/opt/homebrew/lib/libogg.dylib" /opt/homebrew/lib/libopenmpt.dylib
         sudo install_name_tool -change "libogg.0.dylib" "/opt/homebrew/lib/libogg.dylib" /opt/homebrew/lib/libSDL2_mixer.dylib
 
-        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/opt/local/lib/libbrotlicommon.dylib" /opt/local/lib/libbrotlidec.dylib
-        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/opt/local/lib/libbrotlicommon.dylib" /opt/local/lib/libbrotlienc.dylib
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "$MACPORTPREFIX/lib/libbrotlicommon.dylib" $MACPORTPREFIX/lib/libbrotlidec.dylib
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "$MACPORTPREFIX/lib/libbrotlicommon.dylib" $MACPORTPREFIX/lib/libbrotlienc.dylib
 
-        sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/opt/local/lib/libSDL2.dylib" /opt/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libSDL2-2.0.dylib" "/opt/local/lib/libSDL2.dylib" /opt/local/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "$MACPORTPREFIX/lib/libSDL2.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "libSDL2-2.0.dylib" "$MACPORTPREFIX/lib/libSDL2.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
 
-        sudo install_name_tool -change "@rpath/libmodplug.dylib" "/opt/local/lib/libmodplug.dylib" /opt/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libmodplug.dylib" "/opt/local/lib/libmodplug.dylib" /opt/local/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "@rpath/libmodplug.dylib" "$MACPORTPREFIX/lib/libmodplug.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "libmodplug.dylib" "$MACPORTPREFIX/lib/libmodplug.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
 
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libvorbis.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libvorbisfile.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libopenmpt.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libvorbis.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libvorbisfile.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libopenmpt.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libvorbis.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libvorbisfile.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libopenmpt.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libvorbis.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libvorbisfile.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libopenmpt.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
 
 Press y/yes to continue, or n/no or ctrl+c to quit."
 
@@ -3370,7 +3387,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
             # Add compilation flags.
             printf "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-            printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+            printf "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             printf "$PROMPT\n%s\e[0m" "> "
             read -r CONF
@@ -3511,7 +3528,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     sudo_ping
 
     # Download libpng's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "/opt/homebrew/lib/libpng.dylib" ] && [ ! -f "/opt/local/lib/libpng.dylib" ]) && [ "$ISPNG" = "libpng" ]; then
+    if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "/opt/homebrew/lib/libpng.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libpng.dylib" ]) && [ "$ISPNG" = "libpng" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libpng/.git" ]; then
 
@@ -3537,7 +3554,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libogg's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "/opt/homebrew/lib/libogg.dylib" ] && [ ! -f "/opt/local/lib/libogg.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+    if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "/opt/homebrew/lib/libogg.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libogg.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libogg/.git" ]; then
 
@@ -3563,7 +3580,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libvorbis' source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "/opt/homebrew/lib/libvorbis.dylib" ] && [ ! -f "/opt/local/lib/libvorbis.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+    if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "/opt/homebrew/lib/libvorbis.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libvorbis.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libvorbis/.git" ]; then
 
@@ -3591,7 +3608,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libmpg123's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "/opt/homebrew/lib/libmpg123.dylib" ] && [ ! -f "/opt/local/lib/libmpg123.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+    if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "/opt/homebrew/lib/libmpg123.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmpg123.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libmpg123/.git" ]; then
 
@@ -3619,7 +3636,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libmodplug's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "/opt/homebrew/lib/libmodplug.dylib" ] && [ ! -f "/opt/local/lib/libmodplug.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+    if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "/opt/homebrew/lib/libmodplug.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libmodplug/.git" ]; then
 
@@ -3645,7 +3662,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libSDL2's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2.dylib" ] && [ ! -f "/opt/local/lib/libSDL2.dylib" ]; then
+    if [ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libsdl2/.git" ]; then
 
@@ -3672,7 +3689,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libSDL2_mixer's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2_mixer.dylib" ] && [ ! -f "/opt/local/lib/libSDL2_mixer.dylib" ]) && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
+    if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2_mixer.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer.dylib" ]) && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixer/.git" ]; then
 
@@ -3721,7 +3738,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libSDL2_mixerX's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "/opt/local/lib/libSDL2_mixer_ext.dylib" ]) && [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
+    if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "/opt/homebrew/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer_ext.dylib" ]) && [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
 
@@ -3747,7 +3764,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libopenmpt's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "/opt/homebrew/lib/libopenmpt.dylib" ] && [ ! -f "/opt/local/lib/libopenmpt.dylib" ]) && [ "$ISOPENMPT" = "libopenmpt" ]; then
+    if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "/opt/homebrew/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) && [ "$ISOPENMPT" = "libopenmpt" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
 
@@ -3774,7 +3791,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libgme's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "/opt/homebrew/lib/libgme.dylib" ] && [ ! -f "/opt/local/lib/libgme.dylib" ]) && [ "$ISGME" = "libgme" ]; then
+    if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "/opt/homebrew/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) && [ "$ISGME" = "libgme" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libgme/.git" ]; then
 
@@ -3800,7 +3817,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download DiscordRPC's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "/opt/homebrew/lib/libdiscord-rpc.dylib" ] && [ ! -f "/opt/local/lib/libdiscord-rpc.dylib" ]) && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+    if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "/opt/homebrew/lib/libdiscord-rpc.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" ]) && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
@@ -3826,7 +3843,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download libopenvr's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "/opt/homebrew/lib/libopenvr_api.dylib" ] && [ ! -f "/opt/local/lib/libopenvr_api.dylib" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+    if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "/opt/homebrew/lib/libopenvr_api.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenvr_api.dylib" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
@@ -3886,7 +3903,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     # Compile the game's source code.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME. Please wait..."
     mkdir -p "$BUILD/build"
-    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DGME_INCLUDE_DIR="$LIBGMEPREFIX/include/gme" -DGME_LIBRARY="$LIBGMEPREFIX/lib/libgme.dylib" -DOPENMPT_INCLUDE_DIR="$LIBOPENMPTPREFIX/include/libopenmpt" -DOPENMPT_LIBRARY="$LIBOPENMPTPREFIX/lib/libopenmpt.dylib" -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
+    cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DSDL2_INCLUDE_DIR="$LIBSDL2PREFIX/include/SDL2" -DSDL2_LIBRARY="$LIBSDL2PREFIX/lib/libSDL2.dylib" -DGME_INCLUDE_DIR="$LIBGMEPREFIX/include/gme" -DGME_LIBRARY="$LIBGMEPREFIX/lib/libgme.dylib" -DOPENMPT_INCLUDE_DIR="$LIBOPENMPTPREFIX/include/libopenmpt" -DOPENMPT_LIBRARY="$LIBOPENMPTPREFIX/lib/libopenmpt.dylib" -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
     cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
 
     # Get app icon.
@@ -3923,10 +3940,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libbrotlicommon.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libbrotlicommon.dylib" ]; then
 
-        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/opt/local/lib/libbrotlicommon.dylib" /opt/local/lib/libbrotlidec.dylib
-        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "/opt/local/lib/libbrotlicommon.dylib" /opt/local/lib/libbrotlienc.dylib
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "$MACPORTPREFIX/lib/libbrotlicommon.dylib" $MACPORTPREFIX/lib/libbrotlidec.dylib
+        sudo install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "$MACPORTPREFIX/lib/libbrotlicommon.dylib" $MACPORTPREFIX/lib/libbrotlienc.dylib
 
     fi
 
@@ -3944,10 +3961,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libSDL2.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]; then
 
-        sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/opt/local/lib/libSDL2.dylib" /opt/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libSDL2-2.0.dylib" "/opt/local/lib/libSDL2.dylib" /opt/local/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "@rpath/libSDL2-2.0.dylib" "$MACPORTPREFIX/lib/libSDL2.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "libSDL2-2.0.dylib" "$MACPORTPREFIX/lib/libSDL2.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
 
     fi
 
@@ -3965,10 +3982,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libmodplug.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]; then
 
-        sudo install_name_tool -change "@rpath/libmodplug.dylib" "/opt/local/lib/libmodplug.dylib" /opt/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libmodplug.dylib" "/opt/local/lib/libmodplug.dylib" /opt/local/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "@rpath/libmodplug.dylib" "$MACPORTPREFIX/lib/libmodplug.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "libmodplug.dylib" "$MACPORTPREFIX/lib/libmodplug.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
 
     fi
 
@@ -3998,16 +4015,16 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libogg.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libogg.dylib" ]; then
 
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libvorbis.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libvorbisfile.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libopenmpt.dylib
-        sudo install_name_tool -change "@rpath/libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libSDL2_mixer.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libvorbis.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libvorbisfile.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libopenmpt.dylib
-        sudo install_name_tool -change "libogg.0.dylib" "/opt/local/lib/libogg.dylib" /opt/local/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libvorbis.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libvorbisfile.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libopenmpt.dylib
+        sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libvorbis.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libvorbisfile.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libopenmpt.dylib
+        sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libSDL2_mixer.dylib
 
     fi
 
@@ -4026,10 +4043,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libSDL2.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]; then
 
-        install_name_tool -change "@rpath/libSDL2-2.0.dylib" "/opt/local/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-        install_name_tool -change "libSDL2-2.0.dylib" "/opt/local/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "@rpath/libSDL2-2.0.dylib" "$MACPORTPREFIX/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libSDL2-2.0.dylib" "$MACPORTPREFIX/lib/libSDL2.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
     fi
 
@@ -4047,10 +4064,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libmodplug.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]; then
 
-        install_name_tool -change "@rpath/libmodplug.dylib" "/opt/local/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-        install_name_tool -change "libmodplug.dylib" "/opt/local/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "@rpath/libmodplug.dylib" "$MACPORTPREFIX/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libmodplug.dylib" "$MACPORTPREFIX/lib/libmodplug.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
     fi
 
@@ -4068,10 +4085,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libopenmpt.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]; then
 
-        install_name_tool -change "bin/libopenmpt.dylib" "/opt/local/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-        install_name_tool -change "libopenmpt.dylib" "/opt/local/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "bin/libopenmpt.dylib" "$MACPORTPREFIX/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libopenmpt.dylib" "$MACPORTPREFIX/lib/libopenmpt.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
     fi
 
@@ -4089,10 +4106,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libgme.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libgme.dylib" ]; then
 
-        install_name_tool -change "@rpath/libgme.0.dylib" "/opt/local/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-        install_name_tool -change "libgme.0.dylib" "/opt/local/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "@rpath/libgme.0.dylib" "$MACPORTPREFIX/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libgme.0.dylib" "$MACPORTPREFIX/lib/libgme.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
     fi
 
@@ -4110,10 +4127,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libpng.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libpng.dylib" ]; then
 
-        install_name_tool -change "@rpath/libpng16.16.dylib" "/opt/local/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-        install_name_tool -change "libpng16.16.dylib" "/opt/local/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "@rpath/libpng16.16.dylib" "$MACPORTPREFIX/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libpng16.16.dylib" "$MACPORTPREFIX/lib/libpng.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
     fi
 
@@ -4131,10 +4148,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libdiscord-rpc.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" ]; then
 
-        install_name_tool -change "@rpath/libdiscord-rpc.dylib" "/opt/local/lib/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-        install_name_tool -change "libdiscord-rpc.dylib" "/opt/local/lib/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "@rpath/libdiscord-rpc.dylib" "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libdiscord-rpc.dylib" "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
     fi
 
@@ -4152,10 +4169,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f /opt/local/lib/libopenvr_api.dylib ]; then
+    if [ -f "$MACPORTPREFIX/lib/libopenvr_api.dylib" ]; then
 
-        install_name_tool -change "@rpath/libopenvr_api.dylib" "/opt/local/lib/libopenvr_api.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-        install_name_tool -change "libopenvr_api.dylib" "/opt/local/lib/libopenvr_api.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "@rpath/libopenvr_api.dylib" "$MACPORTPREFIX/lib/libopenvr_api.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+        install_name_tool -change "libopenvr_api.dylib" "$MACPORTPREFIX/lib/libopenvr_api.dylib" "$BUILD/build/bin/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
     fi
 
@@ -4643,7 +4660,7 @@ Usage: srb2bld [OPTIONS]
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
      -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
-     -up, --upgrade                         Upgrade SRB2/SRB2Kart build.
+     -up, --upgrade                         Upgrade installed SRB2/SRB2Kart build.
 
   EXAMPLES:
      1. Compile and install SRB2/SRB2Kart build:
