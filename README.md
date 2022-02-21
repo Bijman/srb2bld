@@ -23,7 +23,7 @@ https://user-images.githubusercontent.com/16626326/152710164-9012f542-5922-4958-
 - Docker (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
 - FUSE (Linux only),
-- Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package).
+- Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package) (Linux only).
 
 Windows users need to also have installed Git Bash to run this script.
 
@@ -34,7 +34,7 @@ As for macOS users, they need to install these additional dependencies:
 - Pkg-config,
 - Libtool,
 - P7zip,
-- Unrar,
+- Unrar/Rar,
 - Makeicns.
 
 # Dependencies Installation
@@ -114,7 +114,7 @@ As for macOS users, they need to install these additional dependencies:
 
 3. Go to downloaded directory: `cd srb2bld`,
 
-4. Enter `sudo make install`, which will install to "/usr/bin" or "/usr/local/bin", if path exists. Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
+4. Enter `sudo make install`, which will install to "/usr/local/bin", if path exists. Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
 
 5. Check if you set properly other settings from "Configuration" section of README.
 
@@ -126,7 +126,7 @@ As for macOS users, they need to install these additional dependencies:
 1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system is logged out or rebooted.
 
 **macOS:**
-1. Set SDKROOT environment variable in "~/.zshrc" or "~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew),
+1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
 # Compatibility

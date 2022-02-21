@@ -3254,7 +3254,7 @@ installtomacos() {
     export SDKROOT="$SDKROOT"
     export MACPORTPREFIX="$MACPORTPREFIX"
     export LIBRARY_PATH="/usr/lib:/usr/local/lib:$(brew --prefix)/lib:$MACPORTPREFIX/lib:$LIBRARY_PATH"
-    export C_INCLUDE_PATH="/usr/include:/usr/local/include:$(brew --prefix)/include:$C_INCLUDE_PATH"
+    export C_INCLUDE_PATH="/usr/include:/usr/local/include:$(brew --prefix)/include:$MACPORTPREFIX/include:$C_INCLUDE_PATH"
     export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
     export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig:$MACPORTPREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
     export STOW_DIR="/usr/local/stow"
@@ -3681,7 +3681,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         printf "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
         cmake -S "$SRB2BLDROOT/libraries/libsdl2" -B "$SRB2BLDROOT/libraries/libsdl2/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DSDL_HIDAPI_JOYSTICK=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2 -DCMAKE_MACOSX_RPATH=OFF
-        #-DSDL_RPATH=OFF -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON
         cmake --build "$SRB2BLDROOT/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
         sudo -E stow -v --adopt libsdl2
