@@ -4039,7 +4039,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ -f "$MACPORTPREFIX/lib/libvorbisfile.dylib" ]; then
+    if [ -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]; then
 
         sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libopenmpt.dylib
         sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libopenmpt.dylib
