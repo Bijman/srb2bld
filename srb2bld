@@ -701,7 +701,8 @@ dockerentry() {
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
         if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RL "\$SRB2ASSETSURL" > "\$SRB2BLDROOT/assets/SRB2.zip"
+            rm -f "\$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
@@ -753,7 +754,8 @@ dockerentry() {
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
         if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RL "\$SRB2ASSETSURL" > "\$SRB2BLDROOT/assets/SRB2.zip"
+            rm -f "\$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
@@ -832,7 +834,8 @@ dockerentry() {
             SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
             if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-                curl -RL "\$SRB2ASSETSURL" > "\$SRB2BLDROOT/assets/SRB2.zip"
+                rm -f "\$SRB2BLDROOT/assets/SRB2.zip"
+                curl -RL "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
 
             fi
 
@@ -847,7 +850,8 @@ dockerentry() {
         SRB2KARTASSETSURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
         if [ "\$(curl -sLI "\$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RL "\$SRB2KARTASSETSURL" > "\$SRB2BLDROOT/assets/SRB2Kart.exe"
+            rm -f "\$SRB2BLDROOT/assets/SRB2Kart.exe"
+            curl -RL "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
@@ -3477,7 +3481,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
         if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RL "$SRB2ASSETSURL" > "$SRB2BLDROOT/assets/SRB2.zip"
+            rm -f "$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
@@ -3493,7 +3498,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
         if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RL "$SRB2ASSETSURL" > "$SRB2BLDROOT/assets/SRB2.zip"
+            rm -f "$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
 
         fi
 
@@ -3519,7 +3525,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         SRB2KARTASSETSURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
         if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
-            curl -RL "$SRB2KARTASSETSURL" > "$SRB2BLDROOT/assets/SRB2Kart.exe"
+            rm -f "$SRB2BLDROOT/assets/SRB2Kart.exe"
+            curl -RL "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
