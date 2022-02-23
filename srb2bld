@@ -614,6 +614,12 @@ dockerentry() {
     # Some old Docker images don't have up-to-date SSL certifications, so this is workaround.
     # export GIT_SSL_NO_VERIFY=1
 
+    cleansource() {
+        # Clean build's directory after compiling.
+        git -C "\$BUILD" clean -qdfx -e .comrev
+        git -C "\$BUILD" reset -q --hard
+    }
+
     sudo_ping() {
         if [ -n "$SUDO_PID" ]; then
 
@@ -650,7 +656,7 @@ dockerentry() {
     }
 
     # Clean the game's source code and exit shell script in case of error or cancelling script
-    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; git -C \$BUILD clean -qdfx -e .comrev ; git -C \$BUILD reset -q --hard ; exit' 1 2 3 6 15 ERR
+    trap 'printf "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 1 2 3 6 15 ERR
 
     # Update Docker container.
     printf "$MESSAGE\n%s\n\e[0m" "Updating Docker container. Please wait..."
@@ -674,8 +680,7 @@ dockerentry() {
     elif [ "\$APPIMAGE" = 1 ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $BUILDNAME. Please wait..."
-        git -C "\$BUILD" clean -qdfx -e .comrev
-        git -C "\$BUILD" reset -q --hard
+        cleansource
         git -C "\$BUILD" pull --recurse-submodules --rebase --autostash
 
     fi
@@ -851,7 +856,7 @@ dockerentry() {
         if [ "\$(curl -sLI "\$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
             rm -f "\$SRB2BLDROOT/assets/SRB2Kart.exe"
-            curl -RL "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2Kart.exe"
+            curl -RL "\$SRB2KARTASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
@@ -3251,8 +3256,7 @@ installtomacos() {
     elif [ "$APPBUNDLE" = 1 ]; then
 
         printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $BUILDNAME. Please wait..."
-        git -C "$BUILD" clean -qdfx -e .comrev
-        git -C "$BUILD" reset -q --hard
+        cleansource
         git -C "$BUILD" pull --recurse-submodules --rebase --autostash
 
     fi
@@ -3526,7 +3530,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         if [ "$(curl -sLI "$SRB2KARTASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
 
             rm -f "$SRB2BLDROOT/assets/SRB2Kart.exe"
-            curl -RL "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
+            curl -RL "$SRB2KARTASSETSURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
 
         fi
 
