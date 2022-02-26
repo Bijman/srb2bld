@@ -34,10 +34,6 @@ fi
 BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
-SRB2GITURL="https://git.do.srb2.org/STJr/SRB2.git"
-# Uncomment below SRB2GITURL variable and set your URL to Git repo for custom build of SRB2. Set GitHub branch with SRB2GITVER too, if necessary. If you have downloaded original SRB2 repo, delete it first with "srb2bld -rb" command.
-#SRB2GITURL=""
-SRB2GITVER="master"
 SRB2PERSONAFILEID="vjartyfqu3mdmjj"
 MINGWVER="gcc-10-win32"
 MINGWOLDVER="gcc-4.9-win32"
@@ -147,59 +143,65 @@ appimage() {
     # Set name of AppImage in message.
     APPIMAGENAME=$(find "$BUILD" -name "*.AppImage" 2> /dev/null | gawk -F'/' '{print $NF}')
 
-    mv "$BUILD/"*.AppImage "$LNXPWD"
+    mv "$BUILD/"*.AppImage "$LNXPWD" 2> /dev/null
 
     cleansource
 
     printf "$SUCCESS\n%s\n\e[0m\a" "AppImage for $BUILDNAME is done. Look for $APPIMAGENAME in $LNXPWD path."
 }
 
-buildname() {
-    if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
+choosebranch() {
+    # Download or update game's source code.
+    if [ ! -d "$BUILD/.git" ]; then
 
-        BUILDNAME="Sonic Robo Blast 2"
+        printf "$MESSAGE\n%s\n\e[0m" "Downloading $BUILDNAME's source code. Please wait..."
+        $GIT "$BUILD"
 
-    elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+    else
 
-        BUILDNAME="Sonic Robo Blast 2 Uncapped PLUS"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 NetPlus"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 VR"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 v2.1 Legacy"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 v2.0"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 Final Demo"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 Persona"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 Kart"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 Kart Moe Mansion"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
-
-        BUILDNAME="Sonic Robo Blast 2 Kart VR"
+        printf "$MESSAGE\n%s\n\e[0m" "Updating $BUILDNAME's source code. Please wait..."
+        cleansource
+        git -C "$BUILD" pull --recurse-submodules --rebase --autostash
 
     fi
+
+    # Choose Git branch.
+    printf "$MESSAGE\n%s\n\e[0m" "Please choose branch by typing number and then pressing enter, or just press enter to continue with default branch, which is \"$GITVER\". To quit, press ctrl+c."
+    printf "$NOTICE%s\n\e[0m" "Warning! By choosing different branch other than default, compilation or running compiled build may fail."
+    array=$(git -C "$BUILD" branch -a | gawk -F'/' '{print $NF}' | gawk '!/^ / {gsub("^* ",""); print}')
+    arrayname=$(printf "$(git -C "$BUILD" branch -a | gawk -F'/' '{print $NF}' | gawk '!/^ / {gsub("^* ","\\e[1;92m* \\e[0m"); print}')")
+    count="$(printf "%s\n" "$array" | wc -l)"
+    n=""
+    printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
+    while true; do
+
+        printf "#? "
+        read -r n
+
+        if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
+
+            GITVER=$(printf "%s\n" "$array" | gawk NR=="${n}")
+            if [ -d "$BUILD/.git" ]; then
+
+                printf "$MESSAGE\n%s\n\e[0m" "Switching to branch \"$GITVER\"."
+                git -C "$BUILD" checkout -q "$GITVER"
+
+            fi
+            break
+
+        else
+
+            if [ -d "$BUILD/.git" ]; then
+
+                printf "$MESSAGE\n%s\n\e[0m" "Switching to branch \"$GITVER\"."
+                git -C "$BUILD" checkout -q "$GITVER"
+
+            fi
+            break
+
+        fi
+
+    done
 }
 
 choosebuild() {
@@ -219,7 +221,9 @@ choosebuild() {
             "1")
 
                 BUILD="$BUILDPATH/srb2"
-                GIT="git clone $SRB2GITURL --recursive --branch $SRB2GITVER"
+                BUILDNAME="Sonic Robo Blast 2"
+                GITVER="master"
+                GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -227,7 +231,9 @@ choosebuild() {
             "2")
 
                 BUILD="$BUILDPATH/srb2-uncapped-plus"
-                GIT="git clone https://git.do.srb2.org/Fafabis/SRB2.git --recursive --branch uncapped-plus"
+                BUILDNAME="Sonic Robo Blast 2 Uncapped PLUS"
+                GITVER="uncapped-plus"
+                GIT="git clone https://git.do.srb2.org/Fafabis/SRB2.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -235,7 +241,9 @@ choosebuild() {
             "3")
 
                 BUILD="$BUILDPATH/srb2-netplus"
-                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --recursive --branch master"
+                BUILDNAME="Sonic Robo Blast 2 NetPlus"
+                GITVER="master"
+                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -243,7 +251,9 @@ choosebuild() {
             "4")
 
                 BUILD="$BUILDPATH/srb2-vr"
-                GIT="git clone https://git.do.srb2.org/chreas/SRB2.git --recursive --branch openvr"
+                BUILDNAME="Sonic Robo Blast 2 VR"
+                GITVER="openvr"
+                GIT="git clone https://git.do.srb2.org/chreas/SRB2.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -251,7 +261,9 @@ choosebuild() {
             "5")
 
                 BUILD="$BUILDPATH/srb2-2.1-legacy"
-                GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --recursive --branch master"
+                BUILDNAME="Sonic Robo Blast 2 v2.1 Legacy"
+                GITVER="master"
+                GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -259,7 +271,9 @@ choosebuild() {
             "6")
 
                 BUILD="$BUILDPATH/srb2-2.0"
-                GIT="git clone https://github.com/STJr/SRB2-Public.git --recursive --branch master"
+                BUILDNAME="Sonic Robo Blast 2 v2.0"
+                GITVER="master"
+                GIT="git clone https://github.com/STJr/SRB2-Public.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -267,7 +281,9 @@ choosebuild() {
             "7")
 
                 BUILD="$BUILDPATH/srb2-final-demo"
-                GIT="git clone https://git.do.srb2.org/SteelT/SRB2-OLD.git --recursive --branch master"
+                BUILDNAME="Sonic Robo Blast 2 Final Demo"
+                GITVER="master"
+                GIT="git clone https://git.do.srb2.org/SteelT/SRB2-OLD.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -275,7 +291,9 @@ choosebuild() {
             "8")
 
                 BUILD="$BUILDPATH/srb2-persona"
-                GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --recursive --branch srb2p_22"
+                BUILDNAME="Sonic Robo Blast 2 Persona"
+                GITVER="srb2p_22"
+                GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -283,7 +301,9 @@ choosebuild() {
             "9")
 
                 BUILD="$BUILDPATH/srb2-kart"
-                GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --recursive --branch master"
+                BUILDNAME="Sonic Robo Blast 2 Kart"
+                GITVER="master"
+                GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -291,7 +311,9 @@ choosebuild() {
             "10")
 
                 BUILD="$BUILDPATH/srb2-kart-moe-mansion"
-                GIT="git clone https://gitlab.com/himie/kart-public.git --recursive --branch moe-mansion"
+                BUILDNAME="Sonic Robo Blast 2 Kart Moe Mansion"
+                GITVER="moe-mansion"
+                GIT="git clone https://gitlab.com/himie/kart-public.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -299,7 +321,9 @@ choosebuild() {
             "11")
 
                 BUILD="$BUILDPATH/srb2-kart-vr"
-                GIT="git clone https://gitlab.com/cschoenig/kart-public.git --recursive --branch very-cool-renderer"
+                BUILDNAME="Sonic Robo Blast 2 Kart VR"
+                GITVER="very-cool-renderer"
+                GIT="git clone https://gitlab.com/cschoenig/kart-public.git --recursive --branch $GITVER"
                 break
 
                 ;;
@@ -315,7 +339,8 @@ choosebuild() {
 
     done
 
-    buildname
+    choosebranch
+
 }
 
 chooseinstall() {
@@ -607,6 +632,7 @@ dockerentry() {
     export BUILDPATH="$BUILDPATH"
     export BUILD="$BUILD"
     export GIT="$GIT"
+    export GITVER="$GITVER"
     export APPIMAGE="$APPIMAGE"
     export UPGRADE="$UPGRADE"
     export STOW_DIR=/usr/local/stow
@@ -668,20 +694,6 @@ dockerentry() {
     else
 
         sudo apt update && sudo apt full-upgrade -y
-
-    fi
-
-    # Download game's source code.
-    if [ ! -d "\$BUILD/.git" ]; then
-
-        printf "$MESSAGE\n%s\n\e[0m" "Downloading $BUILDNAME's source code. Please wait..."
-        \$GIT "\$BUILD"
-
-    elif [ "\$APPIMAGE" = 1 ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
-
-        printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $BUILDNAME. Please wait..."
-        cleansource
-        git -C "\$BUILD" pull --recurse-submodules --rebase --autostash
 
     fi
 
@@ -1010,6 +1022,8 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
+         sed -i 's/#define DEFAULTDIR ".srb21094"/#define DEFAULTDIR ".srb2fd"/' "\$BUILD/src/doomdef.h"
+         sed -i 's/#define DEFAULTDIR "srb21094"/#define DEFAULTDIR "srb2fd"/' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/games/SRB2|/usr/local/share/games/SRB2FinalDemo|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/games/SRB2|/usr/games/SRB2FinalDemo|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2finaldemo|' "\$BUILD/src/sdl/i_system.c"
@@ -1206,7 +1220,7 @@ if [ "\$APPIMAGE" = 1 ]; then
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
 
     # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-    if [ -f /usr/local/lib/libpng12.so ]; then
+    if [ -f /usr/local/lib/libpng12.so ] || [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
         sudo -E stow -D --adopt libpng12-lib32
 
@@ -1281,17 +1295,29 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         cp -rf "\$BUILD/bin/Linux\$IS64/Release/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
 
+    elif [ -f "\$BUILD/bin/srb2legacy" ]; then
+
+        cp -rf "\$BUILD/bin/srb2legacy" "\$BUILD/build/AppDir/usr/bin"
+
     elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" ]; then
 
         cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
 
-    elif [ -f "\$BUILD/bin/Linux/Release/lsdl2srb2" ]; then
+    elif [ -f "\$BUILD/bin/lsdlsrb2" ]; then
 
-        cp -rf "\$BUILD/bin/Linux/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
+        cp -rf "\$BUILD/bin/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
+
+#    elif [ -f "\$BUILD/bin/Linux/Release/lsdl2srb2" ]; then
+
+#        cp -rf "\$BUILD/bin/Linux/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
 
     elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" ]; then
 
         cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
+
+    elif [ -f "\$BUILD/bin/lsdl2srb2kart" ]; then
+
+        cp -rf "\$BUILD/bin/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
 
     fi
 
@@ -1612,34 +1638,37 @@ DESKTOP
     cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
 
     # Create game entrypoint and copy libraries to AppDir.
-DEPS="
-libFLAC.so.[0-9]
-libSDL2-2.0.so.[0-9]
-libSDL2_mixer-2.0.so.[0-9]
-libfluidsynth.so.[0-9]
-libgme.so.[0-9]
-libjack.so.[0-9]
-libmad.so.[0-9]
-libmodplug.so.[0-9]
-libmpg123.so.[0-9]
-libogg.so.[0-9]
-libopenmpt.so.[0-9]
-libopus.so.[0-9]
-libopusfile.so.[0-9]
-libpng.so.[0-9]
-libpng16.so.16
-libpulse-simple.so.[0-9]
-libpulse.so.[0-9]
-libpulsecommon-14.2.so.[0-9]
-libreadline.so.[0-9]
-libsndio.so.[0-9]
-libsndfile.so.[0-9]
-libtinfo.so.[0-9]
-libvorbis.so.[0-9]
-libvorbisenc.so.[0-9]
-libvorbisfile.so.[0-9]
-libwrap.so.[0-9]
-"
+#DEPS="
+#libFLAC.so.[0-9]
+#libGLU.so.[0-9]
+#libGL.so.[0-9]
+#libinstpatch.[0-9]
+#libSDL2-2.0.so.[0-9]
+#libSDL2_mixer-2.0.so.[0-9]
+#libfluidsynth.so.[0-9]
+#libgme.so.[0-9]
+#libjack.so.[0-9]
+#libmad.so.[0-9]
+#libmodplug.so.[0-9]
+#libmpg123.so.[0-9]
+#libogg.so.[0-9]
+#libopenmpt.so.[0-9]
+#libopus.so.[0-9]
+#libopusfile.so.[0-9]
+#libpng.so.[0-9]
+#libpng16.so.16
+#libpulse-simple.so.[0-9]
+#libpulse.so.[0-9]
+#libpulsecommon-[0-9]*.[0-9]*.so.[0-9]
+#libreadline.so.[0-9]
+#libsndio.so.[0-9]
+#libsndfile.so.[0-9]
+#libtinfo.so.[0-9]
+#libvorbis.so.[0-9]
+#libvorbisenc.so.[0-9]
+#libvorbisfile.so.[0-9]
+#libwrap.so.[0-9]
+#"
 
     cat > "\$BUILD/build/AppDir/AppRun" << 'APPRUN'
 #!/bin/sh
@@ -1650,7 +1679,7 @@ export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:\$HERE/usr/lib"
 
 APPRUN
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2"
@@ -1658,22 +1687,24 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
-    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]); then
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
-        DISCORDLIBPATH=\$(find /lib* /usr/lib* -name libdiscord-rpc.so)
-        cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
-
-    fi
-
-    if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
-
-        OPENVRLIBPATH=\$(find /lib* /usr/lib* -name libopenvr_api.so)
-        cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
-
-    fi
-
+#    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]); then
+#
+#        DISCORDLIBPATH=\$(find /lib* /usr/lib* -name libdiscord-rpc.so)
+#        cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
+#
+#    fi
+#
+#    if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+#
+#        OPENVRLIBPATH=\$(find /lib* /usr/lib* -name libopenvr_api.so)
+#        cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
+#
+#    fi
+#
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
@@ -1682,19 +1713,21 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdlsrb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so|libglib|libgobject/ {print}') "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
-    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+#    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
-export SRB2WADDIR="\$HERE/usr/games/SRB2"
+#        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+#export SRB2WADDIR="\$HERE/usr/games/SRB2"
 
-exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
-APPRUNBIN
+#exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
+#APPRUNBIN
 
-        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
-    elif [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
+#        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
@@ -1702,18 +1735,21 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
 exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
 APPRUNBIN
 
-        DISCORDLIBPATH=\$(find /lib* /usr/lib* -name libdiscord-rpc.so)
-        cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
-        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
-
-              OPENVRLIBPATH=\$(find /lib* /usr/lib* -name libopenvr_api.so)
-              cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
-
-        fi
+#        DISCORDLIBPATH=\$(find /lib* /usr/lib* -name libdiscord-rpc.so)
+#        cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
+#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+#
+#        if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+#
+#              OPENVRLIBPATH=\$(find /lib* /usr/lib* -name libopenvr_api.so)
+#              cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
+#
+#        fi
 
     fi
+
     chmod +x "\$BUILD/build/AppDir/AppRun"
 
     # Build AppImage.
@@ -2257,7 +2293,7 @@ if [ "\$(printf "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\
      elif [ "\$OS" = "Linux" ]; then
 
         # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-        if [ -f /usr/local/lib/libpng12.so ]; then
+        if [ -f /usr/local/lib/libpng12.so ] || [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
             sudo -E stow -D --adopt libpng12-lib32
 
@@ -3100,6 +3136,7 @@ installtolinux() {
                     $SUDO apt-get install -y apt-file > /dev/null
 
                 fi
+                #                    $SUDO apt-get install ^libc[0-9]*-i386 > /dev/null
 
                 $SUDO apt-file update > /dev/null
                 apt-file -l find "$l" | gawk 'NF{print}'
@@ -3248,20 +3285,6 @@ INSTALL
 }
 
 installtomacos() {
-    # Download source code.
-    printf "$MESSAGE\n%s\n\e[0m" "Downloading $BUILDNAME's source code. Please wait..."
-    if [ ! -d "$BUILD/.git" ]; then
-
-        $GIT "$BUILD"
-
-    elif [ "$APPBUNDLE" = 1 ]; then
-
-        printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $BUILDNAME. Please wait..."
-        cleansource
-        git -C "$BUILD" pull --recurse-submodules --rebase --autostash
-
-    fi
-
     # Exporting environment variables for compiling, installing game and libraries on macOS.
     export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
     export SDKROOT="$SDKROOT"
@@ -4715,7 +4738,13 @@ Usage: srb2bld [OPTIONS]
 
      3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type \"HAVE_DISCORDRPC=1\" (Linux/Windows) or \"-DSRB2_CONFIG_HAVE_DISCORDRPC=ON\" (macOS), when the script asks about optional compilation flags (using \"srb2bld --install\" command).
 
-     4. If on Linux you get error with \"/dev/fuse\" when running script, then load fuse module with \"sudo modprobe fuse\". You can write \"fuse\" in configuration file, usually in file \"/etc/modules\" or \"/etc/modules-load.d/fuse.conf\" or \"/etc/conf.d/modules/fuse.conf\", to automatically load this module at boot.
+     4. If on Linux you get error with \"/dev/fuse\" or FUSE when running script, then load fuse module with \"sudo modprobe fuse\". You can write \"fuse\" in configuration file, usually in file \"/etc/modules\" or \"/etc/modules-load.d/fuse.conf\" or \"/etc/conf.d/modules/fuse.conf\", to automatically load this module at boot.
+
+     5. If 64-bit Linux system has issues with loading \"Sonic Robo Blast 2 Final Demo\" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
+- Debian/Ubuntu/Debian based/Ubuntu based:
+       sudo dpkg --add-architecture i386
+       sudo apt update
+       sudo apt install fuse:i386 libc6:i386 zlib1g:i386
 "
 }
 

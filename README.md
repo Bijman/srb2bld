@@ -201,7 +201,13 @@ Usage: srb2bld [OPTIONS]
 
      3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
-     4. If on Linux you get error with "/dev/fuse" when running script, then load fuse module with "sudo modprobe fuse". You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
+     4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with "sudo modprobe fuse". You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
+
+     5. If 64-bit Linux system has issues with loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
+- Debian/Ubuntu/Debian based/Ubuntu based:
+       sudo dpkg --add-architecture i386
+       sudo apt update
+       sudo apt install fuse:i386 libc6:i386 zlib1g:i386
 ```
 
 # Notes
@@ -211,4 +217,10 @@ Usage: srb2bld [OPTIONS]
 
 3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
-4. If on Linux you get error with "/dev/fuse" when running script, then load fuse module with `sudo modprobe fuse`. You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
+4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with `sudo modprobe fuse`. You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
+
+5. If 64-bit Linux system has issues with loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
+- Debian/Ubuntu/Debian based/Ubuntu based:
+       `sudo dpkg --add-architecture i386`
+       `sudo apt update`
+       `sudo apt install fuse:i386 libc6:i386 zlib1g:i386`
