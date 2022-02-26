@@ -205,9 +205,7 @@ Usage: srb2bld [OPTIONS]
 
      5. If 64-bit Linux system has issues with loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
 - Debian/Ubuntu/Debian based/Ubuntu based:
-       sudo dpkg --add-architecture i386
-       sudo apt update
-       sudo apt install fuse:i386 libc6:i386 zlib1g:i386
+       sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386
 ```
 
 # Notes
@@ -221,6 +219,4 @@ Usage: srb2bld [OPTIONS]
 
 5. If 64-bit Linux system has issues with loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
 - Debian/Ubuntu/Debian based/Ubuntu based:
-       `sudo dpkg --add-architecture i386`
-       `sudo apt update`
-       `sudo apt install fuse:i386 libc6:i386 zlib1g:i386`
+       `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386`

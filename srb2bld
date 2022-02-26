@@ -51,6 +51,10 @@ else
 fi
 
 LNXFMODVER="fmodapi375linux"
+LNXPNG12VER="libpng12"
+LNXSDL2MIXERXVER="master"
+LNXOPENMPTVER="master"
+LNXDISCORDRPCVER="master"
 LNXOPENVRVER="1.10.30"
 if [ "$OS" = "Darwin" ]; then
 
@@ -58,11 +62,14 @@ if [ "$OS" = "Darwin" ]; then
     MACOSPNGVER="1.6.37"
     MACOSOGGVER="1.3.5"
     MACOSVORBISVER="1.3.7"
-    MACOSOPENMPTVER="0.5.14"
-    MACOSGMEVER="0.6.2"
+    MACOSMPG123VER="master"
+    MACOSMODPLUGVER="master"
     MACOSSDL2VER="2.0.18"
     MACOSSDL2MIXERVER="2.0.4"
     MACOSSDL2MIXERXVER="2.5.0"
+    MACOSOPENMPTVER="0.5.14"
+    MACOSGMEVER="0.6.2"
+    MACOSDISCORDRPCVER="master"
     MACOSOPENVRVER="1.10.30"
     HOMEBREWPREFIX="$(brew --prefix)"
     MACPORTPREFIX="/opt/local"
@@ -137,17 +144,63 @@ appimage() {
 
     dockerrun
 
-    # Have commit revision as part of name for AppImage.
-    COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
-
     # Set name of AppImage in message.
     APPIMAGENAME=$(find "$BUILD" -name "*.AppImage" 2> /dev/null | gawk -F'/' '{print $NF}')
 
+    # Move created AppImage to working directory.
     mv "$BUILD/"*.AppImage "$LNXPWD" 2> /dev/null
 
     cleansource
 
     printf "$SUCCESS\n%s\n\e[0m\a" "AppImage for $BUILDNAME is done. Look for $APPIMAGENAME in $LNXPWD path."
+}
+
+buildname() {
+    if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 Uncapped PLUS"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-netplus" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 NetPlus"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 VR"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 v2.1 Legacy"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 v2.0"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 Final Demo"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 Persona"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 Kart"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 Kart Moe Mansion"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 Kart VR"
+
+    fi
 }
 
 choosebranch() {
@@ -168,8 +221,8 @@ choosebranch() {
     # Choose Git branch.
     printf "$MESSAGE\n%s\n\e[0m" "Please choose branch by typing number and then pressing enter, or just press enter to continue with default branch, which is \"$GITVER\". To quit, press ctrl+c."
     printf "$NOTICE%s\n\e[0m" "Warning! By choosing different branch other than default, compilation or running compiled build may fail."
-    array=$(git -C "$BUILD" branch -a | gawk -F'/' '{print $NF}' | gawk '!/^ / {gsub("^* ",""); print}')
-    arrayname=$(printf "$(git -C "$BUILD" branch -a | gawk -F'/' '{print $NF}' | gawk '!/^ / {gsub("^* ","\\e[1;92m* \\e[0m"); print}')")
+    array=$(git -C "$BUILD" branch -a | gawk -F'/' '{print $NF}' | sort -u | gawk '!/^ / {gsub("^* ",""); print}')
+    arrayname=$(printf "$(git -C "$BUILD" branch -a | gawk -F'/' '{print $NF}' | gawk '!/^ / {gsub("^* ","\\e[1;92m* \\e[0m"); print}' | sort -u)")
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
     printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
@@ -221,7 +274,6 @@ choosebuild() {
             "1")
 
                 BUILD="$BUILDPATH/srb2"
-                BUILDNAME="Sonic Robo Blast 2"
                 GITVER="master"
                 GIT="git clone https://git.do.srb2.org/STJr/SRB2.git --recursive --branch $GITVER"
                 break
@@ -231,7 +283,6 @@ choosebuild() {
             "2")
 
                 BUILD="$BUILDPATH/srb2-uncapped-plus"
-                BUILDNAME="Sonic Robo Blast 2 Uncapped PLUS"
                 GITVER="uncapped-plus"
                 GIT="git clone https://git.do.srb2.org/Fafabis/SRB2.git --recursive --branch $GITVER"
                 break
@@ -241,7 +292,6 @@ choosebuild() {
             "3")
 
                 BUILD="$BUILDPATH/srb2-netplus"
-                BUILDNAME="Sonic Robo Blast 2 NetPlus"
                 GITVER="master"
                 GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --recursive --branch $GITVER"
                 break
@@ -251,7 +301,6 @@ choosebuild() {
             "4")
 
                 BUILD="$BUILDPATH/srb2-vr"
-                BUILDNAME="Sonic Robo Blast 2 VR"
                 GITVER="openvr"
                 GIT="git clone https://git.do.srb2.org/chreas/SRB2.git --recursive --branch $GITVER"
                 break
@@ -261,7 +310,6 @@ choosebuild() {
             "5")
 
                 BUILD="$BUILDPATH/srb2-2.1-legacy"
-                BUILDNAME="Sonic Robo Blast 2 v2.1 Legacy"
                 GITVER="master"
                 GIT="git clone https://github.com/PandaSRC/srb2-legacy.git --recursive --branch $GITVER"
                 break
@@ -271,7 +319,6 @@ choosebuild() {
             "6")
 
                 BUILD="$BUILDPATH/srb2-2.0"
-                BUILDNAME="Sonic Robo Blast 2 v2.0"
                 GITVER="master"
                 GIT="git clone https://github.com/STJr/SRB2-Public.git --recursive --branch $GITVER"
                 break
@@ -281,7 +328,6 @@ choosebuild() {
             "7")
 
                 BUILD="$BUILDPATH/srb2-final-demo"
-                BUILDNAME="Sonic Robo Blast 2 Final Demo"
                 GITVER="master"
                 GIT="git clone https://git.do.srb2.org/SteelT/SRB2-OLD.git --recursive --branch $GITVER"
                 break
@@ -291,7 +337,6 @@ choosebuild() {
             "8")
 
                 BUILD="$BUILDPATH/srb2-persona"
-                BUILDNAME="Sonic Robo Blast 2 Persona"
                 GITVER="srb2p_22"
                 GIT="git clone https://git.do.srb2.org/SinnamonLat/SRB2.git --recursive --branch $GITVER"
                 break
@@ -301,7 +346,6 @@ choosebuild() {
             "9")
 
                 BUILD="$BUILDPATH/srb2-kart"
-                BUILDNAME="Sonic Robo Blast 2 Kart"
                 GITVER="master"
                 GIT="git clone https://git.do.srb2.org/KartKrew/Kart-Public.git --recursive --branch $GITVER"
                 break
@@ -311,7 +355,6 @@ choosebuild() {
             "10")
 
                 BUILD="$BUILDPATH/srb2-kart-moe-mansion"
-                BUILDNAME="Sonic Robo Blast 2 Kart Moe Mansion"
                 GITVER="moe-mansion"
                 GIT="git clone https://gitlab.com/himie/kart-public.git --recursive --branch $GITVER"
                 break
@@ -321,7 +364,6 @@ choosebuild() {
             "11")
 
                 BUILD="$BUILDPATH/srb2-kart-vr"
-                BUILDNAME="Sonic Robo Blast 2 Kart VR"
                 GITVER="very-cool-renderer"
                 GIT="git clone https://gitlab.com/cschoenig/kart-public.git --recursive --branch $GITVER"
                 break
@@ -338,6 +380,8 @@ choosebuild() {
         esac
 
     done
+
+    buildname
 
     choosebranch
 
@@ -1068,7 +1112,6 @@ dockerentry() {
 
     fi
 
-# AppImage creation.
 if [ "\$APPIMAGE" = 1 ]; then
 
     # Display content of Makefile for a good view of available compilation flags.
@@ -1140,7 +1183,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
-            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch master "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
+            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$LNXSDL2MIXERXVER" "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
 
         else
 
@@ -1148,6 +1191,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$LNXSDL2MIXERXVER"
 
         fi
 
@@ -1167,7 +1211,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-            git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$SRB2BLDROOT/libraries/discord-rpc"
+            git clone https://github.com/discord/discord-rpc.git --recursive --branch "$LNXDISCORDRPCVER" "\$SRB2BLDROOT/libraries/discord-rpc"
 
         else
 
@@ -1175,7 +1219,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
-
+            git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q "$LNXDISCORDRPCVER"
         fi
 
             printf "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
@@ -1202,6 +1246,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenvr" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q "v$LNXOPENVRVER"
 
         fi
 
@@ -1216,9 +1261,6 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     fi
 
-    # Compile the game's source code.
-    printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
-
     # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
     if [ -f /usr/local/lib/libpng12.so ] || [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
@@ -1226,6 +1268,8 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     fi
 
+    # Compile the game's source code.
+    printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
     if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
@@ -1307,9 +1351,9 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         cp -rf "\$BUILD/bin/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
 
-#    elif [ -f "\$BUILD/bin/Linux/Release/lsdl2srb2" ]; then
+    elif [ -f "\$BUILD/bin/Linux/Release/lsdl2srb2" ]; then
 
-#        cp -rf "\$BUILD/bin/Linux/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
+        cp -rf "\$BUILD/bin/Linux/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
 
     elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" ]; then
 
@@ -1679,7 +1723,7 @@ export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:\$HERE/usr/lib"
 
 APPRUN
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2"
@@ -1714,6 +1758,17 @@ exec "\$HERE/usr/bin/lsdlsrb2" "\$@"
 APPRUNBIN
 
         cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+export SRB2WADDIR="\$HERE/usr/games/SRB2"
+
+exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
+APPRUNBIN
+
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+
 
 #    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
@@ -1752,7 +1807,7 @@ APPRUNBIN
 
     chmod +x "\$BUILD/build/AppDir/AppRun"
 
-    # Build AppImage.
+    # Download appimagetool.
     printf "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's AppImage. Please wait..."
     ISARM=\$(printf "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}')
     IS64=\$(getconf LONG_BIT)
@@ -1813,7 +1868,9 @@ APPRUNBIN
     cd "\$BUILD" || exit
 
     # Export commit revision name before creating AppImage.
-    export VERSION="\$COMREV"
+    export VERSION=\$(git -C "\$BUILD" rev-parse --short HEAD)
+
+    # Create AppImage from prepared AppDir.
     "\$BUILD/appimagetool" -n "\$BUILD/build/AppDir" 2> /dev/null
 
 else
@@ -1960,38 +2017,13 @@ fi
 
     fi
 
-    # Download libopenmpt's source code, build and install it for musl based Linux OS.
-    if [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libopenmpt.so ]; then
-
-        if [ ! -d "\$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
-
-            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch master "\$SRB2BLDROOT/libraries/libopenmpt"
-
-        else
-
-            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
-            git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
-
-        fi
-
-        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
-        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-        sudo make -C "\$SRB2BLDROOT/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
-        sudo -E stow -v --adopt libopenmpt
-
-    fi
-
     # Download libpng12's source code, build and install it.
     if [ "\$OS" = "Linux" ] && [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ ! -f /usr/local/lib/libpng12.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libpng12/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libpng12's source code. Please wait..."
-            git clone https://github.com/glennrp/libpng.git --recursive --branch libpng12 "\$SRB2BLDROOT/libraries/libpng12"
+            git clone https://github.com/glennrp/libpng.git --recursive --branch "$LNXPNG12VER" "\$SRB2BLDROOT/libraries/libpng12"
 
         else
 
@@ -1999,6 +2031,7 @@ fi
             git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libpng12" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libpng12" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libpng12" checkout -q "$LNXPNG12VER"
 
         fi
 
@@ -2019,7 +2052,7 @@ fi
         if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
-            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch master "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
+            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$LNXSDL2MIXERXVER" "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
 
         else
 
@@ -2027,6 +2060,7 @@ fi
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$LNXSDL2MIXERXVER"
 
         fi
 
@@ -2041,13 +2075,39 @@ fi
 
     fi
 
+    # Download libopenmpt's source code, build and install it for musl based Linux OS.
+    if [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libopenmpt.so ]; then
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
+            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "$LNXOPENMPTVER" "\$SRB2BLDROOT/libraries/libopenmpt"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" checkout -q "$LNXOPENMPTVER"
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
+        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+        sudo make -C "\$SRB2BLDROOT/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
+        sudo -E stow -v --adopt libopenmpt
+
+    fi
+
     # Download DiscordRPC source code, build and install it.
     if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
               printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-              git clone https://github.com/discord/discord-rpc.git --recursive --branch master "\$SRB2BLDROOT/libraries/discord-rpc"
+              git clone https://github.com/discord/discord-rpc.git --recursive --branch "$LNXDISCORDRPCVER" "\$SRB2BLDROOT/libraries/discord-rpc"
 
         else
 
@@ -2055,6 +2115,7 @@ fi
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q "$LNXDISCORDRPCVER"
 
         fi
 
@@ -2104,6 +2165,7 @@ fi
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenvr" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q "v$LNXOPENVRVER"
 
         fi
 
@@ -3580,6 +3642,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libpng" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libpng" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libpng" checkout -q "v$MACOSPNGVER"
 
         fi
 
@@ -3605,7 +3668,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libogg's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libogg" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libogg" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libogg" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libogg" checkout -q "v$MACOSOGGVER"
 
         fi
 
@@ -3632,6 +3696,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libvorbis" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libvorbis" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libvorbis" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libvorbis" checkout -q "v$MACOSVORBISVER"
 
         fi
 
@@ -3652,7 +3717,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         if [ ! -d "$SRB2BLDROOT/libraries/libmpg123/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libmpg123's source code. Please wait..."
-            git clone https://github.com/madebr/mpg123.git --recursive --branch master "$SRB2BLDROOT/libraries/libmpg123"
+            git clone https://github.com/madebr/mpg123.git --recursive --branch "$MACOSMPG123VER" "$SRB2BLDROOT/libraries/libmpg123"
 
         else
 
@@ -3660,6 +3725,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libmpg123" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libmpg123" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libmpg123" pull --recurse-submodules --rebase --autostash
+            git -C "$SRB2BLDROOT/libraries/libmpg123" checkout -q "$MACOSMPG123VER"
 
         fi
 
@@ -3680,7 +3746,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         if [ ! -d "$SRB2BLDROOT/libraries/libmodplug/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading libmodplug's source code. Please wait..."
-            git clone https://github.com/Konstanty/libmodplug.git --recursive --branch master "$SRB2BLDROOT/libraries/libmodplug"
+            git clone https://github.com/Konstanty/libmodplug.git --recursive --branch "$MACOSMODPLUGVER" "$SRB2BLDROOT/libraries/libmodplug"
 
         else
 
@@ -3688,6 +3754,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libmodplug" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libmodplug" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libmodplug" pull --recurse-submodules --rebase --autostash
+            git -C "$SRB2BLDROOT/libraries/libmodplug" checkout -q "$MACOSMODPLUGVER"
 
         fi
 
@@ -3714,6 +3781,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libsdl2" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libsdl2" fetch origin main
+            git -C "$SRB2BLDROOT/libraries/libsdl2" checkout -q "release-$MACOSSDL2VER"
 
         fi
 
@@ -3740,6 +3808,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" fetch origin main
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" checkout -q "release-$MACOSSDL2MIXERVER"
 
         fi
 
@@ -3789,6 +3858,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$MACOSSDL2MIXERXVER"
 
         fi
 
@@ -3815,6 +3885,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libopenmpt" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q "libopenmpt-$MACOSOPENMPTVER"
 
         fi
 
@@ -3842,6 +3913,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libgme" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libgme" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libgme" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libgme" checkout -q "$MACOSGMEVER"
 
         fi
 
@@ -3860,7 +3932,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         if [ ! -d "$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
             printf "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
-            git clone https://github.com/discord/discord-rpc.git --recursive --branch master "$SRB2BLDROOT/libraries/discord-rpc"
+            git clone https://github.com/discord/discord-rpc.git --recursive --branch "$MACOSDISCORDRPCVER" "$SRB2BLDROOT/libraries/discord-rpc"
 
         else
 
@@ -3868,6 +3940,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" checkout -q "$MACOSDISCORDRPCVER"
 
         fi
 
@@ -3894,6 +3967,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             git -C "$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libopenvr" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libopenvr" checkout -q "v$MACOSOPENVRVER"
 
         fi
 
@@ -4640,20 +4714,19 @@ upgrade() {
 
     for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort); do
 
-        printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $u. Please wait..."
-        git -C "$BUILDPATH/$u" clean -qdfx -e .comrev
-        git -C "$BUILDPATH/$u" reset -q --hard
-        git -C "$BUILDPATH/$u" pull --recurse-submodules --rebase --autostash
+        export BUILD="$BUILDPATH/$u"
 
-        if [ -f "$BUILDPATH/$u/.comrev" ] && [ "$(git -C "$BUILDPATH/$u" rev-parse --short HEAD)" != "$(cat "$BUILDPATH/$u/.comrev")" ]; then
+        buildname
 
-            printf "$MESSAGE\n%s\n\e[0m" "Upgrading $u. Please wait..."
+        printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up $BUILDNAME. Please wait..."
+        cleansource
+        git -C "$BUILD" pull --recurse-submodules --rebase --autostash
 
-            export "UPGRADE=$u"
+        if [ -f "$BUILD/.comrev" ] && [ "$(git -C "$BUILD" rev-parse --short HEAD)" != "$(cat "$BUILD/.comrev")" ]; then
 
-            export "BUILD=$BUILDPATH/$u"
+            export UPGRADE="$u"
 
-            export "BUILDNAME=$u"
+            printf "$MESSAGE\n%s\n\e[0m" "Upgrading $BUILDNAME. Please wait..."
 
             if [ "$OS" = "Darwin" ]; then
 
@@ -4742,9 +4815,7 @@ Usage: srb2bld [OPTIONS]
 
      5. If 64-bit Linux system has issues with loading \"Sonic Robo Blast 2 Final Demo\" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
 - Debian/Ubuntu/Debian based/Ubuntu based:
-       sudo dpkg --add-architecture i386
-       sudo apt update
-       sudo apt install fuse:i386 libc6:i386 zlib1g:i386
+       sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386
 "
 }
 
