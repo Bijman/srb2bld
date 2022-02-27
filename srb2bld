@@ -736,10 +736,10 @@ dockerentry() {
     }
 
     # Clean the game's source code and exit shell script in case of error or cancelling script
-    trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 1 2 3 6 15 ERR
+    trap '\$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 1 2 3 6 15 ERR
 
     # Update Docker container.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating Docker container. Please wait..."
+    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating Docker container. Please wait..."
 
     if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
 
@@ -766,7 +766,7 @@ dockerentry() {
     fi
 
     # Download and extract assets.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
+    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
         SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
@@ -780,7 +780,7 @@ dockerentry() {
         7z x -y "\$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
         find "\$BUILD/build/AppDir/usr/games/SRB2/models" -type d -exec chmod 755 {} \;
 
-        if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+        if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
@@ -833,7 +833,7 @@ dockerentry() {
         7z x -y "\$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
         find "\$BUILD/build/AppDir/usr/games/SRB2/models" -type d -exec chmod 755 {} \;
 
-        if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+        if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             if [ "\$IS64" = "64" ]; then
 
@@ -864,7 +864,7 @@ dockerentry() {
         curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe -o "\$SRB2BLDROOT/assets/SRB2-2.1.exe"
         7z x -y "\$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
-        if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+        if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             if [ "\$IS64" = "64" ]; then
 
@@ -889,7 +889,7 @@ dockerentry() {
         curl -RLC - https://archive.org/download/srb20ya-v20/SRB2_v206.exe -o "\$SRB2BLDROOT/assets/SRB2-2.0.exe"
         7z x -y "\$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
-        if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+        if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             7z x -y "\$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.dll" -o"\$BUILD/build/AppDir/usr/lib"
 
@@ -900,7 +900,7 @@ dockerentry() {
         curl -RLC - https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe -o "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe"
         7z x -y "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
-        if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+        if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
             if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
@@ -929,7 +929,7 @@ dockerentry() {
         7z x -y "\$SRB2BLDROOT/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
         find "\$BUILD/build/AppDir/usr/games/SRB2Kart/mdls" -type d -exec chmod 755 {} \;
 
-        if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+        if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -992,7 +992,7 @@ dockerentry() {
     fi
 
     # Patching headers, source code to avoid compilation failure for builds on Windows.
-    if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+    if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
          sudo sed -i '/#if !defined(_WIN32) && !defined(__CYGWIN__)/,/#endif/d' "/usr/share/mingw-w64/include/_mingw.h"
          sudo sed -i '/#ifndef _WIN32/,/#endif/d' "/usr/share/mingw-w64/include/_mingw_stdarg.h"
@@ -1136,17 +1136,17 @@ if [ "\$APPIMAGE" = 1 ]; then
     fi
 
     # Add compilation flags.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
 
         if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1154,11 +1154,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1166,38 +1166,38 @@ if [ "\$APPIMAGE" = 1 ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
         fi
 
-    $PRINTF "$PROMPT\n%s\e[0m" "> "
+    \$PRINTF "$PROMPT\n%s\e[0m" "> "
     read -r CONF
 
-    if [ -n "\$($PRINTF "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
-        CONF=\$($PRINTF "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1","");print}')
-        $PRINTF "$FAILURE\n%s\n\e[0m" "Entering OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Exiting."
+        CONF=\$(\$PRINTF "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1","");print}')
+        \$PRINTF "$FAILURE\n%s\n\e[0m" "Entering OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Exiting."
         exit
 
     fi
 
     # Download libSDL2_mixerX's source code, build and install it.
-    if [ -n "\$($PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
             git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$LNXSDL2MIXERXVER" "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
 
         else
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
@@ -1205,7 +1205,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
         mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
         cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" || exit
         cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr
@@ -1216,23 +1216,23 @@ if [ "\$APPIMAGE" = 1 ]; then
     fi
 
     # Download DiscordRPC source code, build and install it.
-    if [ -n "\$($PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
+    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
             git clone https://github.com/discord/discord-rpc.git --recursive --branch "$LNXDISCORDRPCVER" "\$SRB2BLDROOT/libraries/discord-rpc"
 
         else
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q "$LNXDISCORDRPCVER"
         fi
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/discord-rpc/build"
             cd "\$SRB2BLDROOT/libraries/discord-rpc/build" || exit
             cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
@@ -1247,12 +1247,12 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
             git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$LNXOPENVRVER" "\$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenvr" fetch origin master
@@ -1260,7 +1260,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         fi
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
             cp -rf "\$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "\$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
             cd "\$SRB2BLDROOT/libraries/libopenvr/build" || exit
@@ -1279,7 +1279,7 @@ if [ "\$APPIMAGE" = 1 ]; then
     fi
 
     # Compile the game's source code.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
+    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
     if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
@@ -1334,7 +1334,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     fi
 
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Copying $BUILDNAME's binary, libraries, icons, desktop file and AppRun to AppDir. Please wait..."
+    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Copying $BUILDNAME's binary, libraries, icons, desktop file and AppRun to AppDir. Please wait..."
 
     # Copy compiled binary to AppDir.
     if [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2" ]; then
@@ -1735,8 +1735,8 @@ APPRUNBIN
     chmod +x "\$BUILD/build/AppDir/AppRun"
 
     # Download appimagetool.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's AppImage. Please wait..."
-    ISARM=\$($PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}')
+    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's AppImage. Please wait..."
+    ISARM=\$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}')
     IS64=\$(getconf LONG_BIT)
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
@@ -1818,18 +1818,18 @@ else
     fi
 
     # Add compilation flags.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
 
-    if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+    if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
         if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1837,11 +1837,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1849,11 +1849,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1861,11 +1861,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1873,11 +1873,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1889,11 +1889,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1901,11 +1901,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1913,11 +1913,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                $PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1925,30 +1925,30 @@ else
 
     fi
 
-     $PRINTF "$PROMPT\n%s\e[0m" "> "
+     \$PRINTF "$PROMPT\n%s\e[0m" "> "
      read -r CONF
 
 fi
 
-    if [ -n "\$($PRINTF "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
-        CONF=\$($PRINTF "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1","");print}')
-        $PRINTF "$FAILURE\n%s\n\e[0m" "Entering OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Exiting."
+        CONF=\$(\$PRINTF "%s\n" "\$CONF" | gawk '{gsub("LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1","");print}')
+        \$PRINTF "$FAILURE\n%s\n\e[0m" "Entering OS flags like LINUX64=1, MINGW=1 or FREEBSD=1 is not supported on this script. Exiting."
         exit
 
     fi
 
     # Download libpng12's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$($PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ ! -f /usr/local/lib/libpng12.so ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ ! -f /usr/local/lib/libpng12.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libpng12/.git" ]; then
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libpng12's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libpng12's source code. Please wait..."
             git clone https://github.com/glennrp/libpng.git --recursive --branch "$LNXPNG12VER" "\$SRB2BLDROOT/libraries/libpng12"
 
         else
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libpng12" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libpng12" fetch origin master
@@ -1958,7 +1958,7 @@ fi
 
         cd "\$SRB2BLDROOT/libraries/libpng12" || exit
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
+        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
         ./configure --prefix=/usr/local/stow/libpng12-lib32
         CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libpng12"
         sudo make -C "\$SRB2BLDROOT/libraries/libpng12" install
@@ -1968,16 +1968,16 @@ fi
     fi
 
     # Download libSDL2_mixerX's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -n "\$($PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+    if [ "\$OS" = "Linux" ] && [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
             git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$LNXSDL2MIXERXVER" "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
 
         else
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
@@ -1985,7 +1985,7 @@ fi
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
         mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
         cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
         cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx
@@ -1997,16 +1997,16 @@ fi
     fi
 
     # Download libopenmpt's source code, build and install it for musl based Linux OS.
-    if [ -z "\$($PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libopenmpt.so ]; then
+    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libopenmpt.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
             git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "$LNXOPENMPTVER" "\$SRB2BLDROOT/libraries/libopenmpt"
 
         else
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
@@ -2014,7 +2014,7 @@ fi
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
+        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
         gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
         CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
         sudo make -C "\$SRB2BLDROOT/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
@@ -2023,16 +2023,16 @@ fi
     fi
 
     # Download libgme's source code, build and install it.
-    if [ -z "\$($PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libgme.so ]; then
+    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libgme.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libgme/.git" ]; then
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
             git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$LNXGMEVER" "\$SRB2BLDROOT/libraries/libgme"
 
         else
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libgme" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libgme" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libgme" fetch origin master
@@ -2040,7 +2040,7 @@ fi
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
+        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
         mkdir -p "\$SRB2BLDROOT/libraries/libgme/build"
         cd "\$SRB2BLDROOT/libraries/libgme/build"
         gawk -i inplace 'BEGIN { del=0 } /4.1 had poor support for symbol visibility/ { del=2 } del<=0 { print } /endif()/ { del -= 1 }' "\$SRB2BLDROOT/libraries/libgme/CMakeLists.txt"
@@ -2053,16 +2053,16 @@ fi
     fi
 
     # Download DiscordRPC source code, build and install it.
-    if [ -n "\$($PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
+    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
-              $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
+              \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading DiscordRPC's source code. Please wait..."
               git clone https://github.com/discord/discord-rpc.git --recursive --branch "$LNXDISCORDRPCVER" "\$SRB2BLDROOT/libraries/discord-rpc"
 
         else
 
-              $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+              \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
@@ -2070,11 +2070,11 @@ fi
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
+        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
         mkdir -p "\$SRB2BLDROOT/libraries/discord-rpc/build"
         cd "\$SRB2BLDROOT/libraries/discord-rpc/build" || exit
 
-        if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+        if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
             DISCORDRPCURL="\$(curl -s https://api.github.com/repos/discord/discord-rpc/releases/latest | gawk -F'"' '/browser_download_url.*discord-rpc-win.zip/ {print \$4}')"
             curl -RL "\$DISCORDRPCURL" > "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip"
@@ -2107,12 +2107,12 @@ fi
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenvr's source code. Please wait..."
             git clone https://github.com/ValveSoftware/openvr.git --recursive --branch "v$LNXOPENVRVER" "\$SRB2BLDROOT/libraries/libopenvr"
 
         else
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenvr" fetch origin master
@@ -2120,7 +2120,7 @@ fi
 
         fi
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
             cp -rf "\$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "\$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
             cd "\$SRB2BLDROOT/libraries/libopenvr/build" || exit
@@ -2133,9 +2133,9 @@ fi
     fi
 
     # Download and install FMOD for compiling old SRB2 versions on Windows.
-    if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]); then
+    if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]); then
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing FMOD to build $BUILDNAME. Please wait..."
+        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Installing FMOD to build $BUILDNAME. Please wait..."
         sudo mkdir -p "/usr/include/FMOD"
         curl -kRLOC - "https://zdoom.org/files/fmod/$LNXFMODVER.tar.gz"
         sudo tar xvf "$LNXFMODVER.tar.gz" --wildcards --strip-components=3 -C "/usr/lib" "$LNXFMODVER/api/libfmod-"*.so
@@ -2144,9 +2144,9 @@ fi
     fi
 
     # Compile the game's source code.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
+    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
 
-if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
+if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
         if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
@@ -2369,7 +2369,7 @@ if [ "\$($PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "
     fi
 
     # Saving configuration flags for future upgrades.
-    $PRINTF "%s\n" "\$CONF" > "\$BUILD/conf"
+    \$PRINTF "%s\n" "\$CONF" > "\$BUILD/conf"
 
     # Create desktop file.
     COMREV=\$(git -C "\$BUILD" rev-parse --short HEAD)
