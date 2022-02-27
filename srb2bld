@@ -228,8 +228,8 @@ choosebranch() {
     # Choose Git branch.
     printf "$MESSAGE\n%s\n\e[0m" "Please choose branch by typing number and then pressing enter, or just press enter to continue with default branch, which is \"$GITVER\". To quit, press ctrl+c."
     printf "$NOTICE%s\n\e[0m" "Warning! By choosing different branch other than default, compilation or running compiled build may fail."
-    array=$(git -C "$BUILD" branch -a | gawk -F'/' '{print $NF}' | sort -u | gawk '!/^ / {gsub("^* ",""); print}')
-    arrayname=$(printf "$(git -C "$BUILD" branch -a | gawk -F'/' '{print $NF}' | gawk '!/^ / {gsub("^* ","\\e[1;92m* \\e[0m"); print}' | sort -u)")
+    array=$(git -C "$BUILD" branch -a | gawk -F'/' '!/->/ {print $NF}' | sort -u | gawk '!/^ / {gsub("^* ",""); print}')
+    arrayname=$(printf "$(git -C "$BUILD" branch -a | gawk -F'/' '!/->/ {print $NF}' | sort -u | gawk '!/^ / {gsub("^* ","\\e[1;92m* \\e[0m"); print}')\n")
     count="$(printf "%s\n" "$array" | wc -l)"
     n=""
     printf "%s\n" "$arrayname" | gawk '{print NR")", $0}'
