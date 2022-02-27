@@ -54,6 +54,7 @@ LNXFMODVER="fmodapi375linux"
 LNXPNG12VER="libpng12"
 LNXSDL2MIXERXVER="master"
 LNXOPENMPTVER="master"
+LNXGMEVER="0.6.2"
 LNXDISCORDRPCVER="master"
 LNXOPENVRVER="1.10.30"
 if [ "$OS" = "Darwin" ]; then
@@ -2019,6 +2020,36 @@ fi
 
     fi
 
+    # Download libgme's source code, build and install it.
+    if [ -z "\$(printf "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libgme.so ]; then
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/libgme/.git" ]; then
+
+            printf "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
+            git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$LNXGMEVER" "\$SRB2BLDROOT/libraries/libgme"
+
+        else
+
+            printf "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
+            git -C "\$SRB2BLDROOT/libraries/libgme" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libgme" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libgme" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libgme" checkout -q "$LNXGMEVER"
+
+        fi
+
+        printf "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
+        mkdir -p "\$SRB2BLDROOT/libraries/libgme/build"
+        cd "\$SRB2BLDROOT/libraries/libgme/build"
+        gawk -i inplace 'BEGIN { del=0 } /4.1 had poor support for symbol visibility/ { del=2 } del<=0 { print } /endif()/ { del -= 1 }' "\$SRB2BLDROOT/libraries/libgme/CMakeLists.txt"
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
+        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libgme/build"
+        sudo make -C "\$SRB2BLDROOT/libraries/libgme/build" install
+        sudo -E stow -v --adopt libgme
+        cd "\$BUILD" || exit
+
+    fi
+
     # Download DiscordRPC source code, build and install it.
     if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
 
@@ -2699,7 +2730,7 @@ ENV container docker
 RUN printf "%s\n" "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
 apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
@@ -2719,7 +2750,7 @@ ENV container docker
 RUN printf "%s\n" "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
 apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev libgme-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base gcc6 cmake sudo bash dash gawk curl git p7zip shadow stow
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base gcc6 cmake sudo bash dash gawk curl git p7zip shadow stow
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
