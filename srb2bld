@@ -144,6 +144,13 @@ appimage() {
 
     dockerrun
 
+    # Export commit revision name before creating AppImage.
+    export VERSION=$(git -C "$BUILD" rev-parse --short HEAD)
+
+    # Create AppImage from prepared AppDir.
+    cd "$BUILD" || exit
+    "$BUILD/appimagetool" -n "$BUILD/build/AppDir" 2> /dev/null
+
     # Set name of AppImage in message.
     APPIMAGENAME=$(find "$BUILD" -name "*.AppImage" 2> /dev/null | gawk -F'/' '{print $NF}')
 
@@ -1681,39 +1688,6 @@ DESKTOP
     mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
     cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
 
-    # Create game entrypoint and copy libraries to AppDir.
-#DEPS="
-#libFLAC.so.[0-9]
-#libGLU.so.[0-9]
-#libGL.so.[0-9]
-#libinstpatch.[0-9]
-#libSDL2-2.0.so.[0-9]
-#libSDL2_mixer-2.0.so.[0-9]
-#libfluidsynth.so.[0-9]
-#libgme.so.[0-9]
-#libjack.so.[0-9]
-#libmad.so.[0-9]
-#libmodplug.so.[0-9]
-#libmpg123.so.[0-9]
-#libogg.so.[0-9]
-#libopenmpt.so.[0-9]
-#libopus.so.[0-9]
-#libopusfile.so.[0-9]
-#libpng.so.[0-9]
-#libpng16.so.16
-#libpulse-simple.so.[0-9]
-#libpulse.so.[0-9]
-#libpulsecommon-[0-9]*.[0-9]*.so.[0-9]
-#libreadline.so.[0-9]
-#libsndio.so.[0-9]
-#libsndfile.so.[0-9]
-#libtinfo.so.[0-9]
-#libvorbis.so.[0-9]
-#libvorbisenc.so.[0-9]
-#libvorbisfile.so.[0-9]
-#libwrap.so.[0-9]
-#"
-
     cat > "\$BUILD/build/AppDir/AppRun" << 'APPRUN'
 #!/bin/sh
 
@@ -1723,7 +1697,7 @@ export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:\$HERE/usr/lib"
 
 APPRUN
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2"
@@ -1731,24 +1705,8 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
 APPRUNBIN
 
-#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
-
-#    if [ -n "\$(printf "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]); then
-#
-#        DISCORDLIBPATH=\$(find /lib* /usr/lib* -name libdiscord-rpc.so)
-#        cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
-#
-#    fi
-#
-#    if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
-#
-#        OPENVRLIBPATH=\$(find /lib* /usr/lib* -name libopenvr_api.so)
-#        cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
-#
-#    fi
-#
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
@@ -1757,30 +1715,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdlsrb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
-
-    elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
-
-        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
-export SRB2WADDIR="\$HERE/usr/games/SRB2"
-
-exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
-APPRUNBIN
-
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
-
-
-#    elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
-
-#        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
-#export SRB2WADDIR="\$HERE/usr/games/SRB2"
-
-#exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
-#APPRUNBIN
-
-#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
-
-#        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -1790,18 +1725,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
 exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" | gawk '{print \$3}' | gawk '!/libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
-
-#        DISCORDLIBPATH=\$(find /lib* /usr/lib* -name libdiscord-rpc.so)
-#        cp -rf \$DISCORDLIBPATH "\$BUILD/build/AppDir/usr/lib"
-#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
-#
-#        if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
-#
-#              OPENVRLIBPATH=\$(find /lib* /usr/lib* -name libopenvr_api.so)
-#              cp -rf \$OPENVRLIBPATH "\$BUILD/build/AppDir/usr/lib"
-#
-#        fi
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
@@ -1856,7 +1780,7 @@ APPRUNBIN
 
     # Preparing appimagetool and removing libraries in AppDir that can throw errors when running AppImage.
     chmod +x "\$BUILD/appimagetool"
-    rm -rf "\$BUILD/build/AppDir/usr/share/doc" "\$BUILD/build/AppDir/usr/lib/libgcc_s.so"* "\$BUILD/build/AppDir/usr/lib/libstdc++.so"* "\$BUILD/build/AppDir/usr/lib/libc.so"* "\$BUILD/build/AppDir/usr/lib/ld-linux"*
+
     cd "\$BUILD/build/AppDir" || exit
 
     # Create symlinks that are specific for AppDir's structure.
@@ -1866,12 +1790,6 @@ APPRUNBIN
     cd "\$BUILD/build/AppDir/usr" || exit
     ln -sf "lib" "lib32"
     cd "\$BUILD" || exit
-
-    # Export commit revision name before creating AppImage.
-    export VERSION=\$(git -C "\$BUILD" rev-parse --short HEAD)
-
-    # Create AppImage from prepared AppDir.
-    "\$BUILD/appimagetool" -n "\$BUILD/build/AppDir" 2> /dev/null
 
 else
 
@@ -2925,7 +2843,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-old-linux-glibc-docker "$SRB2BLDROOT/containers/srb2-old-linux-glibc-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-old-linux-glibc-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-old-linux-glibc-docker
 
         fi
 
@@ -2956,7 +2874,7 @@ dockerrun() {
             printf "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-linux-glibc-docker "$SRB2BLDROOT/containers/srb2-linux-glibc-docker"
             printf "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --device="/dev/fuse" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-linux-glibc-docker
+            docker run -it -u srb2 --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-linux-glibc-docker
 
         fi
 
