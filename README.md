@@ -1,4 +1,4 @@
-srb2bld is a shell script, that automates and simplifies process of downloading source code, configuring, compilation, installation and creating portable executable bundles of various SRB2 related builds.
+srb2bld is a shell script, that automates and simplifies process of downloading source code, configuring, compilation, installation to system or creating portable executable bundles of various SRB2 related builds.
 
 https://user-images.githubusercontent.com/16626326/152710164-9012f542-5922-4958-a2fd-6480ef0e0339.mp4
 
