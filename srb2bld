@@ -3126,7 +3126,7 @@ installtolinux() {
 
     fi
 
-    if [ -n "$(ldd $SRB2BINARYLNXPATH | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u)" ]; then
+    if [ -n "$(ldd $SRB2BINARYLNXPATH | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u)" ]; then
 
         if [ -x "$(which emerge 2> /dev/null)" ]; then
 
@@ -3233,7 +3233,7 @@ installtolinux() {
 
                 fi
 
-                apk-file "$l" | gawk '/-dev/ {print $2}' | sort -u
+                apk-file "$l" | gawk '!/PACKAGE/ {print $2}' | sort -u
 
             elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
 
