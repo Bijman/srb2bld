@@ -3135,7 +3135,7 @@ installtolinux() {
         fi
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
-        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ {print "'"$LIBPATH"'"$1}' | sort -u); do
+        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print "'"$LIBPATH"'"$1}' | sort -u); do
 
             if [ -x "$(which emerge 2> /dev/null)" ]; then
 
@@ -3213,17 +3213,17 @@ installtolinux() {
 
         else
 
-            ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ {print $1}' | sort -u
+            ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u
             $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
 
         fi
 
     fi
 
-    if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u)" ]; then
+    if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u)" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
-        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u); do
+        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u); do
 
             if [ -x "$(which apk 2> /dev/null)" ]; then
 
@@ -3260,7 +3260,7 @@ installtolinux() {
 
         else
 
-            ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ {print $1}' | gawk '{print $NF}' | sort -u
+            ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u
             $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
 
         fi
