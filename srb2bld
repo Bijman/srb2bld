@@ -223,7 +223,10 @@ choosebranch() {
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating $BUILDNAME's source code. Please wait..."
         cleansource
+        GITCURVER=$(git -C "$BUILD" branch --show-current)
+        git -C "$BUILD" checkout -q "$GITVER"
         git -C "$BUILD" pull --recurse-submodules --rebase --autostash
+        git -C "$BUILD" checkout -q "$GITCURVER"
 
     fi
 
@@ -1200,6 +1203,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$LNXSDL2MIXERXVER"
 
@@ -1228,6 +1232,7 @@ if [ "\$APPIMAGE" = 1 ]; then
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q "$LNXDISCORDRPCVER"
         fi
@@ -1255,7 +1260,8 @@ if [ "\$APPIMAGE" = 1 ]; then
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libopenvr" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q master
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q "v$LNXOPENVRVER"
 
         fi
@@ -1944,14 +1950,15 @@ fi
         if [ ! -d "\$SRB2BLDROOT/libraries/libpng12/.git" ]; then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libpng12's source code. Please wait..."
-            git clone https://github.com/glennrp/libpng.git --recursive --branch "$LNXPNG12VER" "\$SRB2BLDROOT/libraries/libpng12"
+            git clone git://git.code.sf.net/p/libpng/code.git --recursive --branch "$LNXPNG12VER" "\$SRB2BLDROOT/libraries/libpng12"
 
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libpng12" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libpng12" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libpng12" checkout -q master
+            git -C "\$SRB2BLDROOT/libraries/libpng12" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/libpng12" checkout -q "$LNXPNG12VER"
 
         fi
@@ -1980,6 +1987,7 @@ fi
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$LNXSDL2MIXERXVER"
 
@@ -2009,6 +2017,7 @@ fi
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" checkout -q "$LNXOPENMPTVER"
 
@@ -2035,7 +2044,8 @@ fi
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libgme" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libgme" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libgme" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libgme" checkout -q master
+            git -C "\$SRB2BLDROOT/libraries/libgme" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/libgme" checkout -q "$LNXGMEVER"
 
         fi
@@ -2065,6 +2075,7 @@ fi
               \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q master
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q "$LNXDISCORDRPCVER"
 
@@ -2115,7 +2126,8 @@ fi
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libopenvr" fetch origin master
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q master
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q "v$LNXOPENVRVER"
 
         fi
@@ -3592,7 +3604,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libpng" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libpng" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libpng" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libpng" checkout -q master
+            git -C "$SRB2BLDROOT/libraries/libpng" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libpng" checkout -q "v$MACOSPNGVER"
 
         fi
@@ -3619,7 +3632,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libogg's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libogg" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libogg" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libogg" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libogg" checkout -q master
+            git -C "$SRB2BLDROOT/libraries/libogg" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libogg" checkout -q "v$MACOSOGGVER"
 
         fi
@@ -3646,7 +3660,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libvorbis' source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libvorbis" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libvorbis" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libvorbis" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libvorbis" checkout -q master
+            git -C "$SRB2BLDROOT/libraries/libvorbis" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libvorbis" checkout -q "v$MACOSVORBISVER"
 
         fi
@@ -3675,6 +3690,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmpg123's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libmpg123" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libmpg123" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libmpg123" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libmpg123" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libmpg123" checkout -q "$MACOSMPG123VER"
 
@@ -3704,6 +3720,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmodplug's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libmodplug" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libmodplug" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/libmodplug" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libmodplug" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libmodplug" checkout -q "$MACOSMODPLUGVER"
 
@@ -3731,7 +3748,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libsdl2" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libsdl2" fetch origin main
+            git -C "$SRB2BLDROOT/libraries/libsdl2" checkout -q main
+            git -C "$SRB2BLDROOT/libraries/libsdl2" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libsdl2" checkout -q "release-$MACOSSDL2VER"
 
         fi
@@ -3758,7 +3776,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixer's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" fetch origin main
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" checkout -q main
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" checkout -q "release-$MACOSSDL2MIXERVER"
 
         fi
@@ -3808,7 +3827,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$MACOSSDL2MIXERXVER"
 
         fi
@@ -3835,7 +3855,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libopenmpt" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q master
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q "libopenmpt-$MACOSOPENMPTVER"
 
         fi
@@ -3863,7 +3884,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libgme" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libgme" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libgme" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libgme" checkout -q master
+            git -C "$SRB2BLDROOT/libraries/libgme" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libgme" checkout -q "$MACOSGMEVER"
 
         fi
@@ -3890,6 +3912,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
             git -C "$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" checkout -q master
             git -C "$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/discord-rpc" checkout -q "$MACOSDISCORDRPCVER"
 
@@ -3917,7 +3940,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
             git -C "$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
             git -C "$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libopenvr" fetch origin master
+            git -C "$SRB2BLDROOT/libraries/libopenvr" checkout -q master
+            git -C "$SRB2BLDROOT/libraries/libopenvr" pull --recurse-submodules --rebase --autostash
             git -C "$SRB2BLDROOT/libraries/libopenvr" checkout -q "v$MACOSOPENVRVER"
 
         fi
