@@ -1278,7 +1278,7 @@ if [ "\$APPIMAGE" = 1 ]; then
     fi
 
     # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-    if [ -f /usr/local/lib/libpng12.so ] || [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
+    if [ -f /usr/local/lib/libpng12.so ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
         sudo -E stow -D --adopt libpng12-lib32
 
@@ -1958,7 +1958,7 @@ fi
             git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx
             git -C "\$SRB2BLDROOT/libraries/libpng12" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libpng12" checkout -q master
-            git -C "\$SRB2BLDROOT/libraries/libpng12" pull --recurse-submodules --rebase --autostash
+            git -C "\$SRB2BLDROOT/libraries/libpng12" pull --recurse-submodules --rebase
             git -C "\$SRB2BLDROOT/libraries/libpng12" checkout -q "$LNXPNG12VER"
 
         fi
@@ -2318,7 +2318,7 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
      elif [ "\$OS" = "Linux" ]; then
 
         # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-        if [ -f /usr/local/lib/libpng12.so ] || [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
+        if [ -f /usr/local/lib/libpng12.so ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
             sudo -E stow -D --adopt libpng12-lib32
 
@@ -2741,10 +2741,9 @@ FROM "$ISARM"alpine:latest
 
 ENV container docker
 
-RUN printf "%s\n" "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
-apk update && \
+RUN apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
@@ -2761,10 +2760,9 @@ FROM "$ISARM"alpine:latest
 
 ENV container docker
 
-RUN printf "%s\n" "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
-apk update && \
+RUN apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base gcc6 cmake sudo bash dash gawk curl git p7zip shadow stow
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base gcc6 cmake sudo bash dash gawk curl git p7zip shadow stow
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
