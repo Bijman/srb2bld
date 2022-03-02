@@ -58,6 +58,7 @@ LNXOPENMPTVER="master"
 LNXGMEVER="0.6.2"
 LNXDISCORDRPCVER="master"
 LNXOPENVRVER="1.10.30"
+
 if [ "$OS" = "Darwin" ]; then
 
     MACOSVER="10.9"
@@ -87,6 +88,7 @@ PROMPT="\e[1;97m"
 
 appbundle() {
     clear
+
     # Blocking access to this option for users that uses OS other than macOS since App Bundles are macOS exclusive.
     if [ "$OS" != "Darwin" ]; then
 
@@ -126,6 +128,7 @@ appbundle() {
 
 appimage() {
     clear
+
     # Blocking access to this option for users that have OS other than Linux since AppImages are Linux exclusive.
     if [ "$OS" != "Linux" ] || [ -z "$(ldd --version 2>&1 | gawk '/Free Software Foundation/ {print}')" ]; then
 
@@ -165,6 +168,7 @@ appimage() {
 }
 
 buildname() {
+    # Setting names for fancy display in messages.
     if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
 
         export BUILDNAME="Sonic Robo Blast 2"
@@ -271,6 +275,7 @@ choosebranch() {
 
 choosebuild() {
     clear
+
     # Choose and download build.
     while
 
@@ -401,6 +406,7 @@ choosebuild() {
 
 chooseinstall() {
     clear
+
     # Install build.
     if [ "$OS" != "Linux" ] && [ "$OS" != "Darwin" ] && [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" != "MINGW64" ] && [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" != "MINGW" ]; then
 
@@ -469,6 +475,7 @@ chooseinstall() {
 
 chooseremoveasset() {
     clear
+
     if [ -z "$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "Can't find assets."
@@ -516,6 +523,7 @@ chooseremoveasset() {
 
 chooseremovebuild() {
     clear
+
     if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | sort)" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "Can't find builds."
@@ -563,6 +571,7 @@ chooseremovebuild() {
 
 chooseuninstall() {
     clear
+
     if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "Can't find installed builds."
@@ -659,6 +668,7 @@ cleansource() {
 
 compatibility() {
     clear
+
     # Show compatibility table for compiling SRB2 builds for each OS.
     curl -sL "$COMPTABLEURL"
 }
@@ -704,6 +714,7 @@ dockerentry() {
     }
 
     sudo_ping() {
+        # Extend password timeout for sudo.
         if [ -n "$SUDO_PID" ]; then
 
             if [ "$1" = stop ]; then
@@ -1145,11 +1156,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1157,11 +1168,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1169,11 +1180,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1201,7 +1212,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
@@ -1212,7 +1223,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
         mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
         cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" || exit
-        cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr
+        cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_FLAC=OFF -DUSE_MP3_MAD=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX=/usr
         CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
         sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
         cd "\$BUILD" || exit
@@ -1230,7 +1241,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
@@ -1258,7 +1269,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libopenvr" pull --recurse-submodules --rebase --autostash
@@ -1290,11 +1301,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         else
 
-            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         fi
 
@@ -1304,11 +1315,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
 
         else
 
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
 
         fi
 
@@ -1321,11 +1332,11 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         else
 
-            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+            CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
         fi
 
@@ -1831,11 +1842,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1843,11 +1854,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1855,11 +1866,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1867,11 +1878,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1879,11 +1890,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1895,11 +1906,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1907,11 +1918,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1919,11 +1930,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -1945,7 +1956,7 @@ fi
     fi
 
     # Download libpng12's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ ! -f /usr/local/lib/libpng12.so ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libpng12/.git" ]; then
 
@@ -1955,7 +1966,7 @@ fi
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libpng12" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libpng12" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libpng12" pull --recurse-submodules --rebase
@@ -1963,14 +1974,19 @@ fi
 
         fi
 
-        cd "\$SRB2BLDROOT/libraries/libpng12" || exit
+        if [ ! -f /usr/local/lib/libpng12.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libpng12" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libpng12/.comrev")" ]; then
 
-        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
-        ./configure --prefix=/usr/local/stow/libpng12-lib32
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libpng12"
-        sudo make -C "\$SRB2BLDROOT/libraries/libpng12" install
-        sudo -E stow -v --adopt libpng12-lib32
-        cd "\$BUILD" || exit
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
+            cd "\$SRB2BLDROOT/libraries/libpng12" || exit
+            ./configure --prefix=/usr/local/stow/libpng12-lib32
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libpng12"
+            sudo make -C "\$SRB2BLDROOT/libraries/libpng12" install
+            sudo -E stow -v --adopt libpng12-lib32
+            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libpng12" rev-parse --short HEAD)
+            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libpng12/.comrev"
+            cd "\$BUILD" || exit
+
+        fi
 
     fi
 
@@ -1985,7 +2001,7 @@ fi
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
@@ -1993,19 +2009,25 @@ fi
 
         fi
 
-        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
-        mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-        cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-        cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-        sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
-        sudo -E stow -v --adopt libsdl2-mixerx
-        cd "\$BUILD" || exit
+        if [ ! -f /usr/local/lib/libSDL2_mixer_ext.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev")" ]; then
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+            mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+            cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+            cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_FLAC=OFF -DUSE_MP3_MAD=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+            sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
+            sudo -E stow -v --adopt libsdl2-mixerx
+            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)
+            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev"
+            cd "\$BUILD" || exit
+
+        fi
 
     fi
 
     # Download libopenmpt's source code, build and install it for musl based Linux OS.
-    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libopenmpt.so ]; then
+    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
 
@@ -2015,7 +2037,7 @@ fi
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
@@ -2023,16 +2045,23 @@ fi
 
         fi
 
-        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
-        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-        sudo make -C "\$SRB2BLDROOT/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
-        sudo -E stow -v --adopt libopenmpt
+        if [ ! -f /usr/local/lib/libopenmpt.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenmpt/.comrev")" ]; then
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
+            gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+            sudo make -C "\$SRB2BLDROOT/libraries/libopenmpt" PREFIX=/usr/local/stow/libopenmpt install
+            sudo -E stow -v --adopt libopenmpt
+            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)
+            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libopenmpt/.comrev"
+            cd "\$BUILD" || exit
+
+        fi
 
     fi
 
     # Download libgme's source code, build and install it.
-    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f /usr/local/lib/libgme.so ]; then
+    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libgme/.git" ]; then
 
@@ -2042,7 +2071,7 @@ fi
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/libgme" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libgme" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libgme" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libgme" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libgme" pull --recurse-submodules --rebase --autostash
@@ -2050,20 +2079,26 @@ fi
 
         fi
 
-        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
-        mkdir -p "\$SRB2BLDROOT/libraries/libgme/build"
-        cd "\$SRB2BLDROOT/libraries/libgme/build"
-        gawk -i inplace 'BEGIN { del=0 } /4.1 had poor support for symbol visibility/ { del=2 } del<=0 { print } /endif()/ { del -= 1 }' "\$SRB2BLDROOT/libraries/libgme/CMakeLists.txt"
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
-        CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libgme/build"
-        sudo make -C "\$SRB2BLDROOT/libraries/libgme/build" install
-        sudo -E stow -v --adopt libgme
-        cd "\$BUILD" || exit
+        if [ ! -f /usr/local/lib/libgme.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libgme/.comrev")" ]; then
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
+            mkdir -p "\$SRB2BLDROOT/libraries/libgme/build"
+            cd "\$SRB2BLDROOT/libraries/libgme/build"
+            gawk -i inplace 'BEGIN { del=0 } /4.1 had poor support for symbol visibility/ { del=2 } del<=0 { print } /endif()/ { del -= 1 }' "\$SRB2BLDROOT/libraries/libgme/CMakeLists.txt"
+            cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libgme/build"
+            sudo make -C "\$SRB2BLDROOT/libraries/libgme/build" install
+            sudo -E stow -v --adopt libgme
+            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)
+            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libgme/.comrev"
+            cd "\$BUILD" || exit
+
+        fi
 
     fi
 
     # Download DiscordRPC source code, build and install it.
-    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libdiscord-rpc.so ]; then
+    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
@@ -2073,7 +2108,7 @@ fi
         else
 
               \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
-              git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
+              git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx -e .comrev
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q master
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
@@ -2100,12 +2135,14 @@ fi
 
             fi
 
-        elif [ "\$OS" = "Linux" ]; then
+        elif [ "\$OS" = "Linux" ] && ([ ! -f /usr/local/lib/libdiscord-rpc.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/discord-rpc/.comrev")" ]); then
 
-              cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
-              CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
-              sudo make -C "\$SRB2BLDROOT/libraries/discord-rpc/build" install
-              sudo -E stow -v --adopt discord-rpc
+            cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
+            sudo make -C "\$SRB2BLDROOT/libraries/discord-rpc/build" install
+            sudo -E stow -v --adopt discord-rpc
+            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)
+            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/discord-rpc/.comrev"
 
         fi
 
@@ -2114,7 +2151,7 @@ fi
     fi
 
     # Download libopenvr's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]) && [ ! -f /usr/local/lib/libopenvr_api.so ]; then
+    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
@@ -2124,13 +2161,15 @@ fi
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
-            git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
+            git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libopenvr" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q "v$LNXOPENVRVER"
 
         fi
+
+        if [ ! -f /usr/local/lib/libopenvr_api.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev")" ]; then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
@@ -2140,7 +2179,11 @@ fi
             CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenvr/build"
             sudo make -C "\$SRB2BLDROOT/libraries/libopenvr/build" install
             sudo -E stow -v --adopt libopenvr
+            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)
+            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libopenvr/.comrev"
             cd "\$BUILD" || exit
+
+        fi
 
     fi
 
@@ -2169,12 +2212,12 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/srb2win\$IS64.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
@@ -2185,12 +2228,12 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="i686-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="\$ARCH-w64-mingw32-$MINGWOLDVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
@@ -2202,12 +2245,12 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 \$CONF
+                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2sdl.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 \$CONF
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 \$CONF
                 \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
@@ -2216,12 +2259,12 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2kart.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             else
 
-                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
                 \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2kart.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
@@ -2237,11 +2280,11 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
                 if [ "\$IS64" = "64" ]; then
 
-                    CC="x86_64-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                    CC="x86_64-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 else
 
-                    CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                    CC="i686-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 fi
 
@@ -2292,7 +2335,7 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
                 cd "\$BUILD/src" || exit
                 gawk -i inplace '{gsub("\r","");print}' ../comptime.sh
                 bash ../comptime.sh
-                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="\$ARCH-w64-mingw32-$MINGWVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
                 # Making list of game's dependencies to copy them to game directory on Windows later.
                 if [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
@@ -2328,11 +2371,11 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             else
 
-                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             fi
 
@@ -2342,11 +2385,11 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
 
             else
 
-                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
 
             fi
 
@@ -2359,11 +2402,11 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             else
 
-                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             fi
 
@@ -3159,7 +3202,6 @@ installtolinux() {
                     $SUDO apt-get install -y apt-file > /dev/null
 
                 fi
-                #                    $SUDO apt-get install ^libc[0-9]*-i386 > /dev/null
 
                 $SUDO apt-file update > /dev/null
                 apt-file -l find "$l" | gawk 'NF{print}'
@@ -3196,6 +3238,12 @@ installtolinux() {
             $SUDO pacman -S --needed --noconfirm $PACKAGE
 
         elif [ -x "$(which apt-get 2> /dev/null)" ]; then
+
+            #            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+            #                PACKAGE=$(printf "%s\n" "$PACKAGE" | gawk '!/nvidia/primus/virtualbox/ {gsub("$","'":$ISARM"'");print}')
+
+            #            fi
 
             $SUDO apt-get install -y $PACKAGE
 
@@ -3269,6 +3317,7 @@ installtolinux() {
 }
 
 installtolist() {
+    # Making list of installed files.
     mkdir -p "$SRB2BLDROOT/installed"
     cat > "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" << INSTALL
 $SRB2ASSETLNXPATH
@@ -3590,7 +3639,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     sudo_ping
 
     # Download libpng's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libpng.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libpng.dylib" ]) && [ "$ISPNG" = "libpng" ]; then
+    if [ "$ISPNG" = "libpng" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libpng/.git" ]; then
 
@@ -3600,7 +3649,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libpng" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libpng" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libpng" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libpng" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libpng" pull --recurse-submodules --rebase --autostash
@@ -3608,17 +3657,23 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
-        mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
-        cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng -DCMAKE_MACOSX_RPATH=OFF
-        cmake --build "$SRB2BLDROOT/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo -E cmake --install "$SRB2BLDROOT/libraries/libpng/build"
-        sudo -E stow -v --adopt libpng
+        if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libpng.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libpng.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libpng" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libpng/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
+            mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
+            cmake -S "$SRB2BLDROOT/libraries/libpng" -B "$SRB2BLDROOT/libraries/libpng/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libpng -DCMAKE_MACOSX_RPATH=OFF
+            cmake --build "$SRB2BLDROOT/libraries/libpng/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo -E cmake --install "$SRB2BLDROOT/libraries/libpng/build"
+            sudo -E stow -v --adopt libpng
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libpng" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libpng/.comrev"
+
+        fi
 
     fi
 
     # Download libogg's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libogg.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libogg.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+    if [ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libogg/.git" ]; then
 
@@ -3628,7 +3683,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libogg's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libogg" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libogg" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libogg" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libogg" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libogg" pull --recurse-submodules --rebase --autostash
@@ -3636,17 +3691,23 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
-        mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
-        cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg -DCMAKE_MACOSX_RPATH=OFF
-        cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo -E cmake --install "$SRB2BLDROOT/libraries/libogg/build"
-        sudo -E stow -v --adopt libogg
+        if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libogg.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libogg.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libogg" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libogg/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
+            mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
+            cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libogg -DCMAKE_MACOSX_RPATH=OFF
+            cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo -E cmake --install "$SRB2BLDROOT/libraries/libogg/build"
+            sudo -E stow -v --adopt libogg
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libogg" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libogg/.comrev"
+
+        fi
 
     fi
 
     # Download libvorbis' source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libvorbis.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libvorbis.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+    if [ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libvorbis/.git" ]; then
 
@@ -3656,7 +3717,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libvorbis' source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libvorbis" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libvorbis" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libvorbis" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libvorbis" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libvorbis" pull --recurse-submodules --rebase --autostash
@@ -3664,19 +3725,25 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
-        cd "$SRB2BLDROOT/libraries/libvorbis" || exit
-        ./autogen.sh
-        ./configure --prefix=/usr/local/stow/libvorbis
-        make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-        sudo -E make install
-        sudo -E stow -v --adopt libvorbis
-        cd "$BUILD" || exit
+        if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libvorbis.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libvorbis.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libvorbis" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libvorbis/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
+            cd "$SRB2BLDROOT/libraries/libvorbis" || exit
+            ./autogen.sh
+            ./configure --prefix=/usr/local/stow/libvorbis
+            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+            sudo -E make install
+            sudo -E stow -v --adopt libvorbis
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libvorbis" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libvorbis/.comrev"
+            cd "$BUILD" || exit
+
+        fi
 
     fi
 
     # Download libmpg123's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmpg123.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmpg123.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+    if [ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libmpg123/.git" ]; then
 
@@ -3686,7 +3753,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmpg123's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libmpg123" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libmpg123" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libmpg123" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libmpg123" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libmpg123" pull --recurse-submodules --rebase --autostash
@@ -3694,19 +3761,25 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
-        cd "$SRB2BLDROOT/libraries/libmpg123" || exit
-        autoreconf -iv
-        ./configure --prefix=/usr/local/stow/libmpg123
-        make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-        sudo -E make install
-        sudo -E stow -v --adopt libmpg123
-        cd "$BUILD" || exit
+        if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmpg123.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmpg123.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libmpg123" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmpg123/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
+            cd "$SRB2BLDROOT/libraries/libmpg123" || exit
+            autoreconf -iv
+            ./configure --prefix=/usr/local/stow/libmpg123
+            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+            sudo -E make install
+            sudo -E stow -v --adopt libmpg123
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libmpg123" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libmpg123/.comrev"
+            cd "$BUILD" || exit
+
+        fi
 
     fi
 
     # Download libmodplug's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmodplug.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]) && ([ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]); then
+    if [ "$ISOPENMPT" = "libopenmpt" ] || [ "$ISSDL2MIXER" = "libsdl2_mixer" ] || [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libmodplug/.git" ]; then
 
@@ -3716,7 +3789,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libmodplug's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libmodplug" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libmodplug" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libmodplug" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libmodplug" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libmodplug" pull --recurse-submodules --rebase --autostash
@@ -3724,33 +3797,39 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
-        mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
-        cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug -DCMAKE_MACOSX_RPATH=OFF
-        cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo -E cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
-        sudo -E stow -v --adopt libmodplug
+        if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmodplug.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libmodplug" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmodplug/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
+            mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
+            cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libmodplug -DCMAKE_MACOSX_RPATH=OFF
+            cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo -E cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
+            sudo -E stow -v --adopt libmodplug
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libmodplug" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libmodplug/.comrev"
+
+        fi
 
     fi
 
     # Download libSDL2's source code, build and install it.
-    if [ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]; then
+    if [ ! -d "$SRB2BLDROOT/libraries/libsdl2/.git" ]; then
 
-        if [ ! -d "$SRB2BLDROOT/libraries/libsdl2/.git" ]; then
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2's source code. Please wait..."
+        git clone https://github.com/libsdl-org/SDL.git --recursive --branch "release-$MACOSSDL2VER" "$SRB2BLDROOT/libraries/libsdl2"
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2's source code. Please wait..."
-            git clone https://github.com/libsdl-org/SDL.git --recursive --branch "release-$MACOSSDL2VER" "$SRB2BLDROOT/libraries/libsdl2"
+    else
 
-        else
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2's source code. Please wait..."
+        git -C "$SRB2BLDROOT/libraries/libsdl2" clean -qdfx -e .comrev
+        git -C "$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
+        git -C "$SRB2BLDROOT/libraries/libsdl2" checkout -q main
+        git -C "$SRB2BLDROOT/libraries/libsdl2" pull --recurse-submodules --rebase --autostash
+        git -C "$SRB2BLDROOT/libraries/libsdl2" checkout -q "release-$MACOSSDL2VER"
 
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libsdl2" clean -qdfx
-            git -C "$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
-            git -C "$SRB2BLDROOT/libraries/libsdl2" checkout -q main
-            git -C "$SRB2BLDROOT/libraries/libsdl2" pull --recurse-submodules --rebase --autostash
-            git -C "$SRB2BLDROOT/libraries/libsdl2" checkout -q "release-$MACOSSDL2VER"
+    fi
 
-        fi
+    if ([ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2/.comrev")" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
@@ -3758,11 +3837,13 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         cmake --build "$SRB2BLDROOT/libraries/libsdl2/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
         sudo -E cmake --install "$SRB2BLDROOT/libraries/libsdl2/build"
         sudo -E stow -v --adopt libsdl2
+        COMREV=$(git -C "$SRB2BLDROOT/libraries/libsdl2" rev-parse --short HEAD)
+        $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libsdl2/.comrev"
 
     fi
 
     # Download libSDL2_mixer's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer.dylib" ]) && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
+    if [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixer/.git" ]; then
 
@@ -3772,7 +3853,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixer's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" checkout -q main
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" pull --recurse-submodules --rebase --autostash
@@ -3780,40 +3861,46 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixer. Please wait..."
-        cd "$SRB2BLDROOT/libraries/libsdl2-mixer" || exit
-        ./configure \
-            --disable-dependency-tracking \
-            --disable-music-flac \
-            --disable-music-flac-shared \
-            --enable-music-midi \
-            --disable-music-midi-fluidsynth \
-            --disable-music-midi-fluidsynth-shared \
-            --enable-music-midi-native \
-            --disable-music-midi-timidity \
-            --enable-music-mod \
-            --disable-music-mod-mikmod \
-            --disable-music-mod-mikmod-shared \
-            --enable-music-mod-modplug \
-            --disable-music-mod-modplug-shared \
-            --enable-music-mp3 \
-            --enable-music-mp3-mpg123 \
-            --disable-music-mp3-mpg123-shared \
-            --enable-music-ogg \
-            --disable-music-ogg-shared \
-            --disable-music-opus \
-            --disable-music-opus-shared \
-            --enable-music-wave \
-            --prefix=/usr/local/stow/libsdl2-mixer
-        make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
-        sudo -E make install
-        sudo -E stow -v --adopt libsdl2-mixer
-        cd "$BUILD" || exit
+        if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixer. Please wait..."
+            cd "$SRB2BLDROOT/libraries/libsdl2-mixer" || exit
+            ./configure \
+                --disable-dependency-tracking \
+                --disable-music-flac \
+                --disable-music-flac-shared \
+                --enable-music-midi \
+                --disable-music-midi-fluidsynth \
+                --disable-music-midi-fluidsynth-shared \
+                --enable-music-midi-native \
+                --disable-music-midi-timidity \
+                --enable-music-mod \
+                --disable-music-mod-mikmod \
+                --disable-music-mod-mikmod-shared \
+                --enable-music-mod-modplug \
+                --disable-music-mod-modplug-shared \
+                --enable-music-mp3 \
+                --enable-music-mp3-mpg123 \
+                --disable-music-mp3-mpg123-shared \
+                --enable-music-ogg \
+                --disable-music-ogg-shared \
+                --disable-music-opus \
+                --disable-music-opus-shared \
+                --enable-music-wave \
+                --prefix=/usr/local/stow/libsdl2-mixer
+            make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
+            sudo -E make install
+            sudo -E stow -v --adopt libsdl2-mixer
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev"
+            cd "$BUILD" || exit
+
+        fi
 
     fi
 
     # Download libSDL2_mixerX's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer_ext.dylib" ]) && [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
+    if [ "$ISSDL2MIXERX" = "libsdl2_mixerx" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
 
@@ -3823,7 +3910,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
@@ -3831,17 +3918,23 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
-        mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-        cmake -S "$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx -DCMAKE_MACOSX_RPATH=OFF
-        cmake --build "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo -E cmake --install "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-        sudo -E stow -v --adopt libsdl2-mixerx
+        if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer_ext.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+            mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+            cmake -S "$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_FLAC=OFF -DUSE_MP3_MAD=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsdl2-mixerx -DCMAKE_MACOSX_RPATH=OFF
+            cmake --build "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo -E cmake --install "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+            sudo -E stow -v --adopt libsdl2-mixerx
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev"
+
+        fi
 
     fi
 
     # Download libopenmpt's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) && [ "$ISOPENMPT" = "libopenmpt" ]; then
+    if [ "$ISOPENMPT" = "libopenmpt" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
 
@@ -3851,7 +3944,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
@@ -3859,18 +3952,24 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
-        cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
-        gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
-        make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-        sudo -E make PREFIX=/usr/local/stow/libopenmpt install
-        sudo -E stow -v --adopt libopenmpt
-        cd "$BUILD" || exit
+        if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
+            cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
+            gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
+            make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+            sudo -E make PREFIX=/usr/local/stow/libopenmpt install
+            sudo -E stow -v --adopt libopenmpt
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libopenmpt/.comrev"
+            cd "$BUILD" || exit
+
+        fi
 
     fi
 
     # Download libgme's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) && [ "$ISGME" = "libgme" ]; then
+    if [ "$ISGME" = "libgme" ]; then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libgme/.git" ]; then
 
@@ -3880,7 +3979,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libgme" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libgme" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libgme" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libgme" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libgme" pull --recurse-submodules --rebase --autostash
@@ -3888,17 +3987,23 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
-        mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
-        cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme -DCMAKE_MACOSX_RPATH=OFF
-        cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo -E cmake --install "$SRB2BLDROOT/libraries/libgme/build"
-        sudo -E stow -v --adopt libgme
+        if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
+            mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
+            cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libgme -DCMAKE_MACOSX_RPATH=OFF
+            cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo -E cmake --install "$SRB2BLDROOT/libraries/libgme/build"
+            sudo -E stow -v --adopt libgme
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libgme/.comrev"
+
+        fi
 
     fi
 
     # Download DiscordRPC's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libdiscord-rpc.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" ]) && [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+    if [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
@@ -3908,7 +4013,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/discord-rpc" checkout -q master
             git -C "$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
@@ -3916,17 +4021,23 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
-        mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
-        cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc -DCMAKE_MACOSX_RPATH=OFF
-        cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo -E cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
-        sudo -E stow -v --adopt discord-rpc
+        if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libdiscord-rpc.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/discord-rpc/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
+            mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
+            cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc -DCMAKE_MACOSX_RPATH=OFF
+            cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo -E cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
+            sudo -E stow -v --adopt discord-rpc
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/discord-rpc/.comrev"
+
+        fi
 
     fi
 
     # Download libopenvr's source code, build and install it.
-    if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenvr_api.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenvr_api.dylib" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+    if ([ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ ! -d "$SRB2BLDROOT/libraries/libopenvr/.git" ]; then
 
@@ -3936,7 +4047,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         else
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
-            git -C "$SRB2BLDROOT/libraries/libopenvr" clean -qdfx
+            git -C "$SRB2BLDROOT/libraries/libopenvr" clean -qdfx -e .comrev
             git -C "$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "$SRB2BLDROOT/libraries/libopenvr" checkout -q master
             git -C "$SRB2BLDROOT/libraries/libopenvr" pull --recurse-submodules --rebase --autostash
@@ -3944,13 +4055,19 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
-        mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
-        cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
-        cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr -DCMAKE_MACOSX_RPATH=OFF
-        cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-        sudo -E cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
-        sudo -E stow -v --adopt libopenvr
+        if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenvr_api.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenvr_api.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenvr/.comrev")" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
+            mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
+            cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
+            cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libopenvr -DCMAKE_MACOSX_RPATH=OFF
+            cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+            sudo -E cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
+            sudo -E stow -v --adopt libopenvr
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libopenvr/.comrev"
+
+        fi
 
     fi
 
@@ -4564,7 +4681,7 @@ WINMENUSHORTCUT
 
 listasset() {
     clear
-    # List installed games.
+
     if [ -z "$(find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "Can't find downloaded assets."
@@ -4572,12 +4689,13 @@ listasset() {
 
     fi
 
+    # List downloaded assets.
     find "$SRB2BLDROOT/assets" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | gawk -F'/' '{print $NF}' | sort
 }
 
 listbuild() {
     clear
-    # List installed games.
+
     if [ -z "$(find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | sort)" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "Can't find downloaded builds."
@@ -4585,6 +4703,7 @@ listbuild() {
 
     fi
 
+    # List downloaded source code.
     find "$SRB2BLDROOT/builds" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort
 }
 
@@ -4628,7 +4747,7 @@ listconfig() {
 
 listinstalled() {
     clear
-    # List installed games.
+
     if [ -z "$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "Can't find installed builds."
@@ -4636,10 +4755,12 @@ listinstalled() {
 
     fi
 
+    # List installed games.
     find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | gawk -F'/' '{print $NF}' | sort
 }
 
 sudo_ping() {
+    # Make sudo to extend password timeout.
     if [ -n "$SUDO_PID" ]; then
 
         if [ "$1" = stop ]; then
@@ -4677,7 +4798,7 @@ sudo_ping() {
 
 upgrade() {
     clear
-    # Make a loop to find the SRB2 source code directories and then update them one by one.
+
     if [ -z "$(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort)" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "Can't find installed builds."
@@ -4685,6 +4806,7 @@ upgrade() {
 
     fi
 
+    # Make a loop to find the SRB2 source code directories and then update them one by one.
     for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort); do
 
         export BUILD="$BUILDPATH/$u"
@@ -4742,6 +4864,7 @@ upgrade() {
 
 usage() {
     clear
+
     $PRINTF "%s\n" "
 Build and install SRB2/SRB2Kart from source.
 
@@ -4787,8 +4910,7 @@ Usage: srb2bld [OPTIONS]
      4. If on Linux you get error with \"/dev/fuse\" or FUSE when running script, then load fuse module with \"sudo modprobe fuse\". You can write \"fuse\" in configuration file, usually in file \"/etc/modules\" or \"/etc/modules-load.d/fuse.conf\" or \"/etc/conf.d/modules/fuse.conf\", to automatically load this module at boot.
 
      5. If 64-bit Linux system has issues with loading \"Sonic Robo Blast 2 Final Demo\" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
-- Debian/Ubuntu/Debian based/Ubuntu based:
-       sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386
+         - Debian/Ubuntu/Debian based/Ubuntu based: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386
 "
 }
 
