@@ -1725,7 +1725,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
@@ -1735,7 +1735,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdlsrb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -1745,7 +1745,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
 exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++.so|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
@@ -2999,7 +2999,7 @@ installtolinux() {
         SRB2DESKTOPOPENGLLNXPATH="/usr/local/share/applications/srb2-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2.png"
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2 binary binary, assets, libraries, icons and desktop file to the system. Please wait..."
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2 binary, assets, libraries, icons and desktop file to the system. Please wait..."
         $SUDO install -Dm755 "$BUILD/bin/lsdl2srb2" "/usr/local/bin/srb2"
         $SUDO install -d "/usr/local/share/games/SRB2"
         $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "/usr/local/share/games/SRB2"
@@ -3171,14 +3171,8 @@ installtolinux() {
 
     if [ -n "$(ldd $SRB2BINARYLNXPATH | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u)" ]; then
 
-        if [ -x "$(which emerge 2> /dev/null)" ]; then
-
-            LIBPATH="/usr/lib/"
-
-        fi
-
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
-        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print "'"$LIBPATH"'"$1}' | sort -u); do
+        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u); do
 
             if [ -x "$(which emerge 2> /dev/null)" ]; then
 
@@ -3188,12 +3182,21 @@ installtolinux() {
 
                 fi
 
-                e-file "$l" | col | gawk -F' ' '/1;32m/ && gsub(/1;29m|0m/,"") {print $NF}'
+                e-file "/usr/lib/$l" | col | gawk -F' ' '/1;32m/ && gsub(/1;29m|0m/,"") {print $NF}'
 
             elif [ -x "$(which pacman 2> /dev/null)" ]; then
 
                 $SUDO pacman -Fy > /dev/null
-                $SUDO pacman -Fq "$l"
+
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    pacman -Fq "$l" | gawk '{print}'
+
+                else
+
+                    pacman -Fq "$l" | gawk '!/lib32-/ {print}'
+
+                fi
 
             elif [ -x "$(which apt-get 2> /dev/null)" ]; then
 
@@ -3208,11 +3211,27 @@ installtolinux() {
 
             elif [ -x "$(which zypper 2> /dev/null)" ]; then
 
-                zypper search --provides --match-exact "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    zypper search --provides --match-exact "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
+
+                else
+
+                    zypper search --provides --match-exact "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
+
+                fi
 
             elif [ -x "$(which dnf 2> /dev/null)" ]; then
 
-                dnf provides -q "$l" | gawk '/.fc[0-9]./ {print $1}'
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    dnf provides -q "/usr/lib/$l" | gawk '/.fc[0-9]./ {print $1}'
+
+                else
+
+                    dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc[0-9]./ {print $1}'
+
+                fi
 
             elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
 
@@ -3223,7 +3242,16 @@ installtolinux() {
                 fi
 
                 xlocate -S > /dev/null
-                xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | uniq
+
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    xlocate "$l" | gawk '!/-devel-/ && /-32bit-/ {print $1}' | gawk '!a[$0]++'
+
+                else
+
+                    xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | gawk '!a[$0]++'
+
+                fi
 
             fi
 
@@ -3239,11 +3267,12 @@ installtolinux() {
 
         elif [ -x "$(which apt-get 2> /dev/null)" ]; then
 
-            #            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-            #                PACKAGE=$(printf "%s\n" "$PACKAGE" | gawk '!/nvidia/primus/virtualbox/ {gsub("$","'":$ISARM"'");print}')
+                ISARM=$(printf "%s\n" "$ISARM" | gawk -F'/' '{print $1}')
+                PACKAGE=$(printf "%s\n" "$PACKAGE" | gawk '!/nvidia|primus|virtualbox/ {gsub("$","':$ISARM'");print}')
 
-            #            fi
+            fi
 
             $SUDO apt-get install -y $PACKAGE
 
@@ -3292,7 +3321,16 @@ installtolinux() {
                 fi
 
                 xlocate -S > /dev/null
-                xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | uniq
+
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    xlocate "$l" | gawk '!/-devel-/ && /-32bit-/ {print $1}' | gawk '!a[$0]++'
+
+                else
+
+                    xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | gawk '!a[$0]++'
+
+                fi
 
             fi
 
@@ -3353,7 +3391,7 @@ INSTALL
 
     fi
 
-    $PRINTF "$SUCCESS\n%s\n\e[0m\a" "Installation of $BUILDNAME is successful and is located at $SRB2PATH."
+    $PRINTF "$SUCCESS\n%s\n\e[0m\a" "Installation of $BUILDNAME is successful and is located at $SRB2PATH ."
 }
 
 installtomacos() {
@@ -4755,8 +4793,33 @@ listinstalled() {
 
     fi
 
-    # List installed games.
-    find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | gawk -F'/' '{print $NF}' | sort
+    # List files for installed build.
+    $PRINTF "$MESSAGE%s\n\e[0m" "Please choose installed build by typing number and then pressing enter. Press enter or ctrl+c to quit."
+    array=$(find "$SRB2BLDROOT/installed" -mindepth 1 -maxdepth 1 -type f 2> /dev/null | sort)
+    arrayname=$($PRINTF "%s\n" "$array" | gawk -F'/' '{print $NF}')
+    count="$($PRINTF "%s\n" "$array" | wc -l)"
+    n=""
+    $PRINTF "%s\n" "$arrayname" | gawk '{print NR")", $0}'
+    while true; do
+
+        $PRINTF "#? "
+        read -r n
+
+        if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
+
+            CONF=$($PRINTF "%s\n" "$array" | gawk NR=="${n}")
+            $PRINTF "%s\n" ""
+            gawk '/^/,/---------------/ {gsub("---------------","");print}' "$CONF"
+            break
+
+        else
+
+            $PRINTF "$NOTICE\n%s\n\e[0m" "No option has been chosen."
+            exit
+
+        fi
+
+    done
 }
 
 sudo_ping() {
@@ -4909,8 +4972,10 @@ Usage: srb2bld [OPTIONS]
 
      4. If on Linux you get error with \"/dev/fuse\" or FUSE when running script, then load fuse module with \"sudo modprobe fuse\". You can write \"fuse\" in configuration file, usually in file \"/etc/modules\" or \"/etc/modules-load.d/fuse.conf\" or \"/etc/conf.d/modules/fuse.conf\", to automatically load this module at boot.
 
-     5. If 64-bit Linux system has issues with loading \"Sonic Robo Blast 2 Final Demo\" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
+     5. If 64-bit Linux system has issues with creating or loading \"Sonic Robo Blast 2 Final Demo\" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
          - Debian/Ubuntu/Debian based/Ubuntu based: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386
+
+     6. If Linux system has issue with loading compiled libraries, even though they are installed, set export LD_LIBRARY_PATH=\"/usr/local/lib:\$LD_LIBRARY_PATH\" in \"~/.bash_profile\" or \"~/.zshrc\".
 "
 }
 

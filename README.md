@@ -8,7 +8,7 @@ https://user-images.githubusercontent.com/16626326/156061151-234c36bf-9824-481d-
 - Installing missing dependencies on host system (mostly binaries, except for macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
 - Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
-- Creating customisable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
+- Creating customizable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
 - Runs on Linux, macOS and Windows (Git Bash).
@@ -39,8 +39,8 @@ As for macOS users, they need to install these additional dependencies:
 
 # Dependencies Installation
 **Linux:**
-1. In terminal enter this following commands:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git coreutils findutils bash ncurses curl gawk docker.io stow fuse`,
+1. In terminal enter this following command:
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git coreutils findutils bash ncurses-bin curl gawk docker.io stow fuse`,
 
 - Arch/Arch based: `sudo pacman -S --needed make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
@@ -129,7 +129,7 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility
+# Compatibility (as of 18-02-2022)
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -203,8 +203,10 @@ Usage: srb2bld [OPTIONS]
 
      4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with "sudo modprobe fuse". You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 
-     5. If 64-bit Linux system has issues with loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
+     5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
          - Debian/Ubuntu/Debian based/Ubuntu based: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386
+
+     6. If Linux system has issue with loading compiled libraries, even though they are installed, set export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" in "~/.bash_profile" or "~/.zshrc".
 ```
 
 # Notes
@@ -216,5 +218,7 @@ Usage: srb2bld [OPTIONS]
 
 4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with `sudo modprobe fuse`. You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 
-5. If 64-bit Linux system has issues with loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
+5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
     - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386`
+
+6. If Linux system has issue with loading compiled libraries, even though they are installed, set `export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"` in "\~/.bash_profile" or "\~/.zshrc".
