@@ -2011,7 +2011,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libpng12.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libpng12" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libpng12/.comrev")" ]; then
+        if [ ! -f /usr/local/lib/libpng12.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libpng12" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libpng12/.comrev" 2> /dev/null)" ]; then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
             cd "\$SRB2BLDROOT/libraries/libpng12" || exit
@@ -2046,7 +2046,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libSDL2_mixer_ext.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev")" ]; then
+        if [ ! -f /usr/local/lib/libSDL2_mixer_ext.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev" 2> /dev/null)" ]; then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
@@ -2082,7 +2082,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libopenmpt.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenmpt/.comrev")" ]; then
+        if [ ! -f /usr/local/lib/libopenmpt.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ]; then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
             gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
@@ -2116,7 +2116,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libgme.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libgme/.comrev")" ]; then
+        if [ ! -f /usr/local/lib/libgme.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ]; then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libgme/build"
@@ -2172,7 +2172,7 @@ fi
 
             fi
 
-        elif [ "\$OS" = "Linux" ] && ([ ! -f /usr/local/lib/libdiscord-rpc.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/discord-rpc/.comrev")" ]); then
+        elif [ "\$OS" = "Linux" ] && ([ ! -f /usr/local/lib/libdiscord-rpc.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/discord-rpc/.comrev" 2> /dev/null)" ]); then
 
             cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
             CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
@@ -2206,7 +2206,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libopenvr_api.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev")" ]; then
+        if [ ! -f /usr/local/lib/libopenvr_api.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ]; then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
@@ -3722,7 +3722,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libpng.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libpng.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libpng/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libpng" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libpng/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libpng.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libpng.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libpng/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libpng" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libpng/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
@@ -3756,7 +3756,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libogg.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libogg.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libogg/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libogg" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libogg/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libogg.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libogg.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libogg/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libogg" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libogg/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
@@ -3790,7 +3790,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libvorbis.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libvorbis.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libvorbis/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libvorbis" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libvorbis/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libvorbis.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libvorbis.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libvorbis/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libvorbis" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libvorbis/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
             cd "$SRB2BLDROOT/libraries/libvorbis" || exit
@@ -3826,7 +3826,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmpg123.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmpg123.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libmpg123/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libmpg123" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmpg123/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmpg123.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmpg123.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libmpg123/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libmpg123" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmpg123/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
             cd "$SRB2BLDROOT/libraries/libmpg123" || exit
@@ -3862,7 +3862,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmodplug.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libmodplug/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libmodplug" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmodplug/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmodplug.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libmodplug/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libmodplug" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmodplug/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
@@ -3894,7 +3894,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if ([ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2/.comrev")" ]); then
+    if ([ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2/.comrev" 2> /dev/null)" ]); then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
@@ -3926,7 +3926,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixer. Please wait..."
             cd "$SRB2BLDROOT/libraries/libsdl2-mixer" || exit
@@ -3983,7 +3983,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer_ext.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer_ext.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
@@ -4017,7 +4017,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
             cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
@@ -4052,7 +4052,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
@@ -4086,7 +4086,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libdiscord-rpc.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/discord-rpc/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/discord-rpc/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libdiscord-rpc.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/discord-rpc/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/discord-rpc/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
@@ -4120,7 +4120,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenvr_api.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenvr_api.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libopenvr/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenvr/.comrev")" ]); then
+        if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenvr_api.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenvr_api.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
