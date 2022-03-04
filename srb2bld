@@ -3,7 +3,16 @@
 set -e
 
 # Set environment variables.
-PRINTF=$(which printf | gawk '/bin/ {print}')
+if [ "$(uname)" = "Darwin" ]; then
+
+    PRINTF="printf"
+
+else
+
+    PRINTF=$(which -a printf | gawk '/bin/ {print}')
+
+fi
+
 ARCH=$(uname -m)
 OS=$(uname)
 IS64=$($PRINTF "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, RLENGTH)}')
@@ -35,7 +44,7 @@ fi
 BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
-SRB2PERSONAFILEID="vjartyfqu3mdmjj"
+SRB2PERSONAFILEID="5neoderzan6mbh3"
 MINGWVER="gcc-10-win32"
 MINGWOLDVER="gcc-4.9-win32"
 
@@ -833,19 +842,8 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
-        7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-
-        SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
-
-            rm -f "\$SRB2BLDROOT/assets/SRB2.zip"
-            curl -RL "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
-
-        fi
-
-        7z x -y "\$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-        find "\$BUILD/build/AppDir/usr/games/SRB2/models" -type d -exec chmod 755 {} \;
+        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.exe"
+        7z e -y "\$SRB2BLDROOT/assets/SRB2P_MP.exe" "*/*.pk3" "*/*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
         if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
@@ -1708,6 +1706,39 @@ DESKTOP
     mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
     cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
 
+    # Create game entrypoint and copy libraries to AppDir.
+#DEPS="
+#libFLAC.so.[0-9]
+#libSDL2-2.0.so.[0-9]
+#libSDL2_mixer-2.0.so.[0-9]
+#libSDL2_mixer_ext.so.[0-9]
+#libdiscord-rpc.so
+#libfluidsynth.so.[0-9]
+#libgme.so.[0-9]
+#libjack.so.[0-9]
+#libmad.so.[0-9]
+#libmodplug.so.[0-9]
+#libmpg123.so.[0-9]
+#libogg.so.[0-9]
+#libopenmpt.so.[0-9]
+#libopenvr_api.so
+#libopus.so.[0-9]
+#libopusfile.so.[0-9]
+#libpng.so.[0-9]
+#libpng[0-9].so.[0-9]
+#libpulse-simple.so.[0-9]
+#libpulse.so.[0-9]
+#libpulsecommon-[0-9].[0-9].so.[0-9]
+#libreadline.so.[0-9]
+#libsndio.so.[0-9]
+#libsndfile.so.[0-9]
+#libtinfo.so.[0-9]
+#libvorbis.so.[0-9]
+#libvorbisenc.so.[0-9]
+#libvorbisfile.so.[0-9]
+#libwrap.so.[0-9]
+#"
+
     cat > "\$BUILD/build/AppDir/AppRun" << 'APPRUN'
 #!/bin/sh
 
@@ -1727,6 +1758,8 @@ APPRUNBIN
 
         cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
+#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
@@ -1737,6 +1770,8 @@ APPRUNBIN
 
         cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
+#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
@@ -1746,6 +1781,8 @@ exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
 APPRUNBIN
 
         cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+
+#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
@@ -3630,18 +3667,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
-        unrar x -y "$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" "$BUILD/assets/installer"
-
-        SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-        if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
-
-            rm -f "$SRB2BLDROOT/assets/SRB2.zip"
-            curl -RL "$SRB2ASSETSURL" -o "$SRB2BLDROOT/assets/SRB2.zip"
-
-        fi
-
-        7z x -y "$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.exe"
+        7z e -y "$SRB2BLDROOT/assets/SRB2P_MP.exe" "*/*.pk3" "*/*.wad" -o"$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 
@@ -3695,7 +3722,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libpng.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libpng.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libpng" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libpng/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libpng.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libpng.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libpng.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libpng/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libpng" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libpng/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libpng/build"
@@ -3729,7 +3756,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libogg.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libogg.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libogg" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libogg/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libogg.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libogg.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libogg.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libogg/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libogg" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libogg/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libogg. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
@@ -3763,7 +3790,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libvorbis.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libvorbis.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libvorbis" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libvorbis/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libvorbis.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libvorbis.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libvorbis.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libvorbis/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libvorbis" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libvorbis/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libvorbis. Please wait..."
             cd "$SRB2BLDROOT/libraries/libvorbis" || exit
@@ -3799,7 +3826,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmpg123.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmpg123.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libmpg123" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmpg123/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libmpg123.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmpg123.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmpg123.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libmpg123/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libmpg123" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmpg123/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libmpg123. Please wait..."
             cd "$SRB2BLDROOT/libraries/libmpg123" || exit
@@ -3835,7 +3862,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmodplug.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libmodplug" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmodplug/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libmodplug.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libmodplug.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libmodplug/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libmodplug" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libmodplug/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libmodplug. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
@@ -3867,7 +3894,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if ([ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2/.comrev")" ]; then
+    if ([ ! -f "/usr/local/lib/libSDL2.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2/.comrev")" ]); then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2. Please wait..."
         mkdir -p "$SRB2BLDROOT/libraries/libsdl2/build"
@@ -3899,7 +3926,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libSDL2_mixer.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixer" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixer/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixer. Please wait..."
             cd "$SRB2BLDROOT/libraries/libsdl2-mixer" || exit
@@ -3956,7 +3983,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer_ext.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libSDL2_mixer_ext.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libSDL2_mixer_ext.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
@@ -3990,7 +4017,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libopenmpt.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
             cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
@@ -4025,7 +4052,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libgme.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
@@ -4059,7 +4086,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libdiscord-rpc.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/discord-rpc/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libdiscord-rpc.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libdiscord-rpc.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libdiscord-rpc.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/discord-rpc/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/discord-rpc/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
@@ -4093,7 +4120,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-        if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenvr_api.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenvr_api.dylib" ]) || [ "$(git -C "$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenvr/.comrev")" ]; then
+        if ([ ! -f "/usr/local/lib/libopenvr_api.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenvr_api.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenvr_api.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libopenvr/.comrev")" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenvr/.comrev")" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
             mkdir -p "$SRB2BLDROOT/libraries/libopenvr/build"
