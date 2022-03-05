@@ -1722,37 +1722,37 @@ DESKTOP
     cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
 
     # Create game entrypoint and copy libraries to AppDir.
-#DEPS="
-#libFLAC.so.[0-9]
-#libSDL2-2.0.so.[0-9]
-#libSDL2_mixer-2.0.so.[0-9]
-#libSDL2_mixer_ext.so.[0-9]
-#libdiscord-rpc.so
-#libfluidsynth.so.[0-9]
-#libgme.so.[0-9]
-#libjack.so.[0-9]
-#libmad.so.[0-9]
-#libmodplug.so.[0-9]
-#libmpg123.so.[0-9]
-#libogg.so.[0-9]
-#libopenmpt.so.[0-9]
-#libopenvr_api.so
-#libopus.so.[0-9]
-#libopusfile.so.[0-9]
-#libpng.so.[0-9]
-#libpng[0-9].so.[0-9]
-#libpulse-simple.so.[0-9]
-#libpulse.so.[0-9]
-#libpulsecommon-[0-9].[0-9].so.[0-9]
-#libreadline.so.[0-9]
-#libsndio.so.[0-9]
-#libsndfile.so.[0-9]
-#libtinfo.so.[0-9]
-#libvorbis.so.[0-9]
-#libvorbisenc.so.[0-9]
-#libvorbisfile.so.[0-9]
-#libwrap.so.[0-9]
-#"
+DEPS="
+libFLAC.so.[0-9]
+libSDL2-2.0.so.[0-9]
+libSDL2_mixer-2.0.so.[0-9]
+libSDL2_mixer_ext.so.[0-9]
+libdiscord-rpc.so
+libfluidsynth.so.[0-9]
+libgme.so.[0-9]
+libjack.so.[0-9]
+libmad.so.[0-9]
+libmodplug.so.[0-9]
+libmpg123.so.[0-9]
+libogg.so.[0-9]
+libopenmpt.so.[0-9]
+libopenvr_api.so
+libopus.so.[0-9]
+libopusfile.so.[0-9]
+libpng.so.[0-9]
+libpng[0-9].so.[0-9]
+libpulse-simple.so.[0-9]
+libpulse.so.[0-9]
+libpulsecommon-[0-9].[0-9].so.[0-9]
+libreadline.so.[0-9]
+libsndio.so.[0-9]
+libsndfile.so.[0-9]
+libtinfo.so.[0-9]
+libvorbis.so.[0-9]
+libvorbisenc.so.[0-9]
+libvorbisfile.so.[0-9]
+libwrap.so.[0-9]
+"
 
     cat > "\$BUILD/build/AppDir/AppRun" << 'APPRUN'
 #!/bin/sh
@@ -1771,9 +1771,9 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+#        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
-#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
@@ -1783,9 +1783,9 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdlsrb2" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+#        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdlsrb2" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
-#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -1795,9 +1795,9 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
 exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
 APPRUNBIN
 
-        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+#        cp -Lf \$(ldd "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" | gawk '{print \$3}' | gawk '!/libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
-#        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(for l in \$DEPS; do find /lib* /usr/lib* -name \$l; done) "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
