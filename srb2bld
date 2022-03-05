@@ -44,7 +44,8 @@ fi
 BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
-SRB2PERSONAFILEID="5neoderzan6mbh3"
+#SRB2PERSONAFILEID="5neoderzan6mbh3"
+SRB2PERSONAFILEID="vjartyfqu3mdmjj"
 MINGWVER="gcc-10-win32"
 MINGWOLDVER="gcc-4.9-win32"
 
@@ -842,8 +843,22 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.exe"
-        7z e -y "\$SRB2BLDROOT/assets/SRB2P_MP.exe" "*/*.pk3" "*/*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+#        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.exe"
+#        7z e -y "\$SRB2BLDROOT/assets/SRB2P_MP.exe" "*/*.pk3" "*/*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+        SRB2ASSETSURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
+        if [ "\$(curl -sLI "\$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+
+            rm -f "\$SRB2BLDROOT/assets/SRB2.zip"
+            curl -RL "\$SRB2ASSETSURL" -o "\$SRB2BLDROOT/assets/SRB2.zip"
+
+        fi
+
+        7z x -y "\$SRB2BLDROOT/assets/SRB2.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+        find "\$BUILD/build/AppDir/usr/games/SRB2/models" -type d -exec chmod 755 {} \;
 
         if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
@@ -2011,7 +2026,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libpng12.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libpng12" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libpng12/.comrev" 2> /dev/null)" ]; then
+        if [ ! -f /usr/local/lib/libpng12.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libpng12/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libpng12" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libpng12/.comrev" 2> /dev/null)" ]); then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
             cd "\$SRB2BLDROOT/libraries/libpng12" || exit
@@ -2046,7 +2061,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libSDL2_mixer_ext.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev" 2> /dev/null)" ]; then
+        if [ ! -f /usr/local/lib/libSDL2_mixer_ext.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev" 2> /dev/null)" ]); then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
@@ -2082,7 +2097,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libopenmpt.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ]; then
+        if [ ! -f /usr/local/lib/libopenmpt.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ]); then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
             gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
@@ -2116,7 +2131,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libgme.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ]; then
+        if [ ! -f /usr/local/lib/libgme.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ]); then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libgme/build"
@@ -2172,7 +2187,7 @@ fi
 
             fi
 
-        elif [ "\$OS" = "Linux" ] && ([ ! -f /usr/local/lib/libdiscord-rpc.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/discord-rpc/.comrev" 2> /dev/null)" ]); then
+        elif [ "\$OS" = "Linux" ] && ([ ! -f /usr/local/lib/libdiscord-rpc.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/discord-rpc/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/discord-rpc" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/discord-rpc/.comrev" 2> /dev/null)" ])); then
 
             cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/stow/discord-rpc
             CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
@@ -2206,7 +2221,7 @@ fi
 
         fi
 
-        if [ ! -f /usr/local/lib/libopenvr_api.so ] || [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ]; then
+        if [ ! -f /usr/local/lib/libopenvr_api.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ]); then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
@@ -3651,7 +3666,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     # Download and extract assets.
     $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
-    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
+    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
         SRB2ASSETSURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
         if [ "$(curl -sLI "$SRB2ASSETSURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
@@ -3667,8 +3682,11 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.exe"
-        7z e -y "$SRB2BLDROOT/assets/SRB2P_MP.exe" "*/*.pk3" "*/*.wad" -o"$BUILD/assets/installer"
+        #        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.exe"
+        #        7z e -y "$SRB2BLDROOT/assets/SRB2P_MP.exe" "*/*.pk3" "*/*.wad" -o"$BUILD/assets/installer"
+
+        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        unrar x -y "$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" "$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
 

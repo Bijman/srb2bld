@@ -34,6 +34,7 @@ As for macOS users, they need to install these additional dependencies:
 - Pkg-config,
 - Libtool,
 - P7zip,
+- Unrar/Rar,
 - Makeicns.
 
 # Dependencies Installation
@@ -72,8 +73,8 @@ As for macOS users, they need to install these additional dependencies:
 
 **macOS:**
 1. In terminal enter this following command:
-- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip curl makeicns`,
-- MacPorts: `sudo port install cmake autoconf automake pkgconfig libtool gawk stow p7zip curl makeicns`.
+- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl makeicns`,
+- MacPorts: `sudo port install cmake autoconf automake pkgconfig libtool gawk stow p7zip unrar curl makeicns`.
 
 # Installation
 **Linux:**
