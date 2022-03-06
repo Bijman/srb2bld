@@ -9,7 +9,7 @@ if [ "$(uname)" = "Darwin" ]; then
 
 else
 
-    PRINTF=$(which -a printf | gawk '/bin/ {print}')
+    PRINTF=$(which -a printf | gawk '/bin/ {print}' | head -n1)
 
 fi
 
