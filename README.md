@@ -3,18 +3,19 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://user-images.githubusercontent.com/16626326/156061151-234c36bf-9824-481d-9d8f-f19711bcece1.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR on Linux, macOS (tested on version 10.14/Mojave and 10.15/Catalina) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR, wadcli and SLADE on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing custom SRB2 build from local or remote Git repository,
 - Ability to set user's flags before compiling,
-- Installing missing dependencies on host system (mostly binaries, except for macOS) based on user's set compilation flags,
+- Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
-- Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04, some builds may not compile/run successfully),
+- Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04),
 - Creating customizable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
 - Runs on Linux, macOS and Windows (Git Bash).
 
 # Dependencies
-- GNU Coreutils,
+- Basic system utilities like GNU Coreutils, BusyBox or MacOS out-of-the-box system utilities,
 - Bash or any POSIX compliant shell,
 - Findutils,
 - Curl,
@@ -133,7 +134,7 @@ As for macOS users, they need to install these additional dependencies:
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Uncapped Plus    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
+| SRB2 Uncapped PLUS    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -143,6 +144,8 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 Kart             |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
 | SRB2 Kart Moe Mansion |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 Kart VR          |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| wadcli                |          ✅           |         ⛔           |        ✅         |        ⛔       |       ⛔      |
+| SLADE                 |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
 
 **Legend:**
 
@@ -206,7 +209,55 @@ Usage: srb2bld [OPTIONS]
      5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
          - Debian/Ubuntu/Debian based/Ubuntu based: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386
 
-     6. If Linux system has issue with loading compiled libraries, even though they are installed, set export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" in "~/.bash_profile" or "~/.zshrc".
+     6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" in "~/.bash_profile" or "~/.zshrc".
+
+     7. There are couple of patches applied within source code of games. Their purpose is to prevent conflicts of installing/running of multiple builds overlapping each other with the same names of directories for storing assets and configuration/saves. Other patches include fixing compilation for some builds on particular systems.
+
+     8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart build, if you chose default branch or kept previously chosen different branch.
+
+     9. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+
+          - SRB2GITPATH - path to local or remote repository,
+
+          - SRB2GITVER - chosen branch to download build from remote repository,
+
+          - SRB2ASSETPATH - path to assets from local or remote path (supported links/paths:
+               - websites with direct link to file, for example, "https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip",
+               - mega.nz,
+               - drive.google.com,
+               - dropbox.com,
+               - full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.)
+
+          EXAMPLES:
+               1. export SRB2GITPATH="https://github.com/STJr/SRB2"
+
+               2. export SRB2GITPATH="https://git.do.srb2.org/TehRealSalt/SRB2"
+
+               3. export SRB2GITPATH="$HOME/Builds/SRB2"
+
+               4. export SRB2GITPATH="C:\Builds\SRB2"
+
+               5. export SRB2GITVER="udmf"
+
+               6. export SRB2GITVER="master"
+
+               7. export SRB2ASSETPATH="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip"
+
+               8. export SRB2ASSETPATH="https://mega.nz/file/JQswBDAA#IPXWeTmrXrI9YZx6zUznJQ2uIAHryv_WP1JxWfnKbts"
+
+               9. export SRB2ASSETPATH="https://drive.google.com/file/d/1Vc-lHph8MxlnfaBZnv0NNpoFKhehmce6"
+
+               10. export SRB2ASSETPATH="https://www.dropbox.com/s/5neoderzan6mbh3/SRB2PERSONA%20v1.3.3%20Full%20Installer.exe"
+
+               11. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full.zip"
+
+               12. export SRB2ASSETPATH="C:\Downloads\SRB2-Full.zip"
+
+               13. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full"
+
+               14. export SRB2ASSETPATH="C:\Downloads\SRB2-Full"
+
+          Then choose "Build SRB2 Custom", when running script.
 ```
 
 # Notes
@@ -220,5 +271,52 @@ Usage: srb2bld [OPTIONS]
 
 5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
     - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386`
+6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set `export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"` in "\~/.bash_profile" or "\~/.zshrc".
 
-6. If Linux system has issue with loading compiled libraries, even though they are installed, set `export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"` in "\~/.bash_profile" or "\~/.zshrc".
+7. There are couple of patches applied within source code of games. Their purpose is to prevent conflicts of installing/running of multiple builds overlapping each other with the same names of directories for storing assets and configuration/saves. Other patches include fixing compilation for some builds on particular systems.
+
+8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart build, if you chose default branch or kept previously chosen different branch.
+
+9. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+
+    - SRB2GITPATH - path to local or remote repository,
+
+    - SRB2GITVER - chosen branch to download build from remote repository,
+
+    - SRB2ASSETPATH - path to assets from local or remote path (supported links/paths:
+        - websites with direct link to file, for example, "https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip",
+        - mega.nz,
+        - drive.google.com,
+        - dropbox.com,
+        - full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.)
+
+  EXAMPLES:
+        1. export SRB2GITPATH="https://github.com/STJr/SRB2"
+
+        2. export SRB2GITPATH="https://git.do.srb2.org/TehRealSalt/SRB2"
+
+        3. export SRB2GITPATH="$HOME/Builds/SRB2"
+
+        4. export SRB2GITPATH="C:\Builds\SRB2"
+
+        5. export SRB2GITVER="udmf"
+
+        6. export SRB2GITVER="master"
+
+        7. export SRB2ASSETPATH="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip"
+
+        8. export SRB2ASSETPATH="https://mega.nz/file/JQswBDAA#IPXWeTmrXrI9YZx6zUznJQ2uIAHryv_WP1JxWfnKbts"
+
+        9. export SRB2ASSETPATH="https://drive.google.com/file/d/1Vc-lHph8MxlnfaBZnv0NNpoFKhehmce6"
+
+        10. export SRB2ASSETPATH="https://www.dropbox.com/s/5neoderzan6mbh3/SRB2PERSONA%20v1.3.3%20Full%20Installer.exe"
+
+        11. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full.zip"
+
+        12. export SRB2ASSETPATH="C:\Downloads\SRB2-Full.zip"
+
+        13. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full"
+
+        14. export SRB2ASSETPATH="C:\Downloads\SRB2-Full"
+
+   Then choose "Build SRB2 Custom", when running script.
