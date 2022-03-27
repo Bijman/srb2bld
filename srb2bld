@@ -46,7 +46,6 @@ BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
 UBUSOFTVER="20.04"
-#SRB2PERSONAFILEID="5neoderzan6mbh3"
 SRB2PERSONAFILEID="vjartyfqu3mdmjj"
 SRB2VER="SRB2_release_2.2.9"
 SRB2PERSONAVER="1.3.3"
@@ -353,7 +352,7 @@ choosebuild() {
     while
 
         $PRINTF "$MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart VR" "Build SRB2 Custom" "Build Wad CLI" "Build SLADE"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart VR" "Build SRB2 Custom" "Build wadcli" "Build SLADE"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -506,7 +505,7 @@ EXAMPLES:
 
                     if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
-                        $PRINTF "$MESSAGE%s\n\e[0m" "Removing existing source at $BUILD path."
+                        $PRINTF "$MESSAGE\n%s\n\e[0m" "Removing existing source at $BUILD path."
                         sleep 1
                         rm -rf "$BUILD"
 
@@ -3868,7 +3867,7 @@ dockerrun() {
         elif [ "$OS" = "Linux" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/slade" ]); then
 
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating Docker image for glibc based Linux SRB2 tools. Please wait..."
-            docker pull "$ISARM"ubuntu:"$UBUVER"
+            docker pull "$ISARM"ubuntu:"$UBUSOFTVER"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 tools. Please wait..."
             docker build --rm -t srb2-tools-linux-glibc-docker "$SRB2BLDROOT/containers/srb2-tools-linux-glibc-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
@@ -5921,17 +5920,17 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 Custom"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Custom"
-        SRB2WINBIN="srb2win.exe"
+        SRB2WINBIN="srb2win$IS64.exe"
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -6173,7 +6172,7 @@ preparebuild() {
             # Set asset's path, if branch was set to other than default.
             if [ -z "$SRB2ASSETPATH" ] || [ "$BUILD" != "$BUILDPATH/srb2-custom" ]; then
 
-                $PRINTF "$MESSAGE%s\e[0m" "Please enter $BUILDNAME's assets path, or just press enter to download and extract the latest SRB2/SRB2Kart stable release assets. Supported links/paths:
+                $PRINTF "$MESSAGE\n%s\e[0m" "Please enter $BUILDNAME's assets path, or just press enter to download and extract the latest SRB2/SRB2Kart stable release assets. Supported links/paths:
 	- websites with direct link to file, for example, \"https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip\",
 	- mega.nz,
 	- drive.google.com,

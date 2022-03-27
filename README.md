@@ -15,9 +15,10 @@ https://user-images.githubusercontent.com/16626326/156061151-234c36bf-9824-481d-
 - Runs on Linux, macOS and Windows (Git Bash).
 
 # Dependencies
-- Basic system utilities like GNU Coreutils, BusyBox or MacOS out-of-the-box system utilities,
+- Basic system utilities like GNU Coreutils, BusyBox or macOS out-of-the-box system utilities,
 - Bash or any POSIX compliant shell,
 - Findutils,
+- Which,
 - Curl,
 - Gawk,
 - Ncurses,
@@ -41,23 +42,23 @@ As for macOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following command:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git coreutils findutils bash ncurses-bin curl gawk docker.io stow fuse`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils bash ncurses-bin curl gawk docker.io stow fuse`,
 
-- Arch/Arch based: `sudo pacman -S --needed make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Gentoo/Gentoo based: `sudo emerge -av git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Gentoo/Gentoo based: `sudo emerge -av git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Fedora/Fedora based: `sudo dnf install make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- OpenSUSE/OpenSUSE based: `sudo zypper in make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- OpenSUSE/OpenSUSE based: `sudo zypper in make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Void/Void based: `sudo xbps-install -S make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Void/Void based: `sudo xbps-install -S make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Alpine/Alpine based: `sudo apk add make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Alpine/Alpine based: `sudo apk add make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- Solus/Solus based: `sudo eopkg it make git coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Solus/Solus based: `sudo eopkg it make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
 
-- NixOS/NixOS based: `sudo nix-env -i gnumake git coreutils findutils bash ncurses curl gawk stow fuse` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
+- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils bash ncurses curl gawk stow fuse` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -155,7 +156,7 @@ As for macOS users, they need to install these additional dependencies:
 
 ⛔ - Building failure.
 
-*Only 32bit binaries are currently supported. SRB2 v2.0 has graphical issues when running with OpenGL on Linux and Windows.
+*Only 32-bit binaries are currently supported. SRB2 v2.0 has graphical issues when running with OpenGL on Linux and Windows.
 
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
