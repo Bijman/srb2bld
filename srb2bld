@@ -15,6 +15,13 @@ fi
 
 ARCH=$(uname -m)
 OS=$(uname)
+
+if [ "$OS" = "Linux" ]; then
+
+    OSRELEASE=$(gawk -F'=' '/^NAME=/ {gsub("\"","");print $NF}' /etc/os-release)
+
+fi
+
 IS64=$($PRINTF "%s\n" "$ARCH" | gawk 'match($0, /64/) {print substr($0, RSTART, RLENGTH)}')
 USER=$(whoami)
 
@@ -45,7 +52,7 @@ fi
 BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
-UBUSOFTVER="20.04"
+UBUSOFTVER="22.04"
 SRB2PERSONAFILEID="vjartyfqu3mdmjj"
 SRB2VER="SRB2_release_2.2.9"
 SRB2PERSONAVER="1.3.3"
@@ -60,11 +67,18 @@ if [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, R
     GCCOLDVER="gcc-6"
     GXXVER="g++"
 
-else
+elif [ "$OSRELEASE" = "Ubuntu" ] || [ "$OSRELEASE" = "Debian" ] || [ "$OSRELEASE" = "Fedora" ]; then
 
     GCCVER="gcc-10"
     GCCOLDVER="gcc-4.9"
     GXXVER="g++-10"
+    UBUSOFTVER="20.04"
+
+else
+
+    GCCVER="gcc"
+    GCCOLDVER="gcc"
+    GXXVER="g++"
 
 fi
 
@@ -89,7 +103,7 @@ if [ "$OS" = "Darwin" ]; then
     MACOSSDL2VER="2.0.18"
     MACOSSDL2MIXERVER="2.0.4"
     MACOSSDL2MIXERXVER="2.5.0"
-    MACOSOPENMPTVER="0.5.14"
+    MACOSOPENMPTVER="0.4.12"
     MACOSGMEVER="0.6.2"
     MACOSDISCORDRPCVER="master"
     MACOSOPENVRVER="1.10.30"
@@ -1256,6 +1270,10 @@ dockerentry() {
 
         sudo apk update && sudo apk upgrade
 
+    elif [ -n "\$(which pacman 2> /dev/null)" ]; then
+
+        sudo pacman -Syu --needed --noconfirm
+
     else
 
         sudo apt update && sudo apt full-upgrade -y
@@ -1543,7 +1561,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
             fi
 
-            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
         else
 
@@ -1708,7 +1726,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         fi
 
-        cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \$CONF
+        cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \$CONF
         make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/build"
         make -C "\$BUILD/build" install DESTDIR="\$BUILD/build/AppDir"
         rm -rf "\$BUILD/build/AppDir/usr/share/applications/net.mancubus.SLADE.desktop"
@@ -2441,7 +2459,7 @@ else
 
             fi
 
-            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_CXX_COMPILER="\$ARCH-w64-mingw32-$MINGWCXXVER" -DCMAKE_C_COMPILER="\$ARCH-w64-mingw32-$MINGWCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_CXX_COMPILER="\$ARCH-w64-mingw32-$MINGWCXXVER" -DCMAKE_C_COMPILER="\$ARCH-w64-mingw32-$MINGWCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
         else
 
@@ -2495,7 +2513,7 @@ else
 
             fi
 
-            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
         else
 
@@ -2892,7 +2910,7 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             fi
 
-            cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_CXX_COMPILER="\$ARCH-w64-mingw32-$MINGWCXXVER" -DCMAKE_C_COMPILER="\$ARCH-w64-mingw32-$MINGWCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \$CONF
+            cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_CXX_COMPILER="\$ARCH-w64-mingw32-$MINGWCXXVER" -DCMAKE_C_COMPILER="\$ARCH-w64-mingw32-$MINGWCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \$CONF
             make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/build"
             make -C "\$BUILD/build" install DESTDIR="\$BUILD/build/AppDir"
             rm -rf "\$BUILD/build/AppDir/usr/share/applications/net.mancubus.SLADE.desktop"
@@ -3038,7 +3056,7 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             fi
 
-            cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local \$CONF
+            cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local \$CONF
             make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/build"
             sudo make -C "\$BUILD/build" install
             sudo rm -rf "/usr/local/share/applications/net.mancubus.SLADE.desktop"
@@ -4330,6 +4348,8 @@ installtolinux() {
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
         PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u); do
 
+            l=$(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
+
             if [ -x "$(which emerge 2> /dev/null)" ]; then
 
                 if [ ! -x "$(which e-file 2> /dev/null)" ]; then
@@ -4363,7 +4383,6 @@ installtolinux() {
                 fi
 
                 $SUDO apt-file update > /dev/null
-                l=$(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
                 apt-file -l find "$l" | gawk 'NF{print}'
 
             elif [ -x "$(which zypper 2> /dev/null)" ]; then
@@ -4416,11 +4435,11 @@ installtolinux() {
 
         if [ -x "$(which emerge 2> /dev/null)" ]; then
 
-            $SUDO emerge $PACKAGE
+            $SUDO emerge $PACKAGE 2> /dev/null
 
         elif [ -x "$(which pacman 2> /dev/null)" ]; then
 
-            $SUDO pacman -S --needed --noconfirm $PACKAGE
+            $SUDO pacman -S --needed --noconfirm $PACKAGE 2> /dev/null
 
         elif [ -x "$(which apt-get 2> /dev/null)" ]; then
 
@@ -4431,19 +4450,19 @@ installtolinux() {
 
             fi
 
-            $SUDO apt-get install -y $PACKAGE
+            $SUDO apt-get install -y $PACKAGE 2> /dev/null
 
         elif [ -x "$(which zypper 2> /dev/null)" ]; then
 
-            $SUDO zypper install -y $PACKAGE
+            $SUDO zypper install -y $PACKAGE 2> /dev/null
 
         elif [ -x "$(which dnf 2> /dev/null)" ]; then
 
-            $SUDO dnf install --best --skip-broken -y $PACKAGE
+            $SUDO dnf install --best --skip-broken -y $PACKAGE 2> /dev/null
 
         elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
 
-            $SUDO xbps-install -Sy $PACKAGE
+            $SUDO xbps-install -Sy $PACKAGE 2> /dev/null
 
         else
 
@@ -4511,11 +4530,11 @@ installtolinux() {
 
         if [ -x "$(which apk 2> /dev/null)" ]; then
 
-            $SUDO apk add --force-broken-world $PACKAGE
+            $SUDO apk add --force-broken-world $PACKAGE 2> /dev/null
 
         elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
 
-            $SUDO xbps-install -Sy $PACKAGE
+            $SUDO xbps-install -Sy $PACKAGE 2> /dev/null
 
         else
 
@@ -4716,13 +4735,13 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
                 cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(which wx-config wx-config-gtk3 $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
                 # Display content of CMakeLists for a good view of available compilation flags.
                 cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(which wx-config wx-config-gtk3) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -4819,13 +4838,36 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing missing dependencies. Please wait..."
     sudo_ping
 
+    # Fixing permission conflicts between compiled libraries and installed from package manager.
+    if [ "$(stat -f%u /usr/local/stow)" = "0" ]; then
+
+        sudo chown -R $(whoami) /usr/local/stow
+
+    fi
+
     if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
-        brew install -f fmt
+        if [ "$(which port 2> /dev/null)" ]; then
+
+            sudo port -Nc install libfmt
+
+        else
+
+            brew install -f fmt
+
+        fi
 
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
-        brew install -f ftgl glew fluidsynth gtk+ freeimage sfml libmodplug wxwidgets
+        if [ -n "$(which port 2> /dev/null)" ]; then
+
+            sudo port -Nc install ftgl glew fluidsynth gtk3 freeimage sfml libmodplug $(port -q search wxwidgets-[0-9] | tail -n1) lua
+
+        else
+
+            brew install -f ftgl glew fluidsynth gtk+ freeimage sfml libmodplug wxwidgets lua
+
+        fi
 
     else
 
@@ -5149,6 +5191,13 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
                 gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
                 make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+                #cp -f "$SRB2BLDROOT/libraries/libopenmpt/build/autotools/"* "$SRB2BLDROOT/libraries/libopenmpt"
+                #cp -f "$SRB2BLDROOT/libraries/libopenmpt/libopenmpt/Doxyfile" "$SRB2BLDROOT/libraries/libopenmpt/Doxyfile.in"
+                #mkdir -p "$SRB2BLDROOT/libraries/libopenmpt/libmodplug"
+                #cp -f "$SRB2BLDROOT/libraries/libopenmpt/include/modplug/include/libmodplug/libmodplug.pc.in" "$SRB2BLDROOT/libraries/libopenmpt/libmodplug"
+                #autoreconf -iv
+                #./configure --without-portaudio --without-portaudiocpp --without-sndfile --without-flac --prefix=/usr/local/stow/libopenmpt
+                #make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
                 sudo -E make PREFIX=/usr/local/stow/libopenmpt install
                 sudo -E stow -v --adopt libopenmpt
                 COMREV=$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)
@@ -5264,6 +5313,13 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
+    # Fixing permission conflicts between compiled libraries and installed from package manager.
+    if [ "$(stat -f%u /usr/local/stow)" = "0" ]; then
+
+        sudo chown -R $(whoami) /usr/local/stow
+
+    fi
+
     if [ "$GITVERCONF" = "$GITDEFVER" ]; then
 
         unset GITVERCONF
@@ -5324,12 +5380,12 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
-        cmake -S "$BUILD" -B "$BUILD/build" -DwxWidgets_CONFIG_EXECUTABLE=$(which wx-config wx-config-gtk3) -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVERSLADE" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps $CONF
+        cmake -S "$BUILD" -B "$BUILD/build" -DwxWidgets_CONFIG_EXECUTABLE=$(which wx-config wx-config-gtk3 $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVERSLADE" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
 
     else
 
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$GITVER-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DSDL2_INCLUDE_DIR="$LIBSDL2PREFIX/include/SDL2" -DSDL2_LIBRARY="$LIBSDL2PREFIX/lib/libSDL2.dylib" -DGME_INCLUDE_DIR="$LIBGMEPREFIX/include/gme" -DGME_LIBRARY="$LIBGMEPREFIX/lib/libgme.dylib" -DOPENMPT_INCLUDE_DIR="$LIBOPENMPTPREFIX/include/libopenmpt" -DOPENMPT_LIBRARY="$LIBOPENMPTPREFIX/lib/libopenmpt.dylib" -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
+        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$GITVER-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DCMAKE_MODULE_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DCMAKE_SHARED_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DSDL2_INCLUDE_DIR="$LIBSDL2PREFIX/include/SDL2" -DSDL2_LIBRARY="$LIBSDL2PREFIX/lib/libSDL2.dylib" -DSDL2_MIXER_INCLUDE_DIR="/opt/local/include/SDL2" -DSDL2_MIXER_LIBRARY="$LIBSDL2PREFIX/lib/libSDL2_mixer.dylib" -DGME_INCLUDE_DIR="$LIBGMEPREFIX/include/gme" -DGME_LIBRARY="$LIBGMEPREFIX/lib/libgme.dylib" -DOPENMPT_INCLUDE_DIR="$LIBOPENMPTPREFIX/include/libopenmpt" -DOPENMPT_LIBRARY="$LIBOPENMPTPREFIX/lib/libopenmpt.dylib" -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
 
     fi
@@ -5659,6 +5715,16 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         else
 
+            #APPBUNDLELIBS=$(otool -L "$BUILD/build/$BUILDNAME.app/Contents/MacOS/$BUILDNAME" | gawk '/.dylib/ && !/usr\/lib/ {print $1}')
+            #            cp -f $APPBUNDLELIBS "$BUILD/build/$BUILDNAME.app/Contents/Frameworks"
+            #
+            #             for l in $APPBUNDLELIBS; do
+
+            #                 LIBNAME=$(printf "%s\n" "$l" | gawk -F'/' '{print $NF}')
+            #                 install_name_tool -change "$l" "@executable_path/../Frameworks/$LIBNAME" "$BUILD/build/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
+
+            #             done
+
             make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) -C "$BUILD/build" package
 
         fi
@@ -5723,17 +5789,18 @@ installtowindows() {
 
         SRB2WINDIR="SRB2"
         SRB2WINMENUDIR="Sonic Robo Blast 2"
-        SRB2WINBIN="srb2win$IS64.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5741,17 +5808,18 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 Uncapped Plus"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Uncapped PLUS"
-        SRB2WINBIN="srb2win$IS64.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5759,17 +5827,18 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 NetPlus"
         SRB2WINMENUDIR="Sonic Robo Blast 2 NetPlus"
-        SRB2WINBIN="srb2win$IS64.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5777,17 +5846,18 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 VR"
         SRB2WINMENUDIR="Sonic Robo Blast 2 VR"
-        SRB2WINBIN="srb2win.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -openvr -win" > "$SRB2WINPATH/$SRB2WINDIR (OpenVR).bat"
@@ -5796,17 +5866,18 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 v2.1 Legacy"
         SRB2WINMENUDIR="Sonic Robo Blast 2 v2.1 Legacy"
-        SRB2WINBIN="srb2win.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/exchndl.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/exchndl.dll" "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5814,11 +5885,12 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 v2.0"
         SRB2WINMENUDIR="Sonic Robo Blast 2 v2.0"
-        SRB2WINBIN="srb2win.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/r_opengl.dll" "$BUILD/build/AppDir/usr/lib/fmod.dll" "$SRB2WINPATH"
         touch "$SRB2WINPATH/md2.dat"
@@ -5830,16 +5902,17 @@ installtowindows() {
         SRB2WINDIR="SRB2 Final Demo"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Final Demo"
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
-        SRB2WINBIN="srb2sdl.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5848,16 +5921,17 @@ installtowindows() {
         SRB2WINDIR="SRB2 Persona"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Persona"
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
-        SRB2WINBIN="srb2win.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj-1.dll" "$BUILD/build/AppDir/usr/lib/libstdc++-6.dll" "$BUILD/build/AppDir/usr/lib/libfluidsynth-2.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5865,17 +5939,18 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 Kart"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Kart"
-        SRB2WINBIN="srb2kart.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5883,17 +5958,18 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 Kart Moe Mansion"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Kart Moe Mansion"
-        SRB2WINBIN="srb2kart.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5901,17 +5977,18 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 Kart VR"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Kart VR"
-        SRB2WINBIN="srb2kart.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        #        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -openvr -win" > "$SRB2WINPATH/$SRB2WINDIR (OpenVR).bat"
@@ -5920,17 +5997,27 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 Custom"
         SRB2WINMENUDIR="Sonic Robo Blast 2 Custom"
-        SRB2WINBIN="srb2win$IS64.exe"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        #        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
+
+        if [ -f "$(find "$BUILD/build/AppDir/usr/lib" -name "libgcc_s_sjlj"*.dll -type f 2> /dev/null | head -n1)" ]; then
+
+            cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
+
+        else
+
+            cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
+
+        fi
+
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -5938,7 +6025,7 @@ installtowindows() {
 
         SRB2WINDIR="wadcli"
         SRB2WINMENUDIR="wadcli"
-        SRB2WINBIN="wadcli.exe"
+        SRB2WINBIN=$(find "$BUILD" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
@@ -5947,14 +6034,13 @@ installtowindows() {
         mkdir -p "$SRB2WINPATH"
         cp -rf "$BUILD/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        #        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR.bat"
 
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
         SRB2WINDIR="slade"
         SRB2WINMENUDIR="slade"
-        SRB2WINBIN="slade.exe"
+        SRB2WINBIN=$(find "$BUILD" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
@@ -5963,8 +6049,7 @@ installtowindows() {
         mkdir -p "$SRB2WINPATH"
         cp -rf "$BUILD/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        #        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis-0.dll" "$BUILD/build/AppDir/usr/lib/libvorbisfile-3.dll" "$BUILD/build/AppDir/usr/lib/libopus-0.dll" "$BUILD/build/AppDir/usr/lib/libopusfile-0.dll" "$BUILD/build/AppDir/usr/lib/libogg-0.dll" "$BUILD/build/AppDir/usr/lib/libmpg123-0.dll" "$BUILD/build/AppDir/usr/lib/libmodplug-1.dll" "$BUILD/build/AppDir/usr/lib/libFLAC-8.dll" "$SRB2WINPATH"
-        $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR.bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR.bat"
 
     fi
 
