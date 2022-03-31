@@ -784,7 +784,7 @@ chooseuninstall() {
         if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
             BUILDINSTALLED=$($PRINTF "%s\n" "$array" | gawk NR=="${n}")
-            INSTALLEDFILES=$(gawk '/\/usr\/local/ {print}' "$BUILDINSTALLED")
+            INSTALLEDFILES=$(gawk '/\/usr\/local\/|\/SRB2 Games\/|\/Start Menu\/Programs\/|.comrev/ {print}' "$BUILDINSTALLED")
             $PRINTF "$PROMPT\n%s\n\e[0m" "$INSTALLEDFILES"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Above files will be uninstalled. Are you sure you want to that? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\")."
             $PRINTF "$PROMPT\n%s\e[0m" "> "
