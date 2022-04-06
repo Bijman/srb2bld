@@ -68,18 +68,17 @@ if [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, R
     GCCOLDVER="gcc-6"
     GXXVER="g++"
 
-elif [ "$OSID" = "debian" ] || [ "$OSID" = "ubuntu" ] || [ "$OSNAME" = "Debian GNU/Linux" ] || [ "$OSNAME" = "Fedora Linux" ] || [ "$OSNAME" = "openSUSE Leap" ]; then
+else
 
     GCCVER="gcc-10"
     GCCOLDVER="gcc-4.9"
     GXXVER="g++-10"
+
+fi
+
+if [ "$OSID" = "debian" ] || [ "$OSID" = "ubuntu" ] || [ "$OSNAME" = "Debian GNU/Linux" ] || [ "$OSNAME" = "Fedora Linux" ] || [ "$OSNAME" = "openSUSE Leap" ]; then
+
     UBUSOFTVER="20.04"
-
-else
-
-    GCCVER="gcc"
-    GCCOLDVER="gcc"
-    GXXVER="g++"
 
 fi
 
