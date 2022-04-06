@@ -18,7 +18,8 @@ OS=$(uname)
 
 if [ "$OS" = "Linux" ]; then
 
-    OSRELEASE=$(gawk -F'=' '/^NAME=/ {gsub("\"","");print $NF}' /etc/os-release)
+    OSID=$(gawk -F'=' '/^ID_LIKE=/ {gsub("\"","");print $NF}' /etc/os-release)
+    OSNAME=$(gawk -F'=' '/^NAME=/ {gsub("\"","");print $NF}' /etc/os-release)
 
 fi
 
@@ -67,7 +68,7 @@ if [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, R
     GCCOLDVER="gcc-6"
     GXXVER="g++"
 
-elif [ "$OSRELEASE" = "Ubuntu" ] || [ "$OSRELEASE" = "Debian" ] || [ "$OSRELEASE" = "Fedora" ]; then
+elif [ "$OSID" = "debian" ] || [ "$OSID" = "ubuntu" ] || [ "$OSNAME" = "Debian GNU/Linux" ] || [ "$OSNAME" = "Fedora Linux" ] || [ "$OSNAME" = "openSUSE Leap" ]; then
 
     GCCVER="gcc-10"
     GCCOLDVER="gcc-4.9"
@@ -4343,12 +4344,11 @@ installtolinux() {
 
     fi
 
+    # Installing missing libraries for glibc based distros.
     if [ -n "$(ldd $SRB2BINARYLNXPATH | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u)" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
         PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u); do
-
-            l=$(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
 
             if [ -x "$(which emerge 2> /dev/null)" ]; then
 
@@ -4364,13 +4364,19 @@ installtolinux() {
 
                 $SUDO pacman -Fy > /dev/null
 
+                if [ "$BUILD" = "$BUILDPATH/slade" ]; then
+
+                    l=$(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
+
+                fi
+
                 if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-                    pacman -Fq "$l" | gawk '{print}'
+                    pacman -Fqx "$l" | gawk '{print}'
 
                 else
 
-                    pacman -Fq "$l" | gawk '!/lib32-/ {print}'
+                    pacman -Fqx "$l" | gawk '!/lib32-/ {print}'
 
                 fi
 
@@ -4387,17 +4393,29 @@ installtolinux() {
 
             elif [ -x "$(which zypper 2> /dev/null)" ]; then
 
+                if [ "$BUILD" = "$BUILDPATH/slade" ]; then
+
+                    l=$(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
+
+                fi
+
                 if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-                    zypper search --provides --match-exact "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
+                    zypper -q search --provides "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
 
                 else
 
-                    zypper search --provides --match-exact "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
+                    zypper -q search --provides "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
 
                 fi
 
             elif [ -x "$(which dnf 2> /dev/null)" ]; then
+
+                if [ "$BUILD" = "$BUILDPATH/slade" ]; then
+
+                    l=$(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
+
+                fi
 
                 if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
@@ -4474,10 +4492,52 @@ installtolinux() {
 
         fi
 
+        # Changing library filenames within SLADE binary, in order to be found.
+        if [ "$BUILD" = "$BUILDPATH/slade" ]; then
+
+            for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u); do
+
+                if [ ! -x "$(which patchelf 2> /dev/null)" ]; then
+
+                    if [ -x "$(which emerge 2> /dev/null)" ]; then
+
+                        $SUDO emerge patchelf > /dev/null
+
+                    elif [ -x "$(which pacman 2> /dev/null)" ]; then
+
+                        $SUDO pacman -Sy patchelf > /dev/null
+
+                    elif [ -x "$(which apt-get 2> /dev/null)" ]; then
+
+                        $SUDO apt-get install -y patchelf > /dev/null
+
+                    elif [ -x "$(which zypper 2> /dev/null)" ]; then
+
+                        $SUDO zypper install -y patchelf > /dev/null
+
+                    elif [ -x "$(which dnf 2> /dev/null)" ]; then
+
+                        $SUDO dnf install --best --skip-broken -y patchelf > /dev/null
+
+                    elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
+
+                        $SUDO xbps-install -Sy patchelf > /dev/null
+
+                    fi
+
+                fi
+
+                $SUDO patchelf --replace-needed "$l" $(find /usr/lib* -name $(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}') | head -n1 | gawk -F'/' '{print $NF}') "$SRB2BINARYLNXPATH" 2> /dev/null
+
+            done
+
+        fi
+
         $PRINTF "$SUCCESS\n%s\n\e[0m\a" "Installation of $BUILDNAME's dependencies is successful."
 
     fi
 
+    # Installing missing libraries for musl based distros.
     if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u)" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
