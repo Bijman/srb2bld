@@ -399,7 +399,7 @@ choosebuild() {
                 BUILD="$BUILDPATH/srb2-netplus"
                 GITDEFVER="master"
                 GITVER="$GITDEFVER"
-                GIT="git clone https://git.netplus.friskyfox.art/NetPlus/netplus.git --recursive --branch $GITVER"
+                GIT="git clone https://git.do.srb2.org/JohnFrostFox/netplus.git --recursive --branch $GITVER"
                 break
 
                 ;;
