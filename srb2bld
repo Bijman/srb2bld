@@ -1603,6 +1603,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
@@ -1632,11 +1633,13 @@ if [ "\$APPIMAGE" = 1 ]; then
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/discord-rpc"
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" pull --recurse-submodules --rebase --autostash
             git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q "$LNXDISCORDRPCVER"
+
         fi
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
@@ -1660,6 +1663,7 @@ if [ "\$APPIMAGE" = 1 ]; then
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libopenvr"
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q master
@@ -2559,6 +2563,7 @@ else
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libpng12"
             git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libpng12" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libpng12" checkout -q master
@@ -2594,6 +2599,7 @@ else
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
@@ -2630,6 +2636,7 @@ else
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libopenmpt"
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" checkout -q master
@@ -2664,6 +2671,7 @@ else
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libgme"
             git -C "\$SRB2BLDROOT/libraries/libgme" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libgme" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libgme" checkout -q master
@@ -2701,6 +2709,7 @@ else
         else
 
               \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up DiscordRPC's source code. Please wait..."
+              git config --global --add safe.directory "\$SRB2BLDROOT/libraries/discord-rpc"
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" clean -qdfx -e .comrev
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" reset -q --hard
               git -C "\$SRB2BLDROOT/libraries/discord-rpc" checkout -q master
@@ -2754,6 +2763,7 @@ else
         else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libopenvr"
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenvr" checkout -q master
