@@ -896,6 +896,7 @@ dockerentry() {
 
     set -e
 
+    # Added environment variables for Docker container.
     export PRINTF=\$(which -a printf | gawk '/bin/ {print}' | head -n1)
     export ARCH="$ARCH"
     export OS="$OS"
@@ -916,6 +917,9 @@ dockerentry() {
 
     # Some old Docker images don't have up-to-date SSL certifications, so this is workaround.
     # export GIT_SSL_NO_VERIFY=1
+
+    # Added repository to safe directories since Git v2.35.
+    git config --global --add safe.directory "\$BUILD"
 
     cleansource() {
         # Clean build's directory after compiling.
