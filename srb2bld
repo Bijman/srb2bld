@@ -57,7 +57,7 @@ UBUSOFTVER="22.04"
 SRB2PERSONAFILEID="vjartyfqu3mdmjj"
 SRB2VER="SRB2_release_2.2.9"
 SRB2PERSONAVER="1.3.3"
-SRB2KARTVER="v1.3"
+SRB2KARTVER="v1.2"
 MINGWCCVER="gcc-10-win32"
 MINGWOLDCCVER="gcc-4.9-win32"
 MINGWCXXVER="g++-10-win32"
@@ -909,6 +909,9 @@ dockerentry() {
     export GITDEFVER="$GITDEFVER"
     export FILETYPE="$FILETYPE"
     export SRB2VER="$SRB2VER"
+    export SRB2KARTVER="$SRB2KARTVER"
+    export SRB2PERSONAVER="$SRB2PERSONAVER"
+    export SRB2PERSONAFILEID="$SRB2PERSONAFILEID"
     export SRB2ASSETPATH="$SRB2ASSETPATH"
     export ASSETAPPDIR="$ASSETAPPDIR"
     export APPIMAGE="$APPIMAGE"
@@ -939,7 +942,7 @@ dockerentry() {
             if [ "\$(gawk -F'"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" = "\$(printf "\$SRB2VER" | gawk -F'_' '{print \$NF}')" ]; then
 
                 SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'\$SRB2VER'\/.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2-Older.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2-Older.zip"
                     curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Older.zip"
@@ -951,7 +954,7 @@ dockerentry() {
             else
 
                 SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2-Latest.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
                     curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
@@ -1009,7 +1012,7 @@ dockerentry() {
             if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" = "\$SRB2PERSONAVER" ]; then
 
                 SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'\$SRB2VER'\/.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2-Older.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2-Older.zip"
                     curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Older.zip"
@@ -1021,7 +1024,7 @@ dockerentry() {
             else
 
                 SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2-Latest.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
                     curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
@@ -1104,7 +1107,7 @@ dockerentry() {
             if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW" ]; then
 
                 SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2-Latest.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
                     curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
@@ -1121,19 +1124,19 @@ dockerentry() {
             if [ "\$(gawk -F'\"|\\\(' '/VERSIONSTRING/ && /v[0-9]/ {gsub(" ","");print \$2}' "\$BUILD/src/doomdef.h" | gawk '!a[\$0]++')" = "\$SRB2KARTVER" ]; then
 
                 SRB2KARTASSETURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F'"' '/'\$SRB2KARTVER'\/.*Installer.exe/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2KARTASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+                if [ "\$(curl -X GET -sLI "\$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe" 2> /dev/null)" ]; then
 
-                    rm -f "\$SRB2BLDROOT/assets/SRB2Kart.exe"
-                    curl -RL "\$SRB2KARTASSETURL" -o "\$SRB2BLDROOT/assets/SRB2Kart.exe"
+                    rm -f "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
+                    curl -RL "\$SRB2KARTASSETURL" -o "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
 
             else
 
                 SRB2KARTASSETURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2KARTASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print \$NF}')" != "\$(date -u -r "\$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+                if [ "\$(curl -X GET -sLI "\$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2Kart-Latest.exe"
                     curl -RL "\$SRB2KARTASSETURL" -o "\$SRB2BLDROOT/assets/SRB2Kart-Latest.exe"
@@ -3836,7 +3839,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-old-windows-docker "$SRB2BLDROOT/containers/srb2-old-windows-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-old-windows-docker
+            winpty docker run -it --security-opt="label:disable" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-old-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
@@ -3845,7 +3848,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-games-old-linux-musl-docker "$SRB2BLDROOT/containers/srb2-games-old-linux-musl-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-games-old-linux-musl-docker
+            docker run -it --security-opt="label:disable" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-games-old-linux-musl-docker
 
         else
 
@@ -3854,7 +3857,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-games-old-linux-glibc-docker "$SRB2BLDROOT/containers/srb2-games-old-linux-glibc-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-games-old-linux-glibc-docker
+            docker run -it --security-opt="label:disable" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-games-old-linux-glibc-docker
 
         fi
 
@@ -3867,7 +3870,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 tools. Please wait..."
             docker build --rm -t srb2-tools-windows-docker "$SRB2BLDROOT/containers/srb2-tools-windows-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-tools-windows-docker
+            winpty docker run -it --security-opt="label:disable" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-tools-windows-docker
 
         elif [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]; then
 
@@ -3876,7 +3879,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-windows-docker "$SRB2BLDROOT/containers/srb2-windows-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-windows-docker
+            winpty docker run -it --security-opt="label:disable" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/slade" ]); then
 
@@ -3885,7 +3888,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 tools. Please wait..."
             docker build --rm -t srb2-tools-linux-musl-docker "$SRB2BLDROOT/containers/srb2-tools-linux-musl-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-tools-linux-musl-docker
+            docker run -it --security-opt="label:disable" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-tools-linux-musl-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
@@ -3894,7 +3897,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for musl based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-games-linux-musl-docker "$SRB2BLDROOT/containers/srb2-games-linux-musl-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-games-linux-musl-docker
+            docker run -it --security-opt="label:disable" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-games-linux-musl-docker
 
         elif [ "$OS" = "Linux" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/slade" ]); then
 
@@ -3903,7 +3906,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 tools. Please wait..."
             docker build --rm -t srb2-tools-linux-glibc-docker "$SRB2BLDROOT/containers/srb2-tools-linux-glibc-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-tools-linux-glibc-docker
+            docker run -it --security-opt="label:disable" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-tools-linux-glibc-docker
 
         else
 
@@ -3912,7 +3915,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for glibc based Linux SRB2 builds. Please wait..."
             docker build --rm -t srb2-games-linux-glibc-docker "$SRB2BLDROOT/containers/srb2-games-linux-glibc-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            docker run -it --net="host" --cap-add="SYS_ADMIN" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-games-linux-glibc-docker
+            docker run -it --security-opt="label:disable" --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="/usr/local:/usr/local:rw" srb2-games-linux-glibc-docker
 
         fi
 
@@ -3929,7 +3932,7 @@ extractmacosassets() {
         if [ "$(gawk -F'"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" = "$(printf "$SRB2VER" | gawk -F'_' '{print $NF}')" ]; then
 
             SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'$SRB2VER'\/.*Full.zip/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2-Older.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2-Older.zip"
                 curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Older.zip"
@@ -3941,7 +3944,7 @@ extractmacosassets() {
         else
 
             SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2-Latest.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2-Latest.zip"
                 curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Latest.zip"
@@ -3964,7 +3967,7 @@ extractmacosassets() {
         if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" = "$SRB2PERSONAVER" ]; then
 
             SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'$SRB2VER'\/.*Full.zip/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2-Older.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2-Older.zip"
                 curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Older.zip"
@@ -3976,7 +3979,7 @@ extractmacosassets() {
         else
 
             SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2-Latest.zip" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2-Latest.zip"
                 curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Latest.zip"
@@ -4009,19 +4012,19 @@ extractmacosassets() {
         if [ "$(gawk -F'\"|\\(' '/VERSIONSTRING/ && /v[0-9]/ {gsub(" ","");print $2}' "$BUILD/src/doomdef.h" | gawk '!a[$0]++ {print}')" = "$SRB2KARTVER" ]; then
 
             SRB2KARTASSETURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F'"' '/'$SRB2KARTVER'\/.*Installer.exe/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+            if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Kart-Older.exe" 2> /dev/null)" ]; then
 
-                rm -f "$SRB2BLDROOT/assets/SRB2Kart.exe"
-                curl -RL "$SRB2KARTASSETURL" -o "$SRB2BLDROOT/assets/SRB2Kart.exe"
+                rm -f "$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
+                curl -RL "$SRB2KARTASSETURL" -o "$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
 
             fi
 
-            7z x -y "$SRB2BLDROOT/assets/SRB2Kart.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
+            7z x -y "$SRB2BLDROOT/assets/SRB2Kart-Older.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"$BUILD/assets/installer"
 
         else
 
             SRB2KARTASSETURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Last-Modified: ' '{IGNORECASE=1} /Last-Modified/ {gsub("\r","");print $NF}')" != "$(date -u -r "$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" +"%a, %d %b %Y %H:%M:%S GMT" 2> /dev/null)" ]; then
+            if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2Kart-Latest.exe"
                 curl -RL "$SRB2KARTASSETURL" -o "$SRB2BLDROOT/assets/SRB2Kart-Latest.exe"
@@ -4430,13 +4433,15 @@ installtolinux() {
 
                 fi
 
+                VERSION_ID=$(gawk -F'=' '/VERSION_ID/ {print $NF}' /etc/os-release)
+
                 if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-                    dnf provides -q "/usr/lib/$l" | gawk '/.fc[0-9]./ {print $1}'
+                    dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'./ {print $1}'
 
                 else
 
-                    dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc[0-9]./ {print $1}'
+                    dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'./ {print $1}'
 
                 fi
 
@@ -4912,7 +4917,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     sudo_ping
 
     # Fixing permission conflicts between compiled libraries and installed from package manager.
-    if [ "$(stat -f%u /usr/local/stow)" = "0" ]; then
+    if [ "$(stat -f %u /usr/local/stow 2> /dev/null)" = "0" ]; then
 
         sudo chown -R $(whoami) /usr/local/stow
 
@@ -5387,7 +5392,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Fixing permission conflicts between compiled libraries and installed from package manager.
-    if [ "$(stat -f%u /usr/local/stow)" = "0" ]; then
+    if [ "$(stat -f %u /usr/local/stow 2> /dev/null)" = "0" ]; then
 
         sudo chown -R $(whoami) /usr/local/stow
 
