@@ -2209,7 +2209,7 @@ DESKTOP
 
     else
 
-        convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
         ICONSIZE=\$(identify "\$BUILD/build/icon.png" | gawk '{print \$3}')
         mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
@@ -3440,7 +3440,7 @@ DESKTOP
 
     else
 
-        convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
         ICONSIZE=\$(identify "\$BUILD/build/icon.png" | gawk '{print \$3}')
         mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
 
@@ -3545,17 +3545,15 @@ DEBIAN_FRONTEND noninteractive
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
 printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
 apt-get update && \
-apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\ndeb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu bionic main" >> /etc/apt/sources.list && \
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B 60C317803A41BA51845E371A1E9377A2BA9EF27F
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1E9377A2BA9EF27F" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/toolchain.gpg > /dev/null
 
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse imagemagick nasm build-essential gcc-10 cmake file sudo dash curl git stow p7zip-full p7zip-rar
-
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/m/megatools/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/m/megatools | gawk -F'"' '/'\$(dpkg --print-architecture)'/ && !/build/ {print \$8}' | tail -n1) && \
-#dpkg -i ./*.deb
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse imagemagick nasm build-essential gcc-10 cmake file sudo dash git stow p7zip-full p7zip-rar
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/bash srb2 && \
@@ -3576,15 +3574,15 @@ DEBIAN_FRONTEND noninteractive
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
 printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
 apt-get update && \
-apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
+curl -Lks "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null
 
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev libfuse-dev fuse imagemagick nasm build-essential cmake file sudo dash curl git stow p7zip-full p7zip-rar
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev libfuse-dev fuse imagemagick nasm build-essential cmake file sudo dash git stow p7zip-full p7zip-rar
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/dash srb2 && \
@@ -3605,37 +3603,15 @@ DEBIAN_FRONTEND noninteractive
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
 printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
 apt-get update && \
-apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main\ndeb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu bionic main" >> /etc/apt/sources.list && \
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B 60C317803A41BA51845E371A1E9377A2BA9EF27F
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1E9377A2BA9EF27F" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/toolchain.gpg > /dev/null
 
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y liblzf-dev libfmt-dev libsfml-dev libjpeg-dev libogg-dev libflac-dev libvorbis-dev libopenal-dev libudev-dev libglew-dev libfreeimage-dev libftgl-dev libfluidsynth-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgconf2-dev freeglut3-dev libmodplug-dev libwxgtk3.0-gtk3-dev libwxgtk-media3.0-gtk3-dev libcurl4-openssl-dev libwxgtk-webview3.0-gtk3-dev libbz2-dev libgtk-3-dev liblua5.3-dev libmpg123-dev libfuse-dev fuse imagemagick nasm build-essential g++-10 cmake file sudo dash curl git stow p7zip-full p7zip-rar
-
-#if [ \$(dpkg --print-architecture) = "amd64" ]; then \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/libl/liblzf/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/libl/liblzf | gawk -F'"' '/liblzf-dev.*.ubuntu.*.'\$(dpkg --print-architecture)'.deb/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/libl/liblzf/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/libl/liblzf | gawk -F'"' '/liblzf1.*.ubuntu.*.'\$(dpkg --print-architecture)'.deb/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/f/fmtlib/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/f/fmtlib | gawk -F'"' '/libfmt-dev.*.6.1.2.*.'\$(dpkg --print-architecture)'.deb/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-dev.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-audio.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-graphics.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-network.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-system.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-window.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#dpkg -i ./*.deb ; else \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/libl/liblzf/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/libl/liblzf | gawk -F'"' '/liblzf-dev.*.ubuntu.*.'\$(dpkg --print-architecture)'.deb/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/libl/liblzf/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/libl/liblzf | gawk -F'"' '/liblzf1.*.ubuntu.*.'\$(dpkg --print-architecture)'.deb/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/f/fmtlib/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/f/fmtlib | gawk -F'"' '/libfmt-dev.*.6.1.2.*.'\$(dpkg --print-architecture)'.deb/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-dev.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-audio.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-graphics.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-network.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-system.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#curl -LO http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml/\$(curl -sL http://ports.ubuntu.com/ubuntu-ports/pool/universe/libs/libsfml | gawk -F'"' '/libsfml-window.*.2.5.1.*.'\$(dpkg --print-architecture)'.deb/ && !/build/ {print \$8}' | sort -d | head -n1) && \
-#dpkg -i ./*.deb ; \
-#fi
+apt-fast install -y liblzf-dev libfmt-dev libsfml-dev libjpeg-dev libogg-dev libflac-dev libvorbis-dev libopenal-dev libudev-dev libglew-dev libfreeimage-dev libftgl-dev libfluidsynth-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgconf2-dev freeglut3-dev libmodplug-dev libwxgtk3.0-gtk3-dev libwxgtk-media3.0-gtk3-dev libcurl4-openssl-dev libwxgtk-webview3.0-gtk3-dev libbz2-dev libgtk-3-dev liblua5.3-dev libmpg123-dev libfuse-dev fuse imagemagick nasm build-essential g++-10 cmake file sudo dash git stow p7zip-full p7zip-rar
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/bash srb2 && \
@@ -3655,10 +3631,6 @@ ENV container docker
 RUN apk update && \
 apk upgrade && \
 apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
-
-#curl -LO "http://dl-cdn.alpinelinux.org/alpine/edge/testing/$ARCH"/\$(curl -sL "http://dl-cdn.alpinelinux.org/alpine/edge/testing/$ARCH" | gawk -F'"' '/megatools.*.apk/ && !/doc/ {print \$2}' | sort -d | head -n1) && \
-#apk add ./*.apk
-
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
 passwd -d srb2
@@ -3697,9 +3669,6 @@ RUN apk update && \
 apk upgrade && \
 apk add liblzf-dev fmt-dev sfml-dev jpeg-dev libogg-dev flac-dev libvorbis-dev openal-soft-dev eudev-dev glew-dev freeimage-dev ftgl-dev fluidsynth-dev gstreamer-dev gst-plugins-base-dev freeglut-dev libmodplug-dev wxgtk3-dev wxgtk3-media curl-dev libbz2 gtk+3.0 lua-dev mpg123-dev fuse-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow
 
-#curl -LO "http://dl-cdn.alpinelinux.org/alpine/edge/testing/$ARCH"/\$(curl -sL "http://dl-cdn.alpinelinux.org/alpine/edge/testing/$ARCH" | gawk -F'"' '/megatools.*.apk/ && !/doc/ {print \$2}' | sort -d | head -n1) && \
-#apk add ./*.apk
-
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
 passwd -d srb2
@@ -3719,18 +3688,15 @@ DEBIAN_FRONTEND noninteractive
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
 printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
 apt-get update && \
-apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null
 
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse imagemagick nasm build-essential mingw-w64 cmake file sudo dash curl git stow p7zip-full p7zip-rar
-
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/m/megatools/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/m/megatools | gawk -F'"' '/'\$(dpkg --print-architecture)'/ && !/build/ {print \$8}' | tail -n1) && \
-#dpkg -i ./*.deb
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse imagemagick nasm build-essential mingw-w64 cmake file sudo dash git stow p7zip-full p7zip-rar
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/dash srb2 && \
@@ -3751,15 +3717,15 @@ DEBIAN_FRONTEND noninteractive
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
 printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
 apt-get update && \
-apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
+curl -Lks "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null
 
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libmodplug-dev libjack-dev libfuse-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev fuse imagemagick nasm build-essential mingw-w64 cmake file sudo dash curl git p7zip-full p7zip-rar stow
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libgme-dev libfluidsynth-dev libmodplug-dev libjack-dev libfuse-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev fuse imagemagick nasm build-essential mingw-w64 cmake file sudo dash git p7zip-full p7zip-rar stow
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/dash srb2 && \
@@ -3780,18 +3746,15 @@ DEBIAN_FRONTEND noninteractive
 RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
 printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
 apt-get update && \
-apt-get install -y gnupg apt-transport-https ca-certificates gawk && \
+apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null
 
 RUN apt-get update && \
 apt-get upgrade -y && \
 apt-get install -y apt-fast && \
-apt-fast install -y libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev libglew-dev libfreeimage-dev libftgl-dev libsfml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgconf2-dev freeglut3-dev libwxgtk3.0-gtk3-dev libwxgtk-media3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libbz2-dev libgtk-3-dev liblua5.3-dev libfmt-dev libmpg123-dev liblzf-dev libfuse-dev fuse imagemagick nasm build-essential mingw-w64 cmake file sudo dash curl git stow p7zip-full p7zip-rar rapidjson-dev
-
-#curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/m/megatools/\$(curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/m/megatools | gawk -F'"' '/'\$(dpkg --print-architecture)'/ && !/build/ {print \$8}' | tail -n1) && \
-#dpkg -i ./*.deb
+apt-fast install -y libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev libglew-dev libfreeimage-dev libftgl-dev libsfml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgconf2-dev freeglut3-dev libwxgtk3.0-gtk3-dev libwxgtk-media3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libbz2-dev libgtk-3-dev liblua5.3-dev libfmt-dev libmpg123-dev liblzf-dev libfuse-dev fuse imagemagick nasm build-essential mingw-w64 cmake file sudo dash git stow p7zip-full p7zip-rar rapidjson-dev
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/dash srb2 && \
