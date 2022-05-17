@@ -291,7 +291,7 @@ choosebranch() {
 
         $PRINTF "$MESSAGE\n\n%s\n\e[0m" "Cleaning up source code. Please wait..."
         cleansource
-        GITCURVER=$(git -C "$BUILD" branch --show-current)
+        GITCURVER=$(git -C "$BUILD" rev-parse --abbrev-ref HEAD)
 
         if [ -n "$GITVER" ]; then
 
@@ -4337,7 +4337,7 @@ installtolinux() {
 
                 fi
 
-                e-file "/usr/lib/$l" | col | gawk -F' ' '/1;32m/ && gsub(/1;29m|0m/,"") {print $NF}'
+                e-file "/usr/lib/$l" | col | gawk '/\*/ && gsub(/29m|0m/,"") {print $NF}'
 
             elif [ -x "$(which pacman 2> /dev/null)" ]; then
 
