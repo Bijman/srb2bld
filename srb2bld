@@ -54,10 +54,9 @@ BUILDPATH="$SRB2BLDROOT/builds"
 DEBVER="jessie"
 UBUVER="18.04"
 UBUSOFTVER="22.04"
-SRB2PERSONAFILEID="vjartyfqu3mdmjj"
-SRB2VER="SRB2_release_2.2.9"
-SRB2PERSONAVER="1.3.3"
-SRB2KARTVER="v1.2"
+SRB2OLDVER="2.2.10"
+SRB2PERSONAOLDVER="1.3.5"
+SRB2KARTOLDVER="v1.3"
 MINGWCCVER="gcc-10-win32"
 MINGWOLDCCVER="gcc-4.9-win32"
 MINGWCXXVER="g++-10-win32"
@@ -908,10 +907,9 @@ dockerentry() {
     export GITVER="$GITVER"
     export GITDEFVER="$GITDEFVER"
     export FILETYPE="$FILETYPE"
-    export SRB2VER="$SRB2VER"
-    export SRB2KARTVER="$SRB2KARTVER"
-    export SRB2PERSONAVER="$SRB2PERSONAVER"
-    export SRB2PERSONAFILEID="$SRB2PERSONAFILEID"
+    export SRB2OLDVER="$SRB2OLDVER"
+    export SRB2KARTOLDVER="$SRB2KARTOLDVER"
+    export SRB2PERSONAOLDVER="$SRB2PERSONAOLDVER"
     export SRB2ASSETPATH="$SRB2ASSETPATH"
     export ASSETAPPDIR="$ASSETAPPDIR"
     export APPIMAGE="$APPIMAGE"
@@ -939,9 +937,9 @@ dockerentry() {
     extractassets() {
         if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-custom" ]; then
 
-            if [ "\$(gawk -F'"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" = "\$(printf "\$SRB2VER" | gawk -F'_' '{print \$NF}')" ]; then
+            if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" != "\$SRB2OLDVER" ]; then
 
-                SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'\$SRB2VER'\/.*Full.zip/ {print \$4}')
+                SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_\$SRB2OLDVER'\/.*Full.zip/ {print \$4}')
                 if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2-Older.zip"
@@ -1006,22 +1004,10 @@ dockerentry() {
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-            curl -RLC - "https://www.dropbox.com/s/\$SRB2PERSONAFILEID" -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
+            curl -RLC - https://mb.srb2.org/addons/166/download -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
             7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
-            if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" = "\$SRB2PERSONAVER" ]; then
-
-                SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'\$SRB2VER'\/.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
-
-                    rm -f "\$SRB2BLDROOT/assets/SRB2-Older.zip"
-                    curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Older.zip"
-
-                fi
-
-                7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-
-            else
+            if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" != "\$SRB2PERSONAOLDVER" ]; then
 
                 SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
                 if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
@@ -1032,6 +1018,18 @@ dockerentry() {
                 fi
 
                 7z x -y "\$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+            else
+
+                SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_\$SRB2OLDVER'\/.*Full.zip/ {print \$4}')
+                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
+
+                    rm -f "\$SRB2BLDROOT/assets/SRB2-Older.zip"
+                    curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Older.zip"
+
+                fi
+
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
             fi
 
@@ -1121,9 +1119,9 @@ dockerentry() {
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-            if [ "\$(gawk -F'\"|\\\(' '/VERSIONSTRING/ && /v[0-9]/ {gsub(" ","");print \$2}' "\$BUILD/src/doomdef.h" | gawk '!a[\$0]++')" = "\$SRB2KARTVER" ]; then
+            if [ "\$(gawk -F'\"|\\\(' '/VERSIONSTRING/ && /v[0-9]/ {gsub(" ","");print \$2}' "\$BUILD/src/doomdef.h" | gawk '!a[\$0]++')" != "\$SRB2KARTOLDVER" ]; then
 
-                SRB2KARTASSETURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F'"' '/'\$SRB2KARTVER'\/.*Installer.exe/ {print \$4}')
+                SRB2KARTASSETURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F'"' '/'\$SRB2KARTOLDVER'\/.*Installer.exe/ {print \$4}')
                 if [ "\$(curl -X GET -sLI "\$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
@@ -3892,9 +3890,9 @@ dockerrun() {
 extractmacosassets() {
     if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-custom" ]; then
 
-        if [ "$(gawk -F'"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" = "$(printf "$SRB2VER" | gawk -F'_' '{print $NF}')" ]; then
+        if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" != "$SRB2OLDVER" ]; then
 
-            SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'$SRB2VER'\/.*Full.zip/ {print $4}')
+            SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_$SRB2OLDVER'\/.*Full.zip/ {print $4}')
             if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2-Older.zip"
@@ -3924,22 +3922,10 @@ extractmacosassets() {
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        curl -RLC - "https://www.dropbox.com/s/$SRB2PERSONAFILEID" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        curl -RLC - https://mb.srb2.org/addons/166/download -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
         unrar x -y "$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" "$BUILD/assets/installer"
 
-        if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" = "$SRB2PERSONAVER" ]; then
-
-            SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'$SRB2VER'\/.*Full.zip/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
-
-                rm -f "$SRB2BLDROOT/assets/SRB2-Older.zip"
-                curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Older.zip"
-
-            fi
-
-            7z x -y "$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
-
-        else
+        if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" != "$SRB2PERSONAOLDVER" ]; then
 
             SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
             if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
@@ -3950,6 +3936,18 @@ extractmacosassets() {
             fi
 
             7z x -y "$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+
+        else
+
+            SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_$SRB2OLDVER'\/.*Full.zip/ {print $4}')
+            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
+
+                rm -f "$SRB2BLDROOT/assets/SRB2-Older.zip"
+                curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Older.zip"
+
+            fi
+
+            7z x -y "$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
         fi
 
@@ -3972,9 +3970,9 @@ extractmacosassets() {
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
-        if [ "$(gawk -F'\"|\\(' '/VERSIONSTRING/ && /v[0-9]/ {gsub(" ","");print $2}' "$BUILD/src/doomdef.h" | gawk '!a[$0]++ {print}')" = "$SRB2KARTVER" ]; then
+        if [ "$(gawk -F'\"|\\(' '/VERSIONSTRING/ && /v[0-9]/ {gsub(" ","");print $2}' "$BUILD/src/doomdef.h" | gawk '!a[$0]++ {print}')" != "$SRB2KARTOLDVER" ]; then
 
-            SRB2KARTASSETURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F'"' '/'$SRB2KARTVER'\/.*Installer.exe/ {print $4}')
+            SRB2KARTASSETURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F'"' '/'$SRB2KARTOLDVER'\/.*Installer.exe/ {print $4}')
             if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Kart-Older.exe" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
@@ -5756,16 +5754,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         else
 
-            #APPBUNDLELIBS=$(otool -L "$BUILD/build/$BUILDNAME.app/Contents/MacOS/$BUILDNAME" | gawk '/.dylib/ && !/usr\/lib/ {print $1}')
-            #            cp -f $APPBUNDLELIBS "$BUILD/build/$BUILDNAME.app/Contents/Frameworks"
-            #
-            #             for l in $APPBUNDLELIBS; do
-
-            #                 LIBNAME=$(printf "%s\n" "$l" | gawk -F'/' '{print $NF}')
-            #                 install_name_tool -change "$l" "@executable_path/../Frameworks/$LIBNAME" "$BUILD/build/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
-
-            #             done
-
             make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) -C "$BUILD/build" package
 
         fi
@@ -5837,7 +5825,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -5856,7 +5843,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -5875,7 +5861,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -5894,7 +5879,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -5914,7 +5898,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -5930,7 +5913,6 @@ installtowindows() {
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/r_opengl.dll" "$BUILD/build/AppDir/usr/lib/fmod.dll" "$SRB2WINPATH"
@@ -5949,7 +5931,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -5968,7 +5949,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -5987,7 +5967,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -6006,7 +5985,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/Mingw$IS64/Release/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
@@ -6025,7 +6003,6 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        #        cp -rf "$BUILD/bin/Mingw/Release/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
