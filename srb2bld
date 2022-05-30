@@ -1007,7 +1007,7 @@ dockerentry() {
             curl -RLC - https://mb.srb2.org/addons/166/download -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
             7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
-            if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" != "\$SRB2PERSONAOLDVER" ]; then
+            if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" = "\$SRB2PERSONAOLDVER" ]; then
 
                 SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
                 if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
@@ -3925,7 +3925,7 @@ extractmacosassets() {
         curl -RLC - https://mb.srb2.org/addons/166/download -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
         unrar x -y "$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" "$BUILD/assets/installer"
 
-        if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" != "$SRB2PERSONAOLDVER" ]; then
+        if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" = "$SRB2PERSONAOLDVER" ]; then
 
             SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
             if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
