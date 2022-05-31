@@ -106,7 +106,7 @@ if [ "$OS" = "Darwin" ]; then
     MACOSGMEVER="0.6.2"
     MACOSDISCORDRPCVER="master"
     MACOSOPENVRVER="1.10.30"
-    HOMEBREWPREFIX="$(brew --prefix)"
+    HOMEBREWPREFIX=$(brew --prefix)
     MACPORTPREFIX="/opt/local"
 
 fi
@@ -4634,7 +4634,6 @@ installtomacos() {
     # Exporting environment variables for compiling, installing game and libraries on macOS.
     export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
     export SDKROOT="$SDKROOT"
-    export MACPORTPREFIX="$MACPORTPREFIX"
     export LIBRARY_PATH="/usr/lib:/usr/local/lib:$HOMEBREWPREFIX/lib:$MACPORTPREFIX/lib:$LIBRARY_PATH"
     export C_INCLUDE_PATH="/usr/include:/usr/local/include:$HOMEBREWPREFIX/include:$MACPORTPREFIX/include:$C_INCLUDE_PATH"
     export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
