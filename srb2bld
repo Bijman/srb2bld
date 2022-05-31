@@ -5447,7 +5447,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         if [ -f "$(find /Library/Developer/CommandLineTools/usr/lib/clang -name libclang_rt.ubsan_osx_dynamic.dylib | head -n1)" ]; then
 
             sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib
-            sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" /usr/local/lib/libgme.dylib
 
         fi
 
@@ -5565,6 +5564,24 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
             sudo install_name_tool -change "@rpath/libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libopenmpt.dylib
             sudo install_name_tool -change "libogg.0.dylib" "$MACPORTPREFIX/lib/libogg.dylib" $MACPORTPREFIX/lib/libopenmpt.dylib
+
+        fi
+
+        if [ -f /usr/local/lib/libgme.dylib ]; then
+
+            sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" /usr/local/lib/libgme.dylib
+
+        fi
+
+        if [ -f "$HOMEBREWPREFIX/lib/libgme.dylib" ]; then
+
+            sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" "$HOMEBREWPREFIX/lib/libgme.dylib"
+
+        fi
+
+        if [ -f "$MACPORTPREFIX/lib/libgme.dylib" ]; then
+
+            sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" "$MACPORTPREFIX/lib/libgme.dylib"
 
         fi
 
