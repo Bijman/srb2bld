@@ -4777,23 +4777,25 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
                 cat "$BUILD/README.md"
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
                 $PRINTF "$NOTICE%s\n\e[0m" "make -k -j$(($(nproc) + 1)) -C "$BUILD" YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
                 cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
                 $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(which wx-config wx-config-gtk3 $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
                 # Display content of CMakeLists for a good view of available compilation flags.
                 cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
                 $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
             # Add compilation flags.
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
             $PRINTF "$PROMPT\n%s\e[0m" "> "
             read -r CONF
 
