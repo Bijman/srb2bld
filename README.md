@@ -131,7 +131,7 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 18-02-2022)
+# Compatibility (as of 27-03-2022)
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -291,6 +291,7 @@ Usage: srb2bld [OPTIONS]
         - dropbox.com,
         - full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.)
 
+```
   EXAMPLES:
         1. export SRB2GITPATH="https://github.com/STJr/SRB2"
 
@@ -319,5 +320,5 @@ Usage: srb2bld [OPTIONS]
         13. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full"
 
         14. export SRB2ASSETPATH="C:\Downloads\SRB2-Full"
-
+```
    Then choose "Build SRB2 Custom", when running script.
