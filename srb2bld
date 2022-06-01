@@ -56,6 +56,7 @@ UBUVER="18.04"
 UBUSOFTVER="22.04"
 SRB2OLDVER="2.2.10"
 SRB2PERSONAOLDVER="1.3.5"
+SRB2PERSONAASSETURL="https://mb.srb2.org/addons/166/download"
 SRB2KARTOLDVER="v1.3"
 MINGWCCVER="gcc-10-win32"
 MINGWOLDCCVER="gcc-4.9-win32"
@@ -908,8 +909,9 @@ dockerentry() {
     export GITDEFVER="$GITDEFVER"
     export FILETYPE="$FILETYPE"
     export SRB2OLDVER="$SRB2OLDVER"
-    export SRB2KARTOLDVER="$SRB2KARTOLDVER"
     export SRB2PERSONAOLDVER="$SRB2PERSONAOLDVER"
+    export SRB2PERSONAASSETURL="$SRB2PERSONAASSETURL"
+    export SRB2KARTOLDVER="$SRB2KARTOLDVER"
     export SRB2ASSETPATH="$SRB2ASSETPATH"
     export ASSETAPPDIR="$ASSETAPPDIR"
     export APPIMAGE="$APPIMAGE"
@@ -1004,7 +1006,12 @@ dockerentry() {
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-            curl -RLC - https://mb.srb2.org/addons/166/download -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
+            if [ "\$(curl -X GET -sLI "\$SRB2PERSONAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2P_MP.rar" 2> /dev/null)" ]; then
+
+                curl -RL "\$SRB2PERSONAASSETURL" -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
+
+            fi
+
             7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
             if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" = "\$SRB2PERSONAOLDVER" ]; then
@@ -3922,7 +3929,12 @@ extractmacosassets() {
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        curl -RLC - https://mb.srb2.org/addons/166/download -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+        if [ "$(curl -X GET -sLI "$SRB2PERSONAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2P_MP.rar" 2> /dev/null)" ]; then
+
+            curl -RL "$SRB2PERSONAASSETURL" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+
+        fi
+
         unrar x -y "$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" "$BUILD/assets/installer"
 
         if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" = "$SRB2PERSONAOLDVER" ]; then
@@ -4611,7 +4623,7 @@ INSTALL
     gawk -i inplace 'NF{print}' "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
 
     COMREV=$(git -C "$BUILD" rev-parse --short HEAD)
-    $PRINTF "%s\n" "$COMREV" > "$BUILD/.comrev"
+    $PRINTF "$COMREV\n$GITVERCONF" > "$BUILD/.comrev"
 
     if [ -n "$SRB2BINARYLNXPATH" ]; then
 
@@ -4762,9 +4774,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
-            # Add compilation flags.
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-
             if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
                 cat "$BUILD/README.md"
@@ -4783,6 +4792,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
             fi
 
+            # Add compilation flags.
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
             $PRINTF "$PROMPT\n%s\e[0m" "> "
             read -r CONF
 
@@ -6304,7 +6315,7 @@ preparebuild() {
             fi
 
             # Assume default branch and latest SRB2/SRB2Kart assets, if entered nothing in prompt.
-            if [ -z "$SRB2ASSETPATH" ]; then
+            if [ -z "$SRB2ASSETPATH" ] && [ -z "$UPGRADE" ]; then
 
                 $PRINTF "$MESSAGE\n%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
                 GITVER="$GITDEFVER"
@@ -6415,6 +6426,7 @@ upgrade() {
     for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort); do
 
         export BUILD="$BUILDPATH/$u"
+        export GITVER=$(tail -n1 "$BUILD/.comrev" 2> /dev/null)
 
         buildname
 
@@ -6422,7 +6434,7 @@ upgrade() {
         cleansource
         git -C "$BUILD" pull --recurse-submodules --rebase --autostash
 
-        if [ -f "$BUILD/.comrev" ] && [ "$(git -C "$BUILD" rev-parse --short HEAD)" != "$(cat "$BUILD/.comrev")" ]; then
+        if [ -f "$BUILD/.comrev" ] && [ "$(git -C "$BUILD" rev-parse --short HEAD)" != "$(head -n1 "$BUILD/.comrev")" ]; then
 
             export UPGRADE="$u"
 
