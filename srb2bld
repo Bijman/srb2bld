@@ -861,7 +861,7 @@ cleansource() {
 
         if [ "$OS" != "Darwin" ]; then
 
-            $SUDO find "$SRB2BLDROOT" -user root -group root -exec chown -R "$USER":"$USER" {} \;
+            $SUDO find "$SRB2BLDROOT" -user root -exec chown -R "$USER":"$USER" {} \;
 
         fi
 
@@ -876,6 +876,7 @@ compatibility() {
 
     # Show compatibility table for compiling SRB2 builds for each OS.
     curl -sL "$COMPTABLEURL"
+    $PRINTF "%s\n"
 }
 
 defaultmessage() {
@@ -939,29 +940,41 @@ dockerentry() {
     extractassets() {
         if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-custom" ]; then
 
-            if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" != "\$SRB2OLDVER" ]; then
+            # Temporary fix until SRB2 VR will be updated to SRB2 2.2.10.
+            if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
-                SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_\$SRB2OLDVER'\/.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
-
-                    rm -f "\$SRB2BLDROOT/assets/SRB2-Older.zip"
-                    curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Older.zip"
-
-                fi
-
-                7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.8/SRB2-v2.2.8-Full.zip -o "\$SRB2BLDROOT/assets/SRB2VR.zip"
+                curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.9/SRB2-v229-Patch.zip -o "\$SRB2BLDROOT/assets/SRB2VR-Patch.zip"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2VR.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2VR-Patch.zip" "*.pk3" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
             else
 
-                SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
+                if [ "\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null)" != "\$SRB2OLDVER" ]; then
 
-                    rm -f "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
-                    curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
+                    SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_\$SRB2OLDVER'\/.*Full.zip/ {print \$4}')
+                    if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
+
+                        rm -f "\$SRB2BLDROOT/assets/SRB2-Older.zip"
+                        curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Older.zip"
+
+                    fi
+
+                    7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+                else
+
+                    SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
+                    if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
+
+                        rm -f "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
+                        curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
+
+                    fi
+
+                    7z x -y "\$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
                 fi
-
-                7z x -y "\$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
             fi
 
@@ -1793,7 +1806,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
     elif [ -f "\$BUILD/bin/srb2legacy" ]; then
 
-        cp -rf "\$BUILD/bin/srb2legacy" "\$BUILD/build/AppDir/usr/bin"
+        cp -rf "\$BUILD/bin/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
 
     elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" ]; then
 
@@ -2214,7 +2227,15 @@ DESKTOP
 
     else
 
-        convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+            convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+        else
+
+            convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+        fi
         ICONSIZE=\$(identify "\$BUILD/build/icon.png" | gawk '{print \$3}')
         mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
@@ -2634,7 +2655,7 @@ else
     fi
 
     # Download libopenmpt's source code, build and install it for musl based Linux OS.
-    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
+    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
 
@@ -3041,11 +3062,11 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/.:/usr/lib/klibc-$(arch)/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             else
 
-                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
+                CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/.:/usr/lib/klibc-$(arch)/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 \$CONF
 
             fi
 
@@ -3055,11 +3076,11 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/.:/usr/lib/klibc-x86/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 \$CONF
 
             else
 
-                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
+                CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/.:/usr/lib/klibc-$(arch)/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 \$CONF
 
             fi
 
@@ -3445,7 +3466,16 @@ DESKTOP
 
     else
 
-        convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+
+            convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+        else
+
+            convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+        fi
+
         ICONSIZE=\$(identify "\$BUILD/build/icon.png" | gawk '{print \$3}')
         mkdir -p "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps"
 
@@ -3633,9 +3663,10 @@ FROM "$ISARM"alpine:latest
 
 ENV container docker
 
-RUN apk update && \
+RUN printf "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev klibc-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
 passwd -d srb2
@@ -3651,9 +3682,10 @@ FROM "$ISARM"alpine:latest
 
 ENV container docker
 
-RUN apk update && \
+RUN printf "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev imagemagick nasm build-base gcc6 cmake sudo bash dash gawk curl git p7zip shadow stow
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev klibc-dev imagemagick nasm build-base gcc6 cmake sudo bash dash gawk curl git p7zip shadow stow
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
@@ -3897,29 +3929,41 @@ dockerrun() {
 extractmacosassets() {
     if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-custom" ]; then
 
-        if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" != "$SRB2OLDVER" ]; then
+        # Temporary fix until SRB2 VR will be updated to SRB2 2.2.10.
+        if [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
 
-            SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_$SRB2OLDVER'\/.*Full.zip/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
-
-                rm -f "$SRB2BLDROOT/assets/SRB2-Older.zip"
-                curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Older.zip"
-
-            fi
-
-            7z x -y "$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+            curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.8/SRB2-v2.2.8-Full.zip -o "$SRB2BLDROOT/assets/SRB2VR.zip"
+            curl -RLC - https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.9/SRB2-v229-Patch.zip -o "$SRB2BLDROOT/assets/SRB2VR-Patch.zip"
+            7z x -y "$SRB2BLDROOT/assets/SRB2VR.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "$SRB2BLDROOT/assets/SRB2VR-Patch.zip" "*.pk3" -o"$BUILD/build/AppDir/usr/games/SRB2"
 
         else
 
-            SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
+            if [ "$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null)" != "$SRB2OLDVER" ]; then
 
-                rm -f "$SRB2BLDROOT/assets/SRB2-Latest.zip"
-                curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Latest.zip"
+                SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_$SRB2OLDVER'\/.*Full.zip/ {print $4}')
+                if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
+
+                    rm -f "$SRB2BLDROOT/assets/SRB2-Older.zip"
+                    curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Older.zip"
+
+                fi
+
+                7z x -y "$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+
+            else
+
+                SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+                if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
+
+                    rm -f "$SRB2BLDROOT/assets/SRB2-Latest.zip"
+                    curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Latest.zip"
+
+                fi
+
+                7z x -y "$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
             fi
-
-            7z x -y "$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
         fi
 
@@ -4186,7 +4230,7 @@ installtolinux() {
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2legacy.png"
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2legacy binary, assets, icons and desktop file to the system. Please wait..."
-        $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/srb2legacy" "$SRB2BINARYLNXPATH"
+        $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
         $SUDO install -d "$SRB2ASSETLNXPATH"
         $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
         $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
