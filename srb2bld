@@ -85,7 +85,7 @@ fi
 LNXFMODVER="fmodapi375linux"
 LNXPNG12VER="libpng12"
 LNXSDL2MIXERXVER="master"
-LNXOPENMPTVER="master"
+LNXOPENMPTVER="0.6.3"
 LNXGMEVER="0.6.2"
 LNXDISCORDRPCVER="master"
 LNXOPENVRVER="1.10.30"
@@ -1295,10 +1295,6 @@ dockerentry() {
 
         sudo apk update && sudo apk upgrade
 
-    elif [ -n "\$(which pacman 2> /dev/null)" ]; then
-
-        sudo pacman -Syu --needed --noconfirm
-
     else
 
         sudo apt update && sudo apt full-upgrade -y
@@ -1385,13 +1381,13 @@ dockerentry() {
     # Modify the build's configuration and assets directory names to avoid conflicts between installed builds.
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2"|#define DEFAULTDIR ".srb2'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2"|#define DEFAULTDIR "srb2'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2"|#define DEFAULTDIR ".srb2'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2"|#define DEFAULTDIR "srb2'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2UncappedPlus|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2UncappedPlus|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2UncappedPlus|' "\$BUILD/src/sdl/i_system.c"
@@ -1402,8 +1398,8 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2"|#define DEFAULTDIR ".srb2'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2"|#define DEFAULTDIR "srb2'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2NetPlus|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2NetPlus|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2NetPlus|' "\$BUILD/src/sdl/i_system.c"
@@ -1414,8 +1410,8 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2"|#define DEFAULTDIR ".srb2'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2"|#define DEFAULTDIR "srb2'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2VR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2VR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2VR|' "\$BUILD/src/sdl/i_system.c"
@@ -1427,13 +1423,13 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2_21"/#define DEFAULTDIR ".srb2_2.1"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2_21"/#define DEFAULTDIR "srb2_2.1"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2_21"|#define DEFAULTDIR ".srb2_2.1'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2_21"|#define DEFAULTDIR "srb2_2.1'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2_2.0"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2_2.0"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2"|#define DEFAULTDIR ".srb2_2.0'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2"|#define DEFAULTDIR "srb2_2.0'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/share/games/srb2|/usr/local/share/games/SRB2-2.0|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/local/games/srb2|/usr/local/games/SRB2-2.0|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/srb2|/usr/share/games/SRB2-2.0|' "\$BUILD/src/sdl/i_system.c"
@@ -1453,8 +1449,8 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb21094"/#define DEFAULTDIR ".srb2fd"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb21094"/#define DEFAULTDIR "srb2fd"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb21094"|#define DEFAULTDIR ".srb2fd'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb21094"|#define DEFAULTDIR "srb2fd'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/games/SRB2|/usr/local/share/games/SRB2FinalDemo|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/games/SRB2|/usr/games/SRB2FinalDemo|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2finaldemo|' "\$BUILD/src/sdl/i_system.c"
@@ -1472,8 +1468,8 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2persona'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2persona'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2"|#define DEFAULTDIR ".srb2persona'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2"|#define DEFAULTDIR "srb2persona'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2Persona|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2Persona|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2Persona|' "\$BUILD/src/sdl/i_system.c"
@@ -1484,17 +1480,17 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2kart"/#define DEFAULTDIR ".srb2kart'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2kart"/#define DEFAULTDIR "srb2kart'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's|/usr/local/share/games/SRB2Kart|/usr/local/share/games/SRB2KartMoeMansion|' "\$BUILD/src/sdl/i_system.c"
-         sed -i 's|/usr/local/games/SRB2Kart|/usr/local/games/SRB2KartMoeMansion|' "\$BUILD/src/sdl/i_system.c"
-         sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartMoeMansion|' "\$BUILD/src/sdl/i_system.c"
-         sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2KartMoeMansion|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|#define DEFAULTDIR ".srb2kart"|#define DEFAULTDIR ".srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2kart"|#define DEFAULTDIR "srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|/usr/local/share/games/SRB2Kart|/usr/local/share/games/SRB2Kart|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/local/games/SRB2Kart|/usr/local/games/SRB2Kart|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2Kart|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2Kart|' "\$BUILD/src/sdl/i_system.c"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2kart"/#define DEFAULTDIR ".srb2kart'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2kart"/#define DEFAULTDIR "srb2kart'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2kart"|#define DEFAULTDIR ".srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2kart"|#define DEFAULTDIR "srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/share/games/SRB2Kart|/usr/local/share/games/SRB2KartMoeMansion|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/local/games/SRB2Kart|/usr/local/games/SRB2KartMoeMansion|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartMoeMansion|' "\$BUILD/src/sdl/i_system.c"
@@ -1502,8 +1498,8 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2kart"/#define DEFAULTDIR ".srb2kart'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2kart"/#define DEFAULTDIR "srb2kart'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2kart"|#define DEFAULTDIR ".srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2kart"|#define DEFAULTDIR "srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/share/games/SRB2Kart|/usr/local/share/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/local/games/SRB2Kart|/usr/local/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
@@ -1512,10 +1508,10 @@ dockerentry() {
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-custom" ]; then
 
-         sed -i 's/#define DEFAULTDIR ".srb2"/#define DEFAULTDIR ".srb2custom'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2"/#define DEFAULTDIR "srb2custom'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR ".srb2kart"/#define DEFAULTDIR ".srb2custom'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
-         sed -i 's/#define DEFAULTDIR "srb2kart"/#define DEFAULTDIR "srb2custom'\$GITVERCONF'"/' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2"|#define DEFAULTDIR ".srb2custom'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2"|#define DEFAULTDIR "srb2custom'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR ".srb2kart"|#define DEFAULTDIR ".srb2custom'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2kart"|#define DEFAULTDIR "srb2custom'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
          sed -i 's|/usr/local/share/games/SRB2|/usr/local/share/games/SRB2Custom|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/local/games/SRB2|/usr/local/games/SRB2Custom|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2|/usr/share/games/SRB2Custom|' "\$BUILD/src/sdl/i_system.c"
@@ -1683,7 +1679,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         else
 
-            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr's source code. Please wait..."
             git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libopenvr"
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
@@ -1705,9 +1701,9 @@ if [ "\$APPIMAGE" = 1 ]; then
     fi
 
     # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-    if [ -f /usr/local/lib/libpng12.so ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
+    if [ -f /usr/local/lib/libpng12.so ] && [ -d /usr/local/stow/libpng12 ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" != "musl" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
-        sudo -E stow -D --adopt libpng12-lib32
+        sudo -E stow -D --adopt libpng12
 
     fi
 
@@ -1783,9 +1779,9 @@ if [ "\$APPIMAGE" = 1 ]; then
     fi
 
     # Renabling libpng12.
-    if [ -d /usr/local/stow/libpng12-lib32 ]; then
+    if [ ! -f /usr/local/lib/libpng12.so ] && [ -d /usr/local/stow/libpng12 ]; then
 
-        sudo -E stow --adopt libpng12-lib32
+        sudo -E stow --adopt libpng12
 
     fi
 
@@ -2582,7 +2578,7 @@ else
     fi
 
     # Download libpng12's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ]); then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libpng12/.git" ]; then
 
@@ -2591,7 +2587,7 @@ else
 
         else
 
-            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libpng12's source code. Please wait..."
             git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libpng12"
             git -C "\$SRB2BLDROOT/libraries/libpng12" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libpng12" reset -q --hard
@@ -2605,10 +2601,10 @@ else
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libpng12. Please wait..."
             cd "\$SRB2BLDROOT/libraries/libpng12" || exit
-            ./configure --prefix=/usr/local/stow/libpng12-lib32
+            ./configure --prefix=/usr/local/stow/libpng12
             CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libpng12"
             sudo make -C "\$SRB2BLDROOT/libraries/libpng12" install
-            sudo -E stow -v --adopt libpng12-lib32
+            sudo -E stow -v --adopt libpng12
             COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libpng12" rev-parse --short HEAD)
             \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libpng12/.comrev"
             cd "\$BUILD" || exit
@@ -2660,7 +2656,7 @@ else
         if [ ! -d "\$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "$LNXOPENMPTVER" "\$SRB2BLDROOT/libraries/libopenmpt"
+            git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "libopenmpt-$LNXOPENMPTVER" "\$SRB2BLDROOT/libraries/libopenmpt"
 
         else
 
@@ -2670,7 +2666,7 @@ else
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" checkout -q master
             git -C "\$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
-            git -C "\$SRB2BLDROOT/libraries/libopenmpt" checkout -q "$LNXOPENMPTVER"
+            git -C "\$SRB2BLDROOT/libraries/libopenmpt" checkout -q "libopenmpt-$LNXOPENMPTVER"
 
         fi
 
@@ -2690,7 +2686,7 @@ else
     fi
 
     # Download libgme's source code, build and install it.
-    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
+    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libgme/.git" ]; then
 
@@ -2791,7 +2787,7 @@ else
 
         else
 
-            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr's source code. Please wait..."
             git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libopenvr"
             git -C "\$SRB2BLDROOT/libraries/libopenvr" clean -qdfx -e .comrev
             git -C "\$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
@@ -2829,42 +2825,6 @@ else
         sudo tar xvf "$LNXFMODVER.tar.gz" --strip-components=3 -C "/usr/include/FMOD" "$LNXFMODVER/api/inc"
 
     fi
-
-    # Download libsfml's source code, build and install it.
-#    if [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
-#
-#        if [ ! -d "\$SRB2BLDROOT/libraries/libsfml/.git" ]; then
-#
-#            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libsfml's source code. Please wait..."
-#            git clone https://github.com/SFML/sfml.git --recursive --branch "$LNXSFMLVER" "\$SRB2BLDROOT/libraries/libsfml"
-#
-#        else
-#
-#            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libsfml. Please wait..."
-#            git -C "\$SRB2BLDROOT/libraries/libsfml" clean -qdfx -e .comrev
-#            git -C "\$SRB2BLDROOT/libraries/libsfml" reset -q --hard
-#            git -C "\$SRB2BLDROOT/libraries/libsfml" checkout -q master
-#            git -C "\$SRB2BLDROOT/libraries/libsfml" pull --recurse-submodules --rebase --autostash
-#            git -C "\$SRB2BLDROOT/libraries/libsfml" checkout -q "$LNXSFMLVER"
-#
-#        fi
-#
-#        if [ ! -f /usr/local/lib/libsfml-system.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libsfml/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libsfml" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libsfml/.comrev" 2> /dev/null)" ]); then
-#
-#            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libsfml. Please wait..."
-#            mkdir -p "\$SRB2BLDROOT/libraries/libsfml/build"
-#            cd "\$SRB2BLDROOT/libraries/libsfml/build" || exit
-#            cmake .. -DSFML_USE_SYSTEM_DEPS=ON -DSFML_BUILD_EXAMPLES=OFF -DSFML_BUILD_DOC=OFF -DSFML_INSTALL_PKGCONFIG_FILES=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/stow/libsfml
-#            make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsfml/build"
-#            sudo make -C "\$SRB2BLDROOT/libraries/libsfml/build" install
-#            sudo -E stow -v --adopt libsfml
-#            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libsfml" rev-parse --short HEAD)
-#            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libsfml/.comrev"
-#            cd "\$BUILD" || exit
-#
-#        fi
-#
-#    fi
 
     # Compile the build's source code.
     \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's source code. Please wait..."
@@ -3052,9 +3012,9 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
      elif [ "\$OS" = "Linux" ]; then
 
         # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-        if [ -f /usr/local/lib/libpng12.so ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
+        if [ -f /usr/local/lib/libpng12.so ] && [ -d /usr/local/stow/libpng12 ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" != "musl" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
 
-            sudo -E stow -D --adopt libpng12-lib32
+            sudo -E stow -D --adopt libpng12
 
         fi
 
@@ -3127,9 +3087,9 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
         fi
 
         # Renabling libpng12.
-        if [ -d /usr/local/stow/libpng12-lib32 ]; then
+        if [ ! -f /usr/local/lib/libpng12.so ] && [ -d /usr/local/stow/libpng12 ]; then
 
-            sudo -E stow --adopt libpng12-lib32
+            sudo -E stow --adopt libpng12
 
         fi
 
@@ -3666,7 +3626,7 @@ ENV container docker
 RUN printf "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
 apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev libpng-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev klibc-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
+apk add sdl2-dev sdl2_mixer-dev sdl-dev sdl_mixer-dev glu-dev fluidsynth-dev libmodplug-dev mpg123-dev jack-dev curl-dev libupnp-dev zlib-dev libexecinfo-dev klibc-dev imagemagick nasm build-base cmake sudo bash dash gawk curl git p7zip shadow stow rapidjson-dev
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G wheel -s /usr/bin/dash srb2 && \
 passwd -d srb2
@@ -4359,7 +4319,7 @@ installtolinux() {
         SRB2DESKTOPLNXPATH="/usr/local/share/applications/slade.desktop"
         SRB2LNXICONSIZE=$(find "/usr/local/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="/usr/local/share/icons/hicolor/$SRB2LNXICONSIZE/apps/slade.png"
-        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2custom binary, assets, icons and desktop file to the system. Please wait..."
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's slade binary, assets, icons and desktop file to the system. Please wait..."
         $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "/usr/local/share/applications"
 
     fi
@@ -4378,10 +4338,10 @@ installtolinux() {
     fi
 
     # Installing missing libraries for glibc based distros.
-    if [ -n "$(ldd $SRB2BINARYLNXPATH | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u)" ]; then
+    if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u)" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
-        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u); do
+        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u); do
 
             if [ -x "$(which emerge 2> /dev/null)" ]; then
 
@@ -4562,7 +4522,7 @@ installtolinux() {
 
                 fi
 
-                $SUDO patchelf --replace-needed "$l" $(find /usr/lib* -name $(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}') | head -n1 | gawk -F'/' '{print $NF}') "$SRB2BINARYLNXPATH" 2> /dev/null
+                $SUDO patchelf --replace-needed "$l" $(find /usr/lib* -name $(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*.so"}') | head -n1 | gawk -F'/' '{print $NF}') "$SRB2BINARYLNXPATH" 2> /dev/null
 
             done
 
@@ -4573,19 +4533,11 @@ installtolinux() {
     fi
 
     # Installing missing libraries for musl based distros.
-    if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u)" ]; then
+    if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u)" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
 
-        if [ -n "$(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u)" ]; then
-
-            PACKAGE=$(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u)
-
-        elif [ -n "$(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u)" ]; then
-
-            PACKAGE=$(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u)
-
-        fi
+        PACKAGE=$(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u)
 
         PACKAGE=$(for l in $PACKAGE; do
 
@@ -4638,6 +4590,47 @@ installtolinux() {
             $PRINTF "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..."
             cleansource
             exit
+
+        fi
+
+        # Changing library filenames within SLADE binary, in order to be found.
+        if [ "$BUILD" = "$BUILDPATH/slade" ]; then
+
+            for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u); do
+
+                if [ ! -x "$(which patchelf 2> /dev/null)" ]; then
+
+                    if [ -x "$(which emerge 2> /dev/null)" ]; then
+
+                        $SUDO emerge patchelf > /dev/null
+
+                    elif [ -x "$(which pacman 2> /dev/null)" ]; then
+
+                        $SUDO pacman -Sy patchelf > /dev/null
+
+                    elif [ -x "$(which apt-get 2> /dev/null)" ]; then
+
+                        $SUDO apt-get install -y patchelf > /dev/null
+
+                    elif [ -x "$(which zypper 2> /dev/null)" ]; then
+
+                        $SUDO zypper install -y patchelf > /dev/null
+
+                    elif [ -x "$(which dnf 2> /dev/null)" ]; then
+
+                        $SUDO dnf install --best --skip-broken -y patchelf > /dev/null
+
+                    elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
+
+                        $SUDO xbps-install -Sy patchelf > /dev/null
+
+                    fi
+
+                fi
+
+                $SUDO patchelf --replace-needed "$l" $(find /usr/lib* -name $(printf "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*.so"}') | head -n1 | gawk -F'/' '{print $NF}') "$SRB2BINARYLNXPATH" 2> /dev/null
+
+            done
 
         fi
 
@@ -5381,7 +5374,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
             else
 
-                $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr. Please wait..."
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenvr's source code. Please wait..."
                 git -C "$SRB2BLDROOT/libraries/libopenvr" clean -qdfx -e .comrev
                 git -C "$SRB2BLDROOT/libraries/libopenvr" reset -q --hard
                 git -C "$SRB2BLDROOT/libraries/libopenvr" checkout -q master
