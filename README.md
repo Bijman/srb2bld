@@ -3,8 +3,8 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-96ca-b5630b85e022.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR, wadcli and SLADE on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
-- Compiling and installing custom SRB2 build from local or remote Git repository,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR, wadcli and SLADE on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
@@ -137,6 +137,7 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Uncapped PLUS    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 rphys            |          ✅           |         ❔           |        ❔         |        ⛔       |       ❔      |
 | SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 v2.0             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
@@ -259,6 +260,12 @@ Usage: srb2bld [OPTIONS]
                14. export SRB2ASSETPATH="C:\Downloads\SRB2-Full"
 
           Then choose "Build SRB2 Custom", when running script.
+
+     10. Other environment variable to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+
+         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
+
+         - SRB2BLDDEVMODE - For developers, that want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
 ```
 
 # Notes
