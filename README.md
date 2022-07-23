@@ -76,7 +76,7 @@ As for macOS users, they need to install these additional dependencies:
 **macOS:**
 1. In terminal enter this following command:
 - Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl makeicns`,
-- MacPorts: `sudo port install cmake autoconf automake pkgconfig libtool gawk stow p7zip unrar curl makeicns`.
+- MacPorts: `sudo port -Ncb install cmake autoconf automake pkgconfig libtool gawk stow perl5.28 libiconv p7zip unrar curl makeicns`.
 
 # Installation
 **Linux:**
@@ -128,16 +128,16 @@ As for macOS users, they need to install these additional dependencies:
 1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system is logged out or rebooted.
 
 **macOS:**
-1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew),
+1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 05-06-2022)
+# Compatibility (as of 23-07-2022)
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Uncapped PLUS    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 rphys            |          ✅           |         ❔           |        ❔         |        ⛔       |       ❔      |
+| SRB2 rphys            |          ✅           |         ✅           |        ❔         |        ⛔       |       ⛔      |
 | SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 v2.0             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
@@ -219,11 +219,11 @@ Usage: srb2bld [OPTIONS]
 
      9. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
-          - SRB2GITPATH - path to local or remote repository,
+          - SRB2BLDGITPATH - path to local or remote repository,
 
-          - SRB2GITVER - chosen branch to download build from remote repository,
+          - SRB2BLDGITVER - chosen branch to download build from remote repository,
 
-          - SRB2ASSETPATH - path to assets from local or remote path (supported links/paths:
+          - SRB2BLDASSETPATH - path to assets from local or remote path (supported links/paths:
                - websites with direct link to file, for example, "https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip",
                - mega.nz,
                - drive.google.com,
@@ -231,33 +231,33 @@ Usage: srb2bld [OPTIONS]
                - full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.)
 
           EXAMPLES:
-               1. export SRB2GITPATH="https://github.com/STJr/SRB2"
+               1. export SRB2BLDGITPATH="https://github.com/STJr/SRB2"
 
-               2. export SRB2GITPATH="https://git.do.srb2.org/TehRealSalt/SRB2"
+               2. export SRB2BLDGITPATH="https://git.do.srb2.org/TehRealSalt/SRB2"
 
-               3. export SRB2GITPATH="$HOME/Builds/SRB2"
+               3. export SRB2BLDGITPATH="$HOME/Builds/SRB2"
 
-               4. export SRB2GITPATH="C:\Builds\SRB2"
+               4. export SRB2BLDGITPATH="C:\Builds\SRB2"
 
-               5. export SRB2GITVER="udmf"
+               5. export SRB2BLDGITVER="udmf"
 
-               6. export SRB2GITVER="master"
+               6. export SRB2BLDGITVER="master"
 
-               7. export SRB2ASSETPATH="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip"
+               7. export SRB2BLDASSETPATH="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip"
 
-               8. export SRB2ASSETPATH="https://mega.nz/file/JQswBDAA#IPXWeTmrXrI9YZx6zUznJQ2uIAHryv_WP1JxWfnKbts"
+               8. export SRB2BLDASSETPATH="https://mega.nz/file/JQswBDAA#IPXWeTmrXrI9YZx6zUznJQ2uIAHryv_WP1JxWfnKbts"
 
-               9. export SRB2ASSETPATH="https://drive.google.com/file/d/1Vc-lHph8MxlnfaBZnv0NNpoFKhehmce6"
+               9. export SRB2BLDASSETPATH="https://drive.google.com/file/d/1Vc-lHph8MxlnfaBZnv0NNpoFKhehmce6"
 
-               10. export SRB2ASSETPATH="https://www.dropbox.com/s/5neoderzan6mbh3/SRB2PERSONA%20v1.3.3%20Full%20Installer.exe"
+               10. export SRB2BLDASSETPATH="https://www.dropbox.com/s/5neoderzan6mbh3/SRB2PERSONA%20v1.3.3%20Full%20Installer.exe"
 
-               11. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full.zip"
+               11. export SRB2BLDASSETPATH="$HOME/Downloads/SRB2-Full.zip"
 
-               12. export SRB2ASSETPATH="C:\Downloads\SRB2-Full.zip"
+               12. export SRB2BLDASSETPATH="C:\Downloads\SRB2-Full.zip"
 
-               13. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full"
+               13. export SRB2BLDASSETPATH="$HOME/Downloads/SRB2-Full"
 
-               14. export SRB2ASSETPATH="C:\Downloads\SRB2-Full"
+               14. export SRB2BLDASSETPATH="C:\Downloads\SRB2-Full"
 
           Then choose "Build SRB2 Custom", when running script.
 
@@ -265,7 +265,7 @@ Usage: srb2bld [OPTIONS]
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
-         - SRB2BLDDEVMODE - For developers, that want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
+         - SRB2BLDDEVMODE - For developers, who want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
 ```
 
 # Notes
@@ -297,35 +297,40 @@ Usage: srb2bld [OPTIONS]
         - drive.google.com,
         - dropbox.com,
         - full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.)
-
 ```
   EXAMPLES:
-        1. export SRB2GITPATH="https://github.com/STJr/SRB2"
+        1. export SRB2BLDGITPATH="https://github.com/STJr/SRB2"
 
-        2. export SRB2GITPATH="https://git.do.srb2.org/TehRealSalt/SRB2"
+        2. export SRB2BLDGITPATH="https://git.do.srb2.org/TehRealSalt/SRB2"
 
-        3. export SRB2GITPATH="$HOME/Builds/SRB2"
+        3. export SRB2BLDGITPATH="$HOME/Builds/SRB2"
 
-        4. export SRB2GITPATH="C:\Builds\SRB2"
+        4. export SRB2BLDGITPATH="C:\Builds\SRB2"
 
-        5. export SRB2GITVER="udmf"
+        5. export SRB2BLDGITVER="udmf"
 
-        6. export SRB2GITVER="master"
+        6. export SRB2BLDGITVER="master"
 
-        7. export SRB2ASSETPATH="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip"
+        7. export SRB2BLDASSETPATH="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip"
 
-        8. export SRB2ASSETPATH="https://mega.nz/file/JQswBDAA#IPXWeTmrXrI9YZx6zUznJQ2uIAHryv_WP1JxWfnKbts"
+        8. export SRB2BLDASSETPATH="https://mega.nz/file/JQswBDAA#IPXWeTmrXrI9YZx6zUznJQ2uIAHryv_WP1JxWfnKbts"
 
-        9. export SRB2ASSETPATH="https://drive.google.com/file/d/1Vc-lHph8MxlnfaBZnv0NNpoFKhehmce6"
+        9. export SRB2BLDASSETPATH="https://drive.google.com/file/d/1Vc-lHph8MxlnfaBZnv0NNpoFKhehmce6"
 
-        10. export SRB2ASSETPATH="https://www.dropbox.com/s/5neoderzan6mbh3/SRB2PERSONA%20v1.3.3%20Full%20Installer.exe"
+        10. export SRB2BLDASSETPATH="https://www.dropbox.com/s/5neoderzan6mbh3/SRB2PERSONA%20v1.3.3%20Full%20Installer.exe"
 
-        11. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full.zip"
+        11. export SRB2BLDASSETPATH="$HOME/Downloads/SRB2-Full.zip"
 
-        12. export SRB2ASSETPATH="C:\Downloads\SRB2-Full.zip"
+        12. export SRB2BLDASSETPATH="C:\Downloads\SRB2-Full.zip"
 
-        13. export SRB2ASSETPATH="$HOME/Downloads/SRB2-Full"
+        13. export SRB2BLDASSETPATH="$HOME/Downloads/SRB2-Full"
 
-        14. export SRB2ASSETPATH="C:\Downloads\SRB2-Full"
+        14. export SRB2BLDASSETPATH="C:\Downloads\SRB2-Full"
 ```
    Then choose "Build SRB2 Custom", when running script.
+
+10. Other environment variable to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+
+        - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
+
+        - SRB2BLDDEVMODE - For developers, who want to modify build's source code. Disables cleaning build and resetting changes to build's source code.

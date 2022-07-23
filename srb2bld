@@ -115,7 +115,13 @@ if [ "$OS" = "Darwin" ]; then
     MACOSGMEVER="0.6.2"
     MACOSDISCORDRPCVER="master"
     MACOSOPENVRVER="1.10.30"
-    HOMEBREWPREFIX=$(brew --prefix)
+
+    if [ -x "$(which brew 2> /dev/null)" ]; then
+
+        HOMEBREWPREFIX=$(brew --prefix)
+
+    fi
+
     MACPORTPREFIX="/opt/local"
 
 fi
@@ -548,11 +554,14 @@ choosebuild() {
                 if [ -z "$SRB2BLDGITPATH" ]; then
 
                     $PRINTF "$FAILURE%s\n\e[0m" "ERROR: No SRB2BLDGITPATH is set. Add SRB2BLDGITPATH environment variable to valid Git local or remote path in shell configuration file (for example \".bash_profile\" or \".zshrc\" or \".bashrc\").
-                EXAMPLES:
-                	1. export SRB2BLDGITPATH=\"https://github.com/STJr/SRB2\"
-                	2. export SRB2BLDGITPATH=\"https://git.do.srb2.org/TehRealSalt/SRB2\"
-                	3. export SRB2BLDGITPATH=\"\$HOME/Builds/SRB2\"
-                	4. export SRB2BLDGITPATH=\"C:\Builds\SRB2\"
+                EXAMPLE:
+			1. export SRB2BLDGITPATH=\"https://github.com/STJr/SRB2\"
+
+			2. export SRB2BLDGITPATH=\"https://git.do.srb2.org/TehRealSalt/SRB2\"
+
+			3. export SRB2BLDGITPATH=\"\$HOME/Builds/SRB2\"
+
+			4. export SRB2BLDGITPATH=\"C:\Builds\SRB2\"
                 "
                     exit
 
@@ -618,6 +627,7 @@ choosebuild() {
                 fi
 
                 GITVER="$GITDEFVER"
+                GITVERCONF=$($PRINTF "$GITDEFVER" | gawk '{print $NF}')
                 GIT="git clone $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git --recursive $GITVER"
                 break
 
@@ -978,7 +988,7 @@ cleansource() {
 
         if [ "$OS" != "Darwin" ]; then
 
-            $SUDO find "$SRB2BLDROOT" -user root -exec chown -R "$USER":"$USER" {} \;
+            $SUDO find "$SRB2BLDROOT" -user root -exec chown -R "$USER" {} \;
 
         fi
 
@@ -1344,7 +1354,7 @@ dockerentry() {
     extractcustomassets() {
         BUILDPREFIX=\$(\$PRINTF "%s\n" "\$BUILD" | gawk -F'/' '{print \$NF}')
 
-        if [ -n "\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | head -n1)" ]; then
+        if [ -n "\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | head -n1)" ] && [ "\$(curl -X GET -sLI "\$SRB2BLDASSETPATH" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" = "\$(stat -c %s "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null)" ]; then
 
             FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
             SRB2BLDASSETPATH="\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
@@ -1498,28 +1508,6 @@ dockerentry() {
     # Add -lexecinfo to LDFLAGS for musl based Linux OS to make building successful.
     if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ]; then
 
-#        cat > "\$BUILD/srb2-games-linux-musl.patch" << MUSL
-#--- /src/sdl/i_system.c
-#+++ /src/sdl/i_system.c
-#@@ -137,11 +137,11 @@ typedef LPVOID (WINAPI *p_MapViewOfFile) (HANDLE, DWORD, DWORD, DWORD, SIZE_T);
-# #include <errno.h>
-# #endif
-
-#-#if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
-#-#include <execinfo.h>
-#-#include <time.h>
-#-#define UNIXBACKTRACE
-#-#endif
-#+//#if definer (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
-#+//#include <execinfo.h>
-#+//#include <time.h>
-#+//#define UNIXBACKTRACE
-#+//#endif3
-
-# // Locations for searching the srb2.pk3
-# #if defined (__unix__) || defined(__APPLE__) || defined (UNIXCOMMON)
-#MUSL
-#        patch -t -p1 < "\$BUILD/srb2-games-linux-musl.patch"
         export LDFLAGS="\$LDFLAGS -lexecinfo"
 
     fi
@@ -1549,7 +1537,7 @@ dockerentry() {
 
     fi
 
-    if [ "\$GITVERCONF" = "\$GITDEFVER" ]; then
+    if [ "\$GITVERCONF" = "\$GITDEFVER" ] && [ -z "\$SRB2BLDGITVER" ]; then
 
        unset GITVERCONF
 
@@ -1771,7 +1759,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
             fi
 
-            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+            \$PRINTF "$NOTICE%s\n\e[0m" "cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null | head -n1) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so 2>/dev/null) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
         else
 
@@ -1940,7 +1928,7 @@ if [ "\$APPIMAGE" = 1 ]; then
 
         fi
 
-        cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \$CONF
+        cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null | head -n1) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so 2> /dev/null) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \$CONF
         make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/build"
         make -C "\$BUILD/build" install DESTDIR="\$BUILD/build/AppDir"
         rm -rf "\$BUILD/build/AppDir/usr/share/applications/net.mancubus.SLADE.desktop"
@@ -2713,17 +2701,21 @@ else
 
             fi
 
-            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_CXX_COMPILER="\$ARCH-w64-mingw32-$MINGWCXXVER" -DCMAKE_C_COMPILER="\$ARCH-w64-mingw32-$MINGWCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+            \$PRINTF "$NOTICE%s\n\e[0m" "cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null | head -n1) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so 2> /dev/null) \$MUSLFLAGS -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_CXX_COMPILER="\$ARCH-w64-mingw32-$MINGWCXXVER" -DCMAKE_C_COMPILER="\$ARCH-w64-mingw32-$MINGWCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
         else
 
-            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+            if [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWCCVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="x86_64-w64-mingw32-$MINGWCCVER" C_INCLUDE_PATH="/usr/x86_64-w64-mingw32/include/.:/usr/include/x86_64-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW64=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+
+            elif [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]; then
+
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="i686-w64-mingw32-$MINGWCCVER" C_INCLUDE_PATH="/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWCCVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW\$IS64=1 NONX86=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="\$ARCH-w64-mingw32-$MINGWCCVER" C_INCLUDE_PATH="/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" MINGW=1 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -2735,11 +2727,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCOLDVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -2747,11 +2739,11 @@ else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/i386-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/.:/usr/lib/klibc-x86/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
-                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                \$PRINTF "$NOTICE%s\n\e[0m" "CC="$GCCVER" C_INCLUDE_PATH="/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:/usr/local/include/.:/usr/local/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/." LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/src" LINUX=1 NONX86=1 YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -2767,7 +2759,7 @@ else
 
             fi
 
-            \$PRINTF "$NOTICE%s\n\e[0m" "cmake "\$BUILD" -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+            \$PRINTF "$NOTICE%s\n\e[0m" "cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null | head -n1) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so 2> /dev/null) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
         else
 
@@ -3134,7 +3126,7 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             fi
 
-            cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_CXX_COMPILER="\$ARCH-w64-mingw32-$MINGWCXXVER" -DCMAKE_C_COMPILER="\$ARCH-w64-mingw32-$MINGWCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \$CONF
+            cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null | head -n1) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so 2> /dev/null) \$MUSLFLAGS -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_CXX_COMPILER="\$ARCH-w64-mingw32-$MINGWCXXVER" -DCMAKE_C_COMPILER="\$ARCH-w64-mingw32-$MINGWCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \$CONF
             make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/build"
             make -C "\$BUILD/build" install DESTDIR="\$BUILD/build/AppDir"
             rm -rf "\$BUILD/build/AppDir/usr/share/applications/net.mancubus.SLADE.desktop"
@@ -3280,7 +3272,7 @@ if [ "\$(\$PRINTF "%s\n" "\$OS" | gawk -F'_' '{print \$1}')" = "MINGW64" ] || [ 
 
             fi
 
-            cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local \$CONF
+            cmake .. -DwxWidgets_CONFIG_EXECUTABLE=\$(which wx-config wx-config-gtk3 2> /dev/null | head -n1) -DwxWidgets_LIBRARIES=\$(find /usr -name libwx_baseu-*.so 2> /dev/null) \$MUSLFLAGS -DCMAKE_CXX_COMPILER="$GXXVER" -DCMAKE_C_COMPILER="$GCCVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local \$CONF
             make -k -j\$((\$(nproc) + 1)) -C "\$BUILD/build"
             sudo make -C "\$BUILD/build" install
             sudo rm -rf "/usr/local/share/applications/net.mancubus.SLADE.desktop"
@@ -4145,7 +4137,7 @@ extractmacosassets() {
 
             if [ "$BUILD" = "$BUILDPATH/srb2-rphys" ]; then
 
-                if [ "$(curl -X GET -sLI "$SRB2RPHYSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -c %s "$SRB2BLDROOT/assets/SRB2rphys.zip" 2> /dev/null)" ]; then
+                if [ "$(curl -X GET -sLI "$SRB2RPHYSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2rphys.zip" 2> /dev/null)" ]; then
 
                     curl -RL "$SRB2RPHYSASSETURL" -o "$SRB2BLDROOT/assets/SRB2rphys.zip"
 
@@ -4276,7 +4268,7 @@ extractmacosassets() {
 extractmacoscustomassets() {
     BUILDPREFIX=$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')
 
-    if [ -n "$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | head -n1)" ]; then
+    if [ -n "$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | head -n1)" ] && [ "$(curl -X GET -sLI "$SRB2BLDASSETPATH" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" = "$(stat -f %z "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null)" ]; then
 
         FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
         SRB2BLDASSETPATH="$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
@@ -4299,10 +4291,15 @@ extractmacoscustomassets() {
         SRB2BLDASSETPATH="$MEGANZURL"
         FILETYPE=$($PRINTF "$MEGANZFILENAME" | gawk -F'.' '{print $NF}')
 
-    else
+    elif [ -n "$SRB2BLDASSETPATH" ]; then
 
         SRB2BLDASSETPATH="$SRB2BLDASSETPATH"
         FILETYPE=$(curl -X GET -sLI "$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"","");print $NF}')
+
+    elif [ -z "$SRB2BLDASSETPATH" ]; then
+
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
+        extractmacosassets
 
     fi
 
@@ -4320,15 +4317,9 @@ extractmacoscustomassets() {
             cat "$BUILD/$MEGANZFILENAME" | openssl enc -d -aes-128-ctr -K "$MEGANZHEX" -iv "$MEGANZHEXRAW" > "$BUILD/$MEGANZFILENAME.new"
             mv -f "$BUILD/$MEGANZFILENAME.new" "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
 
-        elif [ -n "$SRB2BLDASSETPATH" ]; then
+        else
 
-            SRB2BLDASSETPATH="$SRB2BLDASSETPATH"
-            FILETYPE=$(curl -X GET -sLI "$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"","");print $NF}')
-
-        elif [ -z "$SRB2BLDASSETPATH" ]; then
-
-            $PRINTF "$MESSAGE\n%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
-            extractmacosassets
+            curl -RL "$SRB2BLDASSETPATH" -o "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
 
         fi
 
@@ -4721,6 +4712,22 @@ installtolinux() {
 
                 fi
 
+            elif [ -x "$(which nix-env 2> /dev/null)" ]; then
+
+                if [ ! -x "$(which nix-index 2> /dev/null)" ]; then
+
+                    $SUDO nix-env -iA nixos.nix-index
+
+                fi
+
+                if [ ! -f "$HOME/.cache/nix-index/files" ] && [ ! -f "$XDG_CACHE_HOME/nix-index/files" ]; then
+
+                    nix-index > /dev/null
+
+                fi
+
+                nix-locate --top-level -1 $($PRINTF "%s\n" "$l" | gawk '{print "/lib/"$0}') | gawk '{gsub("^","nixos.");print}' | head -n1
+
             fi
 
         done)
@@ -4756,6 +4763,10 @@ installtolinux() {
 
             $SUDO xbps-install -Sy $PACKAGE 2> /dev/null
 
+        elif [ -x "$(which nix-env 2> /dev/null)" ]; then
+
+            $SUDO nix-env -iA $PACKAGE 2> /dev/null
+
         else
 
             ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u
@@ -4772,7 +4783,7 @@ installtolinux() {
         fi
 
         # Changing library filenames within SLADE binary, in order to be found.
-        if [ "$BUILD" = "$BUILDPATH/slade" ]; then
+        if [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$OSNAME" = "NixOS" ]; then
 
             for l in $(ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ {print $1}' | sort -u); do
 
@@ -4802,13 +4813,27 @@ installtolinux() {
 
                         $SUDO xbps-install -Sy patchelf > /dev/null
 
+                    elif [ -x "$(which nix-env 2> /dev/null)" ]; then
+
+                        $SUDO nix-env -iA nixos.patchelf > /dev/null
+
                     fi
 
                 fi
 
-                $SUDO patchelf --replace-needed "$l" $(find /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*.so"}') | head -n1 | gawk -F'/' '{print $NF}') "$SRB2BINARYLNXPATH" 2> /dev/null
+                if [ "$OSNAME" = "NixOS" ]; then
+
+                    $SUDO patchelf --replace-needed "$l" $(find /nix/store -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-.*.so.*","");print $0"*.so"}') 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH" 2> /dev/null
+
+                else
+
+                    $SUDO patchelf --replace-needed "$l" $(find /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*.so"}') 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1) "$SRB2BINARYLNXPATH" 2> /dev/null
+
+                fi
 
             done
+
+            $SUDO patchelf --set-interpreter $(ldd "$SRB2BINARYLNXPATH" | gawk '/ld-linux/ {print $3}') "$SRB2BINARYLNXPATH"
 
         fi
 
@@ -4972,10 +4997,11 @@ installtomacos() {
     # Exporting environment variables for compiling, installing game and libraries on macOS.
     export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
     export SDKROOT="$SDKROOT"
-    export LIBRARY_PATH="/usr/lib:/usr/local/lib:$HOMEBREWPREFIX/lib:$MACPORTPREFIX/lib:$LIBRARY_PATH"
-    export C_INCLUDE_PATH="/usr/include:/usr/local/include:$HOMEBREWPREFIX/include:$MACPORTPREFIX/include:$C_INCLUDE_PATH"
+    export PATH="$MACPORTPREFIX/bin:$HOMEBREWPREFIX/bin:$PATH"
+    export LIBRARY_PATH="$MACPORTPREFIX/lib:$HOMEBREWPREFIX/lib:/usr/local/lib:/usr/lib:$LIBRARY_PATH"
+    export C_INCLUDE_PATH="$MACPORTPREFIX/include:$HOMEBREWPREFIX/include:/usr/local/include:/usr/include:$C_INCLUDE_PATH"
     export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
-    export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$HOMEBREWPREFIX/lib/pkgconfig:$MACPORTPREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+    export PKG_CONFIG_PATH="$MACPORTPREFIX/lib/pkgconfig:$HOMEBREWPREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
     export STOW_DIR="/usr/local/stow"
 
     # Have commit revision as part of name for App Bundle.
@@ -4994,6 +5020,20 @@ installtomacos() {
     else
 
         LIBSDL2PREFIX="/usr/local"
+
+    fi
+
+    if [ -f "$HOMEBREWPREFIX/lib/libSDL2_mixer.dylib" ]; then
+
+        LIBSDL2MIXERPREFIX="$HOMEBREWPREFIX"
+
+    elif [ -f "$MACPORTPREFIX/lib/libSDL2_mixer.dylib" ]; then
+
+        LIBSDL2MIXERPREFIX="$MACPORTPREFIX"
+
+    else
+
+        LIBSDL2MIXERPREFIX="/usr/local"
 
     fi
 
@@ -5025,10 +5065,42 @@ installtomacos() {
 
     fi
 
+    if [ -f "$HOMEBREWPREFIX/lib/libpng.dylib" ]; then
+
+        LIBPNGPREFIX="$HOMEBREWPREFIX"
+
+    elif [ -f "$MACPORTPREFIX/lib/libpng.dylib" ]; then
+
+        LIBPNGPREFIX="$MACPORTPREFIX"
+
+    else
+
+        LIBPNGPREFIX="/usr/local"
+
+    fi
+
+    if [ -f "$HOMEBREWPREFIX/lib/libmpg123.dylib" ]; then
+
+        LIBMPG123PREFIX="$HOMEBREWPREFIX"
+
+    elif [ -f "$MACPORTPREFIX/lib/libmpg123.dylib" ]; then
+
+        LIBMPG123PREFIX="$MACPORTPREFIX"
+
+    else
+
+        LIBMPG123PREFIX="/usr/local"
+
+    fi
+
     # Upgrade build. Making sure, that there are only used compilation flags.
-    if [ -n "$UPGRADE" ]; then
+    if [ -n "$UPGRADE" ] && [ -z "$CUSTOMDIR" ]; then
 
         export CONF="$(gawk '/---------------/ {gsub("---------------","");getline;print}' "$SRB2BLDROOT/installed/$UPGRADE")"
+
+    elif [ -n "$UPGRADE" ] && [ -n "$CUSTOMDIR" ]; then
+
+        export CONF="$(gawk '/---------------/ {gsub("---------------","");getline;print}' "$SRB2BLDROOT/installed/$CUSTOMDIR")"
 
     # Otherwise set compilation flags, build and install as usual.
     else
@@ -5108,16 +5180,17 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
             elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
+                # Display content of CMakeLists for a good view of available compilation flags.
                 cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
                 $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(which wx-config wx-config-gtk3 $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S "$BUILD" -B "$BUILD/build" -DwxWidgets_CONFIG_EXECUTABLE=$(which $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVERSLADE" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             else
 
                 # Display content of CMakeLists for a good view of available compilation flags.
                 cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
                 $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
+                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$GITVER-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DCMAKE_MODULE_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DCMAKE_SHARED_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DSDL2_INCLUDE_DIR="$LIBSDL2PREFIX/include/SDL2" -DSDL2_LIBRARY="$LIBSDL2PREFIX/lib/libSDL2.dylib" -DSDL2_MIXER_INCLUDE_DIR="$LIBSDL2MIXERPREFIX/include/SDL2" -DSDL2_MIXER_LIBRARY="$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib" -DGME_INCLUDE_DIR="$LIBGMEPREFIX/include/gme" -DGME_LIBRARY="$LIBGMEPREFIX/lib/libgme.dylib" -DOPENMPT_INCLUDE_DIR="$LIBOPENMPTPREFIX/include/libopenmpt" -DOPENMPT_LIBRARY="$LIBOPENMPTPREFIX/lib/libopenmpt.dylib" -DPNG_PNG_INCLUDE_DIR="$LIBPNGPREFIX/include" -DPNG_LIBRARY="$LIBPNGPREFIX/lib/libpng.dylib" -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON YOUR-COMPILATION-FLAGS-WILL-BE-HERE"
 
             fi
 
@@ -5218,7 +5291,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     # Fixing permission conflicts between compiled libraries and installed from package manager.
     if [ "$(stat -f %u /usr/local/stow 2> /dev/null)" = "0" ]; then
 
-        sudo chown -R $(whoami) /usr/local/stow
+        sudo chown -R "$USER" /usr/local/stow
 
     fi
 
@@ -5226,7 +5299,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         if [ "$(which port 2> /dev/null)" ]; then
 
-            sudo port -Nc install libfmt
+            sudo port -Nfcb install libfmt
 
         else
 
@@ -5238,7 +5311,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         if [ -n "$(which port 2> /dev/null)" ]; then
 
-            sudo port -Nc install ftgl glew fluidsynth gtk3 freeimage sfml libmodplug $(port -q search wxwidgets-[0-9] | tail -n1) lua
+            sudo port -Nfcb install ftgl glew fluidsynth gtk3 freeimage sfml libmodplug $(port -q search wxwidgets-[0-9] | tail -n1) lua
 
         else
 
@@ -5568,13 +5641,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
                 gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
                 make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-                #cp -f "$SRB2BLDROOT/libraries/libopenmpt/build/autotools/"* "$SRB2BLDROOT/libraries/libopenmpt"
-                #cp -f "$SRB2BLDROOT/libraries/libopenmpt/libopenmpt/Doxyfile" "$SRB2BLDROOT/libraries/libopenmpt/Doxyfile.in"
-                #mkdir -p "$SRB2BLDROOT/libraries/libopenmpt/libmodplug"
-                #cp -f "$SRB2BLDROOT/libraries/libopenmpt/include/modplug/include/libmodplug/libmodplug.pc.in" "$SRB2BLDROOT/libraries/libopenmpt/libmodplug"
-                #autoreconf -iv
-                #./configure --without-portaudio --without-portaudiocpp --without-sndfile --without-flac --prefix=/usr/local/stow/libopenmpt
-                #make -k -j$(($(sysctl -n hw.logicalcpu) + 1))
                 sudo -E make PREFIX=/usr/local/stow/libopenmpt install
                 sudo -E stow -v --adopt libopenmpt
                 COMREV=$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)
@@ -5693,11 +5759,11 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     # Fixing permission conflicts between compiled libraries and installed from package manager.
     if [ "$(stat -f %u /usr/local/stow 2> /dev/null)" = "0" ]; then
 
-        sudo chown -R $(whoami) /usr/local/stow
+        sudo chown -R "$USER" /usr/local/stow
 
     fi
 
-    if [ "$GITVERCONF" = "$GITDEFVER" ]; then
+    if [ "$GITVERCONF" = "$GITDEFVER" ] && [ -z "$SRB2BLDGITVER" ]; then
 
         unset GITVERCONF
 
@@ -5757,12 +5823,12 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
-        cmake -S "$BUILD" -B "$BUILD/build" -DwxWidgets_CONFIG_EXECUTABLE=$(which wx-config wx-config-gtk3 $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVERSLADE" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps $CONF
+        cmake -S "$BUILD" -B "$BUILD/build" -DwxWidgets_CONFIG_EXECUTABLE=$(which $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVERSLADE" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DMPG123_INCLUDE_DIR="$LIBMPG123PREFIX/include" -DMPG123_LIBRARIES="$LIBMPG123PREFIX/lib/libmpg123.dylib" $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
 
     else
 
-        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$GITVER-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DCMAKE_MODULE_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DCMAKE_SHARED_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DSDL2_INCLUDE_DIR="$LIBSDL2PREFIX/include/SDL2" -DSDL2_LIBRARY="$LIBSDL2PREFIX/lib/libSDL2.dylib" -DSDL2_MIXER_INCLUDE_DIR="/opt/local/include/SDL2" -DSDL2_MIXER_LIBRARY="$LIBSDL2PREFIX/lib/libSDL2_mixer.dylib" -DGME_INCLUDE_DIR="$LIBGMEPREFIX/include/gme" -DGME_LIBRARY="$LIBGMEPREFIX/lib/libgme.dylib" -DOPENMPT_INCLUDE_DIR="$LIBOPENMPTPREFIX/include/libopenmpt" -DOPENMPT_LIBRARY="$LIBOPENMPTPREFIX/lib/libopenmpt.dylib" -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
+        cmake -S "$BUILD" -B "$BUILD/build" -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCPACK_PACKAGE_DESCRIPTION_SUMMARY="$BUILDNAME" -DCPACK_PACKAGE_FILE_NAME="$BUILDNAME-$GITVER-$COMREV" -DCMAKE_BUILD_TYPE=Release -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=/usr/local/opt/srb2-apps -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DCMAKE_MODULE_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DCMAKE_SHARED_LINKER_FLAGS_RELEASE="-headerpad_max_install_names" -DSDL2_INCLUDE_DIR="$LIBSDL2PREFIX/include/SDL2" -DSDL2_LIBRARY="$LIBSDL2PREFIX/lib/libSDL2.dylib" -DSDL2_MIXER_INCLUDE_DIR="$LIBSDL2MIXERPREFIX/include/SDL2" -DSDL2_MIXER_LIBRARY="$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib" -DGME_INCLUDE_DIR="$LIBGMEPREFIX/include/gme" -DGME_LIBRARY="$LIBGMEPREFIX/lib/libgme.dylib" -DOPENMPT_INCLUDE_DIR="$LIBOPENMPTPREFIX/include/libopenmpt" -DOPENMPT_LIBRARY="$LIBOPENMPTPREFIX/lib/libopenmpt.dylib" -DPNG_PNG_INCLUDE_DIR="$LIBPNGPREFIX/include" -DPNG_LIBRARY="$LIBPNGPREFIX/lib/libpng.dylib" -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON $CONF
         cmake --build "$BUILD/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
 
     fi
@@ -5784,7 +5850,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         # Fix paths of installed libraries.
         if [ -f "$(find /Library/Developer/CommandLineTools/usr/lib/clang -name libclang_rt.ubsan_osx_dynamic.dylib | head -n1)" ]; then
 
-            sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/*/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib
+            sudo ln -sf /Library/Developer/CommandLineTools/usr/lib/clang/$(clang -v 2>&1 | gawk -F'Apple clang version|\\(| ' '/version/ {print $3}')/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib /usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib
 
         fi
 
@@ -5913,13 +5979,13 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         if [ -f "$HOMEBREWPREFIX/lib/libgme.dylib" ]; then
 
-            sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" "$HOMEBREWPREFIX/lib/libgme.dylib"
+            sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" $HOMEBREWPREFIX/lib/libgme.dylib
 
         fi
 
         if [ -f "$MACPORTPREFIX/lib/libgme.dylib" ]; then
 
-            sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" "$MACPORTPREFIX/lib/libgme.dylib"
+            sudo install_name_tool -change "@rpath/libclang_rt.ubsan_osx_dynamic.dylib" "/usr/local/lib/libclang_rt.ubsan_osx_dynamic.dylib" $MACPORTPREFIX/lib/libgme.dylib
 
         fi
 
