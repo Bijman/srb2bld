@@ -25,6 +25,7 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - Docker (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
 - FUSE (Linux only),
+- Patchelf (Linux only),
 - Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package) (Linux only).
 
 Windows users need to also have installed Git Bash to run this script.
@@ -42,23 +43,31 @@ As for macOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following command:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils bash ncurses-bin curl gawk docker.io stow fuse`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils ncurses-bin curl gawk docker.io stow fuse patchelf`,
 
-- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- Gentoo/Gentoo based: `sudo emerge -av git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Gentoo/Gentoo based: `sudo emerge -av git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- OpenSUSE/OpenSUSE based: `sudo zypper in make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Fedora Silverblue/Kinoite: `rpm-ostree install -A --idempotent make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- Void/Void based: `sudo xbps-install -S make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- OpenSUSE/OpenSUSE based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- Alpine/Alpine based: `sudo apk add make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Void/Void based: `sudo xbps-install -S make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- Solus/Solus based: `sudo eopkg it make git which coreutils findutils bash ncurses curl gawk docker stow fuse`,
+- Alpine/Alpine based: `sudo apk add make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils bash ncurses curl gawk stow fuse` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
+- Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+
+- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
+
+- Immutable systems like SteamOS needs rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like /usr/local:
+	1. Docker: https://docs.docker.com/engine/security/rootless/ ,
+	2. Package managers:
+		- [Homebrew](https://brew.sh/): `brew install make git coreutils findutils ncurses curl gawk stow patchelf`,
+                - [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -86,7 +95,7 @@ As for macOS users, they need to install these additional dependencies:
 
 3. Go to downloaded directory: `cd srb2bld`,
 
-4. Enter `sudo make install`, which will install to "/usr/bin" or "/usr/local/bin", if path exists. Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
+4. Enter `sudo make install`, which will install to "/usr/local/bin", if path exists. You can specify your path with variable PREFIX, for example `make install PREFIX=$HOME/.local`, which will copy script to "$HOME/.local/bin". Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
 
 5. Check if you set properly other settings from "Configuration" section of README.
 
@@ -116,13 +125,13 @@ As for macOS users, they need to install these additional dependencies:
 
 3. Go to downloaded directory: `cd srb2bld`,
 
-4. Enter `sudo make install`, which will install to "/usr/local/bin", if path exists. Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
+4. Enter `sudo make install`, which will install to "/usr/local/bin", if path exists. You can specify your path with variable PREFIX, for example `make install PREFIX=$HOME/.local`, which will copy script to "$HOME/.local/bin". Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
 
 5. Check if you set properly other settings from "Configuration" section of README.
 
 # Configuration
 **Linux:**
-1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. After that, logout or reboot the system.
+1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. For immutable systems (SteamOS, Fedora Silverblue/Kinoite) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
 
 **Windows:**
 1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system is logged out or rebooted.
@@ -180,6 +189,7 @@ Usage: srb2bld [OPTIONS]
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
+     -u, --user                             Install build to user's home directory (only works with -i/--install).
      -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
      -up, --upgrade                         Upgrade installed SRB2/SRB2Kart build.
 
@@ -187,16 +197,19 @@ Usage: srb2bld [OPTIONS]
      1. Compile and install SRB2/SRB2Kart build:
             srb2bld --install
 
-     2. Compile and create AppImage of SRB2/SRB2Kart build (Linux only):
+     2. Compile and install SRB2/SRB2Kart build to user's home directory:
+            srb2bld --install --user
+
+     3. Compile and create AppImage of SRB2/SRB2Kart build (Linux only):
             srb2bld --appimage
 
-     3. List installed SRB2/SRB2Kart builds:
+     4. List installed SRB2/SRB2Kart builds:
             srb2bld --listinstalled
 
-     4. Uninstall SRB2/SRB2Kart build:
+     5. Uninstall SRB2/SRB2Kart build:
             srb2bld --uninstall
 
-     5. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
+     6. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
             srb2bld --compatibility
 
   NOTES:
@@ -209,9 +222,20 @@ Usage: srb2bld [OPTIONS]
      4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with "sudo modprobe fuse". You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 
      5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
-         - Debian/Ubuntu/Debian based/Ubuntu based: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386
 
-     6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" in "~/.bash_profile" or "~/.zshrc".
+         - Debian/Ubuntu/Debian based/Ubuntu based: "sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386",
+
+         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do "sudo pacman -Syu --needed" and then use one of the AUR helpers that you have installed - "pikaur -S --needed lib32-fuse2 lib32-glibc" or "paru -S --needed lib32-fuse2 lib32-glibc" or "yay -S --needed lib32-fuse2 lib32-glibc",
+
+         - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc",
+
+         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686" for Fedora Workstation/Server or "rpm-ostree install -A --idempotent fuse-libs.i686 glibc.i686" for Fedora Silverblue/Kinoite,
+
+         - OpenSUSE/OpenSUSE based: "sudo zypper in libfuse2-32bit glibc-32bit",
+
+         - Void: "sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su && sudo xbps-install -S fuse-32bit glibc-32bit".
+
+     6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set: export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" in "~/.bash_profile" or "~/.zshrc".
 
      7. There are couple of patches applied within source code of games. Their purpose is to prevent conflicts of installing/running of multiple builds overlapping each other with the same names of directories for storing assets and configuration/saves. Other patches include fixing compilation for some builds on particular systems.
 
@@ -261,7 +285,7 @@ Usage: srb2bld [OPTIONS]
 
           Then choose "Build SRB2 Custom", when running script.
 
-     10. Other environment variable to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+     10. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -278,7 +302,19 @@ Usage: srb2bld [OPTIONS]
 4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with `sudo modprobe fuse`. You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 
 5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
-    - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386`
+
+         - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386`,
+
+         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Syu --needed` and then use one of the AUR helpers that you have installed - `pikaur -S --needed lib32-fuse2 lib32-glibc` or `paru -S --needed lib32-fuse2 lib32-glibc` or `yay -S --needed lib32-fuse2 lib32-glibc`,
+
+         - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc`,
+
+         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686` for Fedora Workstation/Server or `rpm-ostree install -A --idempotent fuse-libs.i686 glibc.i686` for Fedora Silverblue/Kinoite,
+
+         - OpenSUSE/OpenSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit`,
+
+         - Void: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su && sudo xbps-install -S fuse-32bit glibc-32bit`.
+
 6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set `export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"` in "\~/.bash_profile" or "\~/.zshrc".
 
 7. There are couple of patches applied within source code of games. Their purpose is to prevent conflicts of installing/running of multiple builds overlapping each other with the same names of directories for storing assets and configuration/saves. Other patches include fixing compilation for some builds on particular systems.
@@ -329,7 +365,7 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-10. Other environment variable to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+10. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 

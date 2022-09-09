@@ -1,23 +1,12 @@
 PROG=srb2bld
-
-UNAME := $(shell uname)
-ifeq ($(UNAME), Darwin)
-    PREFIX = /usr/local/bin
-endif
-ifeq ($(UNAME), Linux)
-ifeq ("$(wildcard $(/usr/local/bin))","")
-    PREFIX = /usr/local/bin
-else
-    PREFIX = /usr/bin
-endif
-endif
+PREFIX = /usr/local
 
 install:
 	chmod 755 $(PROG)
-	mkdir -p ${DESTDIR}${PREFIX}
-	install ${PROG} ${DESTDIR}${PREFIX}/${PROG}
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	install ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
 
 uninstall:
-	rm -f ${DESTDIR}${PREFIX}/${PROG}
+	rm -f ${DESTDIR}${PREFIX}/bin/${PROG}
 
 .PHONY: install uninstall
