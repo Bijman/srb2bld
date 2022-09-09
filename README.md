@@ -67,7 +67,7 @@ As for macOS users, they need to install these additional dependencies:
 	1. Docker: https://docs.docker.com/engine/security/rootless/ ,
 	2. Package managers:
 		- [Homebrew](https://brew.sh/): `brew install make git coreutils findutils ncurses curl gawk stow patchelf`,
-                - [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf`.
+		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf`.
 
 **Windows:**
 1. Installing Git Bash:
