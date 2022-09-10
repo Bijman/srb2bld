@@ -8,6 +8,7 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
+- Systems with immutable filesystems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) are supported too,
 - Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04),
 - Creating customizable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
@@ -61,13 +62,13 @@ As for macOS users, they need to install these additional dependencies:
 
 - Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
+- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf --extra-experimental-features nix-command --extra-experimental-features flakes` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
 
-- Immutable systems like SteamOS needs rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like /usr/local:
+- Immutable systems like Steam Deck's SteamOS need rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like "/usr/local":
 	1. Docker: https://docs.docker.com/engine/security/rootless/ ,
 	2. Package managers:
 		- [Homebrew](https://brew.sh/): `brew install make git coreutils findutils ncurses curl gawk stow patchelf`,
-		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf`.
+		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf --extra-experimental-features nix-command --extra-experimental-features flakes`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -95,7 +96,7 @@ As for macOS users, they need to install these additional dependencies:
 
 3. Go to downloaded directory: `cd srb2bld`,
 
-4. Enter `sudo make install`, which will install to "/usr/local/bin", if path exists. You can specify your path with variable PREFIX, for example `make install PREFIX=$HOME/.local`, which will copy script to "$HOME/.local/bin". Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
+4. Enter `sudo make install`, which will install to "/usr/local/bin". You can specify your path with variable PREFIX, for example `make install PREFIX=$HOME/.local`, which will copy script to "$HOME/.local/bin". Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
 
 5. Check if you set properly other settings from "Configuration" section of README.
 
@@ -125,13 +126,13 @@ As for macOS users, they need to install these additional dependencies:
 
 3. Go to downloaded directory: `cd srb2bld`,
 
-4. Enter `sudo make install`, which will install to "/usr/local/bin", if path exists. You can specify your path with variable PREFIX, for example `make install PREFIX=$HOME/.local`, which will copy script to "$HOME/.local/bin". Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
+4. Enter `sudo make install`, which will install to "/usr/local/bin". You can specify your path with variable PREFIX, for example `make install PREFIX=$HOME/.local`, which will copy script to "$HOME/.local/bin". Alternatively manually place script to your path, which is readable by shell (PATH environment variable), and change script's permissions to be executable: `chmod 755 [path to srb2bld script]`,
 
 5. Check if you set properly other settings from "Configuration" section of README.
 
 # Configuration
 **Linux:**
-1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. For immutable systems (SteamOS, Fedora Silverblue/Kinoite) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
+1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. For immutable systems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
 
 **Windows:**
 1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system is logged out or rebooted.
