@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ "$SRB2BLDDEBUG" -eq 1 ]; then
+if [ "$SRB2BLDDEBUG" = 1 ]; then
 
     set -e -x
 
@@ -115,7 +115,7 @@ LNXFMODVER="fmodapi375linux"
 LNXPNG12VER="libpng12"
 LNXSDL2MIXERXVER="master"
 LNXOPENMPTVER="0.6.3"
-LNXGMEVER="0.6.2"
+LNXGMEVER="0.6.3"
 LNXDISCORDRPCVER="master"
 LNXOPENVRVER="1.10.30"
 LNXLZFVER="master"
@@ -332,7 +332,7 @@ choosebranch() {
 
     elif [ -d "$BUILD/.git" ]; then
 
-        if [ "$SRB2BLDDEVMODE" -ne 1 ]; then
+        if [ "$SRB2BLDDEVMODE" != 1 ]; then
 
             $PRINTF "$MESSAGE\n\n%s\n\e[0m" "Cleaning up source code. Please wait..."
             cleansource
@@ -638,11 +638,11 @@ choosebuild() {
                 fi
 
                 # Set proper default branch.
-                if [ -n "$SRB2BLDGITVER" ] && [ ! -d "$BUILD/.git" ] && [ -n "$ISNET" ]; then
+                if [ -n "$SRB2BLDGITVER" ] && [ ! -d "$BUILD/.git" ] || [ -n "$ISNET" ]; then
 
                     GITDEFVER="--branch $SRB2BLDGITVER"
 
-                elif [ -z "$SRB2BLDGITVER" ] && [ ! -d "$BUILD/.git" ] && [ -n "$ISNET" ]; then
+                elif [ -z "$SRB2BLDGITVER" ] && [ ! -d "$BUILD/.git" ] || [ -n "$ISNET" ]; then
 
                     GITDEFVER="--branch $(git ls-remote --refs $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git | gawk -F'/' '/'$(git ls-remote $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git --symref HEAD | gawk '{print $1}')'/ {print $NF}' | head -n1)"
 
@@ -959,16 +959,6 @@ chooseuninstall() {
 
             elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
-                if [ -x "$(which xdg-desktop-menu 2> /dev/null)" ]; then
-
-                    $PRINTF "%s\n" "$INSTALLEDFILES" | gawk '/.desktop/ {print}' | while read -r DESKTOP; do
-                        $SUDO xdg-desktop-menu uninstall --noupdate "$DESKTOP"
-                    done
-
-                    $SUDO xdg-desktop-menu forceupdate
-
-                fi
-
                 gawk -i inplace -v RS= '{gsub("---------------\n[A-Z]*=1|---------------","");print}' "$BUILDINSTALLED"
 
                 while read -r FILE; do
@@ -1055,7 +1045,7 @@ dockerentry() {
     cat > "$SRB2BLDROOT/containers/srb2-games-linux-glibc-docker/Entrypoint" << ENTRYPOINT
 #!/bin/sh
 
-    if [ "$SRB2BLDDEBUG" -eq 1 ]; then
+    if [ "$SRB2BLDDEBUG" = 1 ]; then
 
         set -e -x
 
@@ -1092,7 +1082,7 @@ dockerentry() {
     export PATH="$SRB2BLDPREFIX/bin:\$PATH"
 
     # Set prefix path to /usr to make sure files within AppImage can be found.
-    if [ "\$APPIMAGE" -eq 1 ]; then
+    if [ "\$APPIMAGE" = 1 ]; then
 
         export SRB2BLDPREFIX="/usr"
 
@@ -1706,9 +1696,9 @@ dockerentry() {
          sed -i 's|i:\\\\\\\srb2|i:\\\\\\\srb2finaldemo|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2finaldemo|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2finaldemo|' "\$BUILD/src/sdl/i_system.c"
-         gawk -i inplace '{gsub("\\\\$\\\\(CC\\\\) \\\\$\\\\(CFLAGS\\\\) -MM \\\\*.c","\$(CC) \$(CFLAGS) -MM \$(wildcard *.c)");print}' "\$BUILD/src/Makefile"
-         gawk -i inplace '{gsub("\\\\$\\\\(INTERFACE\\\\)/\\\\*.c","\$(wildcard \$(INTERFACE)/*.c)");print}' "\$BUILD/src/Makefile"
-         gawk -i inplace '{gsub("hardware/\\\\*.c","\$(wildcard hardware/*.c)");print}' "\$BUILD/src/Makefile"
+         gawk -i inplace '{gsub("\\\\$\\\\(CC\\\\) \\\\$\\\\(CFLAGS\\\\) -MM \\\\*.c","\$(CC) \$(CFLAGS) -MM \$(wildcard *.c)");print}' "\$BUILD/src/makefile"
+         gawk -i inplace '{gsub("\\\\$\\\\(INTERFACE\\\\)/\\\\*.c","\$(wildcard \$(INTERFACE)/*.c)");print}' "\$BUILD/src/makefile"
+         gawk -i inplace '{gsub("hardware/\\\\*.c","\$(wildcard hardware/*.c)");print}' "\$BUILD/src/makefile"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
@@ -1763,7 +1753,7 @@ dockerentry() {
 
     fi
 
-if [ "\$APPIMAGE" -eq 1 ]; then
+if [ "\$APPIMAGE" = 1 ]; then
 
         # Display content of Makefile for a good view of available compilation flags.
         if [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
@@ -1848,6 +1838,47 @@ if [ "\$APPIMAGE" -eq 1 ]; then
 
         fi
 
+    # Download libgme's source code, build and install it.
+    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ]; then
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/libgme/.git" ]; then
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
+            git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$LNXGMEVER" "\$SRB2BLDROOT/libraries/libgme"
+
+        else
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libgme"
+            git -C "\$SRB2BLDROOT/libraries/libgme" clean -qdffx -e .comrev
+            git -C "\$SRB2BLDROOT/libraries/libgme" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libgme" checkout -q master
+
+            if [ -n "\$ISNET" ]; then
+
+                git -C "\$SRB2BLDROOT/libraries/libgme" pull --recurse-submodules --rebase --autostash
+
+            fi
+
+            git -C "\$SRB2BLDROOT/libraries/libgme" checkout -q "$LNXGMEVER"
+
+        fi
+
+        if [ ! -f \$SRB2BLDPREFIX/lib/libgme.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ]); then
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
+            mkdir -p "\$SRB2BLDROOT/libraries/libgme/build"
+            cd "\$SRB2BLDROOT/libraries/libgme/build"
+            gawk -i inplace 'BEGIN { del=0 } /4.1 had poor support for symbol visibility/ { del=2 } del<=0 { print } /endif()/ { del -= 1 }' "\$SRB2BLDROOT/libraries/libgme/CMakeLists.txt"
+            cmake .. -DGME_YM2612_EMU=MAME -DENABLE_UBSAN=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libgme/build"
+            sudo make -C "\$SRB2BLDROOT/libraries/libgme/build" install
+            cd "\$BUILD" || exit
+
+        fi
+
+    fi
+
     # Download libSDL2_mixerX's source code, build and install it.
     if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
@@ -1877,7 +1908,7 @@ if [ "\$APPIMAGE" -eq 1 ]; then
         \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
         mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
         cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" || exit
-        cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_FLAC=OFF -DUSE_MP3_MAD=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX=/usr
+        cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_GME=ON -DUSE_MIDI=ON -DUSE_MIDI_FLUIDSYNTH=ON -DUSE_MIDI_FLUIDLITE=OFF -DUSE_MIDI_TIMIDITY=ON -DUSE_MIDI_OPNMIDI=OFF -DUSE_MIDI_ADLMIDI=OFF -DUSE_MIDI_EDMIDI=OFF -DUSE_MIDI_NATIVE=OFF -DUSE_SYSTEM_AUDIO_LIBRARIES=ON -DMIXERX_ENABLE_LGPL=ON -DMIXERX_ENABLE_GPL=ON -DCMAKE_INSTALL_PREFIX=/usr
         CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
         sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
         cd "\$BUILD" || exit
@@ -2928,49 +2959,6 @@ else
 
     fi
 
-    # Download libSDL2_mixerX's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
-
-        if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
-
-            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
-            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$LNXSDL2MIXERXVER" "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
-
-        else
-
-            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
-            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdffx -e .comrev
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
-
-            if [ -n "\$ISNET" ]; then
-
-                git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
-
-            fi
-
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$LNXSDL2MIXERXVER"
-
-        fi
-
-        if [ ! -f \$SRB2BLDPREFIX/lib/libSDL2_mixer_ext.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev" 2> /dev/null)" ]); then
-
-            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
-            mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-            cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-            cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_FLAC=OFF -DUSE_MP3_MAD=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX=\$SRB2BLDPREFIX/stow/libsdl2-mixerx
-            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-            sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
-            sudo -E stow -v --adopt libsdl2-mixerx
-            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)
-            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev"
-            cd "\$BUILD" || exit
-
-        fi
-
-    fi
-
     # Download libopenmpt's source code, build and install it for musl based Linux OS.
     if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ]; then
 
@@ -3013,7 +3001,7 @@ else
     fi
 
     # Download libgme's source code, build and install it.
-    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ]; then
+    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libgme/.git" ]; then
 
@@ -3044,7 +3032,7 @@ else
             mkdir -p "\$SRB2BLDROOT/libraries/libgme/build"
             cd "\$SRB2BLDROOT/libraries/libgme/build"
             gawk -i inplace 'BEGIN { del=0 } /4.1 had poor support for symbol visibility/ { del=2 } del<=0 { print } /endif()/ { del -= 1 }' "\$SRB2BLDROOT/libraries/libgme/CMakeLists.txt"
-            cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\$SRB2BLDPREFIX/stow/libgme
+            cmake .. -DGME_YM2612_EMU=MAME -DENABLE_UBSAN=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\$SRB2BLDPREFIX/stow/libgme
             CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libgme/build"
             sudo make -C "\$SRB2BLDROOT/libraries/libgme/build" install
             sudo -E stow -v --adopt libgme
@@ -3053,6 +3041,45 @@ else
             cd "\$BUILD" || exit
 
         fi
+
+    fi
+
+    # Download libSDL2_mixerX's source code, build and install it.
+    if [ "\$OS" = "Linux" ] && [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
+            git clone https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$LNXSDL2MIXERXVER" "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
+
+        else
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libSDL2_mixerX's source code. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" clean -qdffx -e .comrev
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q master
+
+            if [ -n "\$ISNET" ]; then
+
+                git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" pull --recurse-submodules --rebase --autostash
+
+            fi
+
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$LNXSDL2MIXERXVER"
+
+        fi
+
+            \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
+            mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+            cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+            cmake .. -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_GME=ON -DUSE_MIDI=ON -DUSE_MIDI_FLUIDSYNTH=ON -DUSE_MIDI_FLUIDLITE=OFF -DUSE_MIDI_TIMIDITY=ON -DUSE_MIDI_OPNMIDI=OFF -DUSE_MIDI_ADLMIDI=OFF -DUSE_MIDI_EDMIDI=OFF -DUSE_MIDI_NATIVE=OFF -DUSE_SYSTEM_AUDIO_LIBRARIES=ON -DMIXERX_ENABLE_LGPL=ON -DMIXERX_ENABLE_GPL=ON -DCMAKE_INSTALL_PREFIX=\$SRB2BLDPREFIX/stow/libsdl2-mixerx
+            CC="$GCCVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+            sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
+            sudo -E stow -v --adopt libsdl2-mixerx
+            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)
+            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev"
+            cd "\$BUILD" || exit
 
     fi
 
@@ -4685,250 +4712,251 @@ extractsrb2kartmacosassets() {
 
 installdepsglibc() {
     # Creating cache to find packages matching missing library.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Refreshing package database for $BUILDNAME to find packages matching missing library. Please wait..."
+    if [ -n "$ISNET" ] && [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | head -n1)" ]; then
 
-    if [ -x "$(which emerge 2> /dev/null)" ]; then
-
-        if [ ! -x "$(which e-file 2> /dev/null)" ]; then
-
-            $SUDO emerge pfl
-
-        fi
-
-    elif [ -x "$(which pacman 2> /dev/null)" ]; then
-
-        $SUDO pacman -Fy
-
-    elif [ -x "$(which apt-get 2> /dev/null)" ]; then
-
-        if [ ! -x "$(which apt-file 2> /dev/null)" ]; then
-
-            $SUDO apt-get install -y apt-file
-
-        fi
-
-        $SUDO apt-file update
-
-    elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
-
-        if [ ! -x "$(which xlocate 2> /dev/null)" ]; then
-
-            $SUDO xbps-install -Sy xtools
-
-        fi
-
-        xlocate -S
-
-    elif [ -x "$(which rpm-ostree 2> /dev/null)" ]; then
-
-        if [ -z "$(toolbox list --images | gawk '/fedora/ {print}' | head -n1)" ]; then
-
-            yes | toolbox create
-
-        fi
-
-    elif [ -x "$(which nix-env 2> /dev/null)" ]; then
-
-        if [ ! -x "$(which nix-index 2> /dev/null)" ]; then
-
-            $SUDO nix-env -iA nixos.nix-index
-
-        fi
-
-        if [ ! -f "$HOME/.cache/nix-index/files" ] && [ ! -f "$XDG_CACHE_HOME/nix-index/files" ]; then
-
-            nix-index
-
-        fi
-
-    fi
-
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
-    PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u); do
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Refreshing package database for $BUILDNAME to find packages matching missing library. Please wait..."
 
         if [ -x "$(which emerge 2> /dev/null)" ]; then
 
-            e-file "/usr/lib/$l" | col | gawk '/\*/ && gsub(/29m|0m/,"") {print $NF}'
+            if [ ! -x "$(which e-file 2> /dev/null)" ]; then
+
+                $SUDO emerge pfl
+
+            fi
 
         elif [ -x "$(which pacman 2> /dev/null)" ]; then
 
-            if [ "$BUILD" = "$BUILDPATH/slade" ]; then
-
-                l=$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
-
-            fi
-
-            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-                pacman -Fqx "$l" | gawk '{print}'
-
-            else
-
-                pacman -Fqx "$l" | gawk '!/lib32-/ {print}'
-
-            fi
+            $SUDO pacman -Fy
 
         elif [ -x "$(which apt-get 2> /dev/null)" ]; then
 
-            apt-file -l find "$l" | gawk 'NF{print}'
+            if [ ! -x "$(which apt-file 2> /dev/null)" ]; then
 
-        elif [ -x "$(which zypper 2> /dev/null)" ]; then
-
-            if [ "$BUILD" = "$BUILDPATH/slade" ]; then
-
-                l=$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
+                $SUDO apt-get install -y apt-file
 
             fi
 
-            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+            $SUDO apt-file update
 
-                zypper -q search --provides "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
+        elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
 
-            else
+            if [ ! -x "$(which xlocate 2> /dev/null)" ]; then
 
-                zypper -q search --provides "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
-
-            fi
-
-        elif [ -x "$(which dnf 2> /dev/null)" ]; then
-
-            if [ "$BUILD" = "$BUILDPATH/slade" ]; then
-
-                l=$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0".so"}')
+                $SUDO xbps-install -Sy xtools
 
             fi
 
-            VERSION_ID=$(gawk -F'=' '/VERSION_ID/ {print $NF}' /etc/os-release)
-
-            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-                dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'./ {print $1}'
-
-            else
-
-                dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'./ {print $1}'
-
-            fi
+            xlocate -S
 
         elif [ -x "$(which rpm-ostree 2> /dev/null)" ]; then
 
-            if [ "$BUILD" = "$BUILDPATH/slade" ]; then
+            if [ -z "$(toolbox list --images | gawk '/fedora/ {print}' | head -n1)" ]; then
 
-                l=$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-[0-9]\\.[0-9].so.*|[0-9]\\.[0-9].so.*","");print $0"*so"}')
-
-            fi
-
-            VERSION_ID=$(gawk -F'=' '/VERSION_ID/ {print $NF}' /etc/os-release)
-
-            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-                toolbox run dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'/ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
-
-            else
-
-                toolbox run dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'/ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
+                yes | toolbox create
 
             fi
 
-        elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
+        elif [ -x "$(which nix 2> /dev/null)" ]; then
 
-            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+            #            VERSION_ID=$(gawk -F'"' '/VERSION_ID/ {print $2}' /etc/os-release)
 
-                xlocate "$l" | gawk '!/-devel-/ && /-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
+            if [ ! -x "$(which nix-index 2> /dev/null)" ]; then
 
-            else
-
-                xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
+                $SUDO nix-env -iA nixos.nix-index
+                #                $SUDO nix profile remove '.*nix-index' --extra-experimental-features 'nix-command flakes' 2> /dev/null && $SUDO nix profile install "nixpkgs/release-$VERSION_ID#nix-index" --extra-experimental-features 'nix-command flakes'
 
             fi
 
-        elif [ -x "$(which nix-env 2> /dev/null)" ]; then
+            if [ ! -f "$HOME/.cache/nix-index/files" ] && [ ! -f "$XDG_CACHE_HOME/nix-index/files" ]; then
 
-            nix-locate --top-level --regex "$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-[0-9]\\.[0-9].so.*|[0-9]\\.[0-9].so.*","");print "/lib/"$0".*.so|/wx/"$0".*.so"}')" 2>&1 | gawk '{if (/\/lib\/libz\.so/) {gsub("^","nixos.");print $1;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*|\/lib\/libz/) {gsub("^","nixos.");print $1;exit}}'
+                nix-index
 
-        elif [ -x "$(which brew 2> /dev/null)" ]; then
-
-            curl -s "https://packages.debian.org/search?suite=default&section=all&arch=any&searchon=contents&keywords=$l" | gawk 'NF{print}' | gawk -F'>|</a' '/<td>/ {getline;gsub("-dev$|0$","");print $2}' | head -n1
+            fi
 
         fi
 
-    done)
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
+        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {gsub(".so.*|-[0-9]\\.[0-9].so.*|[0-9]\\.[0-9].so.*",".so");print $1}' | sort -u); do
 
-    PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!a[$0]++ {print}')
+            if [ -x "$(which emerge 2> /dev/null)" ]; then
 
-    # Installing missing libraries for glibc based distros.
-    if [ -n "$(touch /TESTFILE 2>&1 | gawk 'match($0, /Read-only/) {print substr($0, RSTART, RLENGTH)}' 2> /dev/null | head -n1)" ]; then
+                e-file "/usr/lib/$l" | col | gawk '/\*/ && gsub(/29m|0m/,"") {print $NF}'
 
-        if [ -x "$(which rpm-ostree 2> /dev/null)" ]; then
+            elif [ -x "$(which pacman 2> /dev/null)" ]; then
 
-            rpm-ostree install -A --idempotent $PACKAGE || true
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-        elif [ -x "$(which nix-env 2> /dev/null)" ]; then
+                    pacman -Fqx "$l" | gawk '{print}'
 
-            PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/nixos\.wxGTK\.out/ {gsub("nixos.|[a-z]*/","") && gsub("^| "," nixpkgs.") && gsub("sdl","SDL");print}' | sort -u)
-            nix-env -irA $PACKAGE || true
+                else
 
-        elif [ -x "$(which brew 2> /dev/null)" ]; then
+                    pacman -Fqx "$l" | gawk '!/lib32-/ {print}'
 
-            PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk -F'/' '{gsub("libpng12","");print $NF}' | sort -u)
-            brew install $PACKAGE || true
+                fi
 
-        else
+            elif [ -x "$(which apt-get 2> /dev/null)" ]; then
 
-            ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u
-            $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
-            exit
+                apt-file -l find "$l" | gawk 'NF{print}'
 
-        fi
+            elif [ -x "$(which zypper 2> /dev/null)" ]; then
 
-    else
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-        if [ -x "$(which emerge 2> /dev/null)" ]; then
+                    zypper -q search --provides "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
 
-            $SUDO emerge $PACKAGE || true
+                else
 
-        elif [ -x "$(which pacman 2> /dev/null)" ]; then
+                    zypper -q search --provides "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
 
-            $SUDO pacman -S --needed --noconfirm $PACKAGE || true
+                fi
 
-        elif [ -x "$(which apt-get 2> /dev/null)" ]; then
+            elif [ -x "$(which dnf 2> /dev/null)" ]; then
 
-            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                VERSION_ID=$(gawk -F'"' '/VERSION_ID/ {print $2}' /etc/os-release)
 
-                ISARM=$($PRINTF "%s\n" "$ISARM" | gawk -F'/' '{print $1}')
-                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/nvidia|primus|virtualbox/ {gsub("$","':$ISARM'");print}')
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'./ {print $1}'
+
+                else
+
+                    dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'./ {print $1}'
+
+                fi
+
+            elif [ -x "$(which rpm-ostree 2> /dev/null)" ]; then
+
+                VERSION_ID=$(gawk -F'"' '/VERSION_ID/ {print $2}' /etc/os-release)
+
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    toolbox run dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'/ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
+
+                else
+
+                    toolbox run dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'/ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
+
+                fi
+
+            elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
+
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    xlocate "$l" | gawk '!/-devel-/ && /-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
+
+                else
+
+                    xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
+
+                fi
+
+            elif [ -x "$(which nix 2> /dev/null)" ]; then
+
+                nix-locate --top-level --regex "$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-[0-9]\\.[0-9].so.*|[0-9]\\.[0-9].so.*","");print "/lib/"$0".*.so|/wx/"$0".*.so"}')" 2>&1 | gawk '{if (/\/lib\/libz\.so/) {gsub("^","nixos.");print $1;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*|\/lib\/libz/) {gsub("^","nixos.");print $1;exit}}'
+                #                nix-locate --top-level --regex "$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-[0-9]\\.[0-9].so.*|[0-9]\\.[0-9].so.*","");print "/lib/"$0".*.so|/wx/"$0".*.so"}')" 2>&1 | gawk '{if (/\/lib\/libz\.so/) {gsub("^","nixpkgs/release-'$VERSION_ID'#");print $1;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*|\/lib\/libz/ || /SDL2_mixer/) {gsub("^","nixpkgs/release-'$VERSION_ID'#");print $1;exit}}'
+
+            elif [ -x "$(which brew 2> /dev/null)" ]; then
+
+                curl -s "https://packages.debian.org/search?suite=default&section=all&arch=any&searchon=contents&keywords=$l" | gawk 'NF{print}' | gawk -F'>|</a' '/<td>/ {getline;gsub("-dev$|0$","");print $2}' | head -n1
 
             fi
 
-            $SUDO apt-get install -y $PACKAGE || true
+        done)
 
-        elif [ -x "$(which zypper 2> /dev/null)" ]; then
+        PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!a[$0]++ {print}')
 
-            $SUDO zypper install -y $PACKAGE || true
+        # Installing missing libraries for glibc based distros.
+        if [ -n "$(touch /TESTFILE 2>&1 | gawk 'match($0, /Read-only/) {print substr($0, RSTART, RLENGTH)}' 2> /dev/null | head -n1)" ]; then
 
-        elif [ -x "$(which dnf 2> /dev/null)" ]; then
+            if [ -x "$(which rpm-ostree 2> /dev/null)" ]; then
 
-            $SUDO dnf install --best --skip-broken -y $PACKAGE || true
+                rpm-ostree install -A --allow-inactive $PACKAGE || true
 
-        elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
+            elif [ -x "$(which nix 2> /dev/null)" ]; then
 
-            $SUDO xbps-install -Sy $PACKAGE || true
+                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/wxGTK\.out/ {gsub("sdl","SDL");print}' | sort -u)
 
-        elif [ -x "$(which nix-env 2> /dev/null)" ]; then
+                #                PACKAGENIXREMOVE=$(for l in $(nix profile list --extra-experimental-features 'nix-command flakes' | gawk -F'#| ' '{print $3}'); do
+                #
+                #                    $PRINTF "%s\n" "$l"
+                #
+                #                done)
 
-            PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/nixos\.wxGTK\.out/ {print}' | sort -u)
-            $SUDO nix-env -irA $PACKAGE || true
+                #                PACKAGENIXREMOVE=$($PRINTF "%s\n" "$PACKAGENIXREMOVE" | gawk '!/wxGTK\.out|wxGTK[0-9][0-9]]-gtk3\.out/ {gsub("sdl","SDL");print}' | sort -u)
+                nix-env -irA $PACKAGE || true
+                #                nix profile remove $PACKAGENIXREMOVE --extra-experimental-features 'nix-command flakes' 2> /dev/null && nix profile install $PACKAGE --extra-experimental-features 'nix-command flakes' || true
 
-        elif [ -x "$(which brew 2> /dev/null)" ]; then
+            elif [ -x "$(which brew 2> /dev/null)" ]; then
 
-            PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk -F'/' '{gsub("libpng12","");print $2}' | sort -u)
-            brew install $PACKAGE || true
+                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk -F'/' '{gsub("libpng12","");print $NF}' | sort -u)
+                brew install $PACKAGE || true
+
+            else
+
+                ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u
+                $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
+                exit
+
+            fi
 
         else
 
-            ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u
-            $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
-            exit
+            if [ -x "$(which emerge 2> /dev/null)" ]; then
+
+                $SUDO emerge $PACKAGE || true
+
+            elif [ -x "$(which pacman 2> /dev/null)" ]; then
+
+                $SUDO pacman -S --needed --noconfirm $PACKAGE || true
+
+            elif [ -x "$(which apt-get 2> /dev/null)" ]; then
+
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    ISARM=$($PRINTF "%s\n" "$ISARM" | gawk -F'/' '{print $1}')
+                    PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/nvidia|primus|virtualbox/ {gsub("$","':$ISARM'");print}')
+
+                fi
+
+                $SUDO apt-get install -y $PACKAGE || true
+
+            elif [ -x "$(which zypper 2> /dev/null)" ]; then
+
+                $SUDO zypper install -y $PACKAGE || true
+
+            elif [ -x "$(which dnf 2> /dev/null)" ]; then
+
+                $SUDO dnf install --best --skip-broken -y $PACKAGE || true
+
+            elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
+
+                $SUDO xbps-install -Sy $PACKAGE || true
+
+            elif [ -x "$(which nix 2> /dev/null)" ]; then
+
+                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/wxGTK\.out/ {gsub("sdl","SDL");print}' | sort -u)
+                #                PACKAGENIXREMOVE=$(for l in $($SUDO nix profile list --extra-experimental-features 'nix-command flakes' | gawk -F'#| ' '{print $3}'); do
+
+                #                    $PRINTF "%s\n" "$l"
+
+                #                done)
+                #                PACKAGENIXREMOVE=$($PRINTF "%s\n" "$PACKAGENIXREMOVE" | gawk '!/wxGTK\.out|wxGTK[0-9][0-9]]-gtk3\.out/ {gsub("sdl","SDL");print}' | sort -u)
+                $SUDO nix-env -irA $PACKAGE || true
+
+                #                $SUDO nix profile remove $PACKAGENIXREMOVE --extra-experimental-features 'nix-command flakes' 2> /dev/null && $SUDO nix profile install $PACKAGE --extra-experimental-features 'nix-command flakes' || true
+
+            elif [ -x "$(which brew 2> /dev/null)" ]; then
+
+                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk -F'/' '{gsub("libpng12","");print $2}' | sort -u)
+                brew install $PACKAGE || true
+
+            else
+
+                ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u
+                $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
+                exit
+
+            fi
 
         fi
 
@@ -4937,88 +4965,94 @@ installdepsglibc() {
 
 installdepsmusl() {
     # Creating cache to find packages matching missing library.
-    $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
+    if [ -n "$ISNET" ] && [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u)" ]; then
 
-    if [ -x "$(which apk 2> /dev/null)" ]; then
-
-        if [ ! -x "$(which apk-file 2> /dev/null)" ]; then
-
-            $SUDO apk add apk-file
-
-        fi
-
-    elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
-
-        if [ ! -x "$(which xlocate 2> /dev/null)" ]; then
-
-            $SUDO xbps-install -Sy xtools
-
-        fi
-
-        xlocate -S
-
-    fi
-
-    PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u); do
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
 
         if [ -x "$(which apk 2> /dev/null)" ]; then
 
-            apk-file "$l" | gawk '!/PACKAGE/ {print $2}' | sort -u
+            if [ ! -x "$(which apk-file 2> /dev/null)" ]; then
 
-        elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
-
-            if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-                xlocate "$l" | gawk '!/-devel-|primus/ && /-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
-
-            else
-
-                xlocate "$l" | gawk '!/-devel-|-32bit-|primus/ {print $1}' | gawk '!a[$0]++ {print}'
+                $SUDO apk add apk-file
 
             fi
 
-        fi
-
-    done)
-
-    PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!a[$0]++ {print}')
-
-    # Installing missing libraries for musl based distros.
-    if [ -n "$(touch /TESTFILE 2>&1 | gawk 'match($0, /Read-only/) {print substr($0, RSTART, RLENGTH)}' 2> /dev/null | head -n1)" ]; then
-
-        if [ -x "$(which nix-env 2> /dev/null)" ]; then
-
-            PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/nixos\.wxGTK\.out/ {gsub("nixos.|[a-z]*/","") && gsub("^| "," nixpkgs.") && gsub("sdl","SDL");pri
-nt}' | sort -u)
-            nix-env -irA $PACKAGE || true
-
-        elif [ -x "$(which brew 2> /dev/null)" ]; then
-
-            PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk -F'/' '{gsub("libpng12","");print $NF}' | sort -u)
-            brew install $PACKAGE || true
-
-        else
-
-            ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u
-            $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
-            exit
-
-        fi
-
-    else
-
-        if [ -x "$(which apk 2> /dev/null)" ]; then
-
-            $SUDO apk add --force-broken-world $PACKAGE 2> /dev/null
-
         elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
 
-            $SUDO xbps-install -Sy $PACKAGE 2> /dev/null
+            if [ ! -x "$(which xlocate 2> /dev/null)" ]; then
+
+                $SUDO xbps-install -Sy xtools
+
+            fi
+
+            xlocate -S
+
+        fi
+
+        PACKAGE=$(for l in $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u); do
+
+            if [ -x "$(which apk 2> /dev/null)" ]; then
+
+                apk-file "$l" | gawk '!/PACKAGE/ {print $2}' | sort -u
+
+            elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
+
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+                    xlocate "$l" | gawk '!/-devel-|primus/ && /-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
+
+                else
+
+                    xlocate "$l" | gawk '!/-devel-|-32bit-|primus/ {print $1}' | gawk '!a[$0]++ {print}'
+
+                fi
+
+            fi
+
+        done)
+
+        PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!a[$0]++ {print}')
+
+        # Installing missing libraries for musl based distros.
+        if [ -n "$(touch /TESTFILE 2>&1 | gawk 'match($0, /Read-only/) {print substr($0, RSTART, RLENGTH)}' 2> /dev/null | head -n1)" ]; then
+
+            if [ -x "$(which nix 2> /dev/null)" ]; then
+
+                #            VERSION_ID=$(gawk -F'"' '/VERSION_ID/ {print $2}' /etc/os-release)
+
+                #                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/nixos\.wxGTK\.out/ {gsub("nixos.|[a-z]*/","") && gsub("^| "," nixpkgs.") && gsub("sdl","SDL");print}' | sort -u)
+                nix-env -irA $PACKAGE || true
+                #                nix profile remove '.*nix-index' --extra-experimental-features 'nix-command flakes' 2> /dev/null && nix profile install "nixpkgs/release-$VERSION_ID#nix-index" --extra-experimental-features 'nix-command flakes'
+
+            elif [ -x "$(which brew 2> /dev/null)" ]; then
+
+                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk -F'/' '{gsub("libpng12","");print $NF}' | sort -u)
+                brew install $PACKAGE || true
+
+            else
+
+                ldd "$SRB2BINARYLNXPATH" | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u
+                $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
+                exit
+
+            fi
 
         else
 
-            ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
-            exit
+            if [ -x "$(which apk 2> /dev/null)" ]; then
+
+                $SUDO apk add --force-broken-world $PACKAGE 2> /dev/null
+
+            elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
+
+                $SUDO xbps-install -Sy $PACKAGE 2> /dev/null
+
+            else
+
+                ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':' '/No such file or directory/ && !/symbol not found/ {print $1}' | gawk '{print $NF}' | sort -u $PRINTF "$NOTICE\n%s\n\e[0m" "Script can't detect package manager. Please install manually these above missing libraries."
+                exit
+
+            fi
 
         fi
 
@@ -5056,6 +5090,17 @@ installtolinux() {
     fi
 
     removeduplicate
+
+    # Patching linked libraries against libSDL2_mixerX.
+    SRB2BINARYLNXPATH="/usr/local/lib/libSDL2_mixer_ext.so"
+
+    installdepsglibc
+
+    ldd /usr/local/lib/libSDL2_mixer_ext.so 2>&1 | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u | while read -r l; do
+
+        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') /usr/local/lib/libSDL2_mixer_ext.so 2> /dev/null || true
+
+    done
 
     # Installing build.
     if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
@@ -5302,23 +5347,15 @@ installtolinux() {
 
     fi
 
-    # Installing tool for detection of missing libraries.
-    if [ -n "$ISNET" ] && [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | head -n1)" ]; then
+    installdepsglibc
 
-        installdepsglibc
+    # Installing tool for detection of missing libraries.
+    if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | head -n1)" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Patching paths to dependencies for $BUILDNAME. Please wait..."
 
         # Setting path to interpreter.
-        if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-            $SUDO patchelf --set-interpreter $(find /nix/store /lib /usr/lib -name "ld-linux.so.*" 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH" || true
-
-        else
-
-            $SUDO patchelf --set-interpreter $(find /nix/store /lib* /usr/lib* -name "ld-linux*$($PRINTF "%s\n" "$ARCH" | gawk '{gsub("_","-") || gsub("^i[0-9]*|armel","");print}')*so.*" 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH" || true
-
-        fi
+        $SUDO patchelf --set-interpreter $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk '/ld-linux.*/ {print $3}') "$SRB2BINARYLNXPATH" || true
 
         # Patching compiled binary, in order to libraries be found.
         while true; do
@@ -5343,11 +5380,11 @@ installtolinux() {
 
                     if [ -n "$VERSION" ] && [ ! -x "$(which brew 2> /dev/null)" ]; then
 
-                        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-'$VERSION'.*so.*|'$VERSION'.*so.*","");print $0"*'$VERSION'*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
+                        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-'$VERSION'.*so.*|'$VERSION'.*so.*","");print $0"*'$VERSION'*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/ || /SDL2_mixer/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
 
                     else
 
-                        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
+                        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/ || /SDL2_mixer/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
 
                     fi
 
@@ -5376,11 +5413,11 @@ installtolinux() {
 
                     if [ -n "$VERSION" ] && [ ! -x "$(which brew 2> /dev/null)" ]; then
 
-                        $SUDO patchelf --add-needed $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-'$VERSION'.*so.*|'$VERSION'.*so.*","");print $0"*'$VERSION'*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib|^\/usr\/lib64/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
+                        $SUDO patchelf --add-needed $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-'$VERSION'.*so.*|'$VERSION'.*so.*","");print $0"*'$VERSION'*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib|^\/usr\/lib64/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
 
                     else
 
-                        $SUDO patchelf --add-needed $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib|^\/usr\/lib64/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
+                        $SUDO patchelf --add-needed $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib|^\/usr\/lib64/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
 
                     fi
 
@@ -5402,22 +5439,14 @@ installtolinux() {
 
     fi
 
-    if [ -n "$ISNET" ] && [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u)" ]; then
+    installdepsmusl
 
-        installdepsmusl
+    if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u)" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Patching paths to dependencies for $BUILDNAME. Please wait..."
 
         # Setting path to interpreter.
-        if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-            $SUDO patchelf --set-interpreter $(find /nix/store /lib /usr/lib -name "ld-musl-i386.so.*" -name "ld-musl-armhf.so.*" 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH" || true
-
-        else
-
-            $SUDO patchelf --set-interpreter $(find /nix/store /lib* /usr/lib* -name "ld-musl*$($PRINTF "%s\n" "$ARCH" | gawk '{gsub("_","-") || gsub("^i[0-9]*|armel","");print}')*so.*" 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH" || true
-
-        fi
+        $SUDO patchelf --set-interpreter $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk '/ld-musl.*/ {print $3}') "$SRB2BINARYLNXPATH" || true
 
         # Patching compiled binary, in order to libraries be found.
         while true; do
@@ -5442,11 +5471,11 @@ installtolinux() {
 
                     if [ -n "$VERSION" ] && [ ! -x "$(which brew 2> /dev/null)" ]; then
 
-                        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-'$VERSION'.*so.*|'$VERSION'.*so.*","");print $0"*'$VERSION'*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
+                        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-'$VERSION'.*so.*|'$VERSION'.*so.*","");print $0"*'$VERSION'*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
 
                     else
 
-                        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
+                        $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
 
                     fi
 
@@ -5475,11 +5504,11 @@ installtolinux() {
 
                     if [ -n "$VERSION" ] && [ ! -x "$(which brew 2> /dev/null)" ]; then
 
-                        $SUDO patchelf --add-needed $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-'$VERSION'.*so.*|'$VERSION'.*so.*","");print $0"*'$VERSION'*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib|^\/usr\/lib64/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
+                        $SUDO patchelf --add-needed $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*|-'$VERSION'.*so.*|'$VERSION'.*so.*","");print $0"*'$VERSION'*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib|^\/usr\/lib64/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
 
                     else
 
-                        $SUDO patchelf --add-needed $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib* -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib|^\/usr\/lib64/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
+                        $SUDO patchelf --add-needed $(find $SRB2BLDPREFIX/lib/ $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*","");print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib|^\/usr\/lib64/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BINARYLNXPATH" 2> /dev/null || true
 
                     fi
 
@@ -6110,6 +6139,87 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
+        # Download libopenmpt's source code, build and install it.
+        if [ "$ISOPENMPT" = "libopenmpt" ]; then
+
+            if [ ! -d "$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
+
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
+                git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "libopenmpt-$MACOSOPENMPTVER" "$SRB2BLDROOT/libraries/libopenmpt"
+
+            else
+
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
+                git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdffx -e .comrev
+                git -C "$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
+                git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q master
+
+                if [ -n "$ISNET" ]; then
+
+                    git -C "$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
+
+                fi
+
+                git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q "libopenmpt-$MACOSOPENMPTVER"
+
+            fi
+
+            if ([ ! -f "$SRB2BLDPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ]); then
+
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
+                cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
+                gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
+                make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+                sudo -E make PREFIX=$SRB2BLDPREFIX/stow/libopenmpt install
+                sudo -E stow -v --adopt libopenmpt
+                COMREV=$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)
+                $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libopenmpt/.comrev"
+                cd "$BUILD" || exit
+
+            fi
+
+        fi
+
+        # Download libgme's source code, build and install it.
+        if [ "$ISGME" = "libgme" ]; then
+
+            if [ ! -d "$SRB2BLDROOT/libraries/libgme/.git" ]; then
+
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
+                git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$MACOSGMEVER" "$SRB2BLDROOT/libraries/libgme"
+
+            else
+
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
+                git -C "$SRB2BLDROOT/libraries/libgme" clean -qdffx -e .comrev
+                git -C "$SRB2BLDROOT/libraries/libgme" reset -q --hard
+                git -C "$SRB2BLDROOT/libraries/libgme" checkout -q master
+
+                if [ -n "$ISNET" ]; then
+
+                    git -C "$SRB2BLDROOT/libraries/libgme" pull --recurse-submodules --rebase --autostash
+
+                fi
+
+                git -C "$SRB2BLDROOT/libraries/libgme" checkout -q "$MACOSGMEVER"
+
+            fi
+
+            if ([ ! -f "$SRB2BLDPREFIX/lib/libgme.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ]); then
+
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
+                mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
+                cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DGME_YM2612_EMU=MAME -DENABLE_UBSAN=OFF -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libgme -DCMAKE_MACOSX_RPATH=OFF
+                cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
+                sudo -E cmake --install "$SRB2BLDROOT/libraries/libgme/build"
+                sudo -E stow -v --adopt libgme
+                COMREV=$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)
+                $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libgme/.comrev"
+
+            fi
+
+        fi
+
         # Download libSDL2_mixer's source code, build and install it.
         if [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
 
@@ -6202,93 +6312,12 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
                 $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libSDL2_mixerX. Please wait..."
                 mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
-                cmake -S "$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_FLAC=OFF -DUSE_MP3_MAD=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libsdl2-mixerx -DCMAKE_MACOSX_RPATH=OFF
+                cmake -S "$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_GME=ON -DUSE_MIDI=ON -DUSE_MIDI_FLUIDSYNTH=ON -DUSE_MIDI_FLUIDLITE=OFF -DUSE_MIDI_TIMIDITY=ON -DUSE_MIDI_OPNMIDI=OFF -DUSE_MIDI_ADLMIDI=OFF -DUSE_MIDI_EDMIDI=OFF -DUSE_MIDI_NATIVE=OFF -DUSE_SYSTEM_AUDIO_LIBRARIES=ON -DMIXERX_ENABLE_LGPL=ON -DMIXERX_ENABLE_GPL=ON -DUSE_FLAC=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libsdl2-mixerx -DCMAKE_MACOSX_RPATH=OFF
                 cmake --build "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
                 sudo -E cmake --install "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
                 sudo -E stow -v --adopt libsdl2-mixerx
                 COMREV=$(git -C "$SRB2BLDROOT/libraries/libsdl2-mixerx" rev-parse --short HEAD)
                 $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libsdl2-mixerx/.comrev"
-
-            fi
-
-        fi
-
-        # Download libopenmpt's source code, build and install it.
-        if [ "$ISOPENMPT" = "libopenmpt" ]; then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libopenmpt/.git" ]; then
-
-                $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libopenmpt's source code. Please wait..."
-                git clone https://github.com/OpenMPT/openmpt.git --recursive --branch "libopenmpt-$MACOSOPENMPTVER" "$SRB2BLDROOT/libraries/libopenmpt"
-
-            else
-
-                $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libopenmpt's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libopenmpt" clean -qdffx -e .comrev
-                git -C "$SRB2BLDROOT/libraries/libopenmpt" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q master
-
-                if [ -n "$ISNET" ]; then
-
-                    git -C "$SRB2BLDROOT/libraries/libopenmpt" pull --recurse-submodules --rebase --autostash
-
-                fi
-
-                git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q "libopenmpt-$MACOSOPENMPTVER"
-
-            fi
-
-            if ([ ! -f "$SRB2BLDPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libopenmpt.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libopenmpt.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libopenmpt/.comrev" 2> /dev/null)" ]); then
-
-                $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
-                cd "$SRB2BLDROOT/libraries/libopenmpt" || exit
-                gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0") gsub("SOSUFFIX=.so","SOSUFFIX=.dylib") gsub("STATIC_LIB=1","STATIC_LIB=0") gsub("EXAMPLES=1","EXAMPLES=0") gsub("OPENMPT123=1","OPENMPT123=0") gsub("TEST=1","TEST=0");print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
-                make -k -j$(($(sysctl -n hw.logicalcpu) + 1)) NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
-                sudo -E make PREFIX=$SRB2BLDPREFIX/stow/libopenmpt install
-                sudo -E stow -v --adopt libopenmpt
-                COMREV=$(git -C "$SRB2BLDROOT/libraries/libopenmpt" rev-parse --short HEAD)
-                $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libopenmpt/.comrev"
-                cd "$BUILD" || exit
-
-            fi
-
-        fi
-
-        # Download libgme's source code, build and install it.
-        if [ "$ISGME" = "libgme" ]; then
-
-            if [ ! -d "$SRB2BLDROOT/libraries/libgme/.git" ]; then
-
-                $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading libgme's source code. Please wait..."
-                git clone https://bitbucket.org/mpyne/game-music-emu.git --recursive --branch "$MACOSGMEVER" "$SRB2BLDROOT/libraries/libgme"
-
-            else
-
-                $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up libgme's source code. Please wait..."
-                git -C "$SRB2BLDROOT/libraries/libgme" clean -qdffx -e .comrev
-                git -C "$SRB2BLDROOT/libraries/libgme" reset -q --hard
-                git -C "$SRB2BLDROOT/libraries/libgme" checkout -q master
-
-                if [ -n "$ISNET" ]; then
-
-                    git -C "$SRB2BLDROOT/libraries/libgme" pull --recurse-submodules --rebase --autostash
-
-                fi
-
-                git -C "$SRB2BLDROOT/libraries/libgme" checkout -q "$MACOSGMEVER"
-
-            fi
-
-            if ([ ! -f "$SRB2BLDPREFIX/lib/libgme.dylib" ] && [ ! -f "$HOMEBREWPREFIX/lib/libgme.dylib" ] && [ ! -f "$MACPORTPREFIX/lib/libgme.dylib" ]) || ([ -n "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/libgme/.comrev" 2> /dev/null)" ]); then
-
-                $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libgme. Please wait..."
-                mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
-                cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libgme -DCMAKE_MACOSX_RPATH=OFF
-                cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j$(($(sysctl -n hw.logicalcpu) + 1)) --config Release
-                sudo -E cmake --install "$SRB2BLDROOT/libraries/libgme/build"
-                sudo -E stow -v --adopt libgme
-                COMREV=$(git -C "$SRB2BLDROOT/libraries/libgme" rev-parse --short HEAD)
-                $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libgme/.comrev"
 
             fi
 
@@ -6761,7 +6790,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Building App Bundle.
-    if [ "$APPBUNDLE" -eq 1 ]; then
+    if [ "$APPBUNDLE" = 1 ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's App Bundle. Please wait..."
 
@@ -7410,25 +7439,25 @@ settrap() {
     # Trigger certain commands with trap signals.
     if [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW32" ] || [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]; then
 
-        if [ "$SRB2BLDDEVMODE" -eq 1 ]; then
+        if [ "$SRB2BLDDEVMODE" = 1 ]; then
 
-            trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Exiting shell script. Please wait..." ; exit' 0 1 2 3 6 9 15
+            trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Exiting shell script. Please wait..." ; exit' 0 1 2 3 6 15
 
         else
 
-            trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 0 1 2 3 6 9 15
+            trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 0 1 2 3 6 15
 
         fi
 
     else
 
-        if [ "$SRB2BLDDEVMODE" -eq 1 ]; then
+        if [ "$SRB2BLDDEVMODE" = 1 ]; then
 
-            trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Exiting shell script. Please wait..." ; sudo_ping stop ; exit' 0 1 2 3 6 9 15
+            trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Exiting shell script. Please wait..." ; sudo_ping stop ; exit' 0 1 2 3 6 15
 
         else
 
-            trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; sudo_ping stop ; exit' 0 1 2 3 6 9 15
+            trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; sudo_ping stop ; exit' 0 1 2 3 6 15
 
         fi
 
@@ -7538,7 +7567,7 @@ upgrade() {
 upgradetasks() {
     buildname
 
-    if [ "$SRB2BLDDEVMODE" -ne 1 ]; then
+    if [ "$SRB2BLDDEVMODE" != 1 ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Cleaning up $BUILDNAME's source code. Please wait..."
         cleansource
@@ -7673,7 +7702,7 @@ Usage: srb2bld [OPTIONS]
 
          - Gentoo/Gentoo based: \"ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc\",
 
-         - Fedora/Fedora based: \"sudo dnf install fuse-libs.i686 glibc.i686\" for Fedora Workstation/Server or \"rpm-ostree install -A --idempotent fuse-libs.i686 glibc.i686\" for Fedora Silverblue/Kinoite,
+         - Fedora/Fedora based: \"sudo dnf install fuse-libs.i686 glibc.i686\" for Fedora Workstation/Server or \"rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686\" for Fedora Silverblue/Kinoite,
 
          - OpenSUSE/OpenSUSE based: \"sudo zypper in libfuse2-32bit glibc-32bit\",
 

@@ -8,7 +8,7 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
-- Systems with immutable filesystems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) are supported too,
+- Systems with immutable root filesystems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) are supported too,
 - Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04),
 - Creating customizable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
@@ -52,7 +52,7 @@ As for macOS users, they need to install these additional dependencies:
 
 - Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- Fedora Silverblue/Kinoite: `rpm-ostree install -A --idempotent make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- Fedora Silverblue/Kinoite: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
 - OpenSUSE/OpenSUSE based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
@@ -62,13 +62,13 @@ As for macOS users, they need to install these additional dependencies:
 
 - Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
-- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf --extra-experimental-features nix-command --extra-experimental-features flakes` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
+- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
 
-- Immutable systems like Steam Deck's SteamOS need rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like "/usr/local":
-	1. Docker: https://docs.docker.com/engine/security/rootless/ ,
+- Systems with immutable root filesystems (with exception of home directory and others depending on distro) like Steam Deck's SteamOS need rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like "/usr/local":
+	1. Docker (Rootless mode): run `curl -fsSL https://get.docker.com/rootless | sh` to install Docker to user's home directory. For more details read [HERE](https://docs.docker.com/engine/security/rootless),
 	2. Package managers:
-		- [Homebrew](https://brew.sh/): `brew install make git coreutils findutils ncurses curl gawk stow patchelf`,
-		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf --extra-experimental-features nix-command --extra-experimental-features flakes`.
+		- [Homebrew](https://brew.sh): `brew install make git coreutils findutils ncurses curl gawk stow patchelf`,
+		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf --extra-experimental-features 'nix-command flakes'`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -230,7 +230,7 @@ Usage: srb2bld [OPTIONS]
 
          - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc",
 
-         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686" for Fedora Workstation/Server or "rpm-ostree install -A --idempotent fuse-libs.i686 glibc.i686" for Fedora Silverblue/Kinoite,
+         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686" for Fedora Workstation/Server or "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686" for Fedora Silverblue/Kinoite,
 
          - OpenSUSE/OpenSUSE based: "sudo zypper in libfuse2-32bit glibc-32bit",
 
@@ -310,7 +310,7 @@ Usage: srb2bld [OPTIONS]
 
          - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc`,
 
-         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686` for Fedora Workstation/Server or `rpm-ostree install -A --idempotent fuse-libs.i686 glibc.i686` for Fedora Silverblue/Kinoite,
+         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686` for Fedora Workstation/Server or `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686` for Fedora Silverblue/Kinoite,
 
          - OpenSUSE/OpenSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit`,
 
