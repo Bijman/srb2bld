@@ -1363,8 +1363,7 @@ dockerentry() {
 
         if [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-            SRB2VER="\$SRB2LATESTVER"
-            SRB2LATESTVER=\$(gawk -F'- v|- ' '/v[0-9]/ {print \$2}' "\$BUILD/src/config.h.in" 2> /dev/null | gawk '{gsub(" ","");print}' | tail -n1)
+            SRB2VER=\$(gawk -F'- v|- ' '/v[0-9]/ {print \$2}' "\$BUILD/src/config.h.in" 2> /dev/null | gawk '{gsub(" ","");print}' | tail -n1)
 
         fi
 
@@ -1446,7 +1445,7 @@ dockerentry() {
     extractsrb2kartassets() {
         SRB2KARTVERS=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F':|_' '/tag_name/ {gsub("\"|,| ","");print \$NF}')
         SRB2KARTLATESTVER=\$(\$PRINTF "%s\n" "\$SRB2KARTVERS" | head -n1)
-        SRB2KARTVER=\$(gawk -F'\"|\\\(' '/VERSIONSTRING/ && /v[0-9]/ {gsub(" ","");print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null | gawk '!a[\$0]++')
+        SRB2KARTVER=\$(gawk -F'- [A-z]*[0-9]*' '/v[0-9]/ {print \$2}' "\$BUILD/src/config.h.in" 2> /dev/null | gawk '{gsub(" ","");print}' | tail -n1)
 
         if [ -n "\$SRB2KARTLATESTVER" ] && [ "\$SRB2KARTVER" != "\$SRB2KARTLATESTVER" ]; then
 
@@ -4295,7 +4294,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-games-old-windows-docker "$SRB2BLDROOT/containers/srb2-games-old-windows-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it --security-opt="label:disable" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-games-old-windows-docker
+            winpty docker run -it --security-opt="label:disable" --volume="$($PRINTF "%s\n" "$HOME" | gawk '{gsub("/","\\");gsub("\\\\Users",":\\Users");gsub("^\\\\","");print}')\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-games-old-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
@@ -4344,7 +4343,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 tools. Please wait..."
             docker build --rm -t srb2-tools-windows-docker "$SRB2BLDROOT/containers/srb2-tools-windows-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it --security-opt="label:disable" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-tools-windows-docker
+            winpty docker run -it --security-opt="label:disable" --volume="$($PRINTF "%s\n" "$HOME" | gawk '{gsub("/","\\");gsub("\\\\Users",":\\Users");gsub("^\\\\","");print}')\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-tools-windows-docker
 
         elif [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW64" ] || [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW32" ] || [ "$($PRINTF "%s\n" "$OS" | gawk -F'_' '{print $1}')" = "MINGW" ]; then
 
@@ -4359,7 +4358,7 @@ dockerrun() {
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Building Docker image for Windows SRB2 builds. Please wait..."
             docker build --rm -t srb2-games-windows-docker "$SRB2BLDROOT/containers/srb2-games-windows-docker"
             $PRINTF "$MESSAGE\n%s\n\e[0m" "Running Docker container from built image for $BUILDNAME. Please wait..."
-            winpty docker run -it --security-opt="label:disable" --volume="C:\\Users\\$USER\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-games-windows-docker
+            winpty docker run -it --security-opt="label:disable" --volume="$($PRINTF "%s\n" "$HOME" | gawk '{gsub("/","\\");gsub("\\\\Users",":\\Users");gsub("^\\\\","");print}')\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" srb2-games-windows-docker
 
         elif [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/slade" ]); then
 
@@ -4626,8 +4625,7 @@ extractsrb2macosassets() {
 
     if [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        SRB2VER="$SRB2LATESTVER"
-        SRB2LATESTVER=$(gawk -F'- v|- ' '/v[0-9]/ {print $2}' "$BUILD/src/config.h.in" 2> /dev/null | gawk '{gsub(" ","");print}' | tail -n1)
+        SRB2VER=$(gawk -F'- v|- ' '/v[0-9]/ {print $2}' "$BUILD/src/config.h.in" 2> /dev/null | gawk '{gsub(" ","");print}' | tail -n1)
 
     fi
 
@@ -4671,7 +4669,7 @@ extractsrb2macosassets() {
 extractsrb2kartmacosassets() {
     SRB2KARTVERS=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F':|_' '/tag_name/ {gsub("\"|,| ","");print $NF}')
     SRB2KARTLATESTVER=$($PRINTF "%s\n" "$SRB2KARTVERS" | head -n1)
-    SRB2KARTVER=$(gawk -F'\"|\\\(' '/VERSIONSTRING/ && /v[0-9]/ {gsub(" ","");print $2}' "$BUILD/src/doomdef.h" 2> /dev/null | gawk '!a[$0]++')
+    SRB2KARTVER=$(gawk -F'- [A-z]*[0-9]*' '/v[0-9]/ {print $2}' "$BUILD/src/config.h.in" 2> /dev/null | gawk '{gsub(" ","");print}' | tail -n1)
 
     if [ -n "$SRB2KARTLATESTVER" ] && [ "$SRB2KARTVER" != "$SRB2KARTLATESTVER" ]; then
 
@@ -7538,6 +7536,8 @@ upgrade() {
         exit
 
     fi
+
+    ISNET=$(curl -vI https://github.com 2>&1 | gawk '/> Host:/ {gsub("\r","");print $NF}')
 
     # Make a loop to find the SRB2 source code directories and then update them one by one.
     for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort -u); do
