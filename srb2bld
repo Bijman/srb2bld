@@ -1130,13 +1130,13 @@ dockerentry() {
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
-            if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "\$SRB2PERSONAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2P_MP.rar" 2> /dev/null)" ]; then
+            if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "\$SRB2PERSONAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2P_MP.zip" 2> /dev/null)" ]; then
 
-                curl -RL "\$SRB2PERSONAASSETURL" -o "\$SRB2BLDROOT/assets/SRB2P_MP.rar"
+                curl -RL "\$SRB2PERSONAASSETURL" -o "\$SRB2BLDROOT/assets/SRB2P_MP.zip"
 
             fi
 
-            7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.zip" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
             extractsrb2assets
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
@@ -4461,13 +4461,13 @@ extractmacosassets() {
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
-        if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "$SRB2PERSONAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2P_MP.rar" 2> /dev/null)" ]; then
+        if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "$SRB2PERSONAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2P_MP.zip" 2> /dev/null)" ]; then
 
-            curl -RL "$SRB2PERSONAASSETURL" -o "$SRB2BLDROOT/assets/SRB2P_MP.rar"
+            curl -RL "$SRB2PERSONAASSETURL" -o "$SRB2BLDROOT/assets/SRB2P_MP.zip"
 
         fi
 
-        unrar x -y "$SRB2BLDROOT/assets/SRB2P_MP.rar" "*.pk3" "*.wad" "$BUILD/assets/installer"
+        7z x -y "$SRB2BLDROOT/assets/SRB2P_MP.zip" "*.pk3" "*.wad" -o"$BUILD/assets/installer"
         extractsrb2macosassets
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
