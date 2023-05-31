@@ -6431,6 +6431,13 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         gawk -i inplace '{gsub("#include \"doomdef.h\"","#include \"r_fps.h\"\n#include \"doomdef.h\"");print}' "$BUILD/src/p_setup.c"
 
+    # Patching SRB2 Persona's source code to fix error with implicit declaration of function W_GetNumForNameMusic is invalid in C99 [-Werror,-Wimplicit-function-declaration].
+    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+        gawk -i inplace '/\/\/ W_GetNumForNameMusic/ {suppress=1} /}/ {suppress=0} !suppress' "$BUILD/src/w_wad.c"
+
+        gawk -i inplace -v RS="^$" '{gsub("\\/\\/\\/ ------------------------\n\nstatic lumpnum_t S_GetMusicLumpNum\\(const char \\*mname\\)","\nlumpnum_t W_GetNumForNameMusic(const char *name)\n{\n\tlumpnum_t i;\n\n\ti = W_CheckNumForName(name);\n\n\treturn i;\n}\n\nstatic lumpnum_t S_GetMusicLumpNum(const char *mname)");print}' "$BUILD/src/s_sound.c"
+
     fi
 
     # Modify the build's configuration and assets directory names to avoid conflicts between installed builds.
