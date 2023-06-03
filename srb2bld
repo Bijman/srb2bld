@@ -188,6 +188,8 @@ appbundle() {
 
     preparebuild
 
+    settrap
+
     installtomacos
 
     # Set name of App Bundle in message.
