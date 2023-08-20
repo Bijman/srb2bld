@@ -1273,7 +1273,7 @@ dockerentry() {
             else
 
                 SRB2BLDASSETPATH="\$SRB2BLDASSETPATH"
-                FILETYPE=\$(curl -X GET -sLI "\$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"","");print \$NF}')
+                FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
 
             fi
 
@@ -1751,6 +1751,13 @@ dockerentry() {
          gawk -i inplace '{gsub("\"/usr/local/games/'\$SRB2CASSETDIR'\"","\"'\$SRB2BLDPREFIX'/games/'\$SRB2CASSETDIR'C'\$CUSTOMDIR'\"");print}' "\$BUILD/src/sdl/i_system.c"
          gawk -i inplace '{gsub("\"/usr/share/games/'\$SRB2CASSETDIR'\"","\"/usr/games/'\$SRB2CASSETDIR'C'\$CUSTOMDIR'\"");print}' "\$BUILD/src/sdl/i_system.c"
          gawk -i inplace '{gsub("\"/usr/games/'\$SRB2CASSETDIR'\"","\"/usr/games/'\$SRB2CASSETDIR'C'\$CUSTOMDIR'\"");print}' "\$BUILD/src/sdl/i_system.c"
+
+    fi
+
+    # Removing SDL_OpenURL, because of using outdated SDL2 in Ubuntu 18.04 Docker container according to issue #21 from https://github.com/bijman/srb2bld.
+    if [ -f "\$BUILD/src/sdl/i_system.c" ] && [ "\$(gawk 'match(\$0, /SDL_OpenURL/) {print substr(\$0, RSTART, RLENGTH)}' \$BUILD/src/sdl/i_system.c 2> /dev/null)" = "SDL_OpenURL" ]; then
+
+        gawk -i inplace '/if \(buttonid == 1\)/ {suppress=1} /}/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_system.c"
 
     fi
 
@@ -4557,7 +4564,7 @@ extractmacoscustomassets() {
         else
 
             SRB2BLDASSETPATH="$SRB2BLDASSETPATH"
-            FILETYPE=$(curl -X GET -sLI "$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"","");print $NF}')
+            FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
 
         fi
 
