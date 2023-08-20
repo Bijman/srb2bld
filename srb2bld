@@ -1273,7 +1273,7 @@ dockerentry() {
             else
 
                 SRB2BLDASSETPATH="\$SRB2BLDASSETPATH"
-                FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
+                FILETYPE=\$(\$PRINTF "%s\n" "\$SRB2BLDASSETPATH" | gawk -F'.' '{print \$NF}')
 
             fi
 
@@ -4564,7 +4564,7 @@ extractmacoscustomassets() {
         else
 
             SRB2BLDASSETPATH="$SRB2BLDASSETPATH"
-            FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
+            FILETYPE=$($PRINTF "%s\n" "$SRB2BLDASSETPATH" | gawk -F'.' '{print $NF}')
 
         fi
 
