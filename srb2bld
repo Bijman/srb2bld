@@ -1758,6 +1758,7 @@ dockerentry() {
     if [ -f "\$BUILD/src/sdl/i_system.c" ] && [ "\$(gawk 'match(\$0, /SDL_OpenURL/) {print substr(\$0, RSTART, RLENGTH)}' \$BUILD/src/sdl/i_system.c 2> /dev/null)" = "SDL_OpenURL" ]; then
 
         gawk -i inplace '/if \(buttonid == 1\)/ {suppress=1} /}/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '/#if SDL_VERSION_ATLEAST\([0-9].*\)/ {suppress=1} /}/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_system.c"
 
     fi
 

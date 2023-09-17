@@ -25,7 +25,7 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - Ncurses,
 - Docker (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
-- FUSE (Linux only),
+- FUSE or Libfuse2 (Linux only),
 - Patchelf (Linux only),
 - Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package) (Linux only).
 
@@ -44,7 +44,7 @@ As for macOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following command:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils ncurses-bin curl gawk docker.io stow fuse patchelf`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils ncurses-bin curl gawk docker.io stow libfuse2 patchelf`,
 
 - Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
 
