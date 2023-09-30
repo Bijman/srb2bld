@@ -4174,12 +4174,13 @@ FROM "$ISARM"debian:latest
 ENV container docker \
 DEBIAN_FRONTEND noninteractive
 
-RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
-printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
+RUN printf 'Acquire::Check-Valid-Until "false";\nAcquire::Check-Date "false";' > /etc/apt/apt.conf.d/90ignore-release-date && \
+printf 'Dpkg::Options:: "--force-confdef";' > /etc/apt/apt.conf.d/90force-confdef && \
+printf 'APT::Install-Recommends "false";\nAPT::Install-Suggests "false";' > /etc/apt/apt.conf.d/90no-recommend && \
 apt-get update && \
 apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
-gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
-printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
+printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list.d/apt-fast.list && \
+gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list.d/debian.sources && \
 curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null
 
 RUN apt-get update && \
@@ -4234,12 +4235,13 @@ FROM "$ISARM"debian:latest
 ENV container docker \
 DEBIAN_FRONTEND noninteractive
 
-RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/90ignore-release-date && \
-printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' > /etc/apt/apt.conf.d/01norecommend && \
+RUN printf 'Acquire::Check-Valid-Until "false";\nAcquire::Check-Date "false";' > /etc/apt/apt.conf.d/90ignore-release-date && \
+printf 'Dpkg::Options:: "--force-confdef";' > /etc/apt/apt.conf.d/90force-confdef && \
+printf 'APT::Install-Recommends "false";\nAPT::Install-Suggests "false";' > /etc/apt/apt.conf.d/90no-recommend && \
 apt-get update && \
 apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
-gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list && \
-printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main" >> /etc/apt/sources.list && \
+printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu jammy main" >> /etc/apt/sources.list.d/apt-fast.list && \
+gawk -i inplace '{gsub("main","main contrib non-free");print}' /etc/apt/sources.list.d/debian.sources && \
 curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r","");print}' | gpg --dearmor | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null
 
 RUN apt-get update && \
