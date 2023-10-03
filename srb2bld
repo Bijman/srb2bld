@@ -87,9 +87,9 @@ UBUVER="18.04"
 UBUSOFTVER="22.04"
 SRB2RPHYSASSETURL="https://mb.srb2.org/addons/4008/download"
 SRB2PERSONAASSETURL="https://mb.srb2.org/addons/166/download"
-MINGWCCVER="gcc-10-win32"
+MINGWCCVER="gcc-12-win32"
 MINGWOLDCCVER="gcc-4.9-win32"
-MINGWCXXVER="g++-10-win32"
+MINGWCXXVER="g++-12-win32"
 
 if [ "$(ldd --version 2>&1 | gawk 'match($0, /musl/) {print substr($0, RSTART, RLENGTH)}' | gawk '!a[$0]++ {print}')" = "musl" ]; then
 
