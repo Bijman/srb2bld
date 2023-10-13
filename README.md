@@ -3,14 +3,14 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-96ca-b5630b85e022.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart VR, wadcli and SLADE on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart VR, wadcli and SLADE, UltimateZoneBuilder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
 - Systems with immutable root filesystems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) are supported too,
 - Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04),
-- Creating customizable AppImages (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
+- Creating customizable AppImages (Linux only), Flatpaks (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
 - Runs on Linux, macOS and Windows (Git Bash).
@@ -23,10 +23,11 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - Curl,
 - Gawk,
 - Ncurses,
-- Docker (Linux and Windows only),
+- Docker or Podman (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
 - FUSE or Libfuse2 (Linux only),
 - Patchelf (Linux only),
+- GDK-Pixbuf (Linux only),
 - Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package) (Linux only).
 
 Windows users need to also have installed Git Bash to run this script.
@@ -44,31 +45,33 @@ As for macOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following command:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils ncurses-bin curl gawk docker.io stow libfuse2 patchelf`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils ncurses-bin curl gawk docker.io stow libfuse2 patchelf libgdk-pixbuf2.0-bin flatpak flatpak-builder`,
 
-- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Gentoo/Gentoo based: `sudo emerge -av git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- Gentoo/Gentoo based: `sudo emerge -av git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Fedora Silverblue/Kinoite: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- Fedora Silverblue/Kinoite: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- OpenSUSE/OpenSUSE based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- OpenSUSE Leap/OpenSUSE Tumbleweed/OpenSUSE Leap/OpenSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
 
-- Void/Void based: `sudo xbps-install -S make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- OpenSUSE MicroOS/OpenSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
 
-- Alpine/Alpine based: `sudo apk add make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- Void/Void based: `sudo xbps-install -S make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf`,
+- Alpine/Alpine based: `sudo apk add make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;" in "/etc/nixos/configuration.nix", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`.
+- Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
+
+- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf gdk-pixbuf flatpak flatpak-builder` or `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`. For Flatpak, set "services.flatpak.enable = true;" in "/etc/nixos/configuration.nix".
 
 - Systems with immutable root filesystems (with exception of home directory and others depending on distro) like Steam Deck's SteamOS need rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like "/usr/local":
 	1. Docker (Rootless mode): run `curl -fsSL https://get.docker.com/rootless | sh` to install Docker to user's home directory. For more details read [HERE](https://docs.docker.com/engine/security/rootless),
 	2. Package managers:
-		- [Homebrew](https://brew.sh): `brew install make git coreutils findutils ncurses curl gawk stow patchelf`,
-		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf` or `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf --extra-experimental-features 'nix-command flakes'`.
+		- [Homebrew](https://brew.sh): `brew install make git coreutils findutils ncurses curl gawk stow libfuse@2 patchelf gdk-pixbuf`,
+		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf gdk-pixbuf flatpak flatpak-builder` or `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -81,7 +84,7 @@ As for macOS users, they need to install these additional dependencies:
 
 4. Installing Docker Desktop:
 - Download from [HERE](https://www.docker.com/products/docker-desktop),
-- Watch this video from 6:07 to 8:36 in [HERE](https://youtu.be/_9AWYlt86B8?t=518).
+- Watch this video from 6:05 to 8:36 in [HERE](https://youtu.be/_9AWYlt86B8?t=365).
 
 **macOS:**
 1. In terminal enter this following command:
@@ -141,23 +144,27 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 23-07-2022)
+# Compatibility (as of 07-10-2023)
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Uncapped PLUS    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 rphys            |          ✅           |         ✅           |        ❔         |        ⛔       |       ⛔      |
+| SRB2 rphys            |          ✅           |         ✅           |        ❔         |        ✅       |       ⛔      |
+| SRB2 TSoURDt3rd       |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
 | SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 v2.0             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| SRB2 v2.0             |          ✅           |         ⛔           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 Final Demo       |          ✅*          |         ⛔           |        ✅*        |        ✅*      |       ⛔      |
 | SRB2 Persona          |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart             |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
 | SRB2 Kart Moe Mansion |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 Kart Galaxy      |          ✅           |         ✅           |        ❔         |        ✅       |       ⛔      |
+| SRB2 Kart HEP         |          ✅           |         ✅           |        ❔         |        ✅       |       ⛔      |
 | SRB2 Kart VR          |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
-| wadcli                |          ✅           |         ⛔           |        ✅         |        ⛔       |       ⛔      |
+| wadcli                |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
 | SLADE                 |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
+| UltimateZoneBuilder   |          ✅           |         ⛔           |        ❔         |        ✅       |       ⛔      |
 
 **Legend:**
 
@@ -166,6 +173,8 @@ As for macOS users, they need to install these additional dependencies:
 🟨 - Builds successfully, but may encounter errors, when starting game, or get performance issues. Patches may apply.
 
 ⛔ - Building failure.
+
+❔ - Not tested.
 
 *Only 32-bit binaries are currently supported. SRB2 v2.0 has graphical issues when running with OpenGL on Linux and Windows.
 
@@ -183,34 +192,40 @@ Usage: srb2bld [OPTIONS]
      -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart build, which is packaged in DMG file (macOS only).
      -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart build (Linux only).
      -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
-     -i, --install                          Compile and install SRB2/SRB2Kart build.
+     -f, --flatpak                          Compile and create distributable Flatpak of SRB2/SRB2Kart build (Linux only).
+     -i, --install                          Compile and install SRB2/SRB2Kart build to system.
      -la, --listasset                       List downloaded SRB2/SRB2Kart assets.
      -lb, --listbuild                       List downloaded SRB2/SRB2Kart builds.
      -lc, --listconfig                      List compilation flags of installed SRB2/SRB2Kart builds.
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
+     -rd, --removedep                       Remove compiled and installed dependencies for builds.
+     -t, --tag                              Compile and install build with chosen tag instead of branch (only works with -i/--install,-ab/--appbundle,-ai/--appimage,-f/--flatpak).
      -u, --user                             Install build to user's home directory (only works with -i/--install).
      -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
      -up, --upgrade                         Upgrade installed SRB2/SRB2Kart build.
 
   EXAMPLES:
-     1. Compile and install SRB2/SRB2Kart build:
+     1. Compile and install SRB2/SRB2Kart build to system:
             srb2bld --install
 
      2. Compile and install SRB2/SRB2Kart build to user's home directory:
             srb2bld --install --user
 
-     3. Compile and create AppImage of SRB2/SRB2Kart build (Linux only):
+     3. Compile and install SRB2/SRB2Kart build to system with chosen tag:
+            srb2bld --install --tag
+
+     4. Compile and create AppImage of SRB2/SRB2Kart build (Linux only):
             srb2bld --appimage
 
-     4. List installed SRB2/SRB2Kart builds:
+     5. List installed SRB2/SRB2Kart builds:
             srb2bld --listinstalled
 
-     5. Uninstall SRB2/SRB2Kart build:
+     6. Uninstall SRB2/SRB2Kart build:
             srb2bld --uninstall
 
-     6. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
+     7. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
             srb2bld --compatibility
 
   NOTES:
@@ -242,7 +257,13 @@ Usage: srb2bld [OPTIONS]
 
      8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart build, if you chose default branch or kept previously chosen different branch.
 
-     9. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+     9. If you have error "invalid file system type on '/sys/fs/cgroup'", while running script, issue could be with not running cgroups service "sudo systemctl enable cgconfig && sudo systemctl start cgconfig" or "sudo systemctl enable cgmanager && sudo systemctl start cgmanager" or "sudo rc-update add cgroups && sudo rc-service cgroups start" and reboot system.
+
+     10. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
+
+     11. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
+
+     12. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -286,11 +307,14 @@ Usage: srb2bld [OPTIONS]
 
           Then choose "Build SRB2 Custom", when running script.
 
-     10. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+     13. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
          - SRB2BLDDEVMODE - For developers, who want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
+
+         - SRB2BLDNOCCACHE - Disable ccache.
+
 ```
 
 # Notes
@@ -322,13 +346,19 @@ Usage: srb2bld [OPTIONS]
 
 8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart build, if you chose default branch or kept previously chosen different branch.
 
-9. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+9. If you have error "invalid file system type on '/sys/fs/cgroup'", while running script, issue could be with not running cgroups service "sudo systemctl enable cgconfig && sudo systemctl start cgconfig" or "sudo systemctl enable cgmanager && sudo systemctl start cgmanager" or "sudo rc-update add cgroups && sudo rc-service cgroups start" and reboot system.
 
-    - SRB2GITPATH - path to local or remote repository,
+10. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
 
-    - SRB2GITVER - chosen branch to download build from remote repository,
+11. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
 
-    - SRB2ASSETPATH - path to assets from local or remote path (supported links/paths:
+12. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+
+    - SRB2BLDGITPATH - path to local or remote repository,
+
+    - SRB2BLDGITVER - chosen branch to download build from remote repository,
+
+    - SRB2BLDASSETPATH - path to assets from local or remote path (supported links/paths:
         - websites with direct link to file, for example, "https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip",
         - mega.nz,
         - drive.google.com,
@@ -366,8 +396,10 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-10. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+13. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
         - SRB2BLDDEVMODE - For developers, who want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
+
+        - SRB2BLDNOCCACHE - Disable ccache.
