@@ -3,7 +3,7 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-96ca-b5630b85e022.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart VR, wadcli and SLADE, UltimateZoneBuilder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart VR, wadcli, SLADE and Ultimate Zone Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
@@ -21,6 +21,7 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - Findutils,
 - Which,
 - Curl,
+- Git,
 - Gawk,
 - Ncurses,
 - Docker or Podman (Linux and Windows only),
@@ -28,8 +29,9 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - FUSE or Libfuse2 (Linux only),
 - Patchelf (Linux only),
 - GDK-Pixbuf (Linux only),
+- Flatpak (Linux only),
+- Flatpak-builder (Linux only),
 - Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package) (Linux only).
-
 Windows users need to also have installed Git Bash to run this script.
 
 As for macOS users, they need to install these additional dependencies:
@@ -47,23 +49,23 @@ As for macOS users, they need to install these additional dependencies:
 1. In terminal enter this following command:
 - Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils ncurses-bin curl gawk docker.io stow libfuse2 patchelf libgdk-pixbuf2.0-bin flatpak flatpak-builder`,
 
-- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils ncurses curl gawk docker stow fuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Gentoo/Gentoo based: `sudo emerge -av git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
+- Gentoo/Gentoo based: `sudo emerge -av dev-vcs/git sys-apps/which sys-apps/coreutils sys-apps/findutils sys-libs/ncurses net-misc/curl sys-apps/gawk app-containers/docker app-admin/stow sys-fs/fuse:0 dev-util/patchelf x11-libs/gdk-pixbuf sys-apps/flatpak dev-util/flatpak-builder`,
 
-- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Fedora Silverblue/Kinoite: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora Silverblue/Kinoite: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- OpenSUSE Leap/OpenSUSE Tumbleweed/OpenSUSE Leap/OpenSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
+- OpenSUSE Leap/OpenSUSE Tumbleweed/OpenSUSE Leap/OpenSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
 
-- OpenSUSE MicroOS/OpenSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
+- OpenSUSE MicroOS/OpenSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
 
 - Void/Void based: `sudo xbps-install -S make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
 
 - Alpine/Alpine based: `sudo apk add make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
+- Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse2 patchelf gdk-pixbuf flatpak flatpak-builder`,
 
 - NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf gdk-pixbuf flatpak flatpak-builder` or `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`. For Flatpak, set "services.flatpak.enable = true;" in "/etc/nixos/configuration.nix".
 
@@ -135,6 +137,7 @@ As for macOS users, they need to install these additional dependencies:
 
 # Configuration
 **Linux:**
+**Notice: This part can be skipped, if you have installed podman.**
 1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. For immutable systems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
 
 **Windows:**
@@ -164,7 +167,7 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 Kart VR          |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | wadcli                |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
 | SLADE                 |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
-| UltimateZoneBuilder   |          ✅           |         ⛔           |        ❔         |        ✅       |       ⛔      |
+| Ultimate Zone Builder |          ✅           |         ⛔           |        ❔         |        ✅       |       ⛔      |
 
 **Legend:**
 

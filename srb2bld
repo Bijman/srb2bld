@@ -688,7 +688,7 @@ choosebuild() {
     while
 
         $PRINTF "$MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 rphys" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart VR" "Build SRB2 Custom" "Build wadcli" "Build SLADE" "Build UltimateZoneBuilder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 rphys" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart VR" "Build SRB2 Custom" "Build wadcli" "Build SLADE" "Build Ultimate Zone Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -3848,7 +3848,7 @@ DESKTOP
         cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
 [Desktop Entry]
 Type=Application
-Name=UltimateZoneBuilder
+Name=Ultimate Zone Builder
 Comment=A map editor for UDMF levels in SRB2, forked from Ultimate Doom Builder.
 Icon=icon
 Exec=AppRun
@@ -4413,7 +4413,7 @@ DESKTOP
 [Desktop Entry]
 Version=\$COMREV
 Type=Application
-Name=UltimateZoneBuilder
+Name=Ultimate Zone Builder
 Comment=A map editor for UDMF levels in SRB2, forked from Ultimate Doom Builder.
 Icon=ultimatezonebuilder
 Exec=uzb
