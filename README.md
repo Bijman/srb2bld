@@ -138,8 +138,7 @@ As for macOS users, they need to install these additional dependencies:
 5. Check if you set properly other settings from "Configuration" section of README.
 
 # Configuration
-**Linux:**
-**(Notice: This part can be skipped, if you have installed podman.)**
+**Linux (Notice: This part can be skipped, if you have installed podman.):**
 1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. For immutable systems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
 
 **Windows:**
