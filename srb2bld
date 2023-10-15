@@ -5684,11 +5684,11 @@ installdepsglibc() {
 
                     if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-                        toolbox run dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'/ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
+                        toolbox run dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
 
                     else
 
-                        toolbox run dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'/ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
+                        toolbox run dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
 
                     fi
 
@@ -5760,11 +5760,11 @@ installdepsglibc() {
 
                     if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
 
-                        dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'./ {print $1}'
+                        dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}'
 
                     else
 
-                        dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'./ {print $1}'
+                        dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}'
 
                     fi
 

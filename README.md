@@ -55,11 +55,13 @@ As for macOS users, they need to install these additional dependencies:
 
 - Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Fedora Silverblue/Kinoite: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora Silverblue/Fedora Kinoite/Fedora Onyx/Fedora Sericea: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- OpenSUSE Leap/OpenSUSE Tumbleweed/OpenSUSE Leap/OpenSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
+- RHEL/RHEL based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse-libs patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- OpenSUSE MicroOS/OpenSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
+- openSUSE Leap/openSUSE Tumbleweed/openSUSE Leap based/openSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
+
+- openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder && sudo transactional-update apply`,
 
 - Void/Void based: `sudo xbps-install -S make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
 
@@ -67,13 +69,13 @@ As for macOS users, they need to install these additional dependencies:
 
 - Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse2 patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- NixOS/NixOS based: `sudo nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf gdk-pixbuf flatpak flatpak-builder` or `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`. For Flatpak, set "services.flatpak.enable = true;" in "/etc/nixos/configuration.nix".
+- NixOS/NixOS based: `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`. For Flatpak, set "services.flatpak.enable = true;" in "/etc/nixos/configuration.nix".
 
 - Systems with immutable root filesystems (with exception of home directory and others depending on distro) like Steam Deck's SteamOS need rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like "/usr/local":
 	1. Docker (Rootless mode): run `curl -fsSL https://get.docker.com/rootless | sh` to install Docker to user's home directory. For more details read [HERE](https://docs.docker.com/engine/security/rootless),
 	2. Package managers:
 		- [Homebrew](https://brew.sh): `brew install make git coreutils findutils ncurses curl gawk stow libfuse@2 patchelf gdk-pixbuf`,
-		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix-env -i gnumake git which coreutils findutils ncurses curl gawk stow fuse patchelf gdk-pixbuf flatpak flatpak-builder` or `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'`.
+		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'`.
 
 **Windows:**
 1. Installing Git Bash:
