@@ -3,7 +3,7 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-96ca-b5630b85e022.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 Persona, SRB2 Kart or SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart VR, wadcli, SLADE and Ultimate Zone Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 JTE, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart VR, wadcli, SLADE and Ultimate Zone Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
@@ -26,13 +26,13 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - Ncurses,
 - Docker or Podman (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
-- FUSE or Libfuse2 (Linux only),
+- FUSE or Libfuse2/Fuse-libs (Linux only),
 - Patchelf (Linux only),
 - GDK-Pixbuf (Linux only),
 - Flatpak (Linux only),
 - Flatpak-builder (Linux only),
 - Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package) (Linux only).
-Windows users need to also have installed Git Bash to run this script.
+Windows users need to also have installed Git Bash or MSYS to run this script.
 
 As for macOS users, they need to install these additional dependencies:
 - Cmake,
@@ -53,9 +53,9 @@ As for macOS users, they need to install these additional dependencies:
 
 - Gentoo/Gentoo based: `sudo emerge -av dev-vcs/git sys-apps/which sys-apps/coreutils sys-apps/findutils sys-libs/ncurses net-misc/curl sys-apps/gawk app-containers/docker app-admin/stow sys-fs/fuse:0 dev-util/patchelf x11-libs/gdk-pixbuf sys-apps/flatpak dev-util/flatpak-builder`,
 
-- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse-libs patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Fedora Silverblue/Fedora Kinoite/Fedora Onyx/Fedora Sericea: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora Silverblue/Fedora Kinoite/Fedora Onyx/Fedora Sericea: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow fuse-libs patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
 - RHEL/RHEL based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse-libs patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
@@ -148,27 +148,29 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 07-10-2023)
+# Compatibility (as of 14-11-2023)
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Uncapped PLUS    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 rphys            |          ✅           |         ✅           |        ❔         |        ✅       |       ⛔      |
-| SRB2 TSoURDt3rd       |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
+| SRB2 rphys            |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 TSoURDt3rd       |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
 | SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 v2.0             |          ✅           |         ⛔           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 Final Demo       |          ✅*          |         ⛔           |        ✅*        |        ✅*      |       ⛔      |
+| SRB2 JTE (1.09)       |          🟨*          |         ⛔           |        🟨         |        ⛔       |       ⛔      |
 | SRB2 Persona          |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart             |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
 | SRB2 Kart Moe Mansion |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 Kart Galaxy      |          ✅           |         ✅           |        ❔         |        ✅       |       ⛔      |
-| SRB2 Kart HEP         |          ✅           |         ✅           |        ❔         |        ✅       |       ⛔      |
+| SRB2 Kart Galaxy      |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
+| SRB2 Kart HEP         |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
+| SRB2 Kart Saturn      |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 Kart VR          |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | wadcli                |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
 | SLADE                 |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
-| Ultimate Zone Builder |          ✅           |         ⛔           |        ❔         |        ✅       |       ⛔      |
+| Ultimate Zone Builder |          ✅           |         ⛔           |        ⛔         |        ✅       |       ⛔      |
 
 **Legend:**
 
@@ -233,7 +235,7 @@ Usage: srb2bld [OPTIONS]
             srb2bld --compatibility
 
   NOTES:
-     1. Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+     1. Old builds like SRB2 v2.0, SRB2 Final Demo, SRB2 JTE may not build/run properly on modern Linux distributions/macOS/Windows.
 
      2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
@@ -322,7 +324,7 @@ Usage: srb2bld [OPTIONS]
 ```
 
 # Notes
-1. Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+1. Old builds like SRB2 v2.0, SRB2 Final Demo, SRB2 JTE may not build/run properly on modern Linux distributions/macOS/Windows.
 
 2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 

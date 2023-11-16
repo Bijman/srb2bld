@@ -89,9 +89,9 @@ if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --use
         SRB2BLDPREFIX="/usr/local"
 
         # Create prefix path.
-        if [ ! -d "$SRB2BLDPREFIX" ]; then
+        if [ ! -d "$SRB2BLDPREFIX" ] && [ "$OS" != "Windows" ]; then
 
-            if [ "$OS" = "Windows" ]; then
+            if [ "$SRB2BLDPREFIX" != "/usr/local" ]; then
 
                 mkdir -p "$SRB2BLDPREFIX"
 
@@ -110,9 +110,9 @@ else
     SRB2BLDPREFIX="/usr/local"
 
     # Create prefix path.
-    if [ ! -d "$SRB2BLDPREFIX" ]; then
+    if [ ! -d "$SRB2BLDPREFIX" ] && [ "$OS" != "Windows" ]; then
 
-        if [ "$OS" = "Windows" ]; then
+        if [ "$SRB2BLDPREFIX" != "/usr/local" ]; then
 
             mkdir -p "$SRB2BLDPREFIX"
 
@@ -138,6 +138,7 @@ SRB2VRASSETURL="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.
 SRB2LEGACYASSETURL="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe"
 SRB220ASSETURL="https://archive.org/download/srb20ya-v20/SRB2_v206.exe"
 SRB2FINALDEMOASSETURL="https://archive.org/download/srb20ya-finaldemo/FinalDemo1094-2008.exe"
+SRB2JTEASSETURL="https://archive.org/download/SRB2JTE-69-1/srb2jte.zip"
 SRB2PERSONAASSETURL="https://mb.srb2.org/addons/166/download"
 SRB2KARTHEPASSETURL="https://mb.srb2.org/addons/5254/download"
 MINGWCCVER="gcc"
@@ -382,30 +383,6 @@ pkgs.appimageTools.wrapType2 {
   name = "AppImageTool";
   src = $BUILD/appimagetool;
 }
-
-#{
-#  inputs = {
-#    nixpkgs.url = "github:NixOS/nixpkgs";
-#  };
-#
-#  outputs = { self, nixpkgs }:
-# let
-#      pkgs = import nixpkgs { inherit self; };
-#
-#      appimageTools = pkgs.appimageTools;
-#      src = $BUILD/appimagetool;
-#
-#    in
-#    {
-#      # Output the derivation that generates the AppImageTool
-#      packages = {
-#        appImageTool = appimageTools.wrapType2 {
-#          name = "AppImageTool";
-#          src = src;
-#        };
-#      };
-#    };
-#}
 NIX
 
         nix build --extra-experimental-features 'nix-command flakes' -f "$BUILD/appimagetool.nix"
@@ -472,6 +449,10 @@ buildname() {
 
         export BUILDNAME="Sonic Robo Blast 2 Final Demo"
 
+    elif [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 JTE"
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
         export BUILDNAME="Sonic Robo Blast 2 Persona"
@@ -491,6 +472,10 @@ buildname() {
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ]; then
 
         export BUILDNAME="Sonic Robo Blast 2 Kart HEP"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 Kart Saturn"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -688,7 +673,7 @@ choosebuild() {
     while
 
         $PRINTF "$MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 rphys" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart VR" "Build SRB2 Custom" "Build wadcli" "Build SLADE" "Build Ultimate Zone Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 rphys" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart VR" "Build SRB2 Custom" "Build wadcli" "Build SLADE" "Build Ultimate Zone Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -752,7 +737,7 @@ choosebuild() {
                 BUILD="$BUILDPATH/srb2-vr"
                 GITDEFVER="openvr"
                 GITVER="$GITDEFVER"
-                GIT="git clone $GITOPTS https://git.do.srb2.org/chreas/SRB2.git --recursive"
+                GIT="git clone $GITOPTS https://git.do.srb2.org/chreas/srb-2-vr.git --recursive"
                 break
 
                 ;;
@@ -762,7 +747,7 @@ choosebuild() {
                 BUILD="$BUILDPATH/srb2-2.1-legacy"
                 GITDEFVER="master"
                 GITVER="$GITDEFVER"
-                GIT="git clone $GITOPTS https://github.com/PandaSRC/srb2-legacy.git --recursive"
+                GIT="git clone $GITOPTS https://github.com/P-AS/srb2-legacy.git --recursive"
                 break
 
                 ;;
@@ -789,6 +774,16 @@ choosebuild() {
 
             "10")
 
+                BUILD="$BUILDPATH/srb2-jte"
+                GITDEFVER="SRB2JTE"
+                GITVER="$GITDEFVER"
+                GIT="git clone $GITOPTS https://github.com/Bijman/SRB2-Archive.git --recursive"
+                break
+
+                ;;
+
+            "11")
+
                 BUILD="$BUILDPATH/srb2-persona"
                 GITDEFVER="srb2p_22"
                 GITVER="$GITDEFVER"
@@ -797,7 +792,7 @@ choosebuild() {
 
                 ;;
 
-            "11")
+            "12")
 
                 BUILD="$BUILDPATH/srb2-kart"
                 GITDEFVER="master"
@@ -807,7 +802,7 @@ choosebuild() {
 
                 ;;
 
-            "12")
+            "13")
 
                 BUILD="$BUILDPATH/srb2-kart-moe-mansion"
                 GITDEFVER="moe-mansion"
@@ -817,7 +812,7 @@ choosebuild() {
 
                 ;;
 
-            "13")
+            "14")
 
                 BUILD="$BUILDPATH/srb2-kart-galaxy"
                 GITDEFVER="Galaxy-Redux"
@@ -827,7 +822,7 @@ choosebuild() {
 
                 ;;
 
-            "14")
+            "15")
 
                 BUILD="$BUILDPATH/srb2-kart-hep"
                 GITDEFVER="Glalxy"
@@ -837,17 +832,27 @@ choosebuild() {
 
                 ;;
 
-            "15")
+            "16")
 
-                BUILD="$BUILDPATH/srb2-kart-vr"
-                GITDEFVER="openvr"
+                BUILD="$BUILDPATH/srb2-kart-saturn"
+                GITDEFVER="Saturn"
                 GITVER="$GITDEFVER"
-                GIT="git clone $GITOPTS https://git.do.srb2.org/chreas/kart-public-vr --recursive"
+                GIT="git clone $GITOPTS https://github.com/Indev450/SRB2Kart-Saturn.git --recursive"
                 break
 
                 ;;
 
-            "16")
+            "17")
+
+                BUILD="$BUILDPATH/srb2-kart-vr"
+                GITDEFVER="openvr"
+                GITVER="$GITDEFVER"
+                GIT="git clone $GITOPTS https://git.do.srb2.org/chreas/kart-public-vr.git --recursive"
+                break
+
+                ;;
+
+            "18")
 
                 BUILD="$BUILDPATH/srb2-custom"
 
@@ -964,7 +969,7 @@ choosebuild() {
 
                 ;;
 
-            "17")
+            "19")
 
                 BUILD="$BUILDPATH/wadcli"
                 GITDEFVER="main"
@@ -974,7 +979,7 @@ choosebuild() {
 
                 ;;
 
-            "18")
+            "20")
 
                 BUILD="$BUILDPATH/slade"
                 GITDEFVER="master"
@@ -984,7 +989,7 @@ choosebuild() {
 
                 ;;
 
-            "19")
+            "21")
 
                 BUILD="$BUILDPATH/ultimatezonebuilder"
                 GITDEFVER="master"
@@ -1457,6 +1462,7 @@ containerentry() {
     export SRB2LEGACYASSETURL="$SRB2LEGACYASSETURL"
     export SRB220ASSETURL="$SRB220ASSETURL"
     export SRB2FINALDEMOASSETURL="$SRB2FINALDEMOASSETURL"
+    export SRB2JTEASSETURL="$SRB2JTEASSETURL"
     export SRB2PERSONAASSETURL="$SRB2PERSONAASSETURL"
     export SRB2KARTHEPASSETURL="$SRB2KARTHEPASSETURL"
     export SRB2BLDDEVMODE="$SRB2BLDDEVMODE"
@@ -1468,8 +1474,12 @@ containerentry() {
     export UPGRADE="$UPGRADE"
     export GCCVER="$GCCVER"
     export GXXVER="$GXXVER"
+    export GCCOLDVER="$GCCOLDVER"
+    export GXXOLDVER="$GXXOLDVER"
     export MINGWCCVER="$MINGWCCVER"
     export MINGWCXXVER="$MINGWCXXVER"
+    export MINGWOLDCCVER="$MINGWOLDCCVER"
+    export MINGWOLDCXXVER="$MINGWOLDCXXVER"
     export STOW_DIR="$SRB2BLDPREFIX/stow"
     export CCACHE_DIR="$CCACHE_DIR"
 
@@ -1549,19 +1559,6 @@ containerentry() {
 
             fi
 
-            # Temporary fix until SRB2 VR will be updated to the latest version of SRB2.
-            if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
-
-                if [ -n "\$ISNET" ]; then
-
-                    curl -RLC - "\$SRB2VRASSETURL" -o "\$SRB2BLDROOT/assets/SRB2VR-Patch.zip"
-
-                fi
-
-                7z x -y "\$SRB2BLDROOT/assets/SRB2VR-Patch.zip" "*.pk3" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-
-            fi
-
             extractsrb2assets
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
@@ -1587,7 +1584,6 @@ containerentry() {
 
             # Copying libraries for Windows version of SRB2 builds.
             if [ "\$OS" = "Windows" ]; then
-
 
                 if [ "\$IS64" = "64" ]; then
 
@@ -1622,7 +1618,19 @@ containerentry() {
 
             fi
 
-        elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+            if [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+                if [ -n "\$ISNET" ]; then
+
+                    curl -RLC - "\$SRB2JTEASSETURL" -o "\$SRB2BLDROOT/assets/SRB2JTE.zip"
+
+                fi
+
+                7z x -y "\$SRB2BLDROOT/assets/SRB2JTE.zip" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+            fi
 
             if [ -n "\$ISNET" ]; then
 
@@ -1651,7 +1659,7 @@ containerentry() {
 
             fi
 
-        elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ]; then
 
@@ -1861,7 +1869,6 @@ containerentry() {
                 cp -f "\$BUILD/libs/libopenmpt/bin/x86/"* "\$BUILD/build/AppDir/usr/lib"
                 cp -f "\$BUILD/libs/SDL2/i686-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
                 cp -f "\$BUILD/libs/SDLMixerX/i686-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
-                cp -f "\$BUILD/libs/openvr/openvr_api.dll" "\$BUILD/build/AppDir/usr/lib"
 
             elif [ "\$IS64" = "64" ]; then
 
@@ -1939,13 +1946,20 @@ containerentry() {
                 cp -f "\$BUILD/libs/dll-binaries/i686/"* "\$BUILD/build/AppDir/usr/lib"
                 cp -f "\$BUILD/libs/SDL2/i686-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
                 cp -f "\$BUILD/libs/SDL2_mixer/i686-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
-                cp -f "\$BUILD/libs/openvr/openvr_api.dll" "\$BUILD/build/AppDir/usr/lib"
 
             elif [ "\$IS64" = "64" ]; then
 
                 cp -f "\$BUILD/libs/curl/lib64/libcurl-x64.dll" "\$BUILD/build/AppDir/usr/lib"
                 rm -rf "\$BUILD/libs/dll-binaries/x86_64/Old"
                 cp -f "\$BUILD/libs/dll-binaries/x86_64/"* "\$BUILD/build/AppDir/usr/lib"
+
+                if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]; then
+
+                    rm -rf "\$BUILD/libs/libopenmpt/bin/x86_64/mingw"
+                    cp -f "\$BUILD/libs/libopenmpt/bin/x86_64/"* "\$BUILD/build/AppDir/usr/lib"
+
+                fi
+
                 cp -f "\$BUILD/libs/SDL2/x86_64-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
                 cp -f "\$BUILD/libs/SDL2_mixer/x86_64-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
 
@@ -1954,6 +1968,14 @@ containerentry() {
                 cp -f "\$BUILD/libs/curl/lib32/libcurl.dll" "\$BUILD/build/AppDir/usr/lib"
                 rm -rf "\$BUILD/libs/dll-binaries/i686/Old"
                 cp -f "\$BUILD/libs/dll-binaries/i686/"* "\$BUILD/build/AppDir/usr/lib"
+
+                if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]; then
+
+                    rm -rf "\$BUILD/libs/libopenmpt/bin/x86/mingw"
+                    cp -f "\$BUILD/libs/libopenmpt/bin/x86/"* "\$BUILD/build/AppDir/usr/lib"
+
+                fi
+
                 cp -f "\$BUILD/libs/SDL2/i686-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
                 cp -f "\$BUILD/libs/SDL2_mixer/i686-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
 
@@ -2018,19 +2040,27 @@ containerentry() {
          sudo sed -i '/#ifndef _WIN32/,/#endif/d' /usr/*/include/_mingw_stdarg.h
          sudo sed -i '/#ifndef _WIN32/,/#endif/d' /usr/*/include/sys/types.h
          sudo sed -i '/#ifndef _WIN32/,/#endif/d' /usr/*/include/sys/stat.h
-         gawk -i inplace '!/#include "exchndl.h"/' "\$BUILD/src/sdl/i_main.c"
-         gawk -i inplace '/ExcHndlInit()/ {suppress=1} /}/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_main.c"
+
+         # Removing exchndl dependency for some SRB2/SRB2 Kart builds due to linking errors.
+         if [ -z "\$(gawk '/#ifdef DRMINGW/ {print}' \$BUILD/src/sdl/i_main.c)" ]; then
+
+             gawk -i inplace '/#include "exchndl.h"/ {suppress=1} /#endif/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_main.c"
+             gawk -i inplace '/ExcHndlInit()/ {suppress=1} /}/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_main.c"
+
+         fi
 
          # Linking windres and dllwrap for compiling specific builds.
-         if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+         if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
              sudo ln -sf /usr/bin/i686-w64-mingw32-windres /usr/bin/windres
              sudo ln -sf /usr/bin/i686-w64-mingw32-dllwrap /usr/bin/dllwrap
+             sudo ln -sf /usr/bin/i686-w64-mingw32-ld /usr/bin/ld
 
          else
 
              sudo ln -sf "/usr/bin/\$ARCH-w64-mingw32-windres" /usr/bin/windres
              sudo ln -sf "/usr/bin/\$ARCH-w64-mingw32-dllwrap" /usr/bin/dllwrap
+             sudo ln -sf "/usr/bin/\$ARCH-w64-mingw32-ld" /usr/bin/ld
 
          fi
 
@@ -2124,7 +2154,8 @@ containerentry() {
          sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2vr|' "\$BUILD/src/sdl/i_system.c"
-         gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib $SRB2BLDPREFIX/lib64 $SRB2BLDPREFIX/lib -name libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/Makefile.d/nix.mk"
+         gawk -i inplace '{gsub("../../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib $SRB2BLDPREFIX/lib64 $SRB2BLDPREFIX/lib -name libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/Makefile.d/nix.mk"
+         \$PRINTF "%s\n" "libs+=\$SRB2BLDROOT/libraries/libopenvr/bin/win32/openvr_api.dll" >> "\$BUILD/src/Makefile.d/win32.mk"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
@@ -2172,6 +2203,26 @@ containerentry() {
          gawk -i inplace '{gsub("\\\\$\\\\(CC\\\\) \\\\$\\\\(CFLAGS\\\\) -MM \\\\*.c","\$(CC) \$(CFLAGS) -MM \$(wildcard *.c)");print}' "\$BUILD/src/makefile"
          gawk -i inplace '{gsub("\\\\$\\\\(INTERFACE\\\\)/\\\\*.c","\$(wildcard \$(INTERFACE)/*.c)");print}' "\$BUILD/src/makefile"
          gawk -i inplace '{gsub("hardware/\\\\*.c","\$(wildcard hardware/*.c)");print}' "\$BUILD/src/makefile"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+         sed -i 's|#define DEFAULTDIR ".srb2"|#define DEFAULTDIR ".srb2jte'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2"|#define DEFAULTDIR "srb2jte'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|/usr/local/games/srb2|'\$SRB2BLDPREFIX'/share/games/SRB2JTE|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/games/srb2|/usr/games/SRB2JTE|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|c:\\\\\\\srb2|c:\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|d:\\\\\\\srb2|d:\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|e:\\\\\\\srb2|e:\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|f:\\\\\\\srb2|f:\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|g:\\\\\\\srb2|g:\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|h:\\\\\\\srb2|h:\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|i:\\\\\\\srb2|i:\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|c:\\\\\\\games\\\\\\\srb2|c:\\\\\\\games\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|\\\\\\\games\\\\\\\srb2|\\\\\\\games\\\\\\\srb2jte|' "\$BUILD/src/sdl/i_system.c"
+         gawk -i inplace '{gsub("\\\\$\\\\(CC\\\\) \\\\$\\\\(CFLAGS\\\\) -MM \\\\*.c","\$(CC) \$(CFLAGS) -MM \$(wildcard *.c)");print}' "\$BUILD/src/makefile"
+         gawk -i inplace '{gsub("\\\\$\\\\(INTERFACE\\\\)/\\\\*.c","\$(wildcard \$(INTERFACE)/*.c)");print}' "\$BUILD/src/makefile"
+         gawk -i inplace '{gsub("hardware/\\\\*.c","\$(wildcard hardware/*.c)");print}' "\$BUILD/src/makefile"
+         gawk -i inplace '{gsub("char \\\\*pCrypt","char *p1Crypt");print}' "\$BUILD/src/JTE/SV_Virus.c"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
@@ -2221,6 +2272,15 @@ containerentry() {
          sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartHEP|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2KartHEP|' "\$BUILD/src/sdl/i_system.c"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]; then
+
+         sed -i 's|#define DEFAULTDIR ".srb2kart"|#define DEFAULTDIR ".srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|#define DEFAULTDIR "srb2kart"|#define DEFAULTDIR "srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
+         sed -i 's|/usr/local/share/games/SRB2Kart|'\$SRB2BLDPREFIX'/share/games/SRB2KartSaturn|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/local/games/SRB2Kart|'\$SRB2BLDPREFIX'/games/SRB2KartSaturn|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartSaturn|' "\$BUILD/src/sdl/i_system.c"
+         sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2KartSaturn|' "\$BUILD/src/sdl/i_system.c"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
          sed -i 's|#define DEFAULTDIR ".srb2kart"|#define DEFAULTDIR ".srb2kart'\$GITVERCONF'"|' "\$BUILD/src/doomdef.h"
@@ -2229,7 +2289,7 @@ containerentry() {
          sed -i 's|/usr/local/games/SRB2Kart|'\$SRB2BLDPREFIX'/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/share/games/SRB2Kart|/usr/share/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
          sed -i 's|/usr/games/SRB2Kart|/usr/games/SRB2KartVR|' "\$BUILD/src/sdl/i_system.c"
-         gawk -i inplace '{gsub("../libs/openvr/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib $SRB2BLDPREFIX -name libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/sdl/Makefile.cfg"
+         gawk -i inplace '{gsub("../libs/openvr/linux.*/libopenvr_api.so","\$(shell find /usr/lib64 /usr/lib $SRB2BLDPREFIX/lib64 $SRB2BLDPREFIX/lib -name libopenvr_api.so 2> /dev/null | head -n1)");print}' "\$BUILD/src/sdl/Makefile.cfg"
 
     elif [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ]; then
 
@@ -2303,11 +2363,24 @@ else
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
                # SDL=1 flag is removed because of errors with building it and only 32bit supported for Windows build.
-               BLDCMD="make CC="\$CCACHE_BIN_PATH"i686-w64-mingw32-$MINGWOLDCCVER LD_LIBRARY_PATH=\$SRB2BLDPREFIX/lib/\$ARCH-linux-gnu C_INCLUDE_PATH=\$SRB2BLDPREFIX/i686-w64-mingw32/include/.:/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:\$SRB2BLDPREFIX/include/SDL2/. -k -j\$NCPU -C \$BUILD/src MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
+               BLDCMD="make CC="\$CCACHE_BIN_PATH"i686-w64-mingw32-\$MINGWOLDCCVER LD_LIBRARY_PATH=\$SRB2BLDPREFIX/lib/\$ARCH-linux-gnu C_INCLUDE_PATH=\$SRB2BLDPREFIX/i686-w64-mingw32/include/.:/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:/usr/include/.:\$SRB2BLDPREFIX/include/SDL2/. -k -j\$NCPU -C \$BUILD/src MINGW=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
 
             else
 
-               BLDCMD="make CC="\$CCACHE_BIN_PATH"\$ARCH-w64-mingw32-$MINGWOLDCCVER LD_LIBRARY_PATH=\$SRB2BLDPREFIX/lib/\$ARCH-linux-gnu C_INCLUDE_PATH=\$SRB2BLDPREFIX/\$ARCH-w64-mingw32/include/.:/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:\$SRB2BLDPREFIX/include/SDL2/. -k -j\$NCPU -C \$BUILD/src MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
+               BLDCMD="make CC="\$CCACHE_BIN_PATH"\$ARCH-w64-mingw32-\$MINGWOLDCCVER LD_LIBRARY_PATH=\$SRB2BLDPREFIX/lib/\$ARCH-linux-gnu C_INCLUDE_PATH=\$SRB2BLDPREFIX/\$ARCH-w64-mingw32/include/.:/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:/usr/include/.:\$SRB2BLDPREFIX/include/SDL2/. -k -j\$NCPU -C \$BUILD/src MINGW=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
+
+            fi
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                # Only 32bit supported for Windows build.
+                BLDCMD="make CC=i686-w64-mingw32-\$MINGWOLDCCVER LD_LIBRARY_PATH=\$SRB2BLDPREFIX/lib/i386-linux-gnu C_INCLUDE_PATH=/usr/i686-w64-mingw32/include/.:/usr/include/i386-linux-gnu/.:\$SRB2BLDPREFIX/include/SDL2/. -k -j\$NCPU -C \$BUILD/src MINGW=1 SDL=1 NOASM=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
+
+            else
+
+                BLDCMD="make CC=\$ARCH-w64-mingw32-\$MINGWOLDCCVER LD_LIBRARY_PATH=\$SRB2BLDPREFIX/lib/\$ARCH-linux-gnu C_INCLUDE_PATH=/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:\$SRB2BLDPREFIX/include/SDL2/. -k -j\$NCPU -C \$BUILD/src MINGW=1 NONX86=1 SDL=1 NOASM=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
 
             fi
 
@@ -2377,11 +2450,11 @@ MINGWCMAKE
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                BLDCMD="make CC="\$CCACHE_BIN_PATH"$GCCOLDVER C_INCLUDE_PATH=\$SRB2BLDPREFIX/include/.:\$SRB2BLDPREFIX/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/.:/usr/include/\$ARCH-linux-gnu/. LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme -k -j\$NCPU -C \$BUILD/src LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
+                BLDCMD="make CC="\$CCACHE_BIN_PATH"\$GCCOLDVER C_INCLUDE_PATH=\$SRB2BLDPREFIX/include/.:\$SRB2BLDPREFIX/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/.:/usr/include/\$ARCH-linux-gnu/. LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme -k -j\$NCPU -C \$BUILD/src LINUX\$IS64=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
 
             else
 
-                BLDCMD="make CC="\$CCACHE_BIN_PATH"$GCCOLDVER C_INCLUDE_PATH=\$SRB2BLDPREFIX/include/.:\$SRB2BLDPREFIX/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/.:/usr/include/\$ARCH-linux-gnu/. LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme -k -j\$NCPU -C \$BUILD/src LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
+                BLDCMD="make CC="\$CCACHE_BIN_PATH"\$GCCOLDVER C_INCLUDE_PATH=\$SRB2BLDPREFIX/include/.:\$SRB2BLDPREFIX/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/.:/usr/include/\$ARCH-linux-gnu/. LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme -k -j\$NCPU -C \$BUILD/src LINUX\$IS64=1 NONX86=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
 
             fi
 
@@ -2394,6 +2467,18 @@ MINGWCMAKE
             else
 
                 BLDCMD="make CC="\$CCACHE_BIN_PATH"\$GCCVER C_INCLUDE_PATH=\$SRB2BLDPREFIX/include/.:\$SRB2BLDPREFIX/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/.:/usr/include/\$ARCH-linux-gnu/. LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme -k -j\$NCPU -C \$BUILD/src LINUX=1 NONX86=1"
+
+            fi
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                BLDCMD="make CC=\$GCCOLDVER C_INCLUDE_PATH=\$SRB2BLDPREFIX/include/.:\$SRB2BLDPREFIX/include/SDL2/.:/usr/lib/klibc-x86/include/.:/usr/include/i386-linux-gnu/. LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme -k -j\$NCPU -C \$BUILD/src LINUX=1 NOASM=1"
+
+            else
+
+                BLDCMD="make CC=\$GCCOLDVER C_INCLUDE_PATH=\$SRB2BLDPREFIX/include/.:\$SRB2BLDPREFIX/include/SDL2/.:/usr/lib/klibc-\$(arch)/include/.:/usr/include/\$ARCH-linux-gnu/. LIBGME_CFLAGS= LIBGME_LDFLAGS=-lgme -k -j\$NCPU -C \$BUILD/src LINUX=1 NONX86=1 NOASM=1"
 
             fi
 
@@ -2457,7 +2542,7 @@ MINGWCMAKE
     fi
 
     # Download libpng12's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]) && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
 
         if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
 
@@ -2794,7 +2879,7 @@ MINGWCMAKE
     fi
 
     # Download DiscordRPC source code, build and install it.
-    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
+    if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
 
         if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
 
@@ -2882,7 +2967,7 @@ MINGWCMAKE
     fi
 
     # Download libopenvr's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
 
@@ -2917,7 +3002,11 @@ MINGWCMAKE
 
         fi
 
-        if [ ! -f \$SRB2BLDPREFIX/lib/libopenvr_api.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ]); then
+        if [ "\$OS" = "Windows" ]; then
+
+            cp -f "\$SRB2BLDROOT/libraries/libopenvr/bin/win32/openvr_api.dll" "\$BUILD/build/AppDir/usr/lib"
+
+        elif [ "\$OS" = "Linux" ] && [ ! -f \$SRB2BLDPREFIX/lib/libopenvr_api.so ] || ([ -n "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ] && [ "\$(git -C "\$SRB2BLDROOT/libraries/libopenvr" rev-parse --short HEAD)" != "\$(cat "\$SRB2BLDROOT/libraries/libopenvr/.comrev" 2> /dev/null)" ]); then
 
             \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing libopenvr. Please wait..."
             mkdir -p "\$SRB2BLDROOT/libraries/libopenvr/build"
@@ -3112,6 +3201,23 @@ MINGWCMAKE
 
             fi
 
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+            mkdir -p "\$BUILD/objs/Mingw/SDL/Release"
+            mkdir -p "\$BUILD/objs/Mingw/Release"
+
+            if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
+
+                \$BLDCMD \$CONF
+                i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2jte.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+
+            else
+
+                \$BLDCMD \$CONF
+                \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2jte.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
+
+            fi
+
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
@@ -3125,10 +3231,6 @@ MINGWCMAKE
                 \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2kart.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
             fi
-
-        elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
-
-             \$BLDCMD \$CONF
 
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
@@ -3145,10 +3247,6 @@ MINGWCMAKE
             sudo rm -rf "\$BUILD/build/AppDir/usr/share/applications/net.mancubus.SLADE.desktop" "\$BUILD/build/AppDir/usr/share/icons/net.mancubus.SLADE.png" "\$BUILD/build/AppDir/usr/share/metainfo"
             cp -rf "\$BUILD/dist/res/logo_icon.png" "\$BUILD/build/icon.png"
             cd "\$BUILD" || exit
-
-        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ]; then
-
-            \$BLDCMD \$CONF
 
         else
 
@@ -3169,7 +3267,7 @@ MINGWCMAKE
 
                     fi
 
-                elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ]; then
+                elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]; then
 
                     if [ "\$IS64" = "64" ]; then
 
@@ -3204,7 +3302,7 @@ MINGWCMAKE
 
                     \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
-                elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+                elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
                     \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2kart.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
@@ -3221,29 +3319,21 @@ MINGWCMAKE
      elif [ "\$OS" = "Linux" ]; then
 
         # Temporarily disabling libpng12 to avoid compiling errors for SRB2 Final Demo.
-        if [ -f "/usr/local/lib/libpng12.so" ] && [ -d "/usr/local/stow/libpng12" ] && [ "\$LIBC" != "musl" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
+        if [ -f "/usr/local/lib/libpng12.so" ] && [ -d "/usr/local/stow/libpng12" ] && [ "\$LIBC" != "musl" ] && ([ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ]); then
 
             sudo -E STOW_DIR="/usr/local/stow" stow -D --adopt libpng12
 
         fi
 
-        if [ -f "$HOME/.local/lib/libpng12.so" ] && [ -d "$HOME/.local/stow/libpng12" ] && [ "\$LIBC" != "musl" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ]; then
+        if [ -f "$HOME/.local/lib/libpng12.so" ] && [ -d "$HOME/.local/stow/libpng12" ] && [ "\$LIBC" != "musl" ] && ([ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ]); then
 
             sudo -E STOW_DIR="$HOME/.local/stow" stow -D --adopt libpng12
 
         fi
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
-
-            \$BLDCMD \$CONF
-
-        elif [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
 
             mkdir -p "\$BUILD/objs/Linux/SDL/Release"
-            \$BLDCMD \$CONF
-
-        elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
-
             \$BLDCMD \$CONF
 
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
@@ -3340,9 +3430,17 @@ MINGWCMAKE
 
         cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
 
+    elif [ -f "\$BUILD/bin/Linux/Release/lsdlsrb2" ]; then
+
+        cp -rf "\$BUILD/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
+
     elif [ -f "\$BUILD/bin/lsdlsrb2" ]; then
 
         cp -rf "\$BUILD/bin/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
+
+    elif [ -f "\$BUILD/bin/Linux/Release/lsdlsrb2JTE" ]; then
+
+        cp -rf "\$BUILD/bin/Linux/Release/lsdlsrb2JTE" "\$BUILD/build/AppDir/usr/bin"
 
     elif [ -f "\$BUILD/bin/Linux/Release/lsdl2srb2" ]; then
 
@@ -3614,6 +3712,33 @@ Name=Software renderer
 Exec=AppRun -software
 DESKTOP
 
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 JTE
+Comment=Modified open source 3D Sonic platformer based on SRB2 Final Demo with additional modes, maps and easter eggs
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2JTE
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
@@ -3737,6 +3862,33 @@ Actions=OpenGL;Software;
 Terminal=false
 NoDisplay=false
 X-AppImage-Name=SRB2KartHEP
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 Kart Saturn
+Comment=Modified open source 3D Sonic game with kart racing gameplay, improved framerate and additional features based on SRB2 Kart Galaxy
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;kart;racing;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2KartSaturn
 X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 
@@ -3895,7 +4047,7 @@ DESKTOP
 
     else
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
             convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
@@ -3946,7 +4098,15 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdlsrb2" "\$@"
 APPRUNBIN
 
-    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+export SRB2WADDIR="\$HERE/usr/games/SRB2"
+
+exec "\$HERE/usr/bin/lsdlsrb2JTE" "\$@"
+APPRUNBIN
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
@@ -3999,7 +4159,7 @@ APPRUNBIN
 
     fi
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
 
         if [ "\$ARCH" = "x86_64" ]; then
 
@@ -4238,6 +4398,25 @@ DESKTOP
     cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2-final-demo-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-final-demo-opengl.desktop"
     gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 Final Demo \\\(Software\\\)","Name=Sonic Robo Blast 2 Final Demo (OpenGL)") || gsub("Exec=srb2fd -software","Exec=srb2fd -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-final-demo-opengl.desktop"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2-jte-software.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 JTE (Software)
+Comment=Modified open source 3D Sonic platformer based on SRB2 Final Demo with additional modes, maps and easter eggs
+Icon=srb2jte
+Exec=srb2jte -software
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2-jte-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-jte-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 JTE \\\(Software\\\)","Name=Sonic Robo Blast 2 JTE (OpenGL)") || gsub("Exec=srb2jte -software","Exec=srb2jte -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-jte-opengl.desktop"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/srb2-persona-software.desktop" << DESKTOP
@@ -4321,7 +4500,7 @@ DESKTOP
 Version=\$COMREV
 Type=Application
 Name=Sonic Robo Blast 2 Kart HEP (Software)
-Comment=Modified open source 3D Sonic game with kart racing gameplay, improved framerate and additional features baseon on SRB2 Kart Galaxy
+Comment=Modified open source 3D Sonic game with kart racing gameplay, improved framerate and additional features based on SRB2 Kart Galaxy
 Icon=srb2karthep
 Exec=srb2karthep -software
 Categories=Game;
@@ -4332,6 +4511,25 @@ DESKTOP
 
     cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2-kart-hep-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-kart-hep-opengl.desktop"
     gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 Kart HEP \\\(Software\\\)","Name=Sonic Robo Blast 2 Kart HEP (OpenGL)") || gsub("Exec=srb2karthep -software","Exec=srb2karthep -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-kart-hep-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2-kart-saturn-software.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 Kart Saturn (Software)
+Comment=Modified open source 3D Sonic game with kart racing gameplay, improved framerate and additional features based on SRB2 Kart Galaxy
+Icon=srb2kartsaturn
+Exec=srb2kartsaturn -software
+Categories=Game;
+Keywords=sonic;kart;racing;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2-kart-saturn-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-kart-saturn-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 Kart Saturn \\\(Software\\\)","Name=Sonic Robo Blast 2 Kart Saturn (OpenGL)") || gsub("Exec=srb2kartsaturn -software","Exec=srb2kartsaturn -opengl");print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-kart-saturn-opengl.desktop"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -4486,7 +4684,7 @@ DESKTOP
 
     else
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
             convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
@@ -4537,6 +4735,10 @@ DESKTOP
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2finaldemo.png"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
+
+        cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2jte.png"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2persona.png"
@@ -4556,6 +4758,10 @@ DESKTOP
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ]; then
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2karthep.png"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]; then
+
+        cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2kartsaturn.png"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -4595,11 +4801,11 @@ ENTRYPOINT
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-tools-windows-container"
 
     # Set CPU architecture for Docker/Podman images in case of building old SRB2 versions.
-    if [ "$OS" != "Windows" ] && ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+    if ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]); then
 
         ISARM="i386/"
 
-    elif ([ "$ARCH" = "armhf" ] || [ "$ARCH" = "aarch64" ]) && [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+    elif ([ "$ARCH" = "armhf" ] || [ "$ARCH" = "aarch64" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]); then
 
         ISARM="armhf/"
 
@@ -4805,6 +5011,27 @@ curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20141209T220
 curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20140625T223032Z/pool/main/i/isl/libisl10_0.12.2-2_amd64.deb --output-dir /tmp && \
 curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20140710T222555Z/pool/main/m/mpclib3/libmpc3_1.0.2-1_amd64.deb --output-dir /tmp && \
 curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20141211T161416Z/pool/main/m/mpfr4/libmpfr4_3.1.2-2_amd64.deb --output-dir /tmp && \
+for i in /tmp/*.deb; do sudo dpkg-deb -xv "\$i" /usr/local/stow; done && \
+sudo mv -f /usr/local/stow/usr /usr/local/stow/mingw-w64-4.9 && \
+STOW_DIR=/usr/local/stow sudo -E stow -v mingw-w64-4.9 && \
+sudo mkdir -p "/usr/include/FMOD" "$SRB2BLDROOT/libraries/FMOD" && \
+sudo curl -RLOC - "https://zdoom.org/files/fmod/$LNXFMODVER.tar.gz" --output-dir "$SRB2BLDROOT/libraries/FMOD" && \
+sudo tar xvf "$SRB2BLDROOT/libraries/FMOD/$LNXFMODVER.tar.gz" --wildcards --strip-components=2 -C "/usr/lib" "$LNXFMODVER/api/libfmod-"*.so && \
+sudo tar xvf "$SRB2BLDROOT/libraries/FMOD/$LNXFMODVER.tar.gz" --strip-components=3 -C "/usr/include/FMOD" "$LNXFMODVER/api/inc" && \
+sudo ln -sf ../../bin/ccache /usr/lib/ccache/i686-w64-mingw32-$MINGWOLDCCVER && \
+sudo ln -sf ../../bin/ccache /usr/lib/ccache/$ARCH-w64-mingw32-$MINGWOLDCCVER ; \
+elif [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20150828T100026Z/pool/main/b/binutils-mingw-w64/binutils-mingw-w64-i686_2.25-5%2B5.2%2Bdeb8u1_i386.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20141220T040525Z/pool/main/g/gcc-mingw-w64/gcc-mingw-w64_4.9.1-19%2B14.3_all.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20141220T100804Z/pool/main/g/gcc-mingw-w64/gcc-mingw-w64-base_4.9.1-19%2B14.3_i386.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20141220T100804Z/pool/main/g/gcc-mingw-w64/gcc-mingw-w64-i686_4.9.1-19%2B14.3_i386.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20140912T042222Z/pool/main/m/mingw-w64/mingw-w64_3.2.0-2_all.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20140912T042222Z/pool/main/m/mingw-w64/mingw-w64-common_3.2.0-2_all.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20140912T042222Z/pool/main/m/mingw-w64/mingw-w64-i686-dev_3.2.0-2_all.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20141209T220743Z/pool/main/c/cloog/libcloog-isl4_0.18.2-1%2Bb2_i386.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20140625T223032Z/pool/main/i/isl/libisl10_0.12.2-2_i386.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20140710T222555Z/pool/main/m/mpclib3/libmpc3_1.0.2-1_i386.deb --output-dir /tmp && \
+curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20141211T161416Z/pool/main/m/mpfr4/libmpfr4_3.1.2-2_i386.deb --output-dir /tmp && \
 for i in /tmp/*.deb; do sudo dpkg-deb -xv "\$i" /usr/local/stow; done && \
 sudo mv -f /usr/local/stow/usr /usr/local/stow/mingw-w64-4.9 && \
 STOW_DIR=/usr/local/stow sudo -E stow -v mingw-w64-4.9 && \
@@ -5022,19 +5249,6 @@ extractmacosassets() {
 
         fi
 
-        # Temporary fix until SRB2 VR will be updated to the latest version of SRB2.
-        if [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
-
-            if [ -n "$ISNET" ]; then
-
-                curl -RLC - "$SRB2VRASSETURL" -o "$SRB2BLDROOT/assets/SRB2VR-Patch.zip"
-
-            fi
-
-            7z x -y "$SRB2BLDROOT/assets/SRB2VR-Patch.zip" "*.pk3" -o"$BUILD/assets/installer"
-
-        fi
-
         extractsrb2macosassets
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
@@ -5068,7 +5282,19 @@ extractmacosassets() {
 
         unrar x -y "$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "$BUILD/assets/installer"
 
-    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
+
+        if [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
+
+            if [ -n "$ISNET" ]; then
+
+                curl -RLC - "$SRB2JTEASSETURL" -o "$SRB2BLDROOT/assets/SRB2JTE.zip"
+
+            fi
+
+            unrar x -y "$SRB2BLDROOT/assets/SRB2JTE.zip" "*.wad" "$BUILD/assets/installer"
+
+        fi
 
         if [ -n "$ISNET" ]; then
 
@@ -5078,7 +5304,7 @@ extractmacosassets() {
 
         unrar x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "$BUILD/assets/installer"
 
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
         if [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ]; then
 
@@ -5494,7 +5720,7 @@ FLATPAK
 
     else
 
-        if [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+        if [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
             SRB2CONFDIR=".srb2kart$GITVERCONF"
 
@@ -5682,7 +5908,7 @@ installdepsglibc() {
 
                     VERSION_ID=$(gawk -F'=' '/VERSION_ID/ {print $2}' /etc/os-release)
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                         toolbox run dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]","");print $1"."$NF}'
 
@@ -5696,7 +5922,7 @@ installdepsglibc() {
 
                     l="$($PRINTF "%s\n" "$l" | gawk '{gsub(".so$","*.so.*");print}')"
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                         zypper -q search --provides "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
 
@@ -5726,7 +5952,7 @@ installdepsglibc() {
 
                 elif [ -x "$(which pacman 2> /dev/null)" ]; then
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                         pacman -Fqx "$l" | gawk '{print}'
 
@@ -5744,7 +5970,7 @@ installdepsglibc() {
 
                     l="$($PRINTF "%s\n" "$l" | gawk '{gsub(".so$","*.so.*");print}')"
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                         zypper -q search --provides "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
 
@@ -5758,7 +5984,7 @@ installdepsglibc() {
 
                     VERSION_ID=$(gawk -F'"' '/VERSION_ID/ {print $2}' /etc/os-release)
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                         dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}'
 
@@ -5770,7 +5996,7 @@ installdepsglibc() {
 
                 elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                         xlocate "$l" | gawk '!/-devel-/ && /-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
 
@@ -5848,7 +6074,7 @@ installdepsglibc() {
 
             elif [ -x "$(which apt-get 2> /dev/null)" ]; then
 
-                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                     ISARM=$($PRINTF "%s\n" "$ISARM" | gawk -F'/' '{print $1}')
                     PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/nvidia|primus|virtualbox/ {gsub("$","':$ISARM'");print}')
@@ -5957,7 +6183,7 @@ installdepsmusl() {
 
             elif [ -x "$(which xbps-install 2> /dev/null)" ]; then
 
-                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                     xlocate "$l" | gawk '!/-devel-|primus/ && /-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
 
@@ -6061,6 +6287,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6070,6 +6297,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6081,6 +6309,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2UncappedPlus"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2ucp"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2uncappedplus-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2uncappedplus-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6090,6 +6319,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6101,6 +6331,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2NetPlus"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2np"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2netplus-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2netplus-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6110,6 +6341,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6121,6 +6353,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2rphys"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2rphys"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2rphys-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2rphys-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6130,6 +6363,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6141,6 +6375,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2TSoURDt3rd"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2tsourdt3rd"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2tsourdt3rd-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2tsourdt3rd-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6150,6 +6385,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6157,59 +6393,11 @@ installtolinux() {
 
         fi
 
-        #        if [ "$LNXOSNAME" = "NixOS" ]; then
-        #
-        #            cat > "$BUILD/package.nix" << NIX
-        #with import <nixpkgs> {};
-        #
-        #  stdenv.mkDerivation rec {
-        #    pname = "srb2tsourdt3rd";
-        #    version = "$(git -C "$BUILD" rev-parse --short HEAD)";
-        #
-        #  src = builtins.path {
-        #    path = "$BUILD/build/AppDir/usr";
-        #  };
-        #
-        #  nativeBuildInputs = [
-        #    autoPatchelfHook
-        #  ];
-        #
-        #  buildInputs = [
-        #     curlMinimal
-        #     SDL2_mixer
-        #     game-music-emu
-        #     libopenmpt
-        #     libpng
-        #  ];
-        #
-        #  autoPatchelfIgnoreMissingDeps = [
-        #     zfs
-        #  ];
-        #
-        #  sourceRoot = ".";
-        #
-        #  installPhase = ''
-        #    install -Dm755 "\$src/bin/"* "\$out/bin/srb2tsourdt3rd"
-        #    install -d "\$out/games/SRB2"
-        #    cp -rf "\$src/games/SRB2"/* "\$out/games/SRB2/"
-        #  '';
-        #
-        #  meta = with lib; {
-        #    homepage = "https://github.com/StarManiaKG/The-Story-Of-Uncapped-Revengence-Discord-the-3rd";
-        #    description = "Modified open source 3D Sonic platformer with improved framerate and additional features combined from Uncapped and other builds";
-        #    platforms = platforms.linux;
-        #  };
-        #}
-        #NIX
-        #
-        #            $SUDO nix-env -v -i -f "$BUILD/package.nix"
-        #
-        #        fi
-
     elif [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2VR"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2vr"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2vr-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2vr-opengl.desktop"
         SRB2DESKTOPOPENVRLNXPATH="$SRB2BLDPREFIX/share/applications/srb2vr-openvr.desktop"
@@ -6220,6 +6408,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6231,6 +6420,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2legacy"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2legacy"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2legacy-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2legacy-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6240,6 +6430,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6251,6 +6442,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2-2.0"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2_2.0"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2_2.0-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2_2.0-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6260,6 +6452,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6287,10 +6480,31 @@ installtolinux() {
 
         fi
 
+    elif [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
+
+        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2JTE"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2jte"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2jte-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2jte-opengl.desktop"
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2jte.png"
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2jte binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2JTE" "$SRB2BINARYLNXPATH"
+            $SUDO install -d "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+
+        fi
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2Persona"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2p"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2persona-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2persona-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6300,6 +6514,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6311,6 +6526,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2Kart"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kart"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kart-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kart-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6320,6 +6536,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6331,6 +6548,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartMoeMansion"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartmoe"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartmoemansion-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartmoemansion-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6340,6 +6558,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6351,6 +6570,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartGalaxy"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartgalaxy"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartgalaxy-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartgalaxy-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6360,6 +6580,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6371,6 +6592,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartHEP"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2karthep"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2karthep-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2karthep-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6380,6 +6602,29 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -d "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+
+        fi
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ]; then
+
+        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartSaturn"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartsaturn"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartsaturn-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartsaturn-opengl.desktop"
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kartsaturn.png"
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's srb2kartsaturn binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6391,6 +6636,7 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartVR"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartvr"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartvr-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartvr-opengl.desktop"
         SRB2DESKTOPOPENVRLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartvr-openvr.desktop"
@@ -6401,6 +6647,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -6414,6 +6661,7 @@ installtolinux() {
         SRB2CCONFDIR=$($PRINTF "%s\n" "$SRB2CASSETDIR" | gawk '{print tolower($0)}')
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/"$SRB2CASSETDIR"C"$CUSTOMDIR""
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/"$SRB2CCONFDIR"c"$CUSTOMDIR""
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
         SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/"$SRB2CCONFDIR"c"$CUSTOMDIR"-software.desktop"
         SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/"$SRB2CCONFDIR"c"$CUSTOMDIR"-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
@@ -6423,6 +6671,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 2> /dev/null) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf $(
                 $SUDO find "$BUILD/build/AppDir/usr/games" -mindepth 2 -maxdepth 2 -type f -regex ".*\.[a-z]*[0-9]*" 2> /dev/null
@@ -6765,9 +7014,11 @@ NIX
           installPhase = ''
             install -d "\$out/bin"
             printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport SRB2WADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
+            printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport SRB2WADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
             chmod +x "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
-            install -d "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
+            chmod +x "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
             install -Dm755 "\$src/bin/"* "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            install -Dm755 \$(find "\$src/bin" -name "*.debug" | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin"
             cp -rf "\$src/games/"*/* "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
             install -Dm644 "\$src/lib/"* -t "\$out/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
             install -Dm644 "\$src/share/applications/"* -t "\$out/share/applications"
@@ -6835,7 +7086,7 @@ NIX
 
                 VERSION=$($PRINTF "%s\n" "$l" | gawk 'match($0, /-[0-9]\.[0-9]|[0-9]\.[0-9]/) {gsub(".so.*|-","");print substr($0, RSTART)}')
 
-                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                     if [ -n "$VERSION" ] && [ ! -x "$(which brew 2> /dev/null)" ]; then
 
@@ -6868,7 +7119,7 @@ NIX
 
                 VERSION=$($PRINTF "%s\n" "$l" | gawk 'match($0, /-[0-9]\.[0-9]|[0-9]\.[0-9]/) {gsub(".so.*|-","");print substr($0, RSTART)}')
 
-                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                     if [ -n "$VERSION" ] && [ ! -x "$(which brew 2> /dev/null)" ]; then
 
@@ -6926,7 +7177,7 @@ NIX
 
                 VERSION=$($PRINTF "%s\n" "$l" | gawk 'match($0, /-[0-9]\.[0-9]|[0-9]\.[0-9]/) {gsub(".so.*|-","");print substr($0, RSTART)}')
 
-                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                     if [ -n "$VERSION" ] && [ ! -x "$(which brew 2> /dev/null)" ]; then
 
@@ -6959,7 +7210,7 @@ NIX
 
                 VERSION=$($PRINTF "%s\n" "$l" | gawk 'match($0, /-[0-9]\.[0-9]|[0-9]\.[0-9]/) {gsub(".so.*|-","");print substr($0, RSTART)}')
 
-                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
 
                     if [ -n "$VERSION" ] && [ ! -x "$(which brew 2> /dev/null)" ]; then
 
@@ -7025,6 +7276,7 @@ INSTALL
 $SRB2ASSETLNXPATH
 $SRB2LIBRARYLNXPATH
 $SRB2BINARYLNXPATH
+$SRB2BINARYDEBUGLNXPATH
 $SRB2DESKTOPLNXPATH
 $SRB2DESKTOPOPENGLLNXPATH
 $SRB2DESKTOPOPENVRLNXPATH
@@ -7869,7 +8121,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         fi
 
         # Download DiscordRPC's source code, build and install it.
-        if [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-rphys" ] || [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
+        if [ "$ISDISCORDRPC" = "libdiscord-rpc" ] && ([ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-rphys" ] || [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]); then
 
             if [ ! -d "$SRB2BLDROOT/libraries/discord-rpc/.git" ]; then
 
@@ -7973,7 +8225,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
-    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ]; then
+
+    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ]; then
 
         gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
 
@@ -8012,7 +8265,11 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb21094\"","#define DEFAULTDIR \"srb2fd'$GITVERCONF'\"");print}' "$BUILD/src/doomdef.h"
 
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2jte'$GITVERCONF'\"");print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2kart\"","#define DEFAULTDIR \"srb2kart'$GITVERCONF'\"");print}' "$BUILD/src/doomdef.h"
 
@@ -8468,7 +8725,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
@@ -8486,7 +8743,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
@@ -8504,7 +8761,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
@@ -8522,7 +8779,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
@@ -8540,7 +8797,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
@@ -8558,7 +8815,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
@@ -8577,7 +8834,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/exchndl.dll" "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$SRB2WINPATH"
@@ -8592,7 +8849,7 @@ installtowindows() {
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/r_opengl.dll" "$BUILD/build/AppDir/usr/lib/fmod.dll" "$SRB2WINPATH"
         touch "$SRB2WINPATH/md2.dat"
@@ -8610,7 +8867,25 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf $DEPS "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$SRB2WINPATH"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
+
+        SRB2WINDIR="SRB2 JTE"
+        SRB2WINMENUDIR="Sonic Robo Blast 2 JTE"
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        DEPS=$(while read -r FILE; do
+            find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+        done < "$BUILD/deps")
+        mkdir -p "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$SRB2WINPATH"
@@ -8628,7 +8903,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/libgcc_s_sjlj"*.dll "$BUILD/build/AppDir/usr/lib/libstdc++"*.dll "$BUILD/build/AppDir/usr/lib/libfluidsynth"*.dll "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$SRB2WINPATH"
@@ -8646,7 +8921,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
@@ -8664,7 +8939,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
@@ -8682,7 +8957,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
@@ -8700,10 +8975,28 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ]; then
+
+        SRB2WINDIR="SRB2 Kart Saturn"
+        SRB2WINMENUDIR="Sonic Robo Blast 2 Kart Saturn"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        DEPS=$(while read -r FILE; do
+            find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
+        done < "$BUILD/deps")
+        mkdir -p "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf $DEPS "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libopenmpt.dll" "$BUILD/build/AppDir/usr/lib/openmpt-"*.dll "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -8718,7 +9011,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/lib/mgwhelp.dll" "$BUILD/build/AppDir/usr/lib/libvorbis"*.dll "$BUILD/build/AppDir/usr/lib/libvorbisfile"*.dll "$BUILD/build/AppDir/usr/lib/libopus"*.dll "$BUILD/build/AppDir/usr/lib/libopusfile"*.dll "$BUILD/build/AppDir/usr/lib/libogg"*.dll "$BUILD/build/AppDir/usr/lib/libmpg123"*.dll "$BUILD/build/AppDir/usr/lib/libmodplug"*.dll "$BUILD/build/AppDir/usr/lib/libFLAC"*.dll "$SRB2WINPATH"
@@ -8737,7 +9030,7 @@ installtowindows() {
             find "$BUILD/build/AppDir/usr/lib" -name "$FILE"
         done < "$BUILD/deps")
         mkdir -p "$SRB2WINPATH"
-        cp -rf $(find "$BUILD/bin" -type f 2> /dev/null | head -n1) "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
 
@@ -8979,7 +9272,7 @@ preparebuild() {
 
         mkdir -p "$SRB2BLDROOT/builds" "$SRB2BLDROOT/assets" "$SRB2BLDROOT/libraries" "$BUILD/build/AppDir/usr/bin" "$BUILD/build/AppDir/usr/games" "$BUILD/build/AppDir/usr/lib" "$BUILD/build/AppDir/usr/share/applications"
 
-        if [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+        if [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
             ASSETAPPDIR="SRB2Kart"
             mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
@@ -9331,7 +9624,7 @@ Usage: srb2bld [OPTIONS]
             srb2bld --compatibility
 
   NOTES:
-     1. Old builds like SRB2 v2.0 and SRB2 Final Demo may not build/run properly on modern Linux distributions/macOS/Windows.
+     1. Old builds like SRB2 v2.0, SRB2 Final Demo and SRB2 JTE may not build/run properly on modern Linux distributions/macOS/Windows.
 
      2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
