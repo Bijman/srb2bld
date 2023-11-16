@@ -9624,7 +9624,7 @@ Usage: srb2bld [OPTIONS]
             srb2bld --compatibility
 
   NOTES:
-     1. Old builds like SRB2 v2.0, SRB2 Final Demo and SRB2 JTE may not build/run properly on modern Linux distributions/macOS/Windows.
+     1. Old builds like SRB2 v2.0, SRB2 Final Demo, SRB2 JTE may not build/run properly on modern Linux distributions/macOS/Windows.
 
      2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
