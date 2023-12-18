@@ -10,7 +10,8 @@ https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
 - Systems with immutable root filesystems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) are supported too,
 - Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04),
-- Creating customizable AppImages (Linux only), Android Apks (Linux and Windows only), Flatpaks (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
+- Creating customizable AppImages (Linux only), Flatpaks (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
+- Building Android APKs (Linux and Windows only), 
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
 - Runs on Linux, macOS and Windows (Git Bash).
