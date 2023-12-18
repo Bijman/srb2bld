@@ -10210,13 +10210,12 @@ preparebuild() {
 
         if [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
 
-            $PRINTF "$MESSAGE\n%s\e[0m" "Please enter $BUILDNAME's extra assets path, or just press enter to download and extract the latest SRB2/SRB2Kart stable release assets. Supported links/paths:
+            $PRINTF "$MESSAGE\n%s\e[0m" "Please enter $BUILDNAME's extra assets path, or just press enter, if you want to skip this part. Supported links/paths:
         	- websites with direct link to file, for example, \"https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip\",
         	- mega.nz,
         	- drive.google.com,
         	- dropbox.com,
         	- full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.
-        Press enter, if you want to skip this part.
         "
             $PRINTF "$PROMPT\n%s\e[0m" "> "
             read -r SRB2BLDEXTRAASSETPATH
