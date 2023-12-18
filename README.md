@@ -3,14 +3,14 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://user-images.githubusercontent.com/16626326/162315944-86dc5997-cfc4-463a-96ca-b5630b85e022.mp4
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 JTE, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart VR, wadcli, SLADE and Ultimate Zone Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 JTE, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart VR, wadcli, kartmaker, SLADE and Ultimate Zone Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
 - Systems with immutable root filesystems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) are supported too,
 - Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04),
-- Creating customizable AppImages (Linux only), Flatpaks (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
+- Creating customizable AppImages (Linux only), Android Apks (Linux and Windows only), Flatpaks (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
 - Runs on Linux, macOS and Windows (Git Bash).
@@ -148,7 +148,7 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 14-11-2023)
+# Compatibility (as of 18-12-2023)
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -169,6 +169,7 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 Kart Saturn      |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 Kart VR          |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | wadcli                |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
+| kartmaker             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SLADE                 |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
 | Ultimate Zone Builder |          ✅           |         ⛔           |        ⛔         |        ✅       |       ⛔      |
 
@@ -196,6 +197,7 @@ Usage: srb2bld [OPTIONS]
   OPTIONS:
      -h, --help                             Show this help text.
      -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart build, which is packaged in DMG file (macOS only).
+     -ad, --android                         Compile and create distributable APK file of SRB2 build (Linux and Windows only).
      -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart build (Linux only).
      -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
      -f, --flatpak                          Compile and create distributable Flatpak of SRB2/SRB2Kart build (Linux only).
@@ -269,7 +271,9 @@ Usage: srb2bld [OPTIONS]
 
      11. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
 
-     12. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+     12. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
+
+     13. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -313,7 +317,7 @@ Usage: srb2bld [OPTIONS]
 
           Then choose "Build SRB2 Custom", when running script.
 
-     13. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+     14. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -321,6 +325,7 @@ Usage: srb2bld [OPTIONS]
 
          - SRB2BLDNOCCACHE - Disable ccache.
 
+         - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.
 ```
 
 # Notes
@@ -358,7 +363,9 @@ Usage: srb2bld [OPTIONS]
 
 11. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
 
-12. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+12. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
+
+13. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
     - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -402,10 +409,12 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-13. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+14. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
         - SRB2BLDDEVMODE - For developers, who want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
 
         - SRB2BLDNOCCACHE - Disable ccache.
+
+        - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.

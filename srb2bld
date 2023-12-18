@@ -2,7 +2,7 @@
 
 #alias gawk="gawk --posix"
 
-if [ "$SRB2BLDDEBUG" = 1 ]; then
+if [ "$SRB2BLDDEBUG" = "1" ]; then
 
     set -e -x
 
@@ -144,6 +144,7 @@ SRB2KARTHEPASSETURL="https://mb.srb2.org/addons/5254/download"
 MINGWCCVER="gcc"
 MINGWCXXVER="g++"
 MINGWOLDCCVER="gcc-4.9-win32"
+ANDROIDSDKVER="jdk11"
 
 # If you set CCACHE_DIR, this path will be used for cache from previous compilations and speed up recompilation.
 if [ -d "$CCACHE_DIR" ]; then
@@ -206,6 +207,7 @@ if [ "$OS" = "Darwin" ]; then
     MACOSGMEVER="0.6.2"
     MACOSDISCORDRPCVER="master"
     MACOSOPENVRVER="1.10.30"
+    MACOSLZFVER="master"
     MACOSMONOVER="6.6.0"
 
     if [ -x "$(which brew 2> /dev/null)" ]; then
@@ -290,6 +292,75 @@ checkreadonly() {
         $PRINTF "$MESSAGE%s\n\e\n[0m" "Detected read-only root filesystem. Assuming \"$SRB2BLDPREFIX\" as install path to builds,assets and storage to containers."
 
     fi
+}
+
+android() {
+    clear
+
+    # Blocking access to this option for users that have OS other than Linux and Windows.
+    if [ "$OS" != "Linux" ] && [ "$OS" != "Windows" ] && [ -z "$(ldd --version 2>&1 | gawk '/Free Software Foundation/ {print}')" ]; then
+
+        $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Currently building APKs is only available for Linux and Windows. Exiting."
+        exit
+
+    fi
+
+    # We have to set this in order to make APK in Docker/Podman container.
+    ANDROID=1
+
+    # Set current working directory.
+    ANDPWD="$(pwd)"
+
+    # If you set GRADLE_USER_HOME, this path will be used for cache from previous compilations and speed up recompilation.
+    if [ -d "$GRADLE_USER_HOME" ]; then
+
+        GRADLE_USER_HOME="$GRADLE_USER_HOME"
+
+    elif [ -n "$GRADLE_USER_HOME" ] && [ ! -d "$GRADLE_USER_HOME" ]; then
+
+        GRADLE_USER_HOME="$GRADLE_USER_HOME"
+        mkdir -p "$GRADLE_USER_HOME"
+
+    else
+
+        GRADLE_USER_HOME="$HOME/.cache/gradle"
+        mkdir -p "$GRADLE_USER_HOME"
+
+    fi
+
+    chooseandroidbuild
+
+    buildname
+
+    choosebranchcommit
+
+    if [ ! -x "$BUILD/android/gradlew" ]; then
+
+        $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Couldn't find gradlew script at path \"$BUILD/android\". Exiting."
+        exit
+
+    fi
+
+    preparebuild
+
+    settrap
+
+    if [ "$OS" = "Linux" ]; then
+
+        sudo_ping
+
+    fi
+
+    containerentry
+
+    containerrun
+
+    # Set name of AppImage in message.
+    APKNAME=$(find "$BUILD/android/app/build/outputs/apk/gameFull/debug" -name "*.apk" 2> /dev/null | gawk -F'/' '{print $NF}')
+
+    # Move created APK to working directory.
+    mv -f "$BUILD/android/app/build/outputs/apk/gameFull/debug/"*.apk "$ANDPWD" 2> /dev/null
+    $PRINTF "$SUCCESS\n%s\n\e[0m\a" "Android APK for $BUILDNAME is done. Look for $APKNAME in \"$ANDPWD\" path."
 }
 
 appbundle() {
@@ -413,9 +484,13 @@ NIX
 
 buildname() {
     # Setting names for fancy display in messages.
-    if [ "$BUILD" = "$BUILDPATH/srb2" ]; then
+    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-android" ]; then
 
         export BUILDNAME="Sonic Robo Blast 2"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-android-bitten" ]; then
+
+        export BUILDNAME="Sonic Robo Blast 2 bitten"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
@@ -425,7 +500,7 @@ buildname() {
 
         export BUILDNAME="Sonic Robo Blast 2 NetPlus"
 
-    elif [ "$BUILD" = "$BUILDPATH/srb2-rphys" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/srb2-rphys" ] || [ "$BUILD" = "$BUILDPATH/srb2-android-rphys" ]; then
 
         export BUILDNAME="Sonic Robo Blast 2 rphys"
 
@@ -489,6 +564,10 @@ buildname() {
 
         export BUILDNAME="wadcli"
 
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+        export BUILDNAME="kartmaker"
+
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
         export BUILDNAME="SLADE"
@@ -512,7 +591,7 @@ choosebranchcommit() {
 
     elif [ -d "$BUILD/.git" ]; then
 
-        if [ "$SRB2BLDDEVMODE" != 1 ]; then
+        if [ "$SRB2BLDDEVMODE" != "1" ]; then
 
             $PRINTF "$MESSAGE\n\n%s\n\e[0m" "Cleaning up source code. Please wait..."
             cleansource
@@ -610,7 +689,7 @@ choosebranchcommit() {
 
     done
 
-    if [ "$COMMIT" = 1 ]; then
+    if [ "$COMMIT" = "1" ]; then
 
         # Choose Git commit.
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Please choose commit by typing number and then pressing enter, or just press enter to continue with the latest commit, which is $(git -C $BUILD log --format=%h | head -n1). To quit, press ctrl+c."
@@ -673,7 +752,7 @@ choosebuild() {
     while
 
         $PRINTF "$MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 rphys" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart VR" "Build SRB2 Custom" "Build wadcli" "Build SLADE" "Build Ultimate Zone Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 rphys" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart VR" "Build SRB2 Custom" "Build wadcli" "Build kartmaker" "Build SLADE" "Build Ultimate Zone Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -854,117 +933,7 @@ choosebuild() {
 
             "18")
 
-                BUILD="$BUILDPATH/srb2-custom"
-
-                mkdir -p "$BUILD"
-
-                if [ -z "$SRB2BLDGITPATH" ]; then
-
-                    $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter valid Git local or remote path."
-                    read -r SRB2BLDGITPATH
-
-                fi
-
-                $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter name of custom build (it will be written as subdirectory in srb2-custom folder)."
-                read -r CUSTOMDIR
-
-                while printf "%s\n" "$CUSTOMDIR"; do
-
-                    if [ -z "$CUSTOMDIR" ]; then
-
-                        $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter again."
-
-                        read -r CUSTOMDIR
-
-                    else
-
-                        break
-
-                    fi
-
-                done
-
-                BUILD="$BUILDPATH/srb2-custom/$CUSTOMDIR"
-
-                # Check whether SRB2BLDGITPATH environment variable is set or not.
-                if [ -z "$SRB2BLDGITPATH" ]; then
-
-                    $PRINTF "$FAILURE%s\n\e[0m" "ERROR: No SRB2BLDGITPATH is set. Add SRB2BLDGITPATH environment variable to valid Git local or remote path in shell configuration file (for example \".bash_profile\" or \".zshrc\" or \".bashrc\").
-                EXAMPLE:
-			1. export SRB2BLDGITPATH=\"https://github.com/STJr/SRB2\"
-
-			2. export SRB2BLDGITPATH=\"https://git.do.srb2.org/TehRealSalt/SRB2\"
-
-			3. export SRB2BLDGITPATH=\"\$HOME/Builds/SRB2\"
-
-			4. export SRB2BLDGITPATH=\"C:\Builds\SRB2\"
-                "
-                    exit
-
-                fi
-
-                if [ -z "$(find "$SRB2BLDGITPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ] && [ -z "$(curl -vI "$SRB2BLDGITPATH" 2>&1 | gawk '/> Host:/ {gsub("\r","");print $NF}')" ]; then
-
-                    $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Can't find path to custom SRB2's source code at $SRB2BLDGITPATH path. Exiting."
-                    exit
-
-                fi
-
-                # Check if directory srb2-custom exits in script's data path.
-                if ([ -d "$BUILD/.git" ] && [ -n "$(git -C "$SRB2BLDGITPATH" diff --shortstat 2> /dev/null)" ]) || ([ -d "$BUILD/.git" ] && [ "$(git -C "$BUILD" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" != "$(git -C "$SRB2BLDGITPATH" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" ]) && ([ -d "$BUILD/.git" ] && [ "$(git -C "$BUILD" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" != "$($PRINTF "$SRB2BLDGITPATH" | gawk '{gsub(".git$","");print}').git" ]); then
-
-                    $PRINTF "$MESSAGE\n%s\n\e[0m" "Found existing directory with source code in $BUILD path. Are you sure you want to remove it? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\"). If you choose \"no/No\", \"n/N\" or just press enter, script will continue with current source code's directory in $BUILD path. Press ctrl+c to quit."
-                    $PRINTF "$PROMPT\n%s\e[0m" "> "
-                    read -r CONFIRM
-
-                    if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
-
-                        $PRINTF "$MESSAGE\n%s\n\e[0m" "Removing existing source at $BUILD path."
-                        sleep 1
-                        rm -rf "$BUILD"
-
-                    fi
-
-                fi
-
-                # Fixing Windows path to source code to be found by script.
-                if [ "$OS" = "Windows" ]; then
-
-                    SRB2BLDGITPATH=$($PRINTF "%s\n" "$SRB2BLDGITPATH" | gawk 'gsub("\\\\","\\\\");{print}' | gawk '!a[$0]++ {print}')
-
-                fi
-
-                # Copy directory with source code to script's data path.
-                if [ -n "$(find "$SRB2BLDGITPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ] && [ ! -d "$BUILD/.git" ]; then
-
-                    $PRINTF "$MESSAGE\n%s\n\e[0m" "Copying source code. Please wait..."
-                    sleep 1
-                    cp -rf "$SRB2BLDGITPATH" "$BUILDPATH/srb2-custom/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
-
-                fi
-
-                # Set proper default branch.
-                if [ -n "$SRB2BLDGITVER" ] && [ ! -d "$BUILD/.git" ] || [ -n "$ISNET" ]; then
-
-                    GITDEFVER="--branch $SRB2BLDGITVER"
-
-                elif [ -z "$SRB2BLDGITVER" ] && [ ! -d "$BUILD/.git" ] || [ -n "$ISNET" ]; then
-
-                    GITDEFVER="--branch $(git ls-remote --refs $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git | gawk -F'/' '/'$(git ls-remote $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git --symref HEAD | gawk '{print $1}')'/ {print $NF}' | head -n1)"
-
-                elif [ -n "$SRB2BLDGITVER" ] && [ -d "$BUILD/.git" ]; then
-
-                    GITDEFVER="$SRB2BLDGITVER"
-
-                else
-
-                    GITDEFVER=$(gawk -F'/' '{print $NF}' "$BUILD/.git/refs/remotes/origin/HEAD" 2> /dev/null)
-
-                fi
-
-                GITVER="$GITDEFVER"
-                GITVERCONF=$($PRINTF "$GITDEFVER" | gawk '{print $NF}')
-                GIT="git clone $GITOPTS $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git --recursive $GITVER"
+                custombuild
                 break
 
                 ;;
@@ -981,6 +950,16 @@ choosebuild() {
 
             "20")
 
+                BUILD="$BUILDPATH/kartmaker"
+                GITDEFVER="master"
+                GITVER="$GITDEFVER"
+                GIT="git clone $GITOPTS https://github.com/BombchuLink/kartmaker.git --recursive"
+                break
+
+                ;;
+
+            "21")
+
                 BUILD="$BUILDPATH/slade"
                 GITDEFVER="master"
                 GITVER="$GITDEFVER"
@@ -989,7 +968,7 @@ choosebuild() {
 
                 ;;
 
-            "21")
+            "22")
 
                 BUILD="$BUILDPATH/ultimatezonebuilder"
                 GITDEFVER="master"
@@ -997,6 +976,71 @@ choosebuild() {
                 GIT="git clone $GITOPTS https://git.do.srb2.org/STJr/UltimateZoneBuilder.git --recursive"
                 break
 
+                ;;
+
+            *)
+
+                $PRINTF "$NOTICE\n%s\n\e[0m" "No option has been chosen."
+                exit
+
+                ;;
+
+        esac
+
+    done
+}
+
+chooseandroidbuild() {
+    clear
+    checkuserid
+    checkreadonly
+
+    # Choose and download build.
+    while
+
+        $PRINTF "$MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
+        for loop in "Build SRB2" "Build SRB2 bitten" "Build SRB2 rphys" "Build SRB2 Custom"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        $PRINTF "#? "
+        read -r choose
+    do
+
+        unset i
+        case "$choose" in
+
+            "1")
+
+                BUILD="$BUILDPATH/srb2-android"
+                GITDEFVER="android-port"
+                GITVER="$GITDEFVER"
+                GIT="git clone $GITOPTS https://github.com/SRB2-Mobile/SRB2-Android.git --recursive"
+                break
+
+                ;;
+
+            "2")
+
+                BUILD="$BUILDPATH/srb2-android-bitten"
+                GITDEFVER="bitten-master"
+                GITVER="$GITDEFVER"
+                GIT="git clone $GITOPTS https://git.do.srb2.org/bitten2up/SRB2-Android.git --recursive"
+                break
+
+                ;;
+
+            "3")
+
+                BUILD="$BUILDPATH/srb2-android-rphys"
+                GITDEFVER="rphys-android"
+                GITVER="$GITDEFVER"
+                GIT="git clone $GITOPTS https://git.do.srb2.org/katsy/SRB2.git --recursive"
+                break
+
+                ;;
+
+            "4")
+
+                custombuild
+                break
                 ;;
 
             *)
@@ -1256,7 +1300,7 @@ chooseremovedep() {
 
                 SRB2DEPLNXNAME=$($PRINTF "%s\n" "$arrayname" | gawk NR=="${n}")
 
-                cd "$SRB2BLDPREFIX/stow"
+                cd "$SRB2BLDPREFIX/stow" || exit
                 $SUDO stow -Dv "$SRB2DEPLNXNAME"
                 $SUDO rm -rfv "$SRB2BLDPREFIX/$SRB2DEPLNXNAME" "$SRB2BLDROOT/libraries/$SRB2DEPLNXNAME"
                 $PRINTF "$SUCCESS\n%s\n\e[0m\a" "Removing $SRB2DEPLNXNAME is successful."
@@ -1429,7 +1473,7 @@ containerentry() {
     cat > "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container/Entrypoint" << ENTRYPOINT
 #!/bin/sh
 
-    if [ "$SRB2BLDDEBUG" = 1 ]; then
+    if [ "$SRB2BLDDEBUG" = "1" ]; then
 
         set -e -x
 
@@ -1467,7 +1511,9 @@ containerentry() {
     export SRB2KARTHEPASSETURL="$SRB2KARTHEPASSETURL"
     export SRB2BLDDEVMODE="$SRB2BLDDEVMODE"
     export SRB2BLDASSETPATH="$SRB2BLDASSETPATH"
+    export SRB2BLDEXTRAASSETPATH="$SRB2BLDEXTRAASSETPATH"
     export ASSETAPPDIR="$ASSETAPPDIR"
+    export ANDROID="$ANDROID"
     export APPIMAGE="$APPIMAGE"
     export FLATPAK="$FLATPAK"
     export COMMIT="$COMMIT"
@@ -1482,9 +1528,10 @@ containerentry() {
     export MINGWOLDCXXVER="$MINGWOLDCXXVER"
     export STOW_DIR="$SRB2BLDPREFIX/stow"
     export CCACHE_DIR="$CCACHE_DIR"
+    export GRADLE_USER_HOME="$GRADLE_USER_HOME"
 
     # Set prefix path to /usr to make sure files within AppImage can be found.
-    if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+    if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
         export SRB2BLDPREFIX="/usr"
 
@@ -1513,7 +1560,7 @@ containerentry() {
 
     fi
 
-    if [ "$SRB2BLDNOCCACHE" != 1 ]; then
+    if [ "$SRB2BLDNOCCACHE" != "1" ]; then
 
         # Setting paths to ccache compilers, in order to speed up compiling.
         if [ "\$LIBC" = "musl" ]; then
@@ -1531,8 +1578,11 @@ containerentry() {
     # Added repository to safe directories since Git v2.35.
     git config --global --add safe.directory "\$BUILD"
 
+    # Added this git config to avoid errors "Filename too long", while cleaning up source code.
+    git config --global core.longpaths true
+
     extractassets() {
-        if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-bitten" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ]; then
 
@@ -1693,6 +1743,7 @@ containerentry() {
     extractcustomassets() {
         BUILDPREFIX=\$(\$PRINTF "%s\n" "\$BUILD" | gawk -F'/' '{print \$NF}')
 
+        # Download and extract assets for custom build.
         if [ -z "\$ISNET" ] && [ -n "\$SRB2BLDASSETPATH" ]; then
 
             FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
@@ -1726,7 +1777,16 @@ containerentry() {
             else
 
                 SRB2BLDASSETPATH="\$SRB2BLDASSETPATH"
-                FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
+
+                if [ -n "\$(curl -X GET -sLI "\$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r","");print \$NF}' | head -n1)" ]; then
+
+                    FILETYPE=\$(curl -X GET -sLI "\$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r","");print \$NF}')
+
+                else
+
+                    FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
+
+                fi
 
             fi
 
@@ -1761,7 +1821,11 @@ containerentry() {
 
         if [ -n "\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE" 2> /dev/null | head -n1)" ]; then
 
-            if [ "\$OS" = "Windows" ]; then
+            if [ "\$ANDROID" = "1" ]; then
+
+                7z x -y "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE" -x!"*.exe" -x!"*.txt" -x!"*.dll" -o"\$BUILD/android/app/src/main/assets"
+
+            elif [ "\$OS" = "Windows" ]; then
 
                 if [ "\$IS64" = "64" ]; then
 
@@ -1801,13 +1865,139 @@ containerentry() {
 
         fi
 
-        if [ -n "\$(find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/models" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ]; then
+        extractextracustomassets
+
+        # Correcting permissions for model directories.
+        if [ "\$ANDROID" = "1" ]; then
+
+            find "\$BUILD/android/app/src/main/assets/models" -type d -exec chmod 755 {} \;
+
+        elif [ -n "\$(find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/models" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ]; then
 
             find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/models" -type d -exec chmod 755 {} \;
 
         elif [ -n "\$(find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/mdls" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ]; then
 
             find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/mdls" -type d -exec chmod 755 {} \;
+
+        fi
+    }
+
+    extractextracustomassets() {
+        # Download and extract extra assets for custom build.
+        if [ -z "\$ISNET" ] && [ -n "\$SRB2BLDEXTRAASSETPATH" ]; then
+
+            FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
+            SRB2BLDEXTRAASSETPATH="\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
+
+        elif [ -n "\$ISNET" ] && [ -n "\$SRB2BLDEXTRAASSETPATH" ]; then
+
+            if [ -n "\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | head -n1)" ] && [ "\$(curl -X GET -sLI "\$SRB2BLDEXTRAASSETPATH" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" = "\$(stat -c %s "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null)" ]; then
+
+                FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
+                SRB2BLDEXTRAASSETPATH="\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
+
+            elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/drive.google.com/ {print}')" ]; then
+
+                SRB2ASSETID=\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '{gsub("https://drive.google.com/file/d/|/view|?usp=sharing","");print}')
+                SRB2BLDEXTRAASSETPATH="https://drive.google.com/uc?export=download&confirm=t&id=\$SRB2ASSETID"
+                FILETYPE=\$(curl -X GET -sLI "https://drive.google.com/uc?export=download&confirm=t&id=\$SRB2ASSETID" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"","");print \$NF}')
+
+            elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/mega.nz/ {print}')" ]; then
+
+                # Using megafetch script to obtain data to decrypt asset pack from mega.nz.
+                curl -sL https://gist.githubusercontent.com/Bijman/b791993783e2fb80d3e98a3a19b6e6e8/raw/4fb91369313eaa8d67fe911fdcc08797ca432517/megafetch.sh -o "\$BUILD/megafetch"
+                chmod +x "\$BUILD/megafetch"
+                MEGANZURL=\$("\$BUILD/megafetch" "\$SRB2BLDEXTRAASSETPATH" | gawk '/userstorage.mega.co.nz/ {print}')
+                MEGANZFILENAME=\$("\$BUILD/megafetch" "\$SRB2BLDEXTRAASSETPATH" | gawk 'NR==2')
+                MEGANZHEX=\$("\$BUILD/megafetch" "\$SRB2BLDEXTRAASSETPATH" | gawk 'NR==3')
+                MEGANZHEXRAW=\$("\$BUILD/megafetch" "\$SRB2BLDEXTRAASSETPATH" | gawk 'NR==4')
+                SRB2BLDEXTRAASSETPATH="\$MEGANZURL"
+                FILETYPE=\$(\$PRINTF "%s\n" "\$MEGANZFILENAME" | gawk -F'.' '{print \$NF}')
+
+            else
+
+                SRB2BLDEXTRAASSETPATH="\$SRB2BLDEXTRAASSETPATH"
+
+                if [ -n "\$(curl -X GET -sLI "\$SRB2BLDEXTRAASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r","");print \$NF}' | head -n1)" ]; then
+
+                    FILETYPE=\$(curl -X GET -sLI "\$SRB2BLDEXTRAASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r","");print \$NF}')
+
+                else
+
+                    FILETYPE=\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER."* 2> /dev/null | gawk -F'.' '{print \$NF}' | head -n1)
+
+                fi
+
+            fi
+
+        fi
+
+        if [ -n "\$ISNET" ] && [ -n "\$(curl -vI "\$SRB2BLDEXTRAASSETPATH" 2>&1 | gawk '/> Host:/ {gsub("\r","");print \$NF}')" ] && [ "\$(curl -X GET -sLI "\$SRB2BLDEXTRAASSETPATH" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print \$NF}' | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE" 2> /dev/null)" ]; then
+
+            rm -f "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
+
+            if [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/drive.google.com/ {print}')" ]; then
+
+                curl -RL "https://drive.google.com/uc?export=download&confirm=t&id=\$SRB2ASSETID" -o"\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
+
+            elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/mega.co.nz/ {print}')" ]; then
+
+                curl -RL "\$MEGANZURL" -o "\$BUILD/\$MEGANZFILENAME"
+                cat "\$BUILD/\$MEGANZFILENAME" | openssl enc -d -aes-128-ctr -K "\$MEGANZHEX" -iv "\$MEGANZHEXRAW" > "\$BUILD/\$MEGANZFILENAME.new"
+                mv -f "\$BUILD/\$MEGANZFILENAME.new" "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
+
+            else
+
+                curl -RL "\$SRB2BLDEXTRAASSETPATH" -o "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
+
+            fi
+
+        fi
+
+        if [ -n "\$(find "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE" 2> /dev/null | head -n1)" ]; then
+
+            if [ "\$ANDROID" = "1" ]; then
+
+                7z x -y "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE" -x!"*.exe" -x!"*.txt" -x!"*.dll" -o"\$BUILD/android/app/src/main/assets"
+
+            elif [ "\$OS" = "Windows" ]; then
+
+                if [ "\$IS64" = "64" ]; then
+
+                    cp -f "\$BUILD/libs/curl/lib64/libcurl-x64.dll" "\$BUILD/build/AppDir/usr/lib"
+                    rm -rf "\$BUILD/libs/dll-binaries/x86_64/Old"
+                    cp -f "\$BUILD/libs/dll-binaries/x86_64/"* "\$BUILD/build/AppDir/usr/lib"
+                    rm -rf "\$BUILD/libs/libopenmpt/bin/x86_64/mingw"
+                    cp -f "\$BUILD/libs/libopenmpt/bin/x86_64/"* "\$BUILD/build/AppDir/usr/lib"
+                    cp -f "\$BUILD/libs/SDL2/x86_64-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
+                    cp -f "\$BUILD/libs/SDLMixerX/x86_64-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
+
+                else
+
+                    cp -f "\$BUILD/libs/curl/lib32/libcurl.dll" "\$BUILD/build/AppDir/usr/lib"
+                    rm -rf "\$BUILD/libs/dll-binaries/i686/Old"
+                    cp -f "\$BUILD/libs/dll-binaries/i686/"* "\$BUILD/build/AppDir/usr/lib"
+                    rm -rf "\$BUILD/libs/libopenmpt/bin/x86/mingw"
+                    cp -f "\$BUILD/libs/libopenmpt/bin/x86/"* "\$BUILD/build/AppDir/usr/lib"
+                    cp -f "\$BUILD/libs/SDL2/i686-w64-mingw32/bin/SDL2.dll" "\$BUILD/build/AppDir/usr/lib"
+                    cp -f "\$BUILD/libs/SDLMixerX/i686-w64-mingw32/bin/"* "\$BUILD/build/AppDir/usr/lib"
+
+                fi
+
+                7z x -y "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE" -x!"*.exe" -x!"*.txt" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+
+            else
+
+                7z x -y "\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE" -x!"*.exe" -x!"*.txt" -x!"*.dll" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+
+            fi
+
+            if [ "\$(find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR" -mindepth 1 -maxdepth 1 2> /dev/null | wc -l)" -eq "1" ]; then
+
+                mv -f "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/"*/* "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+
+            fi
 
         fi
     }
@@ -1836,7 +2026,15 @@ containerentry() {
 
             fi
 
-            7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+            if [ "\$ANDROID" = "1" ]; then
+
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/android/app/src/main/assets"
+
+            else
+
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+            fi
 
         else
 
@@ -1852,11 +2050,27 @@ containerentry() {
 
             fi
 
-            7z x -y "\$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+            if [ "\$ANDROID" = "1" ]; then
+
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/android/app/src/main/assets"
+
+            else
+
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+
+            fi
 
         fi
 
-        find "\$BUILD/build/AppDir/usr/games/SRB2/models" -type d -exec chmod 755 {} \;
+        if [ "\$ANDROID" = "1" ]; then
+
+            find "\$BUILD/android/app/src/main/assets/models" -type d -exec chmod 755 {} \;
+
+        else
+
+            find "\$BUILD/build/AppDir/usr/games/SRB2/models" -type d -exec chmod 755 {} \;
+
+        fi
 
         if [ "\$OS" = "Windows" ]; then
 
@@ -1989,7 +2203,7 @@ containerentry() {
 
     if [ -n "\$ISNET" ]; then
 
-        if [ "\$LIBC" = "musl" ]; then
+        if [ "\$LIBC" = "musl" ] || [ "\$ANDROID" = "1" ]; then
 
             sudo apk update && sudo apk upgrade
 
@@ -2002,7 +2216,7 @@ containerentry() {
     fi
 
     # Download and extract assets.
-    if [ -z "\$(find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/"* 2> /dev/null | head -n1)" ] && ([ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]); then
+    if ([ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]); then
 
         if [ -n "\$ISNET" ]; then
 
@@ -2033,8 +2247,47 @@ containerentry() {
 
     fi
 
+if [ "\$ANDROID" = "1" ]; then
+
+    cd "\$BUILD/android" || exit
+
+    # Running comptime.sh before compiling to avoid errors.
+    if [ -x "\$BUILD/comptime.sh" ]; then
+
+        gawk -i inplace '{gsub("\r","");print}' "\$BUILD/comptime.sh"
+
+    fi
+
+    gawk -i inplace '{gsub("\r","");print}' "\$BUILD/android/gradlew"
+
+    if [ "$SRB2BLDNOGRADLECACHE" = "1" ]; then
+
+        "\$BUILD/android/gradlew" assembleDebug --no-build-cache --no-configuration-cache --parallel --max-workers="\$NCPU"
+
+    else
+
+        "\$BUILD/android/gradlew" assembleDebug --build-cache --configuration-cache --parallel --max-workers="\$NCPU"
+
+    fi
+
+else
+
+    # Modify first line of build script, to avoid issue with running it.
+    if [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+         cd "\$BUILD" || exit
+         gawk -i inplace '{gsub("#!/bin/env sh","#!/bin/sh");print}' "\$BUILD/build.sh"
+
+         if [ "\$OS" = "Windows" ]; then
+
+             gawk -i inplace '{gsub("gcc","'\$CCACHE_BIN_PATH''\$ARCH-w64-mingw32-''\$MINGWCCVER'");gsub("\r","");print}' "\$BUILD/build.sh"
+
+         fi
+
+    fi
+
     # Patching headers, source code to avoid compilation failure for builds on Windows.
-    if [ "\$OS" = "Windows" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
+    if [ "\$OS" = "Windows" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
 
          sudo sed -i '/#if !defined(_WIN32) && !defined(__CYGWIN__)/,/#endif/d' /usr/*/include/_mingw.h
          sudo sed -i '/#ifndef _WIN32/,/#endif/d' /usr/*/include/_mingw_stdarg.h
@@ -2324,6 +2577,10 @@ else
 
         cat "\$BUILD/README.md"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+        \$PRINTF "$NOTICE%s\n\e[0m" "No configs found for kartmaker."
+
     elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
         cmake -LAH "\$BUILD" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
@@ -2387,6 +2644,10 @@ else
         elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
 
             BLDCMD="make CXX="\$CCACHE_BIN_PATH"\$ARCH-w64-mingw32-\$MINGWCXXVER CPLUS_INCLUDE_PATH=/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:\$SRB2BLDPREFIX/include/. -k -j\$NCPU -C \$BUILD WINDOWS=1"
+
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+            BLDCMD="\$BUILD/build.sh"
 
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
@@ -2484,7 +2745,11 @@ MINGWCMAKE
 
         elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
 
-            BLDCMD="make CXX="\$CCACHE_BIN_PATH"\$GXXVER CPLUS_INCLUDE_PATH=\$SRB2BLDPREFIX/include/.:/usr/include/\$ARCH-linux-gnu/. -k -j\$NCPU -C \$BUILD STATIC=1"
+            BLDCMD="make CXX="\$CCACHE_BIN_PATH"\$GXXVER CPLUS_INCLUDE_PATH=/usr/include/\$ARCH-linux-gnu/. -k -j\$NCPU -C \$BUILD STATIC=1"
+
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+            BLDCMD="\$BUILD/build.sh"
 
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
@@ -2542,9 +2807,9 @@ MINGWCMAKE
     fi
 
     # Download libpng12's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]) && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]) && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
 
-        if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+        if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
             LIBPNG12PREFIX="\$SRB2BLDPREFIX"
 
@@ -2585,7 +2850,7 @@ MINGWCMAKE
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libpng12"
             sudo -E make -C "\$SRB2BLDROOT/libraries/libpng12" install
 
-            if [ "\$APPIMAGE" != 1 ] && [ "\$FLATPAK" != 1 ]; then
+            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ]; then
 
                 sudo -E stow -v --adopt libpng12
 
@@ -2603,9 +2868,9 @@ MINGWCMAKE
     fi
 
     # Download libopenmpt's source code, build and install it.
-#    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
+#    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
 #
-#        if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+#        if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 #
 #            LIBOPENMPTPREFIX="\$SRB2BLDPREFIX"
 #
@@ -2645,7 +2910,7 @@ MINGWCMAKE
 #            CC=""\$CCACHE_BIN_PATH"\$GCCVER" CXX=""\$CCACHE_BIN_PATH"\$GXXVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
 #            sudo make -C "\$SRB2BLDROOT/libraries/libopenmpt" PREFIX="\$LIBOPENMPTPREFIX" install
 #
-#            if [ "\$APPIMAGE" != 1 ] && [ "\$FLATPAK" != 1 ]; then
+#            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ]; then
 #
 #                sudo -E stow -v --adopt libopenmpt
 #
@@ -2663,7 +2928,7 @@ MINGWCMAKE
 #    fi
 
     # Download libgme's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
 
 #        # Uninstall system's package libgme-dev to avoid conflicts with compiled libgme.
 #        if [ "\$LIBC" = "musl" ]; then
@@ -2676,7 +2941,7 @@ MINGWCMAKE
 #
 #        fi
 #
-        if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+        if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
             LIBGMEPREFIX="\$SRB2BLDPREFIX"
 
@@ -2722,7 +2987,7 @@ MINGWCMAKE
             CC="\$GCCVER" make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libgme/build"
             sudo make -C "\$SRB2BLDROOT/libraries/libgme/build" install
 
-            if [ "\$APPIMAGE" != 1 ] && [ "\$FLATPAK" != 1 ]; then
+            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ]; then
 
                 sudo -E stow -v --adopt libgme
 
@@ -2740,7 +3005,7 @@ MINGWCMAKE
     fi
 
     # Download libfluidsynth's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ]; then
 
         # Uninstall system's package libfluidsynth-dev to avoid conflicts with compiled libfluidsynth.
         if [ "\$LIBC" = "musl" ]; then
@@ -2753,7 +3018,7 @@ MINGWCMAKE
 
         fi
 
-        if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+        if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
             LIBFLUIDSYNTHPREFIX="\$SRB2BLDPREFIX"
 
@@ -2795,7 +3060,7 @@ MINGWCMAKE
             CC="\$GCCVER" make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libfluidsynth/build"
             sudo make -C "\$SRB2BLDROOT/libraries/libfluidsynth/build" install
 
-            if [ "\$APPIMAGE" != 1 ] && [ "\$FLATPAK" != 1 ]; then
+            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ]; then
 
                 sudo -E stow -v --adopt libfluidsynth
 
@@ -2815,7 +3080,7 @@ MINGWCMAKE
     # Download libSDL2_mixerX's source code, build and install it.
     if [ "\$OS" = "Linux" ] && [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
-        if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+        if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
             LIBSDL2MIXERXPREFIX="\$SRB2BLDPREFIX"
 
@@ -2861,7 +3126,7 @@ MINGWCMAKE
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
             sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
 
-            if [ "\$APPIMAGE" != 1 ] && [ "\$FLATPAK" != 1 ]; then
+            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ]; then
 
                 sudo -E stow -v --adopt libsdl2-mixerx
 
@@ -2881,7 +3146,7 @@ MINGWCMAKE
     # Download DiscordRPC source code, build and install it.
     if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]); then
 
-        if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+        if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
             DISCORDRPCPREFIX="\$SRB2BLDPREFIX"
 
@@ -2948,7 +3213,7 @@ MINGWCMAKE
 #            cmake --build "\$SRB2BLDROOT/libraries/discord-rpc/build" -j"\$NCPU" --config Release
 #            sudo -E cmake --install "\$SRB2BLDROOT/libraries/discord-rpc/build"
 
-            if [ "\$APPIMAGE" != 1 ] && [ "\$FLATPAK" != 1 ]; then
+            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ]; then
 
                 sudo -E stow -v --adopt discord-rpc
 
@@ -2969,7 +3234,7 @@ MINGWCMAKE
     # Download libopenvr's source code, build and install it.
     if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
-        if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+        if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
             LIBOPENVRPREFIX="\$SRB2BLDPREFIX"
 
@@ -3019,7 +3284,7 @@ MINGWCMAKE
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libopenvr/build"
             sudo make -C "\$SRB2BLDROOT/libraries/libopenvr/build" install
 
-            if [ "\$APPIMAGE" != 1 ] && [ "\$FLATPAK" != 1 ]; then
+            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ]; then
 
                 sudo -E stow -v --adopt libopenvr
 
@@ -3039,7 +3304,7 @@ MINGWCMAKE
     # Download liblzf's source code, build and install it.
     if [ "\$OS" = "Linux" ] && [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
 
-        if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+        if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
             LIBLZFPREFIX="\$SRB2BLDPREFIX"
 
@@ -3082,7 +3347,7 @@ MINGWCMAKE
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/liblzf"
             sudo make -C "\$SRB2BLDROOT/libraries/liblzf" install
 
-            if [ "\$APPIMAGE" != 1 ] && [ "\$FLATPAK" != 1 ]; then
+            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ]; then
 
                 sudo -E stow -v --adopt liblzf
 
@@ -3248,6 +3513,10 @@ MINGWCMAKE
             cp -rf "\$BUILD/dist/res/logo_icon.png" "\$BUILD/build/icon.png"
             cd "\$BUILD" || exit
 
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+            \$BLDCMD \$CONF
+
         else
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
@@ -3360,7 +3629,7 @@ MINGWCMAKE
             sudo make -C "\$BUILD/build" install
 
             # Creating loaders.cache with new paths to modules and moving slade.pk3 for SLADE.
-            if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ]; then
+            if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
 
                 gawk -i inplace '{gsub("^\".*/usr/lib/.*-linux-gnu/.*/loaders|^\".*/usr/lib/.*/loaders","\"/usr/lib/gdk-pixbuf/loaders");print}' "\$BUILD/build/AppDir/usr/lib/gdk-pixbuf/loaders.cache"
                 mv -f "\$BUILD/build/AppDir/usr/share/slade3/slade.pk3" "\$BUILD/build/AppDir/usr/bin/slade.pk3"
@@ -3375,7 +3644,7 @@ MINGWCMAKE
 
             \$BLDCMD \$CONF
 
-            if [ "\$APPIMAGE" = 1 ] || [ "\$FLATPAK" = 1 ] || [ "\$LNXOSNAME" != "NixOS" ]; then
+            if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$LNXOSNAME" != "NixOS" ]; then
 
                 mkbundle --fetch-target "mono-$LNXMONOVER-ubuntu-$UBUSOFTVER-x64"
                 cp -f "/home/srb2bld/.mono/targets/mono-$LNXMONOVER-ubuntu-$UBUSOFTVER-x64/etc/mono/config" "\$BUILD/Build/config"
@@ -3458,9 +3727,13 @@ MINGWCMAKE
 
         cp -rf "\$BUILD/wadcli" "\$BUILD/build/AppDir/usr/bin"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+        cp -rf "\$BUILD/build/kartmaker" "\$BUILD/build/AppDir/usr/bin"
+
     fi
 
-if [ "\$APPIMAGE" = 1 ]; then
+if [ "\$APPIMAGE" = "1" ]; then
 
     # Create desktop file.
     COMREV=\$(git -C "\$BUILD" rev-parse --short HEAD)
@@ -3977,6 +4250,24 @@ X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 DESKTOP
 
+    elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=kartmaker
+Comment=Simple utility that automatically creates a character WAD for SRB2Kart from a working folder
+Icon=icon
+Exec=AppRun
+Categories=Development;
+Keywords=sonic;wad;kart
+Terminal=true
+NoDisplay=false
+X-AppImage-Name=kartmaker
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+DESKTOP
+
     elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
@@ -4016,7 +4307,7 @@ DESKTOP
     fi
 
     # Get app icon.
-    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
 
         if [ -n "\$ISNET" ]; then
 
@@ -4120,6 +4411,12 @@ APPRUNBIN
 exec "\$HERE/usr/bin/wadcli" "\$@"
 APPRUNBIN
 
+    elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+exec "\$HERE/usr/bin/kartmaker" "\$@"
+APPRUNBIN
+
     elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
@@ -4146,7 +4443,11 @@ APPRUNBIN
     chmod +x "\$BUILD/build/AppDir/AppRun"
 
     # Copying libraries to AppDir.
-    cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin") 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+    if [ "\$BUILD" != "\$BUILDPATH/kartmaker" ]; then
+
+        cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+
+    fi
 
     # Download appimagetool.
     \$PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's AppImage. Please wait..."
@@ -4213,9 +4514,9 @@ APPRUNBIN
 
 else
 
-    if [ "\$FLATPAK" = 1 ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ]; then
+    if [ "\$FLATPAK" = "1" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ]; then
 
-        cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin") 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
@@ -4589,6 +4890,22 @@ Terminal=true
 NoDisplay=false
 DESKTOP
 
+    elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/kartmaker.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=kartmaker
+Comment=Simple utility that automatically creates a character WAD for SRB2Kart from a working folder
+Icon=kartmaker
+Exec=kartmaker
+Categories=Development;
+Keywords=sonic;wad;kart
+Terminal=true
+NoDisplay=false
+DESKTOP
+
     elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/slade.desktop" << DESKTOP
@@ -4624,9 +4941,9 @@ DESKTOP
     fi
 
     # Modify desktop files for flatpaks.
-    if [ "\$FLATPAK" = 1 ]; then
+    if [ "\$FLATPAK" = "1" ]; then
 
-        if [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
 
             gawk -i inplace '{gsub("Icon=.*","Icon=org.srb2bld.'\$(\$PRINTF \$BUILD | gawk -F'/' '{print \$NF}')'");print}' "\$BUILD/build/AppDir/usr/share/applications/\$(\$PRINTF \$BUILD | gawk -F'/' '{print \$NF}').desktop"
 
@@ -4650,12 +4967,12 @@ DESKTOP
 
     if ([ "\$LNXOSNAME" = "NixOS" ] || [ "\$BUILD" = "\$BUILDPATH/slade" ]) && [ "\$LIBC" != "musl" ]; then
 
-        cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin") 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
     # Get app icon.
-    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
 
         if [ -n "\$ISNET" ]; then
 
@@ -4775,6 +5092,10 @@ DESKTOP
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/wadcli.png"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+        cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/kartmaker.png"
+
     elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/slade.png"
@@ -4787,18 +5108,21 @@ DESKTOP
 
 fi
 
+fi
+
 exit 0
 
 ENTRYPOINT
     chmod +x "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container/Entrypoint"
 
     # Prepare Docker/Podman images.
-    rm -rf "$SRB2BLDROOT/containers/srb2-tools-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-games-linux-musl-container" "$SRB2BLDROOT/containers/srb2-tools-linux-musl-container" "$SRB2BLDROOT/containers/srb2-games-windows-container" "$SRB2BLDROOT/containers/srb2-tools-windows-container"
+    rm -rf "$SRB2BLDROOT/containers/srb2-tools-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-games-linux-musl-container" "$SRB2BLDROOT/containers/srb2-tools-linux-musl-container" "$SRB2BLDROOT/containers/srb2-games-windows-container" "$SRB2BLDROOT/containers/srb2-tools-windows-container" "$SRB2BLDROOT/containers/srb2-games-android-container"
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-tools-linux-glibc-container"
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-games-linux-musl-container"
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-tools-linux-musl-container"
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-games-windows-container"
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-tools-windows-container"
+    cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-games-android-container"
 
     # Set CPU architecture for Docker/Podman images in case of building old SRB2 versions.
     if ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]); then
@@ -5083,6 +5407,28 @@ COPY Entrypoint /home/srb2bld/Entrypoint
 ENTRYPOINT [ "sh", "/home/srb2bld/Entrypoint" ]
 
 DOCKERFILE
+
+    cat > "$SRB2BLDROOT/containers/srb2-games-android-container/Dockerfile" << DOCKERFILE
+FROM docker.io/alvrme/alpine-android-base:"$ANDROIDSDKVER"
+
+ENV container docker
+
+RUN apk update && \
+apk upgrade && \
+apk add file sudo bash dash gawk curl git shadow p7zip
+
+RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+useradd -m -G wheel,abuild -s /usr/bin/dash srb2bld && \
+passwd -d srb2bld && \
+ln -sf /usr/bin/dash /bin/sh
+
+USER srb2bld
+
+COPY Entrypoint /home/srb2bld/Entrypoint
+
+ENTRYPOINT [ "sh", "/home/srb2bld/Entrypoint" ]
+
+DOCKERFILE
 }
 
 containerrun() {
@@ -5114,7 +5460,31 @@ containerrun() {
 
     fi
 
-    if [ "$OS" = "Windows" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]); then
+    if [ "$ANDROID" = "1" ]; then
+
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for SRB2 Android. Please wait..."
+
+        if [ -n "$ISNET" ]; then
+
+            $OSVIRT pull docker.io/alvrme/alpine-android-base:"$ANDROIDSDKVER"
+
+        fi
+
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for SRB2 Android. Please wait..."
+        $OSVIRT build --rm -t srb2-games-android-container "$SRB2BLDROOT/containers/srb2-games-android-container"
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
+
+        if [ "$OS" = "Windows" ]; then
+
+            $OSVIRT run $OSVIRTOPTS --volume="$($PRINTF "%s\n" "$USERPROFILE")\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" --volume="$($PRINTF "%s\n" "$USERPROFILE")\\.cache\\gradle:$GRADLE_USER_HOME:rw" srb2-games-android-container
+
+        elif [ "$OS" = "Linux" ]; then
+
+            $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$GRADLE_USER_HOME:$GRADLE_USER_HOME:rw" srb2-games-android-container
+
+        fi
+
+    elif [ "$OS" = "Windows" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]); then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for Windows SRB2 tools. Please wait..."
 
@@ -5144,7 +5514,7 @@ containerrun() {
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$($PRINTF "%s\n" "$USERPROFILE")\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" --volume="$($PRINTF "%s\n" "$USERPROFILE")\\.cache\\ccache:$CCACHE_DIR:rw" srb2-games-windows-container
 
-    elif [ "$LIBC" = "musl" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]); then
+    elif [ "$LIBC" = "musl" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]); then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for musl based Linux SRB2 tools. Please wait..."
 
@@ -5174,7 +5544,7 @@ containerrun() {
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-games-linux-musl-container
 
-    elif [ "$OS" = "Linux" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]); then
+    elif [ "$OS" = "Linux" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]); then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for glibc based Linux SRB2 tools. Please wait..."
 
@@ -5206,6 +5576,120 @@ containerrun() {
 
     fi
 
+}
+
+custombuild() {
+    BUILD="$BUILDPATH/srb2-custom"
+
+    mkdir -p "$BUILD"
+
+    if [ -z "$SRB2BLDGITPATH" ]; then
+
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter valid Git local or remote path."
+        read -r SRB2BLDGITPATH
+
+    fi
+
+    $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter name of custom build (it will be written as subdirectory in srb2-custom folder)."
+    read -r CUSTOMDIR
+
+    while printf "%s\n" "$CUSTOMDIR"; do
+
+        if [ -z "$CUSTOMDIR" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter again."
+
+            read -r CUSTOMDIR
+
+        else
+
+            break
+
+        fi
+
+    done
+
+    BUILD="$BUILDPATH/srb2-custom/$CUSTOMDIR"
+
+    # Check whether SRB2BLDGITPATH environment variable is set or not.
+    if [ -z "$SRB2BLDGITPATH" ]; then
+
+        $PRINTF "$FAILURE%s\n\e[0m" "ERROR: No SRB2BLDGITPATH is set. Add SRB2BLDGITPATH environment variable to valid Git local or remote path in shell configuration file (for example \".bash_profile\" or \".zshrc\" or \".bashrc\").
+                EXAMPLE:
+			1. export SRB2BLDGITPATH=\"https://github.com/STJr/SRB2\"
+
+			2. export SRB2BLDGITPATH=\"https://git.do.srb2.org/TehRealSalt/SRB2\"
+
+			3. export SRB2BLDGITPATH=\"\$HOME/Builds/SRB2\"
+
+			4. export SRB2BLDGITPATH=\"C:\Builds\SRB2\"
+                "
+        exit
+
+    fi
+
+    if [ -z "$(find "$SRB2BLDGITPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ] && [ -z "$(curl -vI "$SRB2BLDGITPATH" 2>&1 | gawk '/> Host:/ {gsub("\r","");print $NF}')" ]; then
+
+        $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Can't find path to custom SRB2's source code at $SRB2BLDGITPATH path. Exiting."
+        exit
+
+    fi
+
+    # Check if directory srb2-custom exits in script's data path.
+    if ([ -d "$BUILD/.git" ] && [ -n "$(git -C "$SRB2BLDGITPATH" diff --shortstat 2> /dev/null)" ]) || ([ -d "$BUILD/.git" ] && [ "$(git -C "$BUILD" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" != "$(git -C "$SRB2BLDGITPATH" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" ]) && ([ -d "$BUILD/.git" ] && [ "$(git -C "$BUILD" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" != "$($PRINTF "$SRB2BLDGITPATH" | gawk '{gsub(".git$","");print}').git" ]); then
+
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Found existing directory with source code in $BUILD path. Are you sure you want to remove it? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\"). If you choose \"no/No\", \"n/N\" or just press enter, script will continue with current source code's directory in $BUILD path. Press ctrl+c to quit."
+        $PRINTF "$PROMPT\n%s\e[0m" "> "
+        read -r CONFIRM
+
+        if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Removing existing source at $BUILD path."
+            sleep 1
+            rm -rf "$BUILD"
+
+        fi
+
+    fi
+
+    # Fixing Windows path to source code to be found by script.
+    if [ "$OS" = "Windows" ]; then
+
+        SRB2BLDGITPATH=$($PRINTF "%s\n" "$SRB2BLDGITPATH" | gawk 'gsub("\\\\","\\\\");{print}' | gawk '!a[$0]++ {print}')
+
+    fi
+
+    # Copy directory with source code to script's data path.
+    if [ -n "$(find "$SRB2BLDGITPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ] && [ ! -d "$BUILD/.git" ]; then
+
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Copying source code. Please wait..."
+        sleep 1
+        cp -rf "$SRB2BLDGITPATH" "$BUILDPATH/srb2-custom/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
+
+    fi
+
+    # Set proper default branch.
+    if [ -n "$SRB2BLDGITVER" ] && [ ! -d "$BUILD/.git" ] || [ -n "$ISNET" ]; then
+
+        GITDEFVER="--branch $SRB2BLDGITVER"
+
+    elif [ -z "$SRB2BLDGITVER" ] && [ ! -d "$BUILD/.git" ] || [ -n "$ISNET" ]; then
+
+        GITDEFVER="--branch $(git ls-remote --refs $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git | gawk -F'/' '/'$(git ls-remote $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git --symref HEAD | gawk '{print $1}')'/ {print $NF}' | head -n1)"
+
+    elif [ -n "$SRB2BLDGITVER" ] && [ -d "$BUILD/.git" ]; then
+
+        GITDEFVER="$SRB2BLDGITVER"
+
+    else
+
+        GITDEFVER=$(gawk -F'/' '{print $NF}' "$BUILD/.git/refs/remotes/origin/HEAD" 2> /dev/null)
+
+    fi
+
+    GITVER="$GITDEFVER"
+    GITVERCONF=$($PRINTF "$GITDEFVER" | gawk '{print $NF}')
+    GIT="git clone $GITOPTS $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$","");print}').git --recursive $GITVER"
 }
 
 extractmacosassets() {
@@ -5338,6 +5822,7 @@ extractmacosassets() {
 extractmacoscustomassets() {
     BUILDPREFIX=$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')
 
+    # Download and extract assets for custom build.
     if [ -z "$ISNET" ] && [ -n "$SRB2BLDASSETPATH" ]; then
 
         FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
@@ -5371,7 +5856,16 @@ extractmacoscustomassets() {
         else
 
             SRB2BLDASSETPATH="$SRB2BLDASSETPATH"
-            FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
+
+            if [ -n "$(curl -X GET -sLI "$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r","");print $NF}' | head -n1)" ]; then
+
+                FILETYPE=$(curl -X GET -sLI "$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r","");print $NF}')
+
+            else
+
+                FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
+
+            fi
 
         fi
 
@@ -5408,11 +5902,27 @@ extractmacoscustomassets() {
 
         if [ "$FILETYPE" = "rar" ]; then
 
-            unrar x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.rar" -x"*.exe" -x"*.txt" -x"*.dll" "$BUILD/assets/installer"
+            if [ "$ANDROID" = "1" ]; then
+
+                unrar x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.rar" -x"*.exe" -x"*.txt" -x"*.dll" "$BUILD/android/app/src/main/assets"
+
+            else
+
+                unrar x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.rar" -x"*.exe" -x"*.txt" -x"*.dll" "$BUILD/assets/installer"
+
+            fi
 
         else
 
-            7z x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE" -x!"*.exe" -x!"*.txt" -x!"*.dll" -o"$BUILD/assets/installer"
+            if [ "$ANDROID" = "1" ]; then
+
+                7z x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE" -x!"*.exe" -x!"*.txt" -x!"*.dll" -o"$BUILD/android/app/src/main/assets"
+
+            else
+
+                7z x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE" -x!"*.exe" -x!"*.txt" -x!"*.dll" -o"$BUILD/assets/installer"
+
+            fi
 
         fi
 
@@ -5424,7 +5934,140 @@ extractmacoscustomassets() {
 
     fi
 
-    if [ -n "$(find "$BUILD/assets/installer/models" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ]; then
+    extractmacosextracustomassets
+
+    # Correcting permissions for model directories.
+    if [ "$ANDROID" = "1" ]; then
+
+        find "$BUILD/android/app/src/main/assets/models" -type d -exec chmod 755 {} \;
+
+    elif [ -n "$(find "$BUILD/assets/installer/models" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ]; then
+
+        find "$BUILD/assets/installer/models" -type d -exec chmod 755 {} \;
+
+    elif [ -n "$(find "$BUILD/assets/installer/mdls" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ]; then
+
+        find "$BUILD/assets/installer/mdls" -type d -exec chmod 755 {} \;
+
+    fi
+}
+
+extractmacosextracustomassets() {
+    # Download and extract extra assets for custom build.
+    if [ -z "$ISNET" ] && [ -n "$SRB2BLDEXTRAASSETPATH" ]; then
+
+        FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
+        SRB2BLDEXTRAASSETPATH="$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
+
+    elif [ -n "$ISNET" ] && [ -n "$SRB2BLDEXTRAASSETPATH" ]; then
+
+        if [ -n "$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | head -n1)" ] && [ "$(curl -X GET -sLI "$SRB2BLDEXTRAASSETPATH" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" = "$(stat -f %z "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null)" ]; then
+
+            FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
+            SRB2BLDEXTRAASSETPATH="$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
+
+        elif [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/drive.google.com/ {print}')" ]; then
+
+            SRB2ASSETID=$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '{gsub("https://drive.google.com/file/d/|/view|?usp=sharing","");print}')
+            SRB2BLDEXTRAASSETPATH="https://drive.google.com/uc?export=download&confirm=t&id=$SRB2ASSETID"
+            FILETYPE=$(curl -X GET -sLI "https://drive.google.com/uc?export=download&confirm=t&id=$SRB2ASSETID" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"","");print $NF}')
+
+        elif [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/mega.nz/ {print}')" ]; then
+
+            # Using megafetch script to obtain data to decrypt asset pack from mega.nz.
+            curl -sL https://gist.githubusercontent.com/Bijman/b791993783e2fb80d3e98a3a19b6e6e8/raw/4fb91369313eaa8d67fe911fdcc08797ca432517/megafetch.sh -o "$BUILD/megafetch"
+            chmod +x "$BUILD/megafetch"
+            MEGANZURL=$("$BUILD/megafetch" "$SRB2BLDEXTRAASSETPATH" | gawk '/userstorage.mega.co.nz/ {print}')
+            MEGANZFILENAME=$("$BUILD/megafetch" "$SRB2BLDEXTRAASSETPATH" | gawk 'NR==2')
+            MEGANZHEX=$("$BUILD/megafetch" "$SRB2BLDEXTRAASSETPATH" | gawk 'NR==3')
+            MEGANZHEXRAW=$("$BUILD/megafetch" "$SRB2BLDEXTRAASSETPATH" | gawk 'NR==4')
+            SRB2BLDEXTRAASSETPATH="$MEGANZURL"
+            FILETYPE=$($PRINTF "%s\n" "$MEGANZFILENAME" | gawk -F'.' '{print $NF}')
+
+        else
+
+            SRB2BLDEXTRAASSETPATH="$SRB2BLDEXTRAASSETPATH"
+
+            if [ -n "$(curl -X GET -sLI "$SRB2BLDEXTRAASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r","");print $NF}' | head -n1)" ]; then
+
+                FILETYPE=$(curl -X GET -sLI "$SRB2BLDEXTRAASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r","");print $NF}')
+
+            else
+
+                FILETYPE=$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER."* 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
+
+            fi
+
+        fi
+
+    fi
+
+    if [ -n "$ISNET" ] && [ -n "$(curl -vI "$SRB2BLDEXTRAASSETPATH" 2>&1 | gawk '/> Host:/ {gsub("\r","");print $NF}')" ] && [ "$(curl -X GET -sLI "$SRB2BLDEXTRAASSETPATH" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r","");print $NF}' | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE" 2> /dev/null)" ]; then
+
+        rm -f "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
+
+        if [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/drive.google.com/ {print}')" ]; then
+
+            curl -RL "https://drive.google.com/uc?export=download&confirm=t&id=$SRB2ASSETID" -o"$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
+
+        elif [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/mega.co.nz/ {print}')" ]; then
+
+            curl -RL "$MEGANZURL" -o "$BUILD/$MEGANZFILENAME"
+            cat "$BUILD/$MEGANZFILENAME" | openssl enc -d -aes-128-ctr -K "$MEGANZHEX" -iv "$MEGANZHEXRAW" > "$BUILD/$MEGANZFILENAME.new"
+            mv -f "$BUILD/$MEGANZFILENAME.new" "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
+
+        else
+
+            curl -RL "$SRB2BLDEXTRAASSETPATH" -o "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
+
+        fi
+
+    fi
+
+    if [ -n "$(find "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ]; then
+
+        if [ "$FILETYPE" = "rar" ]; then
+
+            if [ "$ANDROID" = "1" ]; then
+
+                unrar x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.rar" -x"*.exe" -x"*.txt" -x"*.dll" "$BUILD/android/app/src/main/assets"
+
+            else
+
+                unrar x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.rar" -x"*.exe" -x"*.txt" -x"*.dll" "$BUILD/assets/installer"
+
+            fi
+
+        else
+
+            if [ "$ANDROID" = "1" ]; then
+
+                7z x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE" -x!"*.exe" -x!"*.txt" -x!"*.dll" -o"$BUILD/android/app/src/main/assets"
+
+            else
+
+                7z x -y "$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE" -x!"*.exe" -x!"*.txt" -x!"*.dll" -o"$BUILD/assets/installer"
+
+            fi
+
+        fi
+
+        if [ "$(find "$BUILD/assets/installer" -mindepth 1 -maxdepth 1 2> /dev/null | wc -l)" -eq "1" ]; then
+
+            mv -f "$BUILD/assets/installer/"*/* "$BUILD/assets/installer"
+
+        fi
+
+    fi
+
+    extractmacosextracustomassets
+
+    # Correcting permissions for model directories.
+    if [ "$ANDROID" = "1" ]; then
+
+        find "$BUILD/android/app/src/main/assets/models" -type d -exec chmod 755 {} \;
+
+    elif [ -n "$(find "$BUILD/assets/installer/models" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ]; then
 
         find "$BUILD/assets/installer/models" -type d -exec chmod 755 {} \;
 
@@ -5593,6 +6236,46 @@ flatpak() {
   "runtime-version": "$($PRINTF $FLATPAKPLATFORM | gawk -F'/' '{print $NF}')",
   "sdk": "org.freedesktop.Sdk",
   "command": "wadcli",
+  "finish-args": [
+    "--share=ipc",
+    "--share=network",
+    "--socket=fallback-x11",
+    "--socket=pulseaudio",
+    "--socket=wayland",
+    "--device=all"
+  ],
+  "modules": [
+    {
+      "name": "$($PRINTF $BUILD | gawk -F'/' '{print $NF}')",
+      "buildsystem": "simple",
+      "sources": [
+        {
+          "type": "dir",
+          "path": "$BUILD/build/AppDir/usr"
+        }
+      ],
+      "build-commands": [
+        "mkdir -p /app/bin /app/lib /app/share",
+        "cp -rf bin/* /app/bin",
+        "cp -rf share/* /app/share",
+        "mv -f /app/share/applications/*.desktop /app/share/applications/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').desktop",
+        "mv -f \$(find /app/share/icons/hicolor -name *.png) \$(find /app/share/icons/hicolor -name apps)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
+      ]
+    }
+  ]
+}
+FLATPAK
+
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+        cat > "$BUILD/build/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').json" << FLATPAK
+{
+  "app-id": "org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}')",
+  "name": "org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}')",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "$($PRINTF $FLATPAKPLATFORM | gawk -F'/' '{print $NF}')",
+  "sdk": "org.freedesktop.Sdk",
+  "command": "kartmaker",
   "finish-args": [
     "--share=ipc",
     "--share=network",
@@ -6698,6 +7381,22 @@ installtolinux() {
 
         fi
 
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/kartmaker"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/kartmaker.desktop"
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/kartmaker.png"
+        $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's kartmaker binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/kartmaker" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+
+        fi
+
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/slade3"
@@ -6829,6 +7528,51 @@ UZB
             install -d "\$out/share/wadcli"
             install -Dm755 "\$src/bin/"* "\$out/share/wadcli/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             install -Dm644 "\$src/lib/"* -t "\$out/lib/wadcli"
+            install -Dm644 "\$src/share/applications/"* -t "\$out/share/applications"
+            install -Dm644 "\$src/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "\$out/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+          '';
+        };
+    };
+}
+NIX
+
+        elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+            # Setting path to interpreter.
+            $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" || true
+
+            cat > "/tmp/flake-build/flake.nix" << NIX
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs";
+  };
+
+  outputs = { self, nixpkgs }:
+    let
+      # Update the localFile to the actual path where the binary is located.
+      localFile = ./usr;
+    in
+    {
+      defaultPackage.$ARCH-linux =
+        with import nixpkgs { system = "$ARCH-linux"; };
+
+        stdenv.mkDerivation rec {
+          name = "$($PRINTF "%s\n" "$BUILDNAME" | gawk '{gsub(" ","-");print tolower($0)}')-\${version}";
+
+          version = "$(git -C "$BUILD" rev-parse --short HEAD)";
+
+          # Set src to the localFile path
+          src = localFile;
+
+          sourceRoot = ".";
+
+          installPhase = ''
+            install -d "\$out/bin"
+            printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/kartmaker\nexec /nix/var/nix/profiles/default/share/kartmaker/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
+            chmod +x "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
+            install -d "\$out/share/kartmaker"
+            install -Dm755 "\$src/bin/"* "\$out/share/kartmaker/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            install -Dm644 "\$src/lib/"* -t "\$out/lib/kartmaker"
             install -Dm644 "\$src/share/applications/"* -t "\$out/share/applications"
             install -Dm644 "\$src/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "\$out/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
           '';
@@ -7502,6 +8246,11 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
                 $PRINTF "$NOTICE%s\n\e[0m" "make -k -j$NCPU -C $BUILD [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
 
+            elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+                $PRINTF "$NOTICE%s\n\e[0m" "$BUILD/build.sh"
+
             elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
                 # Display content of CMakeLists for a good view of available compilation flags.
@@ -7593,7 +8342,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download and extract assets.
-    if [ -z "$(find "$BUILD/build/assets/installer/"* -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] && ([ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ]); then
+    if [ -z "$(find "$BUILD/build/assets/installer/"* -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] && ([ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ]); then
 
         if [ -n "$ISNET" ]; then
 
@@ -7629,16 +8378,53 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
-        # Install package using port command, if detected.
-        if [ "$(which port 2> /dev/null)" ]; then
+        # Download liblzf's source code, build and install it.
+        if [ ! -d "$SRB2BLDROOT/libraries/liblzf/.git" ]; then
 
-            sudo port -Nfcb install libfmt liblzf
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Downloading liblzf's source code. Please wait..."
+            git clone https://salsa.debian.org/debian/liblzf.git --recursive --branch "$MACOSLZFVER" "$SRB2BLDROOT/libraries/liblzf"
 
         else
 
-            brew install -f fmt liblzf
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Updating and cleaning up liblzf's source code. Please wait..."
+            git config --global --add safe.directory "$SRB2BLDROOT/libraries/liblzf"
+            git -C "$SRB2BLDROOT/libraries/liblzf" clean -qdffx -e .comrev
+            git -C "$SRB2BLDROOT/libraries/liblzf" reset -q --hard
+            git -C "$SRB2BLDROOT/libraries/liblzf" checkout -q master
+
+            if [ -n "$ISNET" ]; then
+
+                git -C "$SRB2BLDROOT/libraries/liblzf" pull --recurse-submodules --rebase --autostash
+
+            fi
+
+            git -C "$SRB2BLDROOT/libraries/liblzf" checkout -q "$MACOSLZFVER"
 
         fi
+
+        if [ ! -f $SRB2BLDPREFIX/lib/liblzf.a ] || ([ -n "$(cat "$SRB2BLDROOT/libraries/liblzf/.comrev" 2> /dev/null)" ] && [ "$(git -C "$SRB2BLDROOT/libraries/liblzf" rev-parse --short HEAD)" != "$(cat "$SRB2BLDROOT/libraries/liblzf/.comrev" 2> /dev/null)" ]); then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Building and installing liblzf. Please wait..."
+            cd "$SRB2BLDROOT/libraries/liblzf" || exit
+            cp -rf "$SRB2BLDROOT/libraries/liblzf/debian/extras/"* "$SRB2BLDROOT/libraries/liblzf"
+            patch -Np1 -i "$SRB2BLDROOT/libraries/liblzf/debian/patches/"*.patch
+            CC="/usr/bin/gcc" CXX="/usr/bin/g++" "$SRB2BLDROOT/libraries/liblzf/configure" --prefix="$SRB2BLDPREFIX/stow/liblzf" --includedir="$SRB2BLDPREFIX/stow/liblzf/include/liblzf"
+            make -k -j"$NCPU" -C "$SRB2BLDROOT/libraries/liblzf"
+            sudo make -C "$SRB2BLDROOT/libraries/liblzf" install
+            sudo -E stow -v --adopt liblzf
+
+            git -C "$SRB2BLDROOT/libraries/liblzf" clean -qdffx -e .comrev
+            git -C "$SRB2BLDROOT/libraries/liblzf" reset -q --hard
+
+            COMREV=$(git -C "$SRB2BLDROOT/libraries/liblzf" rev-parse --short HEAD)
+            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/liblzf/.comrev"
+            cd "$BUILD" || exit
+
+        fi
+
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+        $PRINTF "$NOTICE%s\n\e[0m" "No dependencies to install for kartmaker."
 
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
@@ -8225,8 +9011,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
-
-    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ]; then
+    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ]; then
 
         gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)");print}' "$BUILD/CMakeLists.txt"
 
@@ -8245,6 +9030,22 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         gawk -i inplace '/\/\/ W_GetNumForNameMusic/ {suppress=1} /\/\/ Like W_GetNumForName/ {suppress=0} !suppress' "$BUILD/src/w_wad.c"
 
         gawk -i inplace -v RS="^$" '{gsub("\\/\\/\\/ ------------------------\n\nstatic lumpnum_t S_GetMusicLumpNum\\(const char \\*mname\\)","\nlumpnum_t W_GetNumForNameMusic(const char *name)\n{\n\tlumpnum_t i;\n\n\ti = W_CheckNumForName(name);\n\n\treturn i;\n}\n\nstatic lumpnum_t S_GetMusicLumpNum(const char *mname)");print}' "$BUILD/src/s_sound.c"
+
+    fi
+
+    # Replace path to liblzf in Makefile.
+    if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
+
+        cd "$BUILD" || exit
+        gawk -i inplace '{gsub("_LDLIBS=-l:liblzf.so","_LDLIBS=-L/usr/local/lib");print}' "$BUILD/makefile"
+
+    fi
+
+    # Modify first line of build script, to avoid issue with running it.
+    if [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+        cd "$BUILD" || exit
+        gawk -i inplace '{gsub("#!/bin/env sh","#!/bin/sh");print}' "$BUILD/build.sh"
 
     fi
 
@@ -8288,6 +9089,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         make -k -j"$NCPU" -C "$BUILD" STATIC=1 $CONF
 
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+        "$BUILD/build.sh"
+
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
         cmake -S "$BUILD" -B "$BUILD/build" -DwxWidgets_CONFIG_EXECUTABLE=$(which $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT="$SDKROOT" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVERSLADE" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/opt/srb2-apps -DMPG123_INCLUDE_DIR="$LIBMPG123PREFIX/include" -DMPG123_LIBRARIES="$LIBMPG123PREFIX/lib/libmpg123.dylib" $CONF
@@ -8307,7 +9112,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ]; then
+    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ]; then
 
         # Get app icon.
         mkdir -p "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
@@ -8614,18 +9419,27 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Building App Bundle.
-    if [ "$APPBUNDLE" = 1 ]; then
+    if [ "$APPBUNDLE" = "1" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Building $BUILDNAME's App Bundle. Please wait..."
 
         if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
-            mkdir -p "$BUILD/build/WADCLI"
-            mv -f "$BUILD/build/wadcli" "$BUILD/build/WADCLI"
-            cd "$BUILD/build/WADCLI"
+            mkdir -p "$BUILD/build/WADCLI.app"
+            mv -f "$BUILD/build/wadcli" "$BUILD/build/WADCLI.app"
+            cd "$BUILD/build/WADCLI.app" || exit
             ln -sf /Applications Application
-            cd "$BUILD"
-            hdiutil create -srcfolder "$BUILD/WADCLI" "$BUILD/build/WADCLI.dmg"
+            cd "$BUILD" || exit
+            hdiutil create -srcfolder "$BUILD/build/WADCLI.app" "$BUILD/build/WADCLI.dmg"
+
+        elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+            mkdir -p "$BUILD/build/KARTMAKER.app"
+            mv -f "$BUILD/build/kartmaker" "$BUILD/build/KARTMAKER.app"
+            cd "$BUILD/build/KARTMAKER.app" || exit
+            ln -sf /Applications Application
+            cd "$BUILD" || exit
+            hdiutil create -srcfolder "$BUILD/build/KARTMAKER.app" "$BUILD/build/KARTMAKER.dmg"
 
         elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
@@ -8641,10 +9455,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             done
 
             mv -f "$BUILD/build/slade.app" "$BUILD/build/$BUILDNAME-$GITVER-$COMREV/$BUILDNAME.app"
-            cd "$BUILD/build/$BUILDNAME-$GITVER-$COMREV"
+            cd "$BUILD/build/$BUILDNAME-$GITVER-$COMREV" || exit
             ln -sf /Applications Application
             cp -f "$BUILD/LICENSE" "$BUILD/build/$BUILDNAME-$GITVER-$COMREV"
-            cd "$BUILD"
+            cd "$BUILD" || exit
             hdiutil create -srcfolder "$BUILD/build/$BUILDNAME-$GITVER-$COMREV" -format UDZO -fs HFS+ "$BUILD/build/$BUILDNAME.dmg"
 
         else
@@ -8662,14 +9476,24 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Installing $BUILDNAME's binary, assets, libraries, icons and desktop file to the system. Please wait..."
 
+        if [ ! -d "$SRB2BLDPREFIX/opt/srb2-apps" ]; then
+
+            sudo mkdir -p "$SRB2BLDPREFIX/opt/srb2-apps"
+
+        fi
+
         if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
-            sudo mkdir -p $SRB2BLDPREFIX/opt/srb2-apps
-            sudo mv -f "$BUILD/wadcli" $SRB2BLDPREFIX/opt/srb2-apps
+            sudo mv -f "$BUILD/wadcli" "$SRB2BLDPREFIX/opt/srb2-apps"
+
+        elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+            sudo mkdir -p "$SRB2BLDPREFIX/opt/srb2-apps"
+            sudo mv -f "$BUILD/build/kartmaker" "$SRB2BLDPREFIX/opt/srb2-apps"
 
         elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
-            sudo mkdir -p $SRB2BLDPREFIX/opt/srb2-apps
+            sudo mkdir -p "$SRB2BLDPREFIX/opt/srb2-apps"
             sudo mv -f "$BUILD/build/slade.app" "$SRB2MACPATH"
 
         else
@@ -8691,7 +9515,22 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         COMREVFILEPATH="$BUILD/.comrev"
 
         # Making symbolic link to .app file in /Applications.
-        SRB2MACLINK="/Applications/$BUILDNAME.app"
+        if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
+
+            SRB2MACPATH="$SRB2BLDPREFIX/opt/srb2-apps/wadcli"
+            SRB2MACLINK="/usr/local/bin/wadcli"
+
+        elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+            SRB2MACPATH="$SRB2BLDPREFIX/opt/srb2-apps/kartmaker"
+            SRB2MACLINK="/usr/local/bin/kartmaker"
+
+        else
+
+            SRB2MACLINK="/Applications/$BUILDNAME.app"
+
+        fi
+
         sudo rm -rf "$SRB2MACLINK"
         sudo ln -sf "$SRB2MACPATH" "$SRB2MACLINK"
 
@@ -9051,7 +9890,7 @@ installtowindows() {
 
         SRB2WINDIR="wadcli"
         SRB2WINMENUDIR="wadcli"
-        SRB2WINBIN=$(find "$BUILD" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINBIN="wadcli"
         SRB2WINPATH="$HOME/SRB2 Software/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         DEPS=$(while read -r FILE; do
@@ -9060,7 +9899,18 @@ installtowindows() {
         mkdir -p "$SRB2WINPATH"
         cp -rf "$BUILD/$SRB2WINBIN" "$SRB2WINPATH"
         cp -rf $DEPS "$SRB2WINPATH"
-        $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR.bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN.exe" > "$SRB2WINPATH/$SRB2WINDIR.bat"
+
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+
+        SRB2WINDIR="kartmaker"
+        SRB2WINMENUDIR="kartmaker"
+        SRB2WINBIN="kartmaker"
+        SRB2WINPATH="$HOME/SRB2 Software/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        mkdir -p "$SRB2WINPATH"
+        cp -rf "$BUILD/build/$SRB2WINBIN" "$SRB2WINPATH/kartmaker.exe"
+        $PRINTF "@echo off\nstart $SRB2WINBIN.exe" > "$SRB2WINPATH/$SRB2WINDIR.bat"
 
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
@@ -9092,7 +9942,7 @@ installtowindows() {
     fi
 
     # Using VBScript to create menu entry for Windows.
-    if [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]; then
+    if [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]; then
 
         cat > "$BUILD/build/CreateShortcut.vbs" << WINMENUSHORTCUT
 Set oWS = CreateObject("WScript.Shell")
@@ -9277,7 +10127,7 @@ preparebuild() {
             ASSETAPPDIR="SRB2Kart"
             mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
 
-        elif [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ]; then
+        elif [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ]; then
 
             ASSETAPPDIR="SRB2"
             mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
@@ -9288,7 +10138,7 @@ preparebuild() {
 
     cd "$BUILD" || exit
 
-    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ]; then
+    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ]; then
 
         if [ "$GITVER" != "$GITDEFVER" ]; then
 
@@ -9358,6 +10208,67 @@ preparebuild() {
 
         fi
 
+        if [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
+
+            $PRINTF "$MESSAGE\n%s\e[0m" "Please enter $BUILDNAME's extra assets path, or just press enter to download and extract the latest SRB2/SRB2Kart stable release assets. Supported links/paths:
+        	- websites with direct link to file, for example, \"https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip\",
+        	- mega.nz,
+        	- drive.google.com,
+        	- dropbox.com,
+        	- full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.
+        Press enter, if you want to skip this part.
+        "
+            $PRINTF "$PROMPT\n%s\e[0m" "> "
+            read -r SRB2BLDEXTRAASSETPATH
+
+        fi
+
+        # Assume default branch and latest SRB2/SRB2Kart assets, if entered nothing in prompt.
+        if [ -z "$SRB2BLDEXTRAASSETPATH" ] && [ -z "$UPGRADE" ]; then
+
+            $PRINTF "$MESSAGE\n%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
+            GITVER="$GITDEFVER"
+
+        # Set to custom asset's path locally or remotely.
+        else
+
+            # Fixing Windows path to source code to be found by script.
+            if [ "$OS" = "Windows" ]; then
+
+                SRB2BLDEXTRAASSETPATH=$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk 'gsub("\\\\","\\\\");{print}' | gawk '!a[$0]++ {print}')
+
+            fi
+
+            if [ -n "$(find "$SRB2BLDEXTRAASSETPATH" 2> /dev/null | head -n1)" ]; then
+
+                FILETYPE=$(find "$SRB2BLDEXTRAASSETPATH" 2> /dev/null | gawk -F'.' '{print $NF}' | head -n1)
+                $PRINTF "$MESSAGE\n%s\n\e[0m" "Copying assets. Please wait..."
+                sleep 1
+
+                # Copy directory with assets to script's data path.
+                if [ "$(file -b "$SRB2BLDEXTRAASSETPATH" 2> /dev/null)" = "directory" ]; then
+
+                    if [ "$OS" = "Darwin" ]; then
+
+                        cp -rf "$SRB2BLDEXTRAASSETPATH/"* "$BUILD/build/assets/installer/$ASSETAPPDIR"
+
+                    else
+
+                        cp -rf "$SRB2BLDEXTRAASSETPATH/"* "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+
+                    fi
+
+                # Copy archived file of assets to script's data path.
+                else
+
+                    cp -rf "$SRB2BLDEXTRAASSETPATH" "$SRB2BLDROOT/assets/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')-$GITVER.$FILETYPE"
+
+                fi
+
+            fi
+
+        fi
+
     fi
 }
 
@@ -9365,7 +10276,7 @@ settrap() {
     # Trigger certain commands with trap signals.
     if [ "$OS" = "Windows" ]; then
 
-        if [ "$SRB2BLDDEVMODE" = 1 ]; then
+        if [ "$SRB2BLDDEVMODE" = "1" ]; then
 
             trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Exiting shell script. Please wait..." ; exit' 0 1 2 3 6 15
 
@@ -9377,7 +10288,7 @@ settrap() {
 
     else
 
-        if [ "$SRB2BLDDEVMODE" = 1 ]; then
+        if [ "$SRB2BLDDEVMODE" = "1" ]; then
 
             trap '$PRINTF "$SUCCESS\n\n%s\n\e[0m" "Exiting shell script. Please wait..." ; sudo_ping stop ; exit' 0 1 2 3 6 15
 
@@ -9499,7 +10410,7 @@ upgrade() {
 upgradetasks() {
     buildname
 
-    if [ "$SRB2BLDDEVMODE" != 1 ]; then
+    if [ "$SRB2BLDDEVMODE" != "1" ]; then
 
         $PRINTF "$MESSAGE\n%s\n\e[0m" "Cleaning up $BUILDNAME's source code. Please wait..."
         cleansource
@@ -9585,6 +10496,7 @@ Usage: srb2bld [OPTIONS]
   OPTIONS:
      -h, --help                             Show this help text.
      -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart build, which is packaged in DMG file (macOS only).
+     -ad, --android                         Compile and create distributable APK file of SRB2 build (Linux and Windows only).
      -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart build (Linux only).
      -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
      -f, --flatpak                          Compile and create distributable Flatpak of SRB2/SRB2Kart build (Linux only).
@@ -9658,7 +10570,9 @@ Usage: srb2bld [OPTIONS]
 
      11. If you get \"unhandled exception\" when running Ultimate Zone Builder, uninstall mono in your system.
 
-     12. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like \".bash_profile\" or \".zshrc\", which are:
+     12. Building Android APKs require gradlew script in the path \"[SRB2 build path]/android\".
+
+     13. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like \".bash_profile\" or \".zshrc\", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -9703,13 +10617,15 @@ r example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip 
 
           Then choose \"Build SRB2 Custom\", when running script.
 
-     13. Other environment variables to use. To activate them with value \"1\", do for example \"export SRB2BLDDEBUG=1\":
+     14. Other environment variables to use. To activate them with value \"1\", do for example \"export SRB2BLDDEBUG=1\":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues at https://github.com/bijman/srb2bld/issues.
 
          - SRB2BLDDEVMODE - For developers, that want to modify build's source code. Disables cleaning and resetting changes to build's source code.
 
          - SRB2BLDNOCCACHE - Disable ccache.
+
+         - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.
 "
 }
 
@@ -9730,6 +10646,12 @@ case "$1" in
     -ab | --appbundle)
 
         appbundle
+
+        ;;
+
+    -ad | --android)
+
+        android
 
         ;;
 
