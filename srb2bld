@@ -2561,45 +2561,7 @@ else
 
     fi
 
-if [ -n "\$UPGRADE" ] && [ -z "\$CUSTOMDIR" ]; then
-
-    export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline;print}' "\$SRB2BLDROOT/installed/\$UPGRADE")"
-
-elif [ -n "\$UPGRADE" ] && [ -n "\$CUSTOMDIR" ]; then
-
-    export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline;print}' "\$SRB2BLDROOT/installed/\$CUSTOMDIR")"
-
-# Otherwise set compilation flags, build and install as usual.
-else
-
-    # Display content of Makefile for a good view of available compilation flags.
-    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
-
-        cat "\$BUILD/README.md"
-
-    elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
-
-        \$PRINTF "$NOTICE%s\n\e[0m" "No configs found for kartmaker."
-
-    elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
-
-        cmake -LAH "\$BUILD" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-
-    elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ]; then
-
-        cat "\$BUILD/Makefile"
-
-    else
-
-        set +o noglob
-        gawk '/^#/,/ / {print}' "\$BUILD/src/"*akefile
-        set -o noglob
-
-    fi
-
     # Add compilation flags.
-    \$PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-
     if [ "\$OS" = "Windows" ]; then
 
         if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
@@ -2792,11 +2754,48 @@ MINGWCMAKE
 
     fi
 
-    \$PRINTF "$NOTICE%s\n\e[0m" "\$BLDCMD [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
-    \$PRINTF "$PROMPT\n%s\e[0m" "> "
-    read -r CONF
+    if [ -n "\$UPGRADE" ] && [ -z "\$CUSTOMDIR" ]; then
 
-  fi
+        export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline;print}' "\$SRB2BLDROOT/installed/\$UPGRADE")"
+
+    elif [ -n "\$UPGRADE" ] && [ -n "\$CUSTOMDIR" ]; then
+
+        export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline;print}' "\$SRB2BLDROOT/installed/\$CUSTOMDIR")"
+
+    # Otherwise set compilation flags, build and install as usual.
+    else
+
+        # Display content of Makefile for a good view of available compilation flags.
+        if [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
+
+            cat "\$BUILD/README.md"
+
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
+
+            \$PRINTF "$NOTICE%s\n\e[0m" "No configs found for kartmaker."
+
+        elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
+
+            cmake -LAH "\$BUILD" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+
+        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ]; then
+
+            cat "\$BUILD/Makefile"
+
+        else
+
+            set +o noglob
+            gawk '/^#/,/ / {print}' "\$BUILD/src/"*akefile
+            set -o noglob
+
+        fi
+
+        \$PRINTF "$MESSAGE\n%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+        \$PRINTF "$NOTICE%s\n\e[0m" "\$BLDCMD [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
+        \$PRINTF "$PROMPT\n%s\e[0m" "> "
+        read -r CONF
+
+    fi
 
     if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /LINUX=1|LINUX64=1|MINGW=1|MINGW64=1|NONX86=1|UNIX=1|UNIXCOMMON=1|FREEBSD=1|CYGWIN32=1|SOLARIS=1|WATTCP=1|WINDOWS=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
@@ -5154,7 +5153,7 @@ curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1E9377A2BA9EF2
 RUN apt-get update && \
 apt-get full-upgrade -y && \
 apt-get install -y apt-fast && \
-gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=false");sub("_MAXNUM=5","_MAXNUM=20");print}' /etc/apt-fast.conf && \
+gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=true");sub("_MAXNUM=5","_MAXNUM=20");print}' /etc/apt-fast.conf && \
 apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse nasm build-essential $GCCVER $GXXVER $GCCOLDVER ccache automake libtool cmake file sudo dash git stow imagemagick p7zip-full p7zip-rar
 
 #RUN dbus-uuidgen > /var/lib/dbus/machine-id && \
@@ -5199,7 +5198,7 @@ ln -sf /bin/true /usr/bin/chfn
 RUN apt-get update && \
 apt-get full-upgrade -y && \
 apt-get install -y apt-fast && \
-gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=false");sub("_MAXNUM=5","_MAXNUM=20");print}' /etc/apt-fast.conf && \
+gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=true");sub("_MAXNUM=5","_MAXNUM=20");print}' /etc/apt-fast.conf && \
 apt-fast install -y libfmt-dev libsfml-dev libjpeg-dev libogg-dev libflac-dev libvorbis-dev libopenal-dev libudev-dev libglew-dev libfreeimage-dev libftgl-dev libfluidsynth-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgconf2-dev freeglut3-dev libmodplug-dev $LNXWXGTKPKG libnotify-dev libcurl4-openssl-dev libbz2-dev gtk2-engines-pixbuf libgtk-3-dev libcanberra-gtk3-dev libcanberra-gtk3-module libcanberra-gtk-dev libcanberra-gtk-module liblua5.3-dev libmpg123-dev libfuse-dev fuse libx11-dev mesa-common-dev mono-complete gnome-themes-extra nasm build-essential g++ $GCCVER $GXXVER ccache automake libtool cmake patchelf file sudo dash git stow imagemagick p7zip-full p7zip-rar
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
@@ -5305,7 +5304,7 @@ curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA1
 RUN apt-get update && \
 apt-get full-upgrade -y && \
 apt-get install -y apt-fast && \
-gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=false");sub("_MAXNUM=5","_MAXNUM=20");print}' /etc/apt-fast.conf && \
+gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=true");sub("_MAXNUM=5","_MAXNUM=20");print}' /etc/apt-fast.conf && \
 apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev libc6-dev-i386-cross fuse nasm build-essential mingw-w64 ccache automake libtool cmake file sudo dash git-svn stow imagemagick p7zip-full p7zip-rar
 
 RUN ln -sf ../../bin/ccache /usr/lib/ccache/i686-w64-mingw32-$MINGWCCVER && \
@@ -5388,7 +5387,7 @@ curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BF
 RUN apt-get update && \
 apt-get full-upgrade -y && \
 apt-get install -y apt-fast && \
-gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=false");sub("_MAXNUM=5","_MAXNUM=20");print}' /etc/apt-fast.conf && \
+gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=true");sub("_MAXNUM=5","_MAXNUM=20");print}' /etc/apt-fast.conf && \
 apt-fast install -y libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev libglew-dev libfreeimage-dev libftgl-dev libsfml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgconf2-dev freeglut3-dev libwxgtk3.0-gtk3-dev libwxgtk-media3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libbz2-dev libgtk-3-dev liblua5.3-dev libfmt-dev libmpg123-dev rapidjson-dev libfuse-dev libx11-dev mesa-common-dev mono-complete fuse nasm build-essential mingw-w64 ccache automake libtool cmake file sudo dash git stow imagemagick p7zip-full p7zip-rar && \
 ln -sf ../../bin/ccache /usr/lib/ccache/i686-w64-mingw32-$MINGWCCVER && \
 ln -sf ../../bin/ccache /usr/lib/ccache/$ARCH-w64-mingw32-$MINGWCCVER && \
