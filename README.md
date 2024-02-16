@@ -160,8 +160,8 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 v2.0             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
-| SRB2 Final Demo       |          ✅*          |         ✅           |        ✅*        |        ✅*      |       ⛔      |
-| SRB2 JTE (1.09)       |          🟨*          |         ✅           |        🟨*        |        ⛔       |       ⛔      |
+| SRB2 Final Demo       |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
+| SRB2 JTE (1.09)       |          🟨*          |         ✅*          |        🟨*        |        ⛔       |       ⛔      |
 | SRB2 Persona          |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart             |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
 | SRB2 Kart Moe Mansion |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
