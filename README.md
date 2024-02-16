@@ -149,19 +149,19 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 18-12-2023)
+# Compatibility (as of 12-02-2024)
 |                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Uncapped PLUS    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 rphys            |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 TSoURDt3rd       |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
+| SRB2 rphys            |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 TSoURDt3rd       |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
 | SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 v2.0             |          ✅           |         ⛔           |        ✅         |        ✅*      |       ⛔      |
-| SRB2 Final Demo       |          ✅*          |         ⛔           |        ✅*        |        ✅*      |       ⛔      |
-| SRB2 JTE (1.09)       |          🟨*          |         ⛔           |        🟨*        |        ⛔       |       ⛔      |
+| SRB2 v2.0             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| SRB2 Final Demo       |          ✅*          |         ✅           |        ✅*        |        ✅*      |       ⛔      |
+| SRB2 JTE (1.09)       |          🟨*          |         ✅           |        🟨*        |        ⛔       |       ⛔      |
 | SRB2 Persona          |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart             |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
 | SRB2 Kart Moe Mansion |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
@@ -172,7 +172,7 @@ As for macOS users, they need to install these additional dependencies:
 | wadcli                |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
 | kartmaker             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SLADE                 |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
-| Ultimate Zone Builder |          ✅           |         ⛔           |        ⛔         |        ✅       |       ⛔      |
+| Ultimate Zone Builder |          ✅           |         ✅           |        ⛔         |        ✅       |       ⛔      |
 
 **Legend:**
 
@@ -206,6 +206,7 @@ Usage: srb2bld [OPTIONS]
      -la, --listasset                       List downloaded SRB2/SRB2Kart assets.
      -lb, --listbuild                       List downloaded SRB2/SRB2Kart builds.
      -lc, --listconfig                      List compilation flags of installed SRB2/SRB2Kart builds.
+     -ld, --listdep                         List compiled and installed dependencies for builds.
      -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
@@ -274,7 +275,9 @@ Usage: srb2bld [OPTIONS]
 
      12. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
 
-     13. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+     13. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+
+     14. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -286,6 +289,8 @@ Usage: srb2bld [OPTIONS]
                - drive.google.com,
                - dropbox.com,
                - full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.)
+
+          - SRB2BLDEXTRAASSETPATH - path to extra assets from local or remote path, in case build requires it. The same supported links/paths applies as SRB2BLDASSETPATH.
 
           EXAMPLES:
                1. export SRB2BLDGITPATH="https://github.com/STJr/SRB2"
@@ -318,7 +323,7 @@ Usage: srb2bld [OPTIONS]
 
           Then choose "Build SRB2 Custom", when running script.
 
-     14. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+     15. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -327,6 +332,8 @@ Usage: srb2bld [OPTIONS]
          - SRB2BLDNOCCACHE - Disable ccache.
 
          - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.
+
+         - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
 ```
 
 # Notes
@@ -366,7 +373,9 @@ Usage: srb2bld [OPTIONS]
 
 12. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
 
-13. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+13. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+
+14. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
     - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -378,8 +387,10 @@ Usage: srb2bld [OPTIONS]
         - drive.google.com,
         - dropbox.com,
         - full path to downloaded archived file in formats supported by p7zip (https://www.7-zip.org) or full path to directory with build's assets, for example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip for Windows.)
+
+    - SRB2BLDEXTRAASSETPATH - path to extra assets from local or remote path, in case build requires it. The same supported links/paths applies as SRB2BLDASSETPATH.
 ```
-  EXAMPLES:
+    EXAMPLES:
         1. export SRB2BLDGITPATH="https://github.com/STJr/SRB2"
 
         2. export SRB2BLDGITPATH="https://git.do.srb2.org/TehRealSalt/SRB2"
@@ -410,7 +421,7 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-14. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+15. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -419,3 +430,5 @@ Usage: srb2bld [OPTIONS]
         - SRB2BLDNOCCACHE - Disable ccache.
 
         - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.
+
+        - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
