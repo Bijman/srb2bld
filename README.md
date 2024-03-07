@@ -211,7 +211,7 @@ Usage: srb2bld [OPTIONS]
      -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
      -rd, --removedep                       Remove compiled and installed dependencies for builds.
-     -t, --tag                              Compile and install build with chosen tag instead of branch (only works with -i/--install,-ab/--appbundle,-ai/--appimage,-f/--flatpak).
+     -t, --tag                              Compile and install build with chosen tag instead of branch (only works with -i/--install, -ab/--appbundle, -ai/--appimage, -f/--flatpak).
      -u, --user                             Install build to user's home directory (only works with -i/--install).
      -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
      -up, --upgrade                         Upgrade installed SRB2/SRB2Kart build.
