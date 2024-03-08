@@ -1088,13 +1088,13 @@ chooseinstall() {
 
     fi
 
-    if [ "$OS" = "Windows" ] && ([ -f "$(find "$BUILD/bin" -name "*.exe" 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD/build" -mindepth 1 -maxdepth 1 -executable -type f | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f | head -n1)" ]); then
+    if [ "$OS" = "Windows" ] && ([ -f "$(find "$BUILD/bin" -name "*.exe" 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD/build" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ]); then
 
         installtowindows
 
         installtolist
 
-    elif [ "$OS" = "Linux" ] && ([ -f "$(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] || [ -f "$(find $BUILD/build -mindepth 1 -maxdepth 1 -executable -type f | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f | head -n1)" ]); then
+    elif [ "$OS" = "Linux" ] && ([ -f "$(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] || [ -f "$(find $BUILD/build -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ]); then
 
         installtolinux
 
@@ -2241,7 +2241,13 @@ if [ "\$ANDROID" = "1" ]; then
 
     fi
 
-    gawk -i inplace '{gsub("\r",""); print}' "\$BUILD/android/gradlew"
+    if [ -x "\$BUILD/android/gradlew" ]; then
+
+        gawk -i inplace '{gsub("\r",""); print}' "\$BUILD/android/gradlew"
+
+    fi
+
+    \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $BUILDNAME's Android APK. Please wait..."
 
     if [ "$SRB2BLDNOGRADLECACHE" = "1" ]; then
 
@@ -2511,9 +2517,14 @@ else
 
     elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
-         gawk -i inplace '/if\(ZIP_COMMAND\)/ {suppress=1} /if\(APPLE\)/ {suppress=0} !suppress' "\$BUILD/dist/CMakeLists.txt"
-         gawk -i inplace '!/REGEX REPLACE "windres"/ {print}' "\$BUILD/cmake/unix.cmake"
-         gawk -i inplace '{gsub("\\\\$<BUILD_INTERFACE:|>","");print}' "\$BUILD/thirdparty/fmt/CMakeLists.txt"
+        gawk -i inplace '/if\(ZIP_COMMAND\)/ {suppress=1} /if\(APPLE\)/ {suppress=0} !suppress' "\$BUILD/dist/CMakeLists.txt"
+
+#       if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3250" ] && [ "\$LIBC" != "musl" ]; then
+
+#           gawk -i inplace '!/REGEX REPLACE "windres"/ {print}' "\$BUILD/cmake/unix.cmake"
+#           gawk -i inplace '{gsub("\\\\$<BUILD_INTERFACE:|>","");print}' "\$BUILD/thirdparty/fmt/CMakeLists.txt"
+
+#       fi
 
     fi
 
@@ -2671,7 +2682,7 @@ MINGWCMAKE
 
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
-            if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_' '{gsub("\\\.",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -le "3113" ] && [ "\$LIBC" != "musl" ]; then
+            if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -le "3113" ] && [ "\$LIBC" != "musl" ]; then
 
                 WX_CONFIG_EXECUTABLE=\$(command -v wx-config wx-config-gtk3 2> /dev/null | head -n1)
                 WX_LIBRARIES=\$(find /usr -name libwx_gtk3u*.so.* -printf "%p:" 2> /dev/null)
@@ -3738,7 +3749,7 @@ MINGWCMAKE
             if [ "\$LIBC" != "musl" ]; then
 
                 #cp -Lf \$(find \$(ldd "\$BUILD/build/AppDir/usr/bin/slade" 2>&1 2> /dev/null | gawk '!/libc/ {print \$3}')) "\$BUILD/build/AppDir/usr/lib"
-                cp -Lf \$(find /usr/lib/\$ARCH-linux-gnu/libgmp.so.[0-9][0-9] /usr/lib/\$ARCH-linux-gnu/libp11-kit.so.[0-9] /usr/lib/\$ARCH-linux-gnu/liblua[0-9].[0-9].so /usr/lib/\$ARCH-linux-gnu/libnotify.so.[0-9] /usr/lib/\$ARCH-linux-gnu/librsvg-[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libcroco-[0-9].[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libxml[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libicuuc.so.[0-9][0-9] /usr/lib/\$ARCH-linux-gnu/libicudata.so.[0-9][0-9] /usr/lib/\$ARCH-linux-gnu/libproxy.so.[0-9] /usr/lib/\$ARCH-linux-gnu/libgnutls.so.[0-9][0-9] /usr/lib/\$ARCH-linux-gnu/libidn[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libunistring.so.[0-9] /usr/lib/\$ARCH-linux-gnu/libtasn[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libnettle.so.[0-9] /usr/lib/\$ARCH-linux-gnu/libhogweed.so.[0-9] /usr/lib/\$ARCH-linux-gnu/libcanberra-gtk[0-9].so.[0-9]) "\$BUILD/build/AppDir/usr/lib"
+                cp -Lf \$(find /usr/lib/\$ARCH-linux-gnu/libgmp.so.[0-9][0-9] /usr/lib/\$ARCH-linux-gnu/libp11-kit.so.[0-9] /usr/lib/\$ARCH-linux-gnu/liblua[0-9].[0-9].so /usr/lib/\$ARCH-linux-gnu/libnotify.so.[0-9] /usr/lib/\$ARCH-linux-gnu/librsvg-[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libcroco-[0-9].[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libxml[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libicuuc.so.[0-9][0-9] /usr/lib/\$ARCH-linux-gnu/libicudata.so.[0-9][0-9] /usr/lib/\$ARCH-linux-gnu/libproxy.so.[0-9] /usr/lib/\$ARCH-linux-gnu/libgnutls.so.[0-9][0-9] /usr/lib/\$ARCH-linux-gnu/libidn[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libunistring.so.[0-9] /usr/lib/\$ARCH-linux-gnu/libtasn[0-9].so.[0-9] /usr/lib/\$ARCH-linux-gnu/libnettle.so.[0-9] /usr/lib/\$ARCH-linux-gnu/libhogweed.so.[0-9] /usr/lib/\$ARCH-linux-gnu/libcanberra-gtk[0-9].so.[0-9] 2> /dev/null) "\$BUILD/build/AppDir/usr/lib"
                 cp -Lf /usr/lib/\$ARCH-linux-gnu/gtk-3.0/modules/* "\$BUILD/build/AppDir/usr/lib/gtk-3.0/modules"
                 cp -rf /usr/lib/\$ARCH-linux-gnu/gio/modules/* "\$BUILD/build/AppDir/usr/lib/gio/modules"
                 cp -rf /usr/lib/\$ARCH-linux-gnu/gdk-pixbuf-2.0/2.10.0/* "\$BUILD/build/AppDir/usr/lib/gdk-pixbuf"
@@ -4435,7 +4446,7 @@ DESKTOP
 
         else
 
-            cp -f \$(find "/usr/share/icons/hicolor" -type f -name "*.png" | head -n1) "\$BUILD/build/icon.png"
+            cp -f \$(find "/usr/share/icons/hicolor" -type f -name "*.png" 2> /dev/null | head -n1) "\$BUILD/build/icon.png"
 
         fi
 
@@ -5100,7 +5111,7 @@ DESKTOP
 
         else
 
-            cp -rf \$(find "/usr/share/icons/hicolor" -type f -name "*.png" | head -n1) "\$BUILD/build/icon.png"
+            cp -rf \$(find "/usr/share/icons/hicolor" -type f -name "*.png" 2> /dev/null | head -n1) "\$BUILD/build/icon.png"
 
         fi
 
@@ -6502,7 +6513,7 @@ flatpak() {
         "cp -rf bin/* /app/bin",
         "cp -rf share/* /app/share",
         "mv -f /app/share/applications/*.desktop /app/share/applications/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').desktop",
-        "mv -f \$(find /app/share/icons/hicolor -name *.png) \$(find /app/share/icons/hicolor -name apps)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
+        "mv -f \$(find /app/share/icons/hicolor -name *.png 2> /dev/null) \$(find /app/share/icons/hicolor -name apps 2> /dev/null)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
       ]
     }
   ]
@@ -6542,7 +6553,7 @@ FLATPAK
         "cp -rf bin/* /app/bin",
         "cp -rf share/* /app/share",
         "mv -f /app/share/applications/*.desktop /app/share/applications/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').desktop",
-        "mv -f \$(find /app/share/icons/hicolor -name *.png) \$(find /app/share/icons/hicolor -name apps)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
+        "mv -f \$(find /app/share/icons/hicolor -name *.png 2> /dev/null) \$(find /app/share/icons/hicolor -name apps 2> /dev/null)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
       ]
     }
   ]
@@ -6594,7 +6605,7 @@ FLATPAK
         "cp -rf lib/* /app/lib",
         "cp -rf share/* /app/share",
         "mv -f /app/share/applications/*.desktop /app/share/applications/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').desktop",
-        "mv -f \$(find /app/share/icons/hicolor -name *.png) \$(find /app/share/icons/hicolor -name apps)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
+        "mv -f \$(find /app/share/icons/hicolor -name *.png 2> /dev/null) \$(find /app/share/icons/hicolor -name apps 2> /dev/null)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
       ]
     }
   ]
@@ -6637,7 +6648,7 @@ FLATPAK
         "cp -rf lib/* /app/lib",
         "cp -rf share/* /app/share",
         "mv -f /app/share/applications/*.desktop /app/share/applications/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').desktop",
-        "mv -f \$(find /app/share/icons/hicolor -name *.png) \$(find /app/share/icons/hicolor -name apps)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
+        "mv -f \$(find /app/share/icons/hicolor -name *.png 2> /dev/null) \$(find /app/share/icons/hicolor -name apps 2> /dev/null)/org.srb2bld.$($PRINTF $BUILD | gawk -F'/' '{print $NF}').png"
       ]
     }
   ]
@@ -6695,7 +6706,7 @@ FLATPAK
         "cp -rf share/* /app/share",
         "mv -f /app/share/applications/*-software.desktop /app/share/applications/$FLATPAKNAME-software.desktop",
         "mv -f /app/share/applications/*-opengl.desktop /app/share/applications/$FLATPAKNAME-opengl.desktop",
-        "mv -f \$(find /app/share/icons/hicolor -name *.png) \$(find /app/share/icons/hicolor -name apps)/$FLATPAKNAME.png"
+        "mv -f \$(find /app/share/icons/hicolor -name *.png 2> /dev/null) \$(find /app/share/icons/hicolor -name apps 2> /dev/null)/$FLATPAKNAME.png"
       ]
     }
   ]
@@ -6755,7 +6766,7 @@ FLATPAK
         "cp -rf share/* /app/share",
         "mv -f /app/share/applications/*-software.desktop /app/share/applications/$FLATPAKNAME-software.desktop",
         "mv -f /app/share/applications/*-opengl.desktop /app/share/applications/$FLATPAKNAME-opengl.desktop",
-        "mv -f \$(find /app/share/icons/hicolor -name *.png) \$(find /app/share/icons/hicolor -name apps)/$FLATPAKNAME.png"
+        "mv -f \$(find /app/share/icons/hicolor -name *.png 2> /dev/null) \$(find /app/share/icons/hicolor -name apps 2> /dev/null)/$FLATPAKNAME.png"
       ]
     }
   ]
@@ -6764,6 +6775,7 @@ FLATPAK
 
     fi
 
+    $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $BUILDNAME's Flatpak. Please wait..."
     $FLATPAKBIN install -y flathub "$FLATPAKPLATFORM" "$FLATPAKSDK"
 
     # Build Flatpak.
@@ -7294,7 +7306,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7316,7 +7328,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7338,7 +7350,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7360,7 +7372,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7382,7 +7394,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7405,7 +7417,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7427,7 +7439,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7449,7 +7461,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7511,7 +7523,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7533,7 +7545,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7555,7 +7567,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7577,7 +7589,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7599,7 +7611,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7621,7 +7633,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7644,7 +7656,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -7668,7 +7680,7 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 2> /dev/null) "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf $(
                 $SUDO find "$BUILD/build/AppDir/usr/games" -mindepth 2 -maxdepth 2 -type f -regex ".*\.[a-z]*[0-9]*" 2> /dev/null
@@ -7745,7 +7757,7 @@ installtolinux() {
 
             $SUDO chmod +x "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/"* "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            $SUDO install -Dm644 $(find "$BUILD/build" -type f -name slade.pk3 | head -n1) -t "$SRB2ASSETLNXPATH"
+            $SUDO install -Dm644 $(find "$BUILD/build" -type f -name slade.pk3 2> /dev/null | head -n1) -t "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
 
@@ -7916,7 +7928,7 @@ NIX
 
         elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
-            install -Dm644 $(find "$BUILD/build" -type f -name slade.pk3 | head -n1) -t "/tmp/flake-build/usr/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
+            install -Dm644 $(find "$BUILD/build" -type f -name slade.pk3 2> /dev/null | head -n1) -t "/tmp/flake-build/usr/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
 
             # Setting path to interpreter.
             $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" || true
@@ -8095,8 +8107,8 @@ NIX
             printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport SRB2WADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
             chmod +x "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
             chmod +x "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
-            install -Dm755 \$(find "\$src/bin" -type f | gawk '!/\.debug/ {print}' | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            install -Dm755 \$(find "\$src/bin" -type f -name "*.debug" | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin" || true
+            install -Dm755 \$(find "\$src/bin" -type f 2> /dev/null | gawk '!/\.debug/ {print}' | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            install -Dm755 \$(find "\$src/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin" || true
             cp -rf "\$src/games/"*/* "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
             install -Dm644 "\$src/lib/"* -t "\$out/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
             install -Dm644 "\$src/share/applications/"* -t "\$out/share/applications"
@@ -8110,9 +8122,9 @@ NIX
         else
 
             # Copy debug binary files.
-            if [ -x "$(find "$BUILD/bin" -name "*.debug" | head -n1)" ]; then
+            if [ -x "$(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1)" ]; then
 
-                cp -rf $(find "$BUILD/bin" -name "*.debug" | head -n1) "/tmp/flake-build/usr/bin"
+                cp -rf $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "/tmp/flake-build/usr/bin"
 
             fi
 
@@ -8167,8 +8179,8 @@ NIX
             printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport SRB2WADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
             chmod +x "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
             chmod +x "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
-            install -Dm755 \$(find "\$src/bin" -type f | gawk '!/\.debug/ {print}' | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            install -Dm755 \$(find "\$src/bin" -type f -name "*.debug" | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin" || true
+            install -Dm755 \$(find "\$src/bin" -type f 2> /dev/null | gawk '!/\.debug/ {print}' | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            install -Dm755 \$(find "\$src/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin" || true
             cp -rf "\$src/games/"*/* "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
             install -Dm644 "\$src/lib/"* -t "\$out/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
             install -Dm644 "\$src/share/applications/"* -t "\$out/share/applications"
@@ -8221,18 +8233,9 @@ NIX
 
     done
 
-    # Change variable SRB2BINARYLNXPATH to real path to slade binary for reading missing libraries.
-    if [ -x "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin" ]; then
-
-        SRB2BINARYLNXPATH="$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-
-    fi
-
     installdepsglibc
 
     if [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 2> /dev/null | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | head -n1)" ]; then
-
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Patching paths to dependencies for $BUILDNAME. Please wait..."
 
         # Setting path to interpreter.
         $SUDO patchelf --set-interpreter $(ldd "$SRB2BINARYLNXPATH" 2>&1 2> /dev/null | gawk '/ld-linux.*/ {print $3}') "$SRB2BINARYLNXPATH" || true
@@ -8242,6 +8245,8 @@ NIX
         while [ "$n" -lt 3 ]; do
 
             n=$((n + 1))
+
+            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Patching paths to dependencies for $BUILDNAME. Please wait..."
 
             ldd "$SRB2BINARYLNXPATH" 2>&1 2> /dev/null | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u | while read -r l; do
 
@@ -8324,7 +8329,7 @@ NIX
 
         else
 
-            LD_LIBRARY_PATH="$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib" ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u
+            LD_LIBRARY_PATH="$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib" ldd "$SRB2BINARYLNXPATH" 2>&1 2> /dev/null | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u
             $PRINTF "$NOTICE\n%s\n\e[0m" "Script couldn't install some packages for missing libraries. Please install manually these above missing libraries."
             exit
 
@@ -8336,8 +8341,6 @@ NIX
 
     if [ "$LIBC" = "musl" ] && [ -n "$(ldd $SRB2BINARYLNXPATH 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u)" ]; then
 
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Patching paths to dependencies for $BUILDNAME. Please wait..."
-
         # Setting path to interpreter.
         $SUDO patchelf --set-interpreter $(ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk '/ld-musl.*/ {print $3}') "$SRB2BINARYLNXPATH" || true
 
@@ -8346,6 +8349,8 @@ NIX
         while [ "$n" -lt 3 ]; do
 
             n=$((n + 1))
+
+            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Patching paths to dependencies for $BUILDNAME. Please wait..."
 
             ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u | while read -r l; do
 
@@ -8675,48 +8680,48 @@ installtomacos() {
 
 Press y/yes to continue, or n/no or ctrl+c to quit."
 
-        #        $PRINTF "$PROMPT\n%s\e[0m" "> "
-        #        read -r CONFIRM
+        $PRINTF "$PROMPT\n%s\e[0m" "> "
+        read -r CONFIRM
 
-        #        if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
+        if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
-        if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
+            if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
-            cat "$BUILD/README.md"
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-            $PRINTF "$NOTICE%s\n\e[0m" "make -k -j$NCPU -C $BUILD [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
+                cat "$BUILD/README.md"
+                $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+                $PRINTF "$NOTICE%s\n\e[0m" "make -k -j$NCPU -C $BUILD [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
 
-        elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
+            elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
 
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-            $PRINTF "$NOTICE%s\n\e[0m" "$BUILD/build.sh"
+                $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+                $PRINTF "$NOTICE%s\n\e[0m" "$BUILD/build.sh"
 
-        elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
+            elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
-            # Display content of CMakeLists for a good view of available compilation flags.
-            cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-            $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(command -v $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVERSLADE -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/opt/srb2-apps [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
+                # Display content of CMakeLists for a good view of available compilation flags.
+                cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+                $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(command -v $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVERSLADE -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/opt/srb2-apps [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
+
+            else
+
+                # Display content of CMakeLists for a good view of available compilation flags.
+                #                cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+                $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
+                $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$GITVER-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CONFIG_SYSTEM_LIBRARIES=ON -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/opt/srb2-apps -DCMAKE_EXE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_MODULE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DSDL2_MIXER_INCLUDE_DIR=$LIBSDL2MIXERPREFIX/include/SDL2 -DSDL2_MIXER_LIBRARY=$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DPNG_PNG_INCLUDE_DIR=$LIBPNGPREFIX/include -DPNG_LIBRARY=$LIBPNGPREFIX/lib/libpng.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
+
+            fi
+
+            # Add compilation flags.
+            $PRINTF "$PROMPT\n%s\e[0m" "> "
+            read -r CONF
 
         else
 
-            # Display content of CMakeLists for a good view of available compilation flags.
-            #                cmake -LAH -S "$BUILD" -B "$BUILD/build" 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
-            $PRINTF "$NOTICE%s\n\e[0m" "cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=$BUILDNAME -DCPACK_PACKAGE_FILE_NAME=$BUILDNAME-$GITVER-$COMREV -DCMAKE_BUILD_TYPE=Release -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CONFIG_SYSTEM_LIBRARIES=ON -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/opt/srb2-apps -DCMAKE_EXE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_MODULE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DSDL2_MIXER_INCLUDE_DIR=$LIBSDL2MIXERPREFIX/include/SDL2 -DSDL2_MIXER_LIBRARY=$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DPNG_PNG_INCLUDE_DIR=$LIBPNGPREFIX/include -DPNG_LIBRARY=$LIBPNGPREFIX/lib/libpng.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
+            $PRINTF "$NOTICE\n%s\n\e[0m" "Exiting script."
+            exit
 
         fi
-
-        # Add compilation flags.
-        $PRINTF "$PROMPT\n%s\e[0m" "> "
-        read -r CONF
-
-        #        else
-
-        #            $PRINTF "$NOTICE\n%s\n\e[0m" "Exiting."
-        #            exit
-
-        #        fi
 
         # Some checks, if the build's certain compilation flags were entered.
         if [ -n "$($PRINTF "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG=OFF/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$CONF" | gawk 'match($0, /SRB2_CONFIG_HAVE_PNG:BOOL=OFF/) {print substr($0, RSTART, RLENGTH)}')" ]; then
@@ -10843,13 +10848,13 @@ upgradetasks() {
 
         fi
 
-        if [ "$OS" = "Windows" ] && ([ -f "$(find "$BUILD/bin" -name "*.exe" 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD/build" -mindepth 1 -maxdepth 1 -executable -type f | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f | head -n1)" ]); then
+        if [ "$OS" = "Windows" ] && ([ -f "$(find "$BUILD/bin" -name "*.exe" 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD/build" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ]); then
 
             installtowindows
 
             installtolist
 
-        elif [ "$OS" = "Linux" ] && ([ -f "$(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] || [ -f "$(find $BUILD/build -mindepth 1 -maxdepth 1 -executable -type f | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f | head -n1)" ]); then
+        elif [ "$OS" = "Linux" ] && ([ -f "$(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] || [ -f "$(find $BUILD/build -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ]); then
 
             installtolinux
 
