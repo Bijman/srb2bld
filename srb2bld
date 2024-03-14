@@ -62,16 +62,6 @@ else
 
 fi
 
-if [ -x "$(command -v doas 2> /dev/null)" ]; then
-
-    SUDO="doas"
-
-else
-
-    SUDO="sudo"
-
-fi
-
 # Determine installation prefix from user's input.
 if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
 
@@ -224,61 +214,15 @@ if [ "$OS" = "Darwin" ]; then
 
 fi
 
-# If podman is installed, this will be used instead of docker.
-if [ -x "$(command -v podman 2> /dev/null)" ]; then
+checkuseropt() {
+    # Blocking access to option -u/--user for building bundles in Linux.
+    if [ -n "$ANDROID" ] || [ -n "$APPIMAGE" ] || [ -n "$FLATPAK" ] || [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -up -u$| -up --user$| --upgrade -u$| --upgrade --user$/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
-    if [ "$OS" = "Linux" ]; then
-
-        if [ ! -d /etc/containers ]; then
-
-            $SUDO mkdir -p /etc/containers
-
-        fi
-
-        # Setting insecureAcceptAnything in case of missing this policy in file /etc/containers/policy.json.
-        if [ ! -f "/etc/containers/policy.json" ] || [ -z "$(gawk '/insecureAcceptAnything/ {print}' /etc/containers/policy.json 2> /dev/null)" ] && [ -z "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
-
-            $SUDO podman image trust set -t accept default
-
-        fi
-
-        if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
-
-            OSVIRT="podman --root $HOME/.local/share/containers/storage"
-
-        else
-
-            OSVIRT="$SUDO podman --root /var/lib/containers/storage"
-
-        fi
-
-    else
-
-        if [ -x "$(command -v winpty 2> /dev/null)" ]; then
-
-            OSVIRT="winpty podman"
-
-        else
-
-            OSVIRT="podman"
-
-        fi
+        $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Currently building with option $($PRINTF "%s\n" "$ARGS" | gawk '{print $1}') is not supported with -u/--user. Exiting."
+        exit
 
     fi
-
-else
-
-    if [ -x "$(command -v winpty 2> /dev/null)" ]; then
-
-        OSVIRT="winpty docker"
-
-    else
-
-        OSVIRT="docker"
-
-    fi
-
-fi
+}
 
 checkuserid() {
     # Check id of login running this script.
@@ -311,6 +255,8 @@ android() {
 
     # We have to set this in order to make APK in Docker/Podman container.
     ANDROID=1
+
+    checkuseropt
 
     # Set current working directory.
     ANDPWD="$(pwd)"
@@ -349,7 +295,11 @@ android() {
 
     preparebuild
 
-    settrap
+    setsudo
+
+    preparecontainer
+
+    containerentry
 
     if [ "$OS" = "Linux" ]; then
 
@@ -357,7 +307,7 @@ android() {
 
     fi
 
-    containerentry
+    settrap
 
     containerrun
 
@@ -396,6 +346,8 @@ appbundle() {
 
     preparebuild
 
+    setsudo
+
     settrap
 
     installtomacos
@@ -431,6 +383,8 @@ appimage() {
     # We have to set this in order to make AppImage in Docker/Podman container.
     APPIMAGE=1
 
+    checkuseropt
+
     # Set current working directory.
     LNXPWD="$(pwd)"
 
@@ -444,11 +398,15 @@ appimage() {
 
     preparebuild
 
-    settrap
+    setsudo
+
+    preparecontainer
+
+    containerentry
 
     sudo_ping
 
-    containerentry
+    settrap
 
     containerrun
 
@@ -1056,6 +1014,10 @@ chooseinstall() {
 
     preparebuild
 
+    setsudo
+
+    settrap
+
     # Check whether SDKROOT environment variable is set or not.
     if [ "$OS" = "Darwin" ]; then
 
@@ -1066,23 +1028,21 @@ chooseinstall() {
 
         fi
 
-        settrap
-
         installtomacos
 
         installtolist
 
     else
 
+        preparecontainer
+
+        containerentry
+
         if [ "$OS" = "Linux" ]; then
 
             sudo_ping
 
         fi
-
-        containerentry
-
-        settrap
 
         containerrun
 
@@ -1252,6 +1212,8 @@ chooseremovebuild() {
 }
 
 chooseremovedep() {
+    setsudo
+
     if [ -z "$(find "$SRB2BLDROOT/libraries" -mindepth 1 -maxdepth 1 -type d 2> /dev/null)" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Can't find dependencies."
@@ -1360,7 +1322,11 @@ chooseuninstall() {
 
             elif [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
 
+                SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software/) {print substr($0, RSTART, RLENGTH)}' "$BUILDINSTALLED" | head -n1)"
+
                 gawk -i inplace -v RS= '{gsub("---------------\n[A-Z]*=1|---------------",""); print}' "$BUILDINSTALLED"
+
+                setsudo
 
                 if [ "$LNXOSNAME" = "NixOS" ]; then
 
@@ -1411,27 +1377,12 @@ chooseuninstall() {
 
 cleansource() {
     # Clean build's directory after compiling.
-    if [ "$OS" = "Windows" ]; then
+    git -C "$BUILD" clean -qdffx -e .comrev
+    git -C "$BUILD" reset -q --hard
 
-        git -C "$BUILD" clean -qdffx -e .comrev
-        git -C "$BUILD" reset -q --hard
+    if [ "$LNXOSNAME" = "NixOS" ]; then
 
-    else
-
-        if [ "$OS" != "Darwin" ]; then
-
-            $SUDO find "$SRB2BLDROOT" ! -user $(stat -c "%U" "$HOME") -exec chown -R $(stat -c "%U:%G" "$HOME") {} \;
-
-        fi
-
-        git -C "$BUILD" clean -qdffx -e .comrev
-        git -C "$BUILD" reset -q --hard
-
-        if [ "$LNXOSNAME" = "NixOS" ]; then
-
-            rm -rf "/tmp/flake-build"
-
-        fi
+        rm -rf "/tmp/flake-build"
 
     fi
 }
@@ -1471,6 +1422,8 @@ containerentry() {
     fi
 
     # Added environment variables for Docker/Podman container.
+    export HOSTUSER="$USER"
+    export ARGS="$ARGS"
     export PRINTF=\$(which -a printf 2> /dev/null | gawk '/bin/ {print}' | head -n1)
     export ARCH="$ARCH"
     export OS="$OS"
@@ -1479,6 +1432,7 @@ containerentry() {
     export IS64="$IS64"
     export ISNET="$ISNET"
     export LIBC="$LIBC"
+    export OSVIRT=\$(\$PRINTF "%s\n" "$OSVIRT" | gawk 'match(\$0, /podman/) {print substr(\$0, RSTART, RLENGTH)}')
     export SRB2BLDROOT="$SRB2BLDROOT"
     export BUILDPATH="$BUILDPATH"
     export BUILD="$BUILD"
@@ -1505,7 +1459,7 @@ containerentry() {
     export APPIMAGE="$APPIMAGE"
     export FLATPAK="$FLATPAK"
     export COMMIT="$COMMIT"
-    export UPGRADE="$UPGRADE"
+    export UPGRADEBUILD="$UPGRADEBUILD"
     export GCCVER="$GCCVER"
     export GXXVER="$GXXVER"
     export GCCOLDVER="$GCCOLDVER"
@@ -1574,6 +1528,16 @@ containerentry() {
             export CCACHE_BIN_PATH="/usr/lib/ccache/"
 
         fi
+
+    fi
+
+    if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$ARGS" | gawk 'match(\$0, / -u -| -u\$| --user -| --user\$/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local|\/home\/'\$HOSTUSER'\/SRB2 Games|\/home\/'\$HOSTUSER'\/SRB2 Software/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$(gawk '(\$2 == "/" || \$2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]); then
+
+        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && sudo find "\$BUILD" -user root -group root -exec chown -R root:root {} \; && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
+
+    else
+
+        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && sudo find "\$BUILD" -user root -group root -exec chown -R srb2bld:srb2bld {} \; && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
 
     fi
 
@@ -2522,7 +2486,7 @@ else
 #       if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3250" ] && [ "\$LIBC" != "musl" ]; then
 
 #           gawk -i inplace '!/REGEX REPLACE "windres"/ {print}' "\$BUILD/cmake/unix.cmake"
-#           gawk -i inplace '{gsub("\\\\$<BUILD_INTERFACE:|>","");print}' "\$BUILD/thirdparty/fmt/CMakeLists.txt"
+#           gawk -i inplace '{gsub("\\\\$<BUILD_INTERFACE:|>",""); print}' "\$BUILD/thirdparty/fmt/CMakeLists.txt"
 
 #       fi
 
@@ -2721,11 +2685,11 @@ MINGWCMAKE
 
     fi
 
-    if [ -n "\$UPGRADE" ] && [ -z "\$CUSTOMDIR" ]; then
+    if [ -n "\$UPGRADEBUILD" ] && [ -z "\$CUSTOMDIR" ]; then
 
-        export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline; print}' "\$SRB2BLDROOT/installed/\$UPGRADE")"
+        export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline; print}' "\$SRB2BLDROOT/installed/\$UPGRADEBUILD")"
 
-    elif [ -n "\$UPGRADE" ] && [ -n "\$CUSTOMDIR" ]; then
+    elif [ -n "\$UPGRADEBUILD" ] && [ -n "\$CUSTOMDIR" ]; then
 
         export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline; print}' "\$SRB2BLDROOT/installed/\$CUSTOMDIR")"
 
@@ -3241,7 +3205,7 @@ MINGWCMAKE
             mkdir -p "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
             cd "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" || exit
 #            cmake -S "\$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_C_COMPILER=\$GCCVER -DCMAKE_CXX_COMPILER=\$GXXVER -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_GME=ON -DUSE_MIDI=ON -DUSE_MIDI_FLUIDSYNTH=ON -DUSE_MIDI_FLUIDLITE=OFF -DUSE_MIDI_TIMIDITY=ON -DUSE_MIDI_OPNMIDI=OFF -DUSE_MIDI_ADLMIDI=OFF -DUSE_MIDI_EDMIDI=OFF -DUSE_MIDI_NATIVE=OFF -DUSE_SYSTEM_AUDIO_LIBRARIES=ON -DMIXERX_ENABLE_LGPL=ON -DMIXERX_ENABLE_GPL=ON -DUSE_FLAC=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX="\$LIBSDL2MIXERXPREFIX"
-            cmake .. -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_AUDIO_LIBRARIES=ON -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DSDL_MIXER_X_SHARED=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_SYSTEM_SDL2=ON -DUSE_GME=ON -DUSE_FLAC=OFF -DUSE_DRFLAC=OFF -DUSE_MP3_MPG123=OFF -DUSE_MP3_MINIMP3=OFF -DUSE_OGG_VORBIS=ON -DUSE_XMP=OFF -DUSE_MODPLUG=ON -DUSE_MODPLUG_STATIC=OFF -DUSE_OPUS=OFF -DUSE_MIDI=ON -DUSE_MIDI_FLUIDSYNTH=ON -DUSE_MIDI_FLUIDLITE=OFF -DUSE_MIDI_TIMIDITY=ON -DUSE_MIDI_OPNMIDI=OFF -DUSE_MIDI_ADLMIDI=OFF -DUSE_MIDI_NATIVE=OFF -DCMAKE_INSTALL_PREFIX="\$LIBSDL2MIXERXPREFIX"
+            cmake .. -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_AUDIO_LIBRARIES=ON -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=OFF -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DSDL_MIXER_X_SHARED=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_SYSTEM_SDL2=ON -DUSE_GME=ON -DUSE_FLAC=OFF -DUSE_DRFLAC=OFF -DUSE_MP3_MPG123=OFF -DUSE_MP3_MINIMP3=OFF -DUSE_OGG_VORBIS=ON -DUSE_XMP=OFF -DUSE_MODPLUG=ON -DUSE_MODPLUG_STATIC=OFF -DUSE_OPUS=OFF -DUSE_MIDI=ON -DUSE_MIDI_FLUIDSYNTH=ON -DUSE_MIDI_FLUIDLITE=OFF -DUSE_MIDI_TIMIDITY=ON -DUSE_MIDI_OPNMIDI=OFF -DUSE_MIDI_ADLMIDI=OFF -DUSE_MIDI_NATIVE=OFF -DGME_INCLUDE_DIR="\$SRB2BLDPREFIX/include/gme" -DGME_LIBRARY="\$SRB2BLDPREFIX/lib/libgme.so" -DCMAKE_INSTALL_PREFIX="\$LIBSDL2MIXERXPREFIX"
 
 #            cmake --build "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j"\$NCPU" --config Release
 #            sudo -E cmake --install "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
@@ -3744,7 +3708,7 @@ MINGWCMAKE
             7z a -tzip "\$BUILD/build/slade.pk3" "\$BUILD/dist/res/"*
             \$BLDCMD \$CONF
             make -k -j"\$NCPU" -C "\$BUILD/build"
-            sudo make -C "\$BUILD/build" install
+            make -C "\$BUILD/build" install
 
             if [ "\$LIBC" != "musl" ]; then
 
@@ -4655,7 +4619,7 @@ else
     \$PRINTF "%s\n" "\$CONF" > "\$BUILD/conf"
 
     # Create desktop file.
-    COMREV=\$(git -C "\$BUILD" rev-parse --short HEAD)
+    COMREV=\$(sudo git -C "\$BUILD" rev-parse --short HEAD)
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
 
@@ -5241,7 +5205,15 @@ fi
 
 fi
 
-exit 0
+if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$ARGS" | gawk 'match(\$0, / -u -| -u\$| --user -| --user\$/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local|\/home\/'\$HOSTUSER'\/SRB2 Games|\/home\/'\$HOSTUSER'\/SRB2 Software/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$(gawk '(\$2 == "/" || \$2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]); then
+
+    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." ; sudo find "\$BUILD" -user root -group root -exec chown -R root:root {} \; ; exit 0' 0
+
+else
+
+    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." ; sudo find "\$BUILD" -user root -group root -exec chown -R srb2bld:srb2bld {} \; ; exit 0' 0
+
+fi
 
 ENTRYPOINT
     chmod +x "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container/Entrypoint"
@@ -5613,6 +5585,16 @@ containerrun() {
     # Restarting Docker daemon in order to avoid connection to be refused by Docker image repository. One time check after every reboot/shutdown of system.
     if [ ! -f /tmp/srb2bld-docker ] && [ ! -x "$(command -v podman 2> /dev/null)" ]; then
 
+        if [ -x "$(command -v doas 2> /dev/null)" ]; then
+
+            SUDO="doas"
+
+        else
+
+            SUDO="sudo"
+
+        fi
+
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Restarting Docker daemon. Please wait..."
 
         if [ -x "$(command -v systemctl 2> /dev/null)" ] && [ -n "$(systemctl --user list-units docker.service | gawk '/docker/ {print $1}')" ]; then
@@ -5634,6 +5616,13 @@ containerrun() {
         fi
 
         touch /tmp/srb2bld-docker
+
+        if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
+
+            unset SUDO
+
+        fi
+
         sleep 1
 
     fi
@@ -5768,7 +5757,6 @@ containerrun() {
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-games-linux-glibc-container
 
     fi
-
 }
 
 custombuild() {
@@ -6384,7 +6372,7 @@ fetchupdatebuild() {
 
         if [ "$SRB2BLDDEVMODE" != "1" ]; then
 
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Cleaning up source code. Please wait..."
+            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Cleaning up $BUILDNAME's source code. Please wait..."
             cleansource
 
         fi
@@ -6430,6 +6418,8 @@ flatpak() {
     # We have to set this in order to make Flatpak in Docker/Podman container.
     FLATPAK=1
 
+    checkuseropt
+
     # Set current working directory.
     LNXPWD="$(pwd)"
 
@@ -6443,11 +6433,15 @@ flatpak() {
 
     preparebuild
 
-    settrap
+    setsudo
+
+    preparecontainer
+
+    containerentry
 
     sudo_ping
 
-    containerentry
+    settrap
 
     containerrun
 
@@ -6795,10 +6789,19 @@ FLATPAK
         $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak \"org.freedesktop.Platform.Compat.i386\" with command \"flatpak --user install org.freedesktop.Platform.Compat.i386/$($PRINTF "%s\n" "$FLATPAKPLATFORM" | gawk -F'/' '{print $2"/"$3}')\"."
 
     fi
-
 }
 
 installdepsglibc() {
+    if [ -x "$(command -v doas 2> /dev/null)" ]; then
+
+        SUDO="doas"
+
+    else
+
+        SUDO="sudo"
+
+    fi
+
     # Creating cache to find packages matching missing library.
     if [ -n "$ISNET" ] && [ -n "$(LD_LIBRARY_PATH=$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib ldd $SRB2BINARYLNXPATH 2>&1 2> /dev/null | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | head -n1)" ]; then
 
@@ -6821,7 +6824,7 @@ installdepsglibc() {
                 if [ ! -x "$(command -v nix-index 2> /dev/null)" ]; then
 
                     #                         $SUDO nix-env -iA nixos.nix-index
-                    $SUDO nix profile remove '.*nix-index' --extra-experimental-features 'nix-command flakes' 2> /dev/null && $SUDO nix profile install "nixpkgs/release-$VERSION_ID#nix-index" --extra-experimental-features 'nix-command flakes'
+                    nix profile remove '.*nix-index' --extra-experimental-features 'nix-command flakes' 2> /dev/null && nix profile install "nixpkgs/release-$VERSION_ID#nix-index" --extra-experimental-features 'nix-command flakes'
 
                 fi
 
@@ -7100,6 +7103,7 @@ installdepsglibc() {
 
             elif [ -x "$(command -v xbps-install 2> /dev/null)" ]; then
 
+                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '{gsub(" ","\n"); print}' | gawk -F'-' '{printf " "$1}')
                 $SUDO xbps-install -y $PACKAGE || true
 
             elif [ -x "$(command -v nix 2> /dev/null)" ]; then
@@ -7131,27 +7135,22 @@ installdepsglibc() {
         fi
 
     fi
+
+    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
+
+        unset SUDO
+
+    fi
 }
 
 installdepsmusl() {
-    # Since Alpine 3.17 building and installing libexecinfo through abuild is required.
-    if [ -x "$(command -v apk 2> /dev/null)" ] && [ ! -f "$(find /usr/lib -name libexecinfo.so 2> /dev/null | head -n1)" ]; then
+    if [ -x "$(command -v doas 2> /dev/null)" ]; then
 
-        if [ ! -x "$(command -v abuild 2> /dev/null)" ]; then
+        SUDO="doas"
 
-            $SUDO apk add alpine-sdk
+    else
 
-        fi
-
-        curl -L https://git.alpinelinux.org/aports/plain/main/libexecinfo/APKBUILD?h=3.16-stable -o/tmp/APKBUILD
-        curl -L https://git.alpinelinux.org/aports/plain/main/libexecinfo/10-execinfo.patch?h=3.16-stable -o/tmp/10-execinfo.patch
-        curl -L https://git.alpinelinux.org/aports/plain/main/libexecinfo/20-define-gnu-source.patch?h=3.16-stable -o/tmp/20-define-gnu-source.patch
-        curl -L https://git.alpinelinux.org/aports/plain/main/libexecinfo/30-linux-makefile.patch?h=3.16-stable -o/tmp/30-linux-makefile.patch
-        cd /tmp
-        abuild-keygen -nai
-        abuild -rc -P /tmp
-        $SUDO apk add $(find /tmp -name "*.apk" 2> /dev/null)
-        cd -
+        SUDO="sudo"
 
     fi
 
@@ -7236,10 +7235,38 @@ installdepsmusl() {
 
             if [ -x "$(command -v apk 2> /dev/null)" ]; then
 
+                # Since Alpine 3.17 building and installing libexecinfo through abuild is required.
+                if [ -z "$($PRINTF "%s\n" "$PACKAGE" | gawk 'match($0, /libexecinfo.so/) {print substr($0, RSTART, RLENGTH)}' | head -n1)" ]; then
+
+                    if [ ! -x "$(command -v abuild 2> /dev/null)" ]; then
+
+                        $SUDO apk add alpine-sdk
+
+                    fi
+
+                    curl -L https://git.alpinelinux.org/aports/plain/main/libexecinfo/APKBUILD?h=3.16-stable -o/tmp/APKBUILD
+                    curl -L https://git.alpinelinux.org/aports/plain/main/libexecinfo/10-execinfo.patch?h=3.16-stable -o/tmp/10-execinfo.patch
+                    curl -L https://git.alpinelinux.org/aports/plain/main/libexecinfo/20-define-gnu-source.patch?h=3.16-stable -o/tmp/20-define-gnu-source.patch
+                    curl -L https://git.alpinelinux.org/aports/plain/main/libexecinfo/30-linux-makefile.patch?h=3.16-stable -o/tmp/30-linux-makefile.patch
+                    cd /tmp || exit
+                    abuild-keygen -nai
+                    abuild -rc -P /tmp
+                    $SUDO apk add $(find /tmp -name "*.apk" 2> /dev/null)
+                    cd -
+
+                fi
+
                 $SUDO apk add --force-broken-world $PACKAGE 2> /dev/null
 
             elif [ -x "$(command -v xbps-install 2> /dev/null)" ]; then
 
+                if [ ! -f "$(xbps-query -f libexecinfo 2> /dev/null | head -n1)" ]; then
+
+                    $SUDO xbps-install -y libexecinfo
+
+                fi
+
+                PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '{gsub(" ","\n"); print}' | gawk -F'-' '{printf " "$1}')
                 $SUDO xbps-install -y $PACKAGE 2> /dev/null
 
             else
@@ -7251,6 +7278,12 @@ installdepsmusl() {
             fi
 
         fi
+
+    fi
+
+    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
+
+        unset SUDO
 
     fi
 }
@@ -8200,13 +8233,6 @@ NIX
 
     fi
 
-    # Fixing owner of installed files to logged user.
-    if [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'/) {print substr($0, RSTART, RLENGTH)}')" ]; then
-
-        $SUDO find "$SRB2BLDPREFIX" ! -user $(stat -c "%U" "$HOME") -exec chown -R $(stat -c "%U:%G" "$HOME") {} \;
-
-    fi
-
     installtolist
 
     # Refreshing menu icons.
@@ -8221,13 +8247,13 @@ NIX
     fi
 
     # Install missing libraries and patching them to be linked against libSDL2_mixerX.
-    LD_LIBRARY_PATH=$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib ldd "$SRB2BLDPREFIX/lib/libSDL2_mixer_ext.so" 2>&1 2> /dev/null | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u | while read -r l; do
+    LD_LIBRARY_PATH="$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib" ldd "$SRB2BLDPREFIX/lib/libSDL2_mixer_ext.so" 2>&1 2> /dev/null | gawk '/not found/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | sort -u | while read -r l; do
 
         $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*",""); print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/ && !/slade3/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BLDPREFIX/lib/libSDL2_mixer_ext.so" 2> /dev/null || true
 
     done
 
-    LD_LIBRARY_PATH=$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib ldd "$SRB2BLDPREFIX/lib/libSDL2_mixer_ext.so" 2>&1 2> /dev/null | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u | while read -r l; do
+    LD_LIBRARY_PATH="$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib" ldd "$SRB2BLDPREFIX/lib/libSDL2_mixer_ext.so" 2>&1 2> /dev/null | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u | while read -r l; do
 
         $SUDO patchelf --replace-needed "$l" $(find $SRB2BLDPREFIX/lib $HOME/.nix-portable/store /home/linuxbrew/.linuxbrew/lib /nix/store /usr/lib64 /usr/lib -name $($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*",""); print $0"*so*"}' | head -n1) 2> /dev/null | gawk '{if (/^\/home\/'$USER'\/.nix-portable\/store|^\/home\/linuxbrew\/.linuxbrew\/lib|^\/home\/'$USER'\/.local\/lib\/|^\/usr\/local\/lib|^\/usr\/lib\/|^\/usr\/lib64|^\/usr\/lib32/ && !/slade3/) {print;exit} else if (/[0-9]\.[0-9]\/lib|[0-9]\.[0-9][0-9]\/lib|[0-9]\.[0-9]\/wx|[0-9]\.[0-9][0-9]\/wx|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/lib|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\/wx|\/lib\/libz.so/ && !/libstdc\+\+[0-9]|lzfse|SDL2_.*/) {print;exit}}') "$SRB2BLDPREFIX/lib/libSDL2_mixer_ext.so" 2> /dev/null || true
 
@@ -8607,11 +8633,11 @@ installtomacos() {
     fi
 
     # Upgrade build. Making sure, that there are only used compilation flags.
-    if [ -n "$UPGRADE" ] && [ -z "$CUSTOMDIR" ]; then
+    if [ -n "$UPGRADEBUILD" ] && [ -z "$CUSTOMDIR" ]; then
 
-        export CONF="$(gawk '/---------------/ {gsub("---------------","");getline; print}' "$SRB2BLDROOT/installed/$UPGRADE")"
+        export CONF="$(gawk '/---------------/ {gsub("---------------","");getline; print}' "$SRB2BLDROOT/installed/$UPGRADEBUILD")"
 
-    elif [ -n "$UPGRADE" ] && [ -n "$CUSTOMDIR" ]; then
+    elif [ -n "$UPGRADEBUILD" ] && [ -n "$CUSTOMDIR" ]; then
 
         export CONF="$(gawk '/---------------/ {gsub("---------------","");getline; print}' "$SRB2BLDROOT/installed/$CUSTOMDIR")"
 
@@ -8718,7 +8744,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         else
 
-            $PRINTF "$NOTICE\n%s\n\e[0m" "Exiting script."
+            $PRINTF "$NOTICE\n%s\n\e[0m" "Exiting shell script."
             exit
 
         fi
@@ -10402,7 +10428,6 @@ listbuild() {
     # List downloaded source code.
     find "$SRB2BLDROOT/builds" ! -iname srb2-custom -mindepth 1 -maxdepth 1 -type d -printf "\033[1;97m%P\n\033[0m" 2> /dev/null | sort
     $PRINTF "\e[1;97msrb2-custom\e[0m$(find "$SRB2BLDROOT/builds/srb2-custom" -mindepth 1 -maxdepth 1 -type d -printf "\n├%P" 2> /dev/null)\n"
-
 }
 
 listconfig() {
@@ -10547,7 +10572,7 @@ preparebuild() {
             fi
 
             # Assume default branch and latest SRB2/SRB2Kart assets, if entered nothing in prompt.
-            if [ -z "$SRB2BLDASSETPATH" ] && [ -z "$UPGRADE" ]; then
+            if [ -z "$SRB2BLDASSETPATH" ] && [ -z "$UPGRADEBUILD" ]; then
 
                 $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
                 GITVER="$GITDEFVER"
@@ -10609,7 +10634,7 @@ preparebuild() {
         fi
 
         # Assume default branch and latest SRB2/SRB2Kart assets, if entered nothing in prompt.
-        if [ -z "$SRB2BLDEXTRAASSETPATH" ] && [ -z "$UPGRADE" ]; then
+        if [ -z "$SRB2BLDEXTRAASSETPATH" ] && [ -z "$UPGRADEBUILD" ]; then
 
             $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
             GITVER="$GITDEFVER"
@@ -10657,6 +10682,111 @@ preparebuild() {
     fi
 }
 
+preparecontainer() {
+    # If podman is installed, this will be used instead of docker.
+    if [ -x "$(command -v podman 2> /dev/null)" ]; then
+
+        if [ "$OS" = "Linux" ]; then
+
+            if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
+
+                if [ ! -d "$HOME/.config/containers" ]; then
+
+                    mkdir -p "$HOME/.config/containers"
+
+                fi
+
+                # Setting insecureAcceptAnything in case of missing this policy in file /etc/containers/policy.json.
+                if [ ! -f "$HOME/.config/containers/policy.json" ]; then
+
+                    cat > "$HOME/.config/containers/policy.json" << NIX
+{
+"default": [
+        {
+            "type": "insecureAcceptAnything"
+        }
+    ]
+}
+NIX
+
+                fi
+
+            else
+
+                if [ ! -d /etc/containers ]; then
+
+                    $SUDO mkdir -p /etc/containers
+
+                fi
+
+                # Setting insecureAcceptAnything in case of missing this policy in file /etc/containers/policy.json.
+                if [ ! -f "/etc/containers/policy.json" ] || [ -z "$(gawk '/insecureAcceptAnything/ {print}' /etc/containers/policy.json 2> /dev/null)" ]; then
+
+                    $SUDO podman image trust set -t accept default
+
+                fi
+
+            fi
+
+            if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
+
+                OSVIRT="podman --root $HOME/.local/share/containers/storage"
+
+            else
+
+                OSVIRT="$SUDO podman --root /var/lib/containers/storage"
+
+            fi
+
+        else
+
+            if [ -x "$(command -v winpty 2> /dev/null)" ]; then
+
+                OSVIRT="winpty podman"
+
+            else
+
+                OSVIRT="podman"
+
+            fi
+
+        fi
+
+    else
+
+        if [ -x "$(command -v winpty 2> /dev/null)" ]; then
+
+            OSVIRT="winpty docker"
+
+        else
+
+            OSVIRT="docker"
+
+        fi
+
+    fi
+}
+
+setsudo() {
+    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
+
+        unset SUDO
+
+    else
+
+        if [ -x "$(command -v doas 2> /dev/null)" ]; then
+
+            SUDO="doas"
+
+        else
+
+            SUDO="sudo"
+
+        fi
+
+    fi
+}
+
 settrap() {
     # Trigger certain commands with trap signals.
     if [ "$OS" = "Windows" ]; then
@@ -10667,11 +10797,25 @@ settrap() {
 
         else
 
-            trap '$PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; exit' 0 1 2 3 6 15
+            trap '$PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Cleaning up $BUILDNAME'\''s source code and exiting shell script. Please wait..." ; cleansource ; exit' 0 1 2 3 6 15
 
         fi
 
-    else
+    elif [ "$OS" = "Darwin" ]; then
+
+        trap '$PRINTF "\n\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process."' 1 2 3 6 15
+
+        if [ "$SRB2BLDDEVMODE" = "1" ]; then
+
+            trap '$PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Exiting shell script. Please wait..." ; sudo_ping stop ; exit' 0
+
+        else
+
+            trap '$PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Cleaning up $BUILDNAME'\''s source code and exiting shell script. Please wait..." ; cleansource ; sudo_ping stop ; exit' 0
+
+        fi
+
+    elif [ "$OS" = "Linux" ]; then
 
         if [ "$SRB2BLDDEVMODE" = "1" ]; then
 
@@ -10679,7 +10823,7 @@ settrap() {
 
         else
 
-            trap '$PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Cleaning up source code and exiting shell script. Please wait..." ; cleansource ; sudo_ping stop ; exit' 0 1 2 3 6 15
+            trap '$PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Cleaning up $BUILDNAME'\''s source code and exiting shell script. Please wait..." ; cleansource ; sudo_ping stop ; exit' 0 1 2 3 6 15
 
         fi
 
@@ -10687,42 +10831,60 @@ settrap() {
 }
 
 sudo_ping() {
-    # Make sudo to extend password timeout.
-    if [ -n "$SUDO_PID" ]; then
+    if [ -z "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
 
-        if [ "$1" = stop ]; then
+        # Make sudo to extend password timeout.
+        if [ -n "$SUDO_PID" ]; then
 
-            kill "$SUDO_PID"
-            return
+            if [ "$1" = stop ]; then
 
-        else
+                kill "$SUDO_PID"
+                return
+
+            else
+
+                return
+
+            fi
+
+        fi
+
+        sudo -v
+
+        if [ $? -eq 1 ]; then
 
             return
 
         fi
 
+        while true; do
+
+            sudo -v
+            sleep 30
+
+        done &
+        SUDO_PID=$!
+
     fi
-
-    sudo -v
-
-    if [ $? -eq 1 ]; then
-
-        return
-
-    fi
-
-    while true; do
-
-        sudo -v
-        sleep 30
-
-    done &
-    SUDO_PID=$!
 }
 
 removeduplicate() {
     # Removing previously installed files before installing the latest one.
-    if [ "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software|\/Start Menu\/Programs/) {print substr($0, RSTART, RLENGTH)}')" != "$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software|\/Start Menu\/Programs/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" 2> /dev/null | head -n1)" ] && [ -f "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" ] && [ -z "$UPGRADE" ]; then
+    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$UPGRADEBUILD" ]; then
+
+        if [ -x "$(command -v doas 2> /dev/null)" ]; then
+
+            SUDO="doas"
+
+        else
+
+            SUDO="sudo"
+
+        fi
+
+    fi
+
+    if [ "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software|\/Start Menu\/Programs/) {print substr($0, RSTART, RLENGTH)}')" != "$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software|\/Start Menu\/Programs/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" 2> /dev/null | head -n1)" ] && [ -f "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" ] && [ -z "$UPGRADEBUILD" ]; then
 
         BUILDINSTALLED="$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Removing previously installed build. Please wait..."
@@ -10751,10 +10913,19 @@ removeduplicate() {
 
     fi
 
+    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$UPGRADEBUILD" ]; then
+
+        unset SUDO
+
+    fi
 }
 
 upgrade() {
     clear
+
+    UPGRADE=1
+
+    checkuseropt
 
     checkuserid
 
@@ -10779,6 +10950,7 @@ upgrade() {
                 export BUILD="$BUILDPATH/$u/$d"
                 export GITVER=$(tail -n+2 "$BUILD/.comrev" 2> /dev/null)
                 export CUSTOMDIR="$d"
+                unset CONF
                 upgradetasks
 
             done
@@ -10787,11 +10959,23 @@ upgrade() {
 
             export BUILD="$BUILDPATH/$u"
             export GITVER=$(tail -n+2 "$BUILD/.comrev" 2> /dev/null)
+            unset CONF
             upgradetasks
 
         fi
 
-    done && $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "Upgrading is successful."
+    done && $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "Upgrading is finished."
+
+    # Making sure to kill sudo_ping function process after finishing upgrade.
+    if [ -n "$SUDO_PID" ]; then
+
+        trap '$PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Exiting shell script. Please wait..." ; kill $SUDO_PID ; exit' 0 1 2 3 6 15
+
+    else
+
+        trap '$PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Exiting shell script. Please wait..." ; exit' 0 1 2 3 6 15
+
+    fi
 }
 
 upgradetasks() {
@@ -10801,16 +10985,16 @@ upgradetasks() {
 
     if [ -f "$BUILD/.comrev" ] && [ "$(git -C "$BUILD" rev-parse --short HEAD)" != "$(head -n1 "$BUILD/.comrev")" ]; then
 
-        export UPGRADE="$u"
+        export UPGRADEBUILD="$u"
 
         # Checking installation prefix for to be upgraded build.
-        if [ -n "$UPGRADE" ] && [ -z "$CUSTOMDIR" ] && [ -f "$SRB2BLDROOT/installed/$UPGRADE" ]; then
+        if [ -n "$UPGRADEBUILD" ] && [ -z "$CUSTOMDIR" ] && [ -f "$SRB2BLDROOT/installed/$UPGRADEBUILD" ]; then
 
-            SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$UPGRADE" | head -n1)"
+            SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$UPGRADEBUILD" | head -n1)"
 
-        elif [ -n "$UPGRADE" ] && [ -n "$CUSTOMDIR" ] && [ -f "$SRB2BLDROOT/installed/$CUSTOMDIR" ]; then
+        elif [ -n "$UPGRADEBUILD" ] && [ -n "$CUSTOMDIR" ] && [ -f "$SRB2BLDROOT/installed/$CUSTOMDIR" ]; then
 
-            SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$CUSTOMDIR" | head -n1)"
+            SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$CUSTOMDIR" | head -n1)"
 
         fi
 
@@ -10824,9 +11008,11 @@ upgradetasks() {
 
         preparebuild
 
-        if [ "$OS" = "Darwin" ]; then
+        setsudo
 
-            settrap
+        settrap
+
+        if [ "$OS" = "Darwin" ]; then
 
             installtomacos
 
@@ -10834,29 +11020,38 @@ upgradetasks() {
 
         else
 
-            if [ "$OS" = "Linux" ]; then
+            preparecontainer
+
+            containerentry
+
+            if [ "$OS" = "Linux" ] && [ -z "$SUDO_PID" ]; then
 
                 sudo_ping
 
             fi
 
-            containerentry
-
-            settrap
-
             containerrun
 
         fi
 
-        if [ "$OS" = "Windows" ] && ([ -f "$(find "$BUILD/bin" -name "*.exe" 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD/build" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ]); then
+        if [ "$?" != "0" ]; then
 
-            installtowindows
+            $PRINTF "\n\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn't finish due to error or cancelling process. Cleaning up $BUILDNAME's source code. Please wait..."
+            cleansource
 
-            installtolist
+        else
 
-        elif [ "$OS" = "Linux" ] && ([ -f "$(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] || [ -f "$(find $BUILD/build -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ]); then
+            if [ "$OS" = "Windows" ] && ([ -f "$(find "$BUILD/bin" -name "*.exe" 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD/build" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ]); then
 
-            installtolinux
+                installtowindows
+
+                installtolist
+
+            elif [ "$OS" = "Linux" ] && ([ -f "$(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] || [ -f "$(find $BUILD/build -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ] || [ -f "$(find "$BUILD" -mindepth 1 -maxdepth 1 -executable -type f 2> /dev/null | head -n1)" ]); then
+
+                installtolinux
+
+            fi && $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m" "Cleaning up $BUILDNAME's source code. Please wait..." && cleansource
 
         fi
 
@@ -10887,7 +11082,7 @@ Usage: srb2bld [OPTIONS]
      -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
      -rd, --removedep                       Remove compiled and installed dependencies for builds.
      -t, --tag                              Compile and install build with chosen tag instead of branch (only works with -i/--install, -ab/--appbundle, -ai/--appimage, -f/--flatpak).
-     -u, --user                             Install build to user's home directory (only works with -i/--install).
+     -u, --user                             Set installation path to user's home directory (only works with -i/--install, -ui/--uninstall, -rd/--removedep).
      -ui, --uninstall                       Uninstall SRB2/SRB2Kart/Software build.
      -up, --upgrade                         Upgrade installed SRB2/SRB2Kart build.
 
