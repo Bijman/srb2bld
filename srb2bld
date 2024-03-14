@@ -216,7 +216,7 @@ fi
 
 checkuseropt() {
     # Blocking access to option -u/--user for building bundles in Linux.
-    if [ -n "$ANDROID" ] || [ -n "$APPIMAGE" ] || [ -n "$FLATPAK" ] || [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -up -u$| -up --user$| --upgrade -u$| --upgrade --user$/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if [ -n "$ANDROID" ] || [ -n "$APPBUNDLE" ] || [ -n "$APPIMAGE" ] || [ -n "$FLATPAK" ] || [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -up -u$| -up --user$| --upgrade -u$| --upgrade --user$/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Currently building with option $($PRINTF "%s\n" "$ARGS" | gawk '{print $1}') is not supported with -u/--user. Exiting."
         exit
@@ -332,6 +332,8 @@ appbundle() {
 
     # We have to set this in order to make App Bundle in installtomacos function.
     APPBUNDLE=1
+
+    checkuseropt
 
     # Set current working directory.
     MACOSPWD="$(pwd)"
@@ -1393,10 +1395,6 @@ compatibility() {
     # Show compatibility table for compiling SRB2 builds for each OS.
     curl -sL "$COMPTABLEURL"
     $PRINTF "%s\n"
-}
-
-defaultmessage() {
-    $PRINTF "$NOTICE%s\n\e[0m" "Please enter \"srb2bld --help\" to check usage of this shell script."
 }
 
 containerentry() {
@@ -4619,7 +4617,7 @@ else
     \$PRINTF "%s\n" "\$CONF" > "\$BUILD/conf"
 
     # Create desktop file.
-    COMREV=\$(sudo git -C "\$BUILD" rev-parse --short HEAD)
+    COMREV=\$(git -C "\$BUILD" rev-parse --short HEAD)
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
 
@@ -5870,6 +5868,10 @@ custombuild() {
 
     GITVER="$GITDEFVER"
     GITVERCONF=$($PRINTF "$GITDEFVER" | gawk '{print $NF}')
+}
+
+defaultmessage() {
+    $PRINTF "$NOTICE%s\n\e[0m" "Please enter \"srb2bld --help\" to check usage of this shell script."
 }
 
 extractmacosassets() {
@@ -10767,6 +10769,58 @@ NIX
     fi
 }
 
+removeduplicate() {
+    # Removing previously installed files before installing the latest one.
+    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$UPGRADEBUILD" ]; then
+
+        if [ -x "$(command -v doas 2> /dev/null)" ]; then
+
+            SUDO="doas"
+
+        else
+
+            SUDO="sudo"
+
+        fi
+
+    fi
+
+    if [ "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software|\/Start Menu\/Programs/) {print substr($0, RSTART, RLENGTH)}')" != "$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software|\/Start Menu\/Programs/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" 2> /dev/null | head -n1)" ] && [ -f "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" ] && [ -z "$UPGRADEBUILD" ]; then
+
+        BUILDINSTALLED="$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Removing previously installed build. Please wait..."
+        sleep 1
+        gawk -i inplace -v RS= '{gsub("---------------\n[A-Z]*=1|---------------",""); print}' "$BUILDINSTALLED"
+
+        if [ "$OS" = "Windows" ]; then
+
+            while read -r FILE; do
+                rm -rfv "$FILE"
+            done < "$BUILDINSTALLED"
+
+        elif [ "$LNXOSNAME" = "NixOS" ]; then
+
+            $SUDO nix profile remove $(head -n1 "$BUILDINSTALLED")
+
+        else
+
+            while read -r FILE; do
+                $SUDO rm -rfv "$FILE"
+            done < "$BUILDINSTALLED"
+
+        fi
+
+        rm -rfv "$BUILDINSTALLED"
+
+    fi
+
+    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$UPGRADEBUILD" ]; then
+
+        unset SUDO
+
+    fi
+}
+
 setsudo() {
     if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$(gawk '($2 == "/" || $2 == "/sysroot") && /ro,/ {print}' /proc/mounts 2> /dev/null)" ]; then
 
@@ -10864,58 +10918,6 @@ sudo_ping() {
 
         done &
         SUDO_PID=$!
-
-    fi
-}
-
-removeduplicate() {
-    # Removing previously installed files before installing the latest one.
-    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$UPGRADEBUILD" ]; then
-
-        if [ -x "$(command -v doas 2> /dev/null)" ]; then
-
-            SUDO="doas"
-
-        else
-
-            SUDO="sudo"
-
-        fi
-
-    fi
-
-    if [ "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software|\/Start Menu\/Programs/) {print substr($0, RSTART, RLENGTH)}')" != "$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software|\/Start Menu\/Programs/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" 2> /dev/null | head -n1)" ] && [ -f "$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')" ] && [ -z "$UPGRADEBUILD" ]; then
-
-        BUILDINSTALLED="$SRB2BLDROOT/installed/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Removing previously installed build. Please wait..."
-        sleep 1
-        gawk -i inplace -v RS= '{gsub("---------------\n[A-Z]*=1|---------------",""); print}' "$BUILDINSTALLED"
-
-        if [ "$OS" = "Windows" ]; then
-
-            while read -r FILE; do
-                rm -rfv "$FILE"
-            done < "$BUILDINSTALLED"
-
-        elif [ "$LNXOSNAME" = "NixOS" ]; then
-
-            $SUDO nix profile remove $(head -n1 "$BUILDINSTALLED")
-
-        else
-
-            while read -r FILE; do
-                $SUDO rm -rfv "$FILE"
-            done < "$BUILDINSTALLED"
-
-        fi
-
-        rm -rfv "$BUILDINSTALLED"
-
-    fi
-
-    if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$UPGRADEBUILD" ]; then
-
-        unset SUDO
 
     fi
 }
