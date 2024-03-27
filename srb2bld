@@ -7161,7 +7161,15 @@ installdepsmusl() {
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing missing dependencies for $BUILDNAME to the system. Please wait..."
 
-        if [ -x "$(command -v apk 2> /dev/null)" ]; then
+        if [ -x "$(command -v emerge 2> /dev/null)" ]; then
+
+            if [ ! -x "$(command -v e-file 2> /dev/null)" ]; then
+
+                $SUDO emerge pfl
+
+            fi
+
+        elif [ -x "$(command -v apk 2> /dev/null)" ]; then
 
             if [ ! -x "$(command -v apk-file 2> /dev/null)" ]; then
 
@@ -7183,7 +7191,21 @@ installdepsmusl() {
 
         PACKAGE=$(for l in $(LD_LIBRARY_PATH="$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib" ldd "$SRB2BINARYLNXPATH" 2>&1 | gawk -F':| ' '/No such file or directory/ && !/symbol not found/ {print $5}' | sort -u); do
 
-            if [ -x "$(command -v apk 2> /dev/null)" ]; then
+            if [ -x "$(command -v emerge 2> /dev/null)" ]; then
+
+                p=$(e-file "/usr/lib/$l" | col | gawk '/^ \*/ {gsub(/29m|0m/,""); print $NF}')
+
+                if [ -z "$p" ]; then
+
+                    e-file "/usr/lib64/$l" | col | gawk '/^ \*/ {gsub(/29m|0m/,""); print $NF}'
+
+                else
+
+                    $PRINTF "%s\n" "$p"
+
+                fi
+
+            elif [ -x "$(command -v apk 2> /dev/null)" ]; then
 
                 l="$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*",".so"); print}')"
 
@@ -7235,7 +7257,11 @@ installdepsmusl() {
 
         else
 
-            if [ -x "$(command -v apk 2> /dev/null)" ]; then
+            if [ -x "$(command -v emerge 2> /dev/null)" ]; then
+
+                $SUDO emerge $PACKAGE || true
+
+            elif [ -x "$(command -v apk 2> /dev/null)" ]; then
 
                 # Since Alpine 3.17 building and installing libexecinfo through abuild is required.
                 if [ -z "$($PRINTF "%s\n" "$PACKAGE" | gawk 'match($0, /libexecinfo.so/) {print substr($0, RSTART, RLENGTH)}' | head -n1)" ]; then
