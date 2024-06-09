@@ -3,7 +3,7 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://github.com/Bijman/srb2bld/assets/16626326/7533a945-116a-4e1d-b738-41526b5cb33a
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 rphys, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 JTE, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart VR, wadcli, kartmaker, SLADE and Ultimate Zone Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries (rphys), SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 JTE, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Ring Racers, Ring Racers Noire, wadcli, kartmaker (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
@@ -149,30 +149,37 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 12-02-2024)
-|                       | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
-| :-------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
-| SRB2                  |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Uncapped PLUS    |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
-| SRB2 NetPlus          |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 rphys            |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 TSoURDt3rd       |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
-| SRB2 VR               |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
-| SRB2 v2.1 Legacy      |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 v2.0             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
-| SRB2 Final Demo       |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
-| SRB2 JTE (1.09)       |          🟨*          |         🟨*          |        🟨*        |        ⛔       |       ⛔      |
-| SRB2 Persona          |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Kart             |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
-| SRB2 Kart Moe Mansion |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 Kart Galaxy      |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
-| SRB2 Kart HEP         |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
-| SRB2 Kart Saturn      |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 Kart VR          |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
-| wadcli                |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
-| kartmaker             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SLADE                 |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
-| Ultimate Zone Builder |          ✅           |         ✅           |        ⛔         |        ✅       |       ⛔      |
+# Compatibility (as of 04-06-2024)
+|                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
+| :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
+| SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 Uncapped PLUS       |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
+| SRB2 NetPlus             |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 Reveries (rphys)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 TSoURDt3rd          |          ✅           |         ✅           |        🟨         |        ✅       |       🟨      |
+| SRB2 VR                  |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| SRB2 v2.1 Legacy         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 v2.0                |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| SRB2 Final Demo          |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
+| SRB2 JTE                 |          🟨*          |         🟨*          |        🟨*        |        ⛔       |       ⛔      |
+| SRB2 Persona             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 Kart                |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
+| SRB2 Kart Moe Mansion    |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 Kart Galaxy         |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
+| SRB2 Kart HEP            |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
+| SRB2 Kart Saturn         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 Kart Neptune        |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 Kart VR             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| Ring Racers              |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
+| Ring Racers Noire        |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
+| wadcli                   |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
+| kartmaker (SRB2 Kart)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| kartmaker (RR)           |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| followermaker (RR)       |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SLADE                    |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
+| Ultimate Zone Builder    |          ✅           |         ✅           |        ⛔         |        ✅       |       ⛔      |
+| High Voltage Ring        |          🟨****       |         🟨****       |        ⛔         |        🟨****   |       ⛔      |
+| Aseprite w/ Kart Builder |          ✅           |         ⛔           |         ?         |        ⛔       |       ✅      |
 
 **Legend:**
 
@@ -189,6 +196,8 @@ As for macOS users, they need to install these additional dependencies:
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
 ***Compiles successfully, but it can throw SIGABRT error on some macOS versions. Compiled build runs fine on macOS 10.14/Mojave.
+
+****Compiles successfully from Ubuntu 18.04 Docker container, but it throws exception when running build everytime.
 
 # Usage (from help text)
 ```
@@ -271,13 +280,15 @@ Usage: srb2bld [OPTIONS]
 
      10. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
 
-     11. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
+     11. If you get "unhandled exception" when running Ultimate Zone Builder or High Voltage Ring, uninstall mono in your system.
 
-     12. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
+     12. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
 
-     13. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+     13. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
 
-     14. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+     14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+
+     15. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -323,7 +334,7 @@ Usage: srb2bld [OPTIONS]
 
           Then choose "Build SRB2 Custom", when running script.
 
-     15. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+     16. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -332,6 +343,8 @@ Usage: srb2bld [OPTIONS]
          - SRB2BLDNOCCACHE - Disable ccache.
 
          - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.
+
+         - SRB2BLDNCPU - Determine number of CPU threads to compile build. Useful in case of out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus".
 
          - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
 ```
@@ -371,11 +384,13 @@ Usage: srb2bld [OPTIONS]
 
 11. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
 
-12. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
+12. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
 
-13. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+13. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
 
-14. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+
+15. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
     - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -421,7 +436,7 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-15. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+16. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -430,5 +445,7 @@ Usage: srb2bld [OPTIONS]
         - SRB2BLDNOCCACHE - Disable ccache.
 
         - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.
+
+        - SRB2BLDNCPU - Determine number of CPU threads to compile build. Useful in case of out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus".
 
         - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
