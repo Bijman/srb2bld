@@ -16,7 +16,6 @@ fi
 ARGS="$*"
 ARCH=$(uname -m)
 OS=$(uname)
-LANG="en_US.UTF-8"
 
 if [ "$OS" = "Darwin" ]; then
 
@@ -6931,7 +6930,7 @@ custombuild() {
     fi
 
     # Check if directory srb2-custom exits in script's data path.
-    if ([ -d "$BUILD/.git" ] && [ -n "$(git -C "$SRB2BLDGITPATH" diff --shortstat 2> /dev/null)" ]) || ([ -d "$BUILD/.git" ] && [ "$(git -C "$BUILD" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" != "$(git -C "$SRB2BLDGITPATH" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" ]) && ([ -d "$BUILD/.git" ] && [ "$(git -C "$BUILD" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}')" != "$($PRINTF "$SRB2BLDGITPATH" | gawk '{gsub(".git$",""); print}').git" ]); then
+    if ([ -d "$BUILD/.git" ] && [ -n "$(git -C "$SRB2BLDGITPATH" diff --shortstat 2> /dev/null)" ]) || ([ -d "$BUILD/.git" ] && [ "$(git -C "$BUILD" remote -v 2> /dev/null | gawk '/fetch/ {print $2}')" != "$(git -C "$SRB2BLDGITPATH" remote -v 2> /dev/null | gawk '/fetch/ {print $2}')" ]) && ([ -d "$BUILD/.git" ] && [ "$(git -C "$BUILD" remote -v 2> /dev/null | gawk '/fetch/ {print $2}')" != "$($PRINTF "$SRB2BLDGITPATH" | gawk '{gsub(".git$",""); print}').git" ]); then
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Found existing directory with source code in $BUILD path. Are you sure you want to remove it? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\"). If you choose \"no/No\", \"n/N\" or just press enter, script will continue with current source code's directory in $BUILD path. Press ctrl+c to quit."
         $PRINTF "$PROMPT\n%s\e[0m" "> "
@@ -7560,7 +7559,7 @@ fetchupdatebuild() {
         $GIT "$BUILD"
         git -C "$BUILD" checkout $($PRINTF "$GITVER" | gawk '{print $NF}')
 
-    elif [ -d "$BUILD/.git" ] && [ -n "$GITURL" ] && [ $(git -C "$BUILD" remote show origin 2> /dev/null | gawk '/Fetch URL/ {print $NF}') != "$GITURL" ] && [ -n "$ISNET" ]; then
+    elif [ -d "$BUILD/.git" ] && [ -n "$GITURL" ] && [ $(git -C "$BUILD" remote -v 2> /dev/null | gawk '/fetch/ {print $2}') != "$GITURL" ] && [ -n "$ISNET" ]; then
 
         # Replace build, if variable GITURL was updated to new Git repository.
         if [ -f "$BUILD/.comrev" ] && [ -n "$(cat "$BUILD/.comrev")" ]; then
