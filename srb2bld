@@ -45,7 +45,6 @@ PROMPT="\e[1;97m"
 # Linux specific environment variables for compatibility reasons.
 if [ "$OS" = "Linux" ]; then
 
-    LNXOSID=$(gawk -F'=' '/^ID_LIKE=/ {gsub("\"",""); print $NF}' /etc/os-release)
     LNXOSNAME=$(gawk -F'=' '/^NAME=/ {gsub("\"",""); print $NF}' /etc/os-release)
     ISREADONLY=$(gawk '($2 == "/" || $2 == "/sysroot") && / ro,/ {print}' /proc/mounts 2> /dev/null)
 
@@ -264,7 +263,6 @@ if [ "$OS" = "Darwin" ]; then
     MACOSMPG123VER="master"
     MACOSMODPLUGVER="master"
     MACOSSDL2VER="release-2.24.x"
-    #    MACOSSDL2MIXERVER="release-2.0.4"
     MACOSSDL2MIXERVER="release-2.6.0"
     MACOSSDL2MIXERXVER="2.5.0"
     MACOSOPENMPTVER="0.4.12"
@@ -272,7 +270,6 @@ if [ "$OS" = "Darwin" ]; then
     MACOSDISCORDRPCVER="master"
     MACOSOPENVRVER="1.10.30"
     MACOSLZFVER="master"
-    MACOSMONOVER="6.6.0"
     MACOSDEPOTTOOLSVER="main"
     MACOSSKIAVER="aseprite-m102"
     MACOSVCPKGVER="master"
@@ -1366,7 +1363,7 @@ chooseremovebuild() {
 
             fi
 
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Are you sure you want to remove this build's directory? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\")."
+            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Are you sure you want to remove this build? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\")."
             $PRINTF "$PROMPT\n%s\e[0m" "> "
             read -r CONFIRM
 
@@ -1416,7 +1413,7 @@ chooseremovedep() {
 
         if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Are you sure you want to remove this asset? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\")."
+            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Are you sure you want to remove this dependency? Enter \"yes/Yes\" or \"no/No\" (\"y/Y\" or \"n/N\")."
             $PRINTF "$PROMPT\n%s\e[0m" "> "
             read -r CONFIRM
 
@@ -1618,7 +1615,7 @@ containerentry() {
     export ISREADONLY="$ISREADONLY"
     export ISNET="$ISNET"
     export LIBC="$LIBC"
-    export OSVIRT=\$(\$PRINTF "%s\n" "$OSVIRT" | gawk 'match(\$0, /podman/) {print substr(\$0, RSTART, RLENGTH)}')
+    export OSVIRT=\$(\$PRINTF "%s\n" "$OSVIRT" | gawk 'match(\$0, /docker|podman/) {print substr(\$0, RSTART, RLENGTH)}')
     export SRB2BLDROOT="$SRB2BLDROOT"
     export BUILDPATH="$BUILDPATH"
     export BUILD="$BUILD"
@@ -1730,20 +1727,32 @@ containerentry() {
     fi
 
     # Correcting compiled library permissions when running -u/--user or having read-only filesystem.
-    if [ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$ARGS" | gawk 'match(\$0, / -u -| -u\$| --user -| --user\$/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local|\/home\/'\$HOSTUSER'\/SRB2 Games|\/home\/'\$HOSTUSER'\/SRB2 Software/) {print substr(\$0, RSTART, RLENGTH)}')" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
+    if ([ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "podman" ]) && [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
 
         sudo find -L "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true
+
+    elif ([ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "docker" ]) && [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
+
+        sudo find -L "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true
+
+    else
+
+        sudo find -L "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true
 
     fi
 
     # Setting trap signal for correcting compiled build's source code, libraries etc. permissions when running -u/--user or having read-only filesystem.
-    if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$ARGS" | gawk 'match(\$0, / -u -| -u\$| --user -| --user\$/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local|\/home\/'\$HOSTUSER'\/SRB2 Games|\/home\/'\$HOSTUSER'\/SRB2 Software/) {print substr(\$0, RSTART, RLENGTH)}')" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
+    if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
-        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" ! -group root -exec sudo chown -R root:root {} \; ; [ -d "\$SRB2BLDPREFIX/lib" ] && sudo find -L "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
+        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
+
+    elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
+
+        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
 
     else
 
-        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" -group root -exec chown -R srb2bld:srb2bld {} \; && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
+        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
 
     fi
 
@@ -4435,11 +4444,11 @@ MINGWCMAKE
             git clone \$GITOPTS https://github.com/DragonDePlatino/Kart-Builder "\$BUILD/build/AppDir/usr/share/aseprite/data/extensions/kart-builder"
 
             if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ]; then
-            
+
                 cp -rf "/usr/lib/p7zip" "\$BUILD/build/AppDir/usr/lib"
 
             fi
-            
+
         else
 
             cd "\$BUILD" || exit
@@ -6279,13 +6288,17 @@ if [ "\$OS" = "Linux" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); p
 fi
 
 # Correcting compiled build's source code, libraries etc. permissions when running -u/--user or having read-only filesystem.
-if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$ARGS" | gawk 'match(\$0, / -u -| -u\$| --user -| --user\$/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local|\/home\/'\$HOSTUSER'\/SRB2 Games|\/home\/'\$HOSTUSER'\/SRB2 Software/) {print substr(\$0, RSTART, RLENGTH)}')" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
+if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
-    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" ! -group root -exec chown -R root:root {} \; ; [ -d "\$SRB2BLDPREFIX/lib" ] && sudo find -L "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true ; exit 0' 0
+    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true ; exit 0' 0
+
+elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
+
+    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true ; exit 0' 0
 
 else
 
-    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" -group root -exec chown -R srb2bld:srb2bld {} \; ; exit 0' 0
+    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true ; exit 0' 0
 
 fi
 
@@ -6737,6 +6750,27 @@ containerrun() {
         fi
 
         sleep 1
+
+    elif [ "$OS" = "Linux" ] && [ -x "$(command -v podman 2> /dev/null)" ] && ([ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$ISREADONLY" ]) && [ -n "$(podman unshare find -L "$SRB2BLDPREFIX/stow" "$SRB2BLDPREFIX/bin" "$SRB2BLDPREFIX/include" "$SRB2BLDPREFIX/lib" "$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -printf "%u:%g\n" 2> /dev/null | gawk '!/root/ {print $3,$4}' | head -n1)" ]; then
+
+        if [ -x "$(command -v doas 2> /dev/null)" ]; then
+
+            SUDO="doas"
+
+        else
+
+            SUDO="sudo"
+
+        fi
+
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME's files. Please wait..."
+        $SUDO find -L "$SRB2BLDPREFIX/stow" "$SRB2BLDPREFIX/bin" "$SRB2BLDPREFIX/include" "$SRB2BLDPREFIX/lib" "$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group "$USER" -exec chown -R "$USER:$USER" {} \; 2> /dev/null || true
+
+        if [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] || [ -n "$ISREADONLY" ]; then
+
+            unset SUDO
+
+        fi
 
     fi
 
@@ -7666,8 +7700,6 @@ flatpak() {
     FLATPAKARCH="$ARCH"
     FLATPAKPLATFORM=$($FLATPAKBIN remote-info flathub org.freedesktop.Platform 2>&1 | gawk '{gsub(" ","\n"); gsub(",",""); print}' | gawk '/org\.freedesktop\.Platform\// {gsub("//","/'$FLATPAKARCH'/"); print}' | sort -V | tail -n1)
     FLATPAKSDK=$($FLATPAKBIN remote-info flathub org.freedesktop.Sdk 2>&1 | gawk '{gsub(" ","\n"); gsub(",",""); print}' | gawk '/org\.freedesktop\.Sdk\// {gsub("//","/'$FLATPAKARCH'/"); print}' | sort -V | tail -n1)
-    FLATPAKGNOMEPLATFORM=$($FLATPAKBIN remote-info flathub org.gnome.Platform 2>&1 | gawk '{gsub(" ","\n"); gsub(",",""); print}' | gawk '/org\.gnome\.Platform\// {gsub("//","/'$FLATPAKARCH'/"); print}' | sort -V | tail -n1)
-    FLATPAKGNOMESDK=$($FLATPAKBIN remote-info flathub org.gnome.Sdk 2>&1 | gawk '{gsub(" ","\n"); gsub(",",""); print}' | gawk '/org\.gnome\.Sdk\// {gsub("//","/'$FLATPAKARCH'/"); print}' | sort -V | tail -n1)
 
     # Determine name of the flatpak.
     if [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
@@ -12946,7 +12978,7 @@ Usage: srb2bld [OPTIONS]
 
      12. To deal with out of memory errors, for example \"g++: fatal error: Killed signal terminated program cc1plus\", decrease number of CPU threads using variable \"SRB2BLDNCPU=[number of CPU threads]\".
 
-     13. Building Android APKs require gradlew script in the path \"[SRB2 build path]/android\".
+     13. Building Android APKs requires gradlew script and Gradle files in the directory \"android\" for SRB2 Custom.
 
      14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak \"org.freedesktop.Platform.Compat.i386\" with command \"flatpak --user install org.freedesktop.Platform.Compat.i386\".
 

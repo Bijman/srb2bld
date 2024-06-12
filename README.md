@@ -199,6 +199,12 @@ As for macOS users, they need to install these additional dependencies:
 
 ****Compiles successfully from Ubuntu 18.04 Docker container, but it throws exception when running build everytime.
 
+# Supported Android builds
+- SRB2 Android by Lactozilla
+- SRB2 Android by bitten2up
+- SRB2 Reveries (rphys)
+- SRB2 Custom (requires custom build that supports building with gradle files in directory "android" in SRB2 custom build directory)
+
 # Usage (from help text)
 ```
 Build and install SRB2/SRB2Kart from source.
@@ -284,7 +290,7 @@ Usage: srb2bld [OPTIONS]
 
      12. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
 
-     13. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
+     13. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
 
      14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
 
@@ -386,7 +392,7 @@ Usage: srb2bld [OPTIONS]
 
 12. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
 
-13. Building Android APKs require gradlew script in the path "[SRB2 build path]/android".
+13. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
 
 14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
 
