@@ -149,7 +149,7 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 04-06-2024)
+# Compatibility (as of 12-06-2024)
 |                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -179,7 +179,7 @@ As for macOS users, they need to install these additional dependencies:
 | SLADE                    |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
 | Ultimate Zone Builder    |          ✅           |         ✅           |        ⛔         |        ✅       |       ⛔      |
 | High Voltage Ring        |          🟨****       |         🟨****       |        ⛔         |        🟨****   |       ⛔      |
-| Aseprite w/ Kart Builder |          ✅           |         ⛔           |         ?         |        ⛔       |       ✅      |
+| Aseprite w/ Kart Builder |          ✅           |         ⛔           |        ⛔         |        ⛔       |       ✅      |
 
 **Legend:**
 
