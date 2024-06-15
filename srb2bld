@@ -47,6 +47,7 @@ if [ "$OS" = "Linux" ]; then
 
     LNXOSNAME=$(gawk -F'=' '/^NAME=/ {gsub("\"",""); print $NF}' /etc/os-release)
     ISREADONLY=$(gawk '($2 == "/" || $2 == "/sysroot") && / ro,/ {print}' /proc/mounts 2> /dev/null)
+    ISPASSWORDLESS=$(passwd -S "$USER" | gawk 'match($2, /NP/) {print substr($2, RSTART, RLENGTH)}')
 
 fi
 
@@ -8696,8 +8697,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2UncappedPlus"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2ucp"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2uncappedplus-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2uncappedplus-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-uncapped-plus-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-uncapped-plus-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2uncappedplus.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2ucp binary, assets, icons and desktop file to the system. Please wait..."
@@ -8718,8 +8719,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2NetPlus"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2np"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2netplus-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2netplus-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-netplus-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-netplus-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2netplus.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2np binary, assets, icons and desktop file to the system. Please wait..."
@@ -8740,8 +8741,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2rphys"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2rphys"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2rphys-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2rphys-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-rphys-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-rphys-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2rphys.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2rphys binary, assets, icons and desktop file to the system. Please wait..."
@@ -8762,8 +8763,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2TSoURDt3rd"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2tsourdt3rd"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2tsourdt3rd-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2tsourdt3rd-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-tsourdt3rd-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-tsourdt3rd-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2tsourdt3rd.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2tsourdt3rd binary, assets, icons and desktop file to the system. Please wait..."
@@ -8784,9 +8785,9 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2VR"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2vr"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2vr-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2vr-opengl.desktop"
-        SRB2DESKTOPOPENVRLNXPATH="$SRB2BLDPREFIX/share/applications/srb2vr-openvr.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-vr-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-vr-opengl.desktop"
+        SRB2DESKTOPOPENVRLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-vr-openvr.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2vr.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2vr binary, assets, icons and desktop file to the system. Please wait..."
@@ -8807,8 +8808,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2legacy"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2legacy"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2legacy-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2legacy-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-2.1-legacy-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-2.1-legacy-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2legacy.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2legacy binary, assets, icons and desktop file to the system. Please wait..."
@@ -8829,8 +8830,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2-2.0"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2_2.0"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2_2.0-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2_2.0-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-2.0-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-2.0-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2_2.0.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2_2.0 binary, assets, icons and desktop file to the system. Please wait..."
@@ -8850,8 +8851,8 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2FinalDemo"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2fd"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2finaldemo-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2finaldemo-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-final-demo-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-final-demo-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2finaldemo.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2fd binary, assets, icons and desktop file to the system. Please wait..."
@@ -8870,8 +8871,8 @@ installtolinux() {
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2JTE"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2jte"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2jte-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2jte-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-jte-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-jte-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2jte.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2jte binary, assets, icons and desktop file to the system. Please wait..."
@@ -8891,8 +8892,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2Persona"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2p"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2persona-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2persona-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-persona-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-persona-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2persona.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2p binary, assets, icons and desktop file to the system. Please wait..."
@@ -8957,8 +8958,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2Kart"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kart"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kart-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kart-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kart.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2kart binary, assets, icons and desktop file to the system. Please wait..."
@@ -8979,8 +8980,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartMoeMansion"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartmoe"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartmoemansion-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartmoemansion-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-moe-mansion-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-moe-mansion-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kartmoemansion.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2kartmoe binary, assets, icons and desktop file to the system. Please wait..."
@@ -9001,8 +9002,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartGalaxy"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartgalaxy"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartgalaxy-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartgalaxy-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-galaxy-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-galaxy-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kartgalaxy.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2kartgalaxy binary, assets, icons and desktop file to the system. Please wait..."
@@ -9023,8 +9024,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartHEP"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2karthep"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2karthep-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2karthep-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-hep-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-hep-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2karthep.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2karthep binary, assets, icons and desktop file to the system. Please wait..."
@@ -9045,8 +9046,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartSaturn"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartsaturn"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartsaturn-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartsaturn-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-saturn-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-saturn-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kartsaturn.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2kartsaturn binary, assets, icons and desktop file to the system. Please wait..."
@@ -9067,8 +9068,8 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartNeptune"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartneptune"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartneptune-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartneptune-opengl.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-neptune-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-neptune-opengl.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kartneptune.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2kartneptune binary, assets, icons and desktop file to the system. Please wait..."
@@ -9089,9 +9090,9 @@ installtolinux() {
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2KartVR"
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2kartvr"
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartvr-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartvr-opengl.desktop"
-        SRB2DESKTOPOPENVRLNXPATH="$SRB2BLDPREFIX/share/applications/srb2kartvr-openvr.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-vr-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-vr-opengl.desktop"
+        SRB2DESKTOPOPENVRLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-kart-vr-openvr.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2kartvr.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2kartvr binary, assets, icons and desktop file to the system. Please wait..."
@@ -9169,7 +9170,7 @@ installtolinux() {
     elif [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ]; then
 
         SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/kartmaker_rr"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/kartmakerringracers.desktop"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/kartmaker-ring-racers.desktop"
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/kartmakerringracers.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's kartmaker_rr binary, assets, icons and desktop file to the system. Please wait..."
@@ -12712,7 +12713,7 @@ settrap() {
 }
 
 sudo_ping() {
-    if [ -z "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$ISREADONLY" ]; then
+    if [ -z "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$ISREADONLY" ] && [ -z "$ISPASSWORDLESS" ]; then
 
         # Make sudo to extend password timeout.
         if [ -n "$SUDO_PID" ]; then
