@@ -12713,7 +12713,7 @@ settrap() {
 }
 
 sudo_ping() {
-    if [ -z "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$ISREADONLY" ] && [ -z "$ISPASSWORDLESS" ]; then
+    if [ -x "$(command -v sudo 2> /dev/null)" ] && ([ -z "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u -| -u$| --user -| --user$/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk 'match($0, /\/home\/'$USER'\/.local/) {print substr($0, RSTART, RLENGTH)}')" ] && [ -z "$ISREADONLY" ] && [ -z "$ISPASSWORDLESS" ]); then
 
         # Make sudo to extend password timeout.
         if [ -n "$SUDO_PID" ]; then
