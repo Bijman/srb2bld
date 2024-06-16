@@ -297,7 +297,7 @@ fi
 
 checkuseropt() {
     # Blocking access to option -u/--user for building bundles in Linux.
-    if ([ -n "$ANDROID" ] || [ -n "$APPBUNDLE" ] || [ -n "$APPIMAGE" ] || [ -n "$FLATPAK" ] || [ -n "$UPGRADE" ]) && [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u$| --user$/) {print substr($0, RSTART, RLENGTH)}')" ]; then
+    if ([ -n "$ANDROID" ] || [ -n "$APPBUNDLE" ] || [ -z "$APPIMAGE" ] || [ -n "$FLATPAK" ] || [ -n "$UPGRADE" ]) && [ -n "$($PRINTF "%s\n" "$ARGS" | gawk 'match($0, / -u$| --user$/) {print substr($0, RSTART, RLENGTH)}')" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Currently building with option $($PRINTF "%s\n" "$ARGS" | gawk '{print $1}') is not supported with -u/--user. Exiting."
         exit
@@ -1738,30 +1738,30 @@ containerentry() {
     fi
 
     # Correcting compiled library permissions when running -u/--user or having read-only filesystem.
-    if ([ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "podman" ]) && [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
+    if [ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
         sudo find -L "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true
 
-    elif ([ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "docker" ]) && [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
+    elif [ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
         sudo find -L "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true
 
-    else
+    elif [ "\$OS" = "Linux" ]; then
 
         sudo find -L "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true
 
     fi
 
     # Setting trap signal for correcting compiled build's source code, libraries etc. permissions when running -u/--user or having read-only filesystem.
-    if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
+    if [ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
         trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
 
-    elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]) || [ -n "\$ISREADONLY" ]; then
+    elif [ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
         trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
 
-    else
+    elif [ "\$OS" = "Linux" ]; then
 
         trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
 
@@ -6299,15 +6299,15 @@ if [ "\$OS" = "Linux" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); p
 fi
 
 # Correcting compiled build's source code, libraries etc. permissions when running -u/--user or having read-only filesystem.
-if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
+if [ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
     trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true ; exit 0' 0
 
-elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
+elif [ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
     trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true ; exit 0' 0
 
-else
+elif [ "\$OS" = "Linux" ]; then
 
     trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true ; exit 0' 0
 
