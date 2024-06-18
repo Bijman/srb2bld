@@ -7076,7 +7076,7 @@ extractmacosassets() {
 
             fi
 
-            cp -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3" "$BUILD/build/AppDir/usr/games/SRB2"
+            cp -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3" "$BUILD/assets/installer"
 
         fi
 
