@@ -1807,15 +1807,16 @@ containerentry() {
 
                 fi
 
-                if [ "\$ANDROID" = "1" ]; then
+                7z e -y -r "\$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip" "*.pk3" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
-                    7z e -y -r "\$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip" "*.pk3" -o"\$BUILD/android/app/src/main/assets"
+                #Temporary fix for mismatched tsourdt3rd.pk3 file from the latest commits.
+                if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/v4.0/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
 
-                else
-
-                    7z e -y -r "\$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip" "*.pk3" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                    curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/v4.0/tsourdt3rd.pk3" -o "\$SRB2BLDROOT/assets/tsourdt3rd.pk3"
 
                 fi
+
+                cp -f "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" "\$BUILD/build/AppDir/usr/games/SRB2"
 
             fi
 
@@ -7067,6 +7068,15 @@ extractmacosassets() {
             fi
 
             7z e -y -r "$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip" "*.pk3" -o"$BUILD/assets/installer"
+
+            #Temporary fix for mismatched tsourdt3rd.pk3 file from the latest commits.
+            if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/v4.0/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
+
+                curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/v4.0/tsourdt3rd.pk3" -o "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+
+            fi
+
+            cp -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3" "$BUILD/build/AppDir/usr/games/SRB2"
 
         fi
 
