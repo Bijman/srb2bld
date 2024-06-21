@@ -6356,7 +6356,7 @@ printf 'APT::Install-Recommends "false";\nAPT::Install-Suggests "false";' > /etc
 apt-get update && \
 apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu $UBUVER main\ndeb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu $UBUVER main\ndeb https://apt.kitware.com/ubuntu/ $UBUVER main" >> /etc/apt/sources.list && \
-curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
 curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1E9377A2BA9EF27F" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/toolchain.gpg > /dev/null && \
 curl -Ls "https://apt.kitware.com/keys/kitware-archive-latest.asc" | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/cmake.gpg > /dev/null
 
@@ -6405,7 +6405,7 @@ printf 'APT::Install-Recommends "false";\nAPT::Install-Suggests "false";' > /etc
 apt-get update && \
 apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu $UBUSOFTVER main\ndeb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu $UBUSOFTVER main\ndeb https://apt.kitware.com/ubuntu/ $UBUSOFTVER main\ndeb https://repos.codelite.org/wx3.2.0/ubuntu/ $UBUSOFTVER universe" >> /etc/apt/sources.list && \
-curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
 curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1E9377A2BA9EF27F" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/toolchain.gpg > /dev/null && \
 curl -Ls "https://apt.kitware.com/keys/kitware-archive-latest.asc" | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/cmake.gpg > /dev/null && \
 curl -Ls "https://repos.codelite.org/CodeLite.asc" | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/libwxgtk.gpg > /dev/null && \
@@ -6445,7 +6445,7 @@ printf 'APT::Install-Recommends "false";\nAPT::Install-Suggests "false";' > /etc
 apt-get update && \
 apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu $UBUUZBVER main\ndeb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu $UBUUZBVER main\ndeb https://download.mono-project.com/repo/ubuntu stable-$UBUUZBVER/snapshots/$LNXMONOVER main" >> /etc/apt/sources.list && \
-curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
 curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1E9377A2BA9EF27F" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/toolchain.gpg > /dev/null && \
 curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/mono.gpg > /dev/null
 
@@ -6567,7 +6567,7 @@ apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu jammy main" >> /etc/apt/sources.list.d/apt-fast.list && \
 printf "deb https://packages.microsoft.com/ubuntu/22.04/prod/ jammy main" >> /etc/apt/sources.list.d/powershell.list && \
 gawk -i inplace '{gsub("main","main contrib non-free"); print}' /etc/apt/sources.list.d/debian.sources && \
-curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
 curl -Ls "https://packages.microsoft.com/keys/microsoft.asc" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/powershell.gpg > /dev/null
 
 RUN apt-get update && \
@@ -6663,7 +6663,7 @@ apt-get update && \
 apt-get install -y gnupg apt-transport-https ca-certificates curl gawk && \
 gawk -i inplace '{gsub("main","main contrib non-free"); print}' /etc/apt/sources.list && \
 printf "deb http://ppa.launchpad.net/apt-fast/stable/ubuntu $UBUSOFTVER main\ndeb https://download.mono-project.com/repo/ubuntu stable-$UBUSOFTVER main\ndeb https://apt.kitware.com/ubuntu/ $UBUSOFTVER main" >> /etc/apt/sources.list && \
-curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x1EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
+curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/aptfast.gpg > /dev/null && \
 curl -Ls "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF" | gawk '!/Comment:|Version:/ {gsub("\r",""); print}' | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/mono.gpg > /dev/null && \
 curl -Ls "https://apt.kitware.com/keys/kitware-archive-latest.asc" | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/cmake.gpg > /dev/null
 
