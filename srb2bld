@@ -1947,7 +1947,7 @@ EOF
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ]; then
 
-                SRB2KARTNEPTUNEASSETURL=\$(curl -s "\$SRB2KARTNEPTUNEASSETURL" | gawk -F'"' '/browser_download_url.*64Bit.zip/ {print \$4}')
+                SRB2KARTNEPTUNEASSETURL=\$(curl -s "\$SRB2KARTNEPTUNEASSETURL" | gawk -F'"' '/browser_download_url.*64Bit.zip/ {print \$4}' | head -n1)
                 if [ "\$(curl -X GET -sLI "\$SRB2KARTNEPTUNEASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2KartNeptune.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2KartNeptune.zip"
@@ -5328,9 +5328,21 @@ DESKTOP
 
             convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+
+            convert "\$BUILD/src/win32/Srb2win.ico[8]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
         else
 
-            convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+            if [ -n "\$(identify "\$BUILD/src/win32/Srb2win.ico" | gawk '/ico\\[5\\] PNG/ {print}')" ] || [ -n "\$(identify "\$BUILD/src/win32/Srb2win.ico" | tail -n1 | gawk '/ico\\[1\\] PNG/ {print}')" ]; then
+
+                convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+            else
+
+                convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+            fi
 
         fi
 
@@ -6159,9 +6171,21 @@ DESKTOP
 
             convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+
+            convert "\$BUILD/src/win32/Srb2win.ico[8]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
         else
 
-            convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+            if [ -n "\$(identify "\$BUILD/src/win32/Srb2win.ico" | gawk '/ico\\[5\\] PNG/ {print}')" ] || [ -n "\$(identify "\$BUILD/src/win32/Srb2win.ico" | tail -n1 | gawk '/ico\\[1\\] PNG/ {print}')" ]; then
+
+                convert "\$BUILD/src/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+            else
+
+                convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+            fi
 
         fi
 
