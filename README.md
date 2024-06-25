@@ -207,50 +207,50 @@ As for macOS users, they need to install these additional dependencies:
 
 # Usage (from help text)
 ```
-Build and install SRB2/SRB2Kart from source.
+Build and install SRB2/SRB2Kart/Ring Racers from source.
 
 Usage: srb2bld [OPTIONS]
   OPTIONS:
      -h, --help                             Show this help text.
-     -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart build, which is packaged in DMG file (macOS only).
+     -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart/Ring Racers build, which is packaged in DMG file (macOS only).
      -ad, --android                         Compile and create distributable APK file of SRB2 build (Linux and Windows only).
-     -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart build (Linux only).
-     -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
-     -f, --flatpak                          Compile and create distributable Flatpak of SRB2/SRB2Kart build (Linux only).
-     -i, --install                          Compile and install SRB2/SRB2Kart build to system.
-     -la, --listasset                       List downloaded SRB2/SRB2Kart assets.
-     -lb, --listbuild                       List downloaded SRB2/SRB2Kart builds.
-     -lc, --listconfig                      List compilation flags of installed SRB2/SRB2Kart builds.
+     -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart/Ring Racers build (Linux only).
+     -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart/Ring Racers builds for each operating system.
+     -f, --flatpak                          Compile and create distributable Flatpak of SRB2/SRB2Kart/Ring Racers build (Linux only).
+     -i, --install                          Compile and install SRB2/SRB2Kart/Ring Racers build to system.
+     -la, --listasset                       List downloaded SRB2/SRB2Kart/Ring Racers assets.
+     -lb, --listbuild                       List downloaded SRB2/SRB2Kart/Ring Racers builds.
+     -lc, --listconfig                      List compilation flags of installed SRB2/SRB2Kart/Ring Racers builds.
      -ld, --listdep                         List compiled and installed dependencies for builds.
-     -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
-     -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
-     -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
+     -li, --listinstalled                   List installed SRB2/SRB2Kart/Ring Racers builds.
+     -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart/Ring Racers build.
+     -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart/Ring Racers build.
      -rd, --removedep                       Remove compiled and installed dependencies for builds.
      -t, --tag                              Compile and install build with chosen tag instead of branch (only works with -i/--install, -ab/--appbundle, -ai/--appimage, -f/--flatpak).
      -u, --user                             Set installation path to user's home directory (only works with -i/--install, -ui/--uninstall, -rd/--removedep).
-     -ui, --uninstall                       Uninstall SRB2/SRB2Kart build.
-     -up, --upgrade                         Upgrade installed SRB2/SRB2Kart build.
+     -ui, --uninstall                       Uninstall SRB2/SRB2Kart/Ring Racers build.
+     -up, --upgrade                         Upgrade installed SRB2/SRB2Kart/Ring Racers build.
 
   EXAMPLES:
-     1. Compile and install SRB2/SRB2Kart build to system:
+     1. Compile and install SRB2/SRB2Kart/Ring Racers build to system:
             srb2bld --install
 
-     2. Compile and install SRB2/SRB2Kart build to user's home directory:
+     2. Compile and install SRB2/SRB2Kart/Ring Racers build to user's home directory:
             srb2bld --install --user
 
-     3. Compile and install SRB2/SRB2Kart build to system with chosen tag:
+     3. Compile and install SRB2/SRB2Kart/Ring Racers build to system with chosen tag:
             srb2bld --install --tag
 
-     4. Compile and create AppImage of SRB2/SRB2Kart build (Linux only):
+     4. Compile and create AppImage of SRB2/SRB2Kart/Ring Racers build (Linux only):
             srb2bld --appimage
 
-     5. List installed SRB2/SRB2Kart builds:
+     5. List installed SRB2/SRB2Kart/Ring Racers builds:
             srb2bld --listinstalled
 
-     6. Uninstall SRB2/SRB2Kart build:
+     6. Uninstall SRB2/SRB2Kart/Ring Racers build:
             srb2bld --uninstall
 
-     7. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
+     7. Display compatibility table of compiling SRB2/SRB2Kart/Ring Racers builds for each operating system:
             srb2bld --compatibility
 
   NOTES:
@@ -280,7 +280,7 @@ Usage: srb2bld [OPTIONS]
 
      7. There are couple of patches applied within source code of games. Their purpose is to prevent conflicts of installing/running of multiple builds overlapping each other with the same names of directories for storing assets and configuration/saves. Other patches include fixing compilation for some builds on particular systems.
 
-     8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart build, if you chose default branch or kept previously chosen different branch.
+     8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart/Ring Racers build, if you chose default branch or kept previously chosen different branch.
 
      9. If you have error "invalid file system type on '/sys/fs/cgroup'", while running script, issue could be with not running cgroups service "sudo systemctl enable cgconfig && sudo systemctl start cgconfig" or "sudo systemctl enable cgmanager && sudo systemctl start cgmanager" or "sudo rc-update add cgroups && sudo rc-service cgroups start" and reboot system.
 
@@ -294,7 +294,7 @@ Usage: srb2bld [OPTIONS]
 
      14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
 
-     15. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+     15. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -352,7 +352,7 @@ Usage: srb2bld [OPTIONS]
 
          - SRB2BLDNCPU - Determine number of CPU threads to compile build. Useful in case of out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus".
 
-         - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
+         - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart/Ring Racers assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
 ```
 
 # Notes
@@ -382,7 +382,7 @@ Usage: srb2bld [OPTIONS]
 
 7. There are couple of patches applied within source code of games. Their purpose is to prevent conflicts of installing/running of multiple builds overlapping each other with the same names of directories for storing assets and configuration/saves. Other patches include fixing compilation for some builds on particular systems.
 
-8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart build, if you chose default branch or kept previously chosen different branch.
+8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart/Ring Racers build, if you chose default branch or kept previously chosen different branch.
 
 9. If you have error "invalid file system type on '/sys/fs/cgroup'", while running script, issue could be with not running cgroups service "sudo systemctl enable cgconfig && sudo systemctl start cgconfig" or "sudo systemctl enable cgmanager && sudo systemctl start cgmanager" or "sudo rc-update add cgroups && sudo rc-service cgroups start" and reboot system.
 
@@ -396,7 +396,7 @@ Usage: srb2bld [OPTIONS]
 
 14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
 
-15. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+15. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
     - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -454,4 +454,4 @@ Usage: srb2bld [OPTIONS]
 
         - SRB2BLDNCPU - Determine number of CPU threads to compile build. Useful in case of out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus".
 
-        - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
+        - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart/Ring Racers assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.

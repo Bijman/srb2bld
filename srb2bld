@@ -2028,7 +2028,7 @@ EOF
 
         elif [ -z "\$SRB2BLDASSETPATH" ]; then
 
-            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
+            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart/Ring Racers release assets for $BUILDNAME."
             extractassets
 
         fi
@@ -2607,7 +2607,7 @@ else
          sudo gawk -i inplace '/#ifndef _WIN32/ {suppress=1} /^\$/ {suppress=0} !suppress' /usr/*/include/sys/types.h
          sudo gawk -i inplace '/#ifndef _WIN32/ {suppress=1} /^\$/ {suppress=0} !suppress' /usr/*/include/sys/stat.h
 
-         # Removing exchndl dependency for some SRB2/SRB2Kart builds due to linking errors.
+         # Removing exchndl dependency for some SRB2/SRB2Kart/Ring Racers builds due to linking errors.
          if [ -f "\$BUILD/src/sdl/i_main.c" ] && [ -z "\$(gawk '/#ifdef DRMINGW/ {print}' \$BUILD/src/sdl/i_main.c)" ]; then
 
              gawk -i inplace '/#include "exchndl.h"/ {suppress=1} /#endif/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_main.c"
@@ -2778,8 +2778,8 @@ else
         gawk -i inplace '{gsub("#define DEFAULTDIR \\"ringracers\\"","#define DEFAULTDIR \\"ringracers'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
         gawk -i inplace '{gsub("/usr/local/share/games/RingRacers","'\$SRB2BLDPREFIX'/share/games/RingRacers"); print}' "\$BUILD/src/sdl/i_system.cpp"
         gawk -i inplace '{gsub("/usr/local/games/RingRacers","'\$SRB2BLDPREFIX'/games/RingRacers"); print}' "\$BUILD/src/sdl/i_system.cpp"
-        gawk -i inplace '{gsub("! UNCOMMITTED CHANGES !",""); print}' "\$BUILD/src/f_finale.c"
-        gawk -i inplace '{gsub("! UNCOMMITTED CHANGES !",""); print}' "\$BUILD/src/d_netcmd.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/f_finale.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/d_netcmd.c"
 
     elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ]; then
 
@@ -2787,8 +2787,8 @@ else
         gawk -i inplace '{gsub("#define DEFAULTDIR \\"ringracers\\"","#define DEFAULTDIR \\"ringracers'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
         gawk -i inplace '{gsub("/usr/local/share/games/RingRacers","'\$SRB2BLDPREFIX'/share/games/RingRacersNoire"); print}' "\$BUILD/src/sdl/i_system.cpp"
         gawk -i inplace '{gsub("/usr/local/games/RingRacers","'\$SRB2BLDPREFIX'/games/RingRacersNoire"); print}' "\$BUILD/src/sdl/i_system.cpp"
-        gawk -i inplace '{gsub("! UNCOMMITTED CHANGES !",""); print}' "\$BUILD/src/f_finale.c"
-        gawk -i inplace '{gsub("! UNCOMMITTED CHANGES !",""); print}' "\$BUILD/src/d_netcmd.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/f_finale.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/d_netcmd.c"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
@@ -2865,8 +2865,8 @@ else
             gawk -i inplace '{gsub("\"/usr/local/games/'\$SRB2CASSETDIR'\"","\"'\$SRB2BLDPREFIX'/games/'\$SRB2CASSETDIR'C'\$CUSTOMDIR'\""); print}' "\$BUILD/src/sdl/i_system.cpp"
             gawk -i inplace '{gsub("\"/usr/share/games/'\$SRB2CASSETDIR'\"","\"/usr/games/'\$SRB2CASSETDIR'C'\$CUSTOMDIR'\""); print}' "\$BUILD/src/sdl/i_system.cpp"
             gawk -i inplace '{gsub("\"/usr/games/'\$SRB2CASSETDIR'\"","\"/usr/games/'\$SRB2CASSETDIR'C'\$CUSTOMDIR'\""); print}' "\$BUILD/src/sdl/i_system.cpp"
-            gawk -i inplace '{gsub("! UNCOMMITTED CHANGES !",""); print}' "\$BUILD/src/f_finale.c"
-            gawk -i inplace '{gsub("! UNCOMMITTED CHANGES !",""); print}' "\$BUILD/src/d_netcmd.c"
+            gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/f_finale.c"
+            gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/d_netcmd.c"
 
         else
 
@@ -7262,7 +7262,7 @@ extractmacoscustomassets() {
 
     elif [ -z "$SRB2BLDASSETPATH" ]; then
 
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart/Ring Racers release assets for $BUILDNAME."
         extractmacosassets
 
     fi
@@ -7593,7 +7593,7 @@ extractsrb2kartmacosassets() {
 fetchupdatebuild() {
     ISNET=$(curl -vI https://github.com 2>&1 | gawk '/> Host:/ {gsub("\r",""); print $NF}')
 
-    if [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
+    if [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ] && [ "$UPGRADE" != "1" ]; then
 
         GIT="git clone $GITOPTS $($PRINTF $SRB2BLDGITPATH | gawk '{gsub(".git$",""); print}').git --recursive $GITVER"
 
@@ -8026,7 +8026,7 @@ FLATPAK
 
     else
 
-        # Set variables for each SRB2/SRB2Kart build.
+        # Set variables for each SRB2/SRB2Kart/Ring Racers build.
         if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ]; then
 
             SRB2CONFDIR=".ringracers$GITVERCONF"
@@ -11258,8 +11258,8 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ]; then
 
-        gawk -i inplace '{gsub("! UNCOMMITTED CHANGES !",""); print}' "$BUILD/src/f_finale.c"
-        gawk -i inplace '{gsub("! UNCOMMITTED CHANGES !",""); print}' "$BUILD/src/d_netcmd.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/f_finale.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/d_netcmd.c"
 
     elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
 
@@ -12407,7 +12407,7 @@ preparebuild() {
             # Set asset's path, if branch was set to other than default.
             if [ -z "$SRB2BLDASSETPATH" ] || [ "$(dirname $BUILD)" != "$BUILDPATH/srb2-custom" ]; then
 
-                $PRINTF "\n$PROMPT==> $MESSAGE%s\e[0m" "Please enter $BUILDNAME's assets path, or just press enter to download and extract the latest SRB2/SRB2Kart stable release assets. Supported links/paths:
+                $PRINTF "\n$PROMPT==> $MESSAGE%s\e[0m" "Please enter $BUILDNAME's assets path, or just press enter to download and extract the latest SRB2/SRB2Kart/Ring Racers stable release assets. Supported links/paths:
 	- websites with direct link to file, for example, \"https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.10/SRB2-v2210-Full.zip\",
 	- mega.nz,
 	- drive.google.com,
@@ -12419,10 +12419,10 @@ preparebuild() {
 
             fi
 
-            # Assume default branch and latest SRB2/SRB2Kart assets, if entered nothing in prompt.
+            # Assume default branch and latest SRB2/SRB2Kart/Ring Racers assets, if entered nothing in prompt.
             if [ -z "$SRB2BLDASSETPATH" ] && [ -z "$UPGRADEBUILD" ]; then
 
-                $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
+                $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart/Ring Racers release assets for $BUILDNAME."
                 GITVER="$GITDEFVER"
 
             # Set to custom asset's path locally or remotely.
@@ -12481,10 +12481,10 @@ preparebuild() {
 
         fi
 
-        # Assume default branch and latest SRB2/SRB2Kart assets, if entered nothing in prompt.
+        # Assume default branch and latest SRB2/SRB2Kart/Ring Racers assets, if entered nothing in prompt.
         if [ -z "$SRB2BLDEXTRAASSETPATH" ] && [ -z "$UPGRADEBUILD" ]; then
 
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart release assets for $BUILDNAME."
+            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Assuming the latest SRB2/SRB2Kart/Ring Racers release assets for $BUILDNAME."
             GITVER="$GITDEFVER"
 
         # Set to custom asset's path locally or remotely.
@@ -12795,19 +12795,20 @@ upgrade() {
 
             for d in $(find "$BUILDPATH/$u" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort -u); do
 
+                unset CONF CUSTOMDIR UPGRADEBUILD
                 export BUILD="$BUILDPATH/$u/$d"
+                export GITURL=$(git -C "$BUILD" remote -v 2> /dev/null | gawk '/fetch/ {print $2}')
                 export GITVER=$(tail -n+2 "$BUILD/.comrev" 2> /dev/null)
                 export CUSTOMDIR="$d"
-                unset CONF
                 upgradetasks
 
             done
 
         else
 
+            unset CONF CUSTOMDIR UPGRADEBUILD
             export BUILD="$BUILDPATH/$u"
             export GITVER=$(tail -n+2 "$BUILD/.comrev" 2> /dev/null)
-            unset CONF
             upgradetasks
 
         fi
@@ -12918,50 +12919,50 @@ usage() {
     clear
 
     $PRINTF "%s\n" "
-Build and install SRB2/SRB2Kart from source.
+Build and install SRB2/SRB2Kart/Ring Racers from source.
 
 Usage: srb2bld [OPTIONS]
   OPTIONS:
      -h, --help                             Show this help text.
-     -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart build, which is packaged in DMG file (macOS only).
+     -ab, --appbundle                       Compile and create distributable App Bundle of SRB2/SRB2Kart/Ring Racers build, which is packaged in DMG file (macOS only).
      -ad, --android                         Compile and create distributable APK file of SRB2 build (Linux and Windows only).
-     -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart build (Linux only).
-     -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system.
-     -f, --flatpak                          Compile and create distributable Flatpak of SRB2/SRB2Kart build (Linux only).
-     -i, --install                          Compile and install SRB2/SRB2Kart build.
-     -la, --listasset                       List downloaded SRB2/SRB2Kart assets.
-     -lb, --listbuild                       List downloaded SRB2/SRB2Kart builds.
-     -lc, --listconfig                      List compilation flags of installed SRB2/SRB2Kart builds.
+     -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart/Ring Racers build (Linux only).
+     -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart/Ring Racers builds for each operating system.
+     -f, --flatpak                          Compile and create distributable Flatpak of SRB2/SRB2Kart/Ring Racers build (Linux only).
+     -i, --install                          Compile and install SRB2/SRB2Kart/Ring Racers build.
+     -la, --listasset                       List downloaded SRB2/SRB2Kart/Ring Racers assets.
+     -lb, --listbuild                       List downloaded SRB2/SRB2Kart/Ring Racers builds.
+     -lc, --listconfig                      List compilation flags of installed SRB2/SRB2Kart/Ring Racers builds.
      -ld, --listdep                         List compiled and installed dependencies for builds.
-     -li, --listinstalled                   List installed SRB2/SRB2Kart builds.
-     -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart build.
-     -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart build.
+     -li, --listinstalled                   List installed SRB2/SRB2Kart/Ring Racers builds.
+     -ra, --removeasset                     Remove downloaded asset for SRB2/SRB2Kart/Ring Racers build.
+     -rb, --removebuild                     Remove downloaded source code for SRB2/SRB2Kart/Ring Racers build.
      -rd, --removedep                       Remove compiled and installed dependencies for builds.
      -t, --tag                              Compile and install build with chosen tag instead of branch (only works with -i/--install, -ab/--appbundle, -ai/--appimage, -f/--flatpak).
      -u, --user                             Set installation path to user's home directory (only works with -i/--install, -ui/--uninstall, -rd/--removedep).
-     -ui, --uninstall                       Uninstall SRB2/SRB2Kart/Software build.
-     -up, --upgrade                         Upgrade installed SRB2/SRB2Kart build.
+     -ui, --uninstall                       Uninstall SRB2/SRB2Kart/Ring Racers/Software build.
+     -up, --upgrade                         Upgrade installed SRB2/SRB2Kart/Ring Racers build.
 
   EXAMPLES:
-     1. Compile and install SRB2/SRB2Kart build to system:
+     1. Compile and install SRB2/SRB2Kart/Ring Racers build to system:
             srb2bld --install
 
-     2. Compile and install SRB2/SRB2Kart build to user's home directory:
+     2. Compile and install SRB2/SRB2Kart/Ring Racers build to user's home directory:
             srb2bld --install --user
 
-     3. Compile and install SRB2/SRB2Kart build to system with chosen tag:
+     3. Compile and install SRB2/SRB2Kart/Ring Racers build to system with chosen tag:
             srb2bld --install --tag
 
-     4. Compile and create AppImage of SRB2/SRB2Kart build (Linux only):
+     4. Compile and create AppImage of SRB2/SRB2Kart/Ring Racers build (Linux only):
             srb2bld --appimage
 
-     5. List installed SRB2/SRB2Kart builds:
+     5. List installed SRB2/SRB2Kart/Ring Racers builds:
             srb2bld --listinstalled
 
-     6. Uninstall SRB2/SRB2Kart build:
+     6. Uninstall SRB2/SRB2Kart/Ring Racers build:
             srb2bld --uninstall
 
-     7. Display compatibility table of compiling SRB2/SRB2Kart builds for each operating system:
+     7. Display compatibility table of compiling SRB2/SRB2Kart/Ring Racers builds for each operating system:
             srb2bld --compatibility
 
   NOTES:
@@ -12991,7 +12992,7 @@ Usage: srb2bld [OPTIONS]
 
      7. There are couple of patches applied within source code of games. Their purpose is to prevent conflicts of installing/running of multiple builds overlapping each other with the same names of directories for storing assets and configuration/saves. Other patches include fixing compilation for some builds on particular systems.
 
-     8. If you choose branch other than default, configuration directory's name will be changed, for example \".srb2\" will become \".srb2udmf\", if \"udmf\" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart build, if you chose default branch or kept previously chosen different branch.
+     8. If you choose branch other than default, configuration directory's name will be changed, for example \".srb2\" will become \".srb2udmf\", if \"udmf\" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart/Ring Racers build, if you chose default branch or kept previously chosen different branch.
 
      9. If you have error \"invalid file system type on '/sys/fs/cgroup'\", while running script, issue could be with not running cgroups service \"sudo systemctl enable cgconfig && sudo systemctl start cgconfig\" or \"sudo systemctl enable cgmanager && sudo systemctl start cgmanager\" or \"sudo rc-update add cgroups && sudo rc-service cgroups start\" and reboot system.
 
@@ -13005,7 +13006,7 @@ Usage: srb2bld [OPTIONS]
 
      14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak \"org.freedesktop.Platform.Compat.i386\" with command \"flatpak --user install org.freedesktop.Platform.Compat.i386\".
 
-     15. In order to compile and install custom SRB2/SRB2Kart build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like \".bash_profile\" or \".zshrc\", which are:
+     15. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like \".bash_profile\" or \".zshrc\", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -13064,7 +13065,7 @@ r example $HOME/Downloads/SRB2.zip for Linux and macOS or C:\Downloads\SRB2.zip 
 
          - SRB2BLDNCPU - Determine number of CPU threads to compile build. Useful in case of out of memory errors, for example \"g++: fatal error: Killed signal terminated program cc1plus\".
 
-         - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
+         - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart/Ring Racers assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
 "
 }
 
