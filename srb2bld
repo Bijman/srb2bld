@@ -699,6 +699,13 @@ buildvar() {
         GITVER="$GITDEFVER"
         GITURL="https://github.com/NepDisk/RingRacers-Noire.git"
 
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
+
+        BUILDNAME="Ring Racers HEP2"
+        GITDEFVER="idk"
+        GITVER="$GITDEFVER"
+        GITURL="https://github.com/hayaunderscore/RingRacers.git"
+
     elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
 
         BUILDNAME="Sonic Robo Blast 2 Custom $CUSTOMDIR"
@@ -712,10 +719,17 @@ buildvar() {
 
     elif [ "$BUILD" = "$BUILDPATH/kartmaker" ]; then
 
-        BUILDNAME="kartmaker (SRB2Kart)"
+        BUILDNAME="kartmaker (SRB2 Kart)"
         GITDEFVER="master"
         GITVER="$GITDEFVER"
         GITURL="https://github.com/BombchuLink/kartmaker.git"
+
+    elif [ "$BUILD" = "$BUILDPATH/neptunefm" ]; then
+
+        BUILDNAME="NeptuneFM (SRB2 Kart)"
+        GITDEFVER="main"
+        GITVER="$GITDEFVER"
+        GITURL="https://github.com/NepDisk/NeptuneFM.git"
 
     elif [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ]; then
 
@@ -900,7 +914,7 @@ choosebuild() {
     while
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Reveries (rphys)" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart Neptune" "Build SRB2 Kart VR" "Build Ring Racers" "Build Ring Racers Noire" "Build SRB2 Custom" "Build wadcli" "Build kartmaker (SRB2 Kart)" "Build kartmaker (Ring Racers)" "Build followermaker (Ring Racers)" "Build SLADE" "Build Ultimate Zone Builder" "Build High Voltage Ring" "Build Aseprite with Kart Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Reveries (rphys)" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart Neptune" "Build SRB2 Kart VR" "Build Ring Racers" "Build Ring Racers Noire" "Build Ring Racers HEP2" "Build SRB2 Custom" "Build wadcli" "Build kartmaker (SRB2 Kart)" "Build NeptuneFM (SRB2 Kart)" "Build kartmaker (Ring Racers)" "Build followermaker (Ring Racers)" "Build SLADE" "Build Ultimate Zone Builder" "Build High Voltage Ring" "Build Aseprite with Kart Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -1050,61 +1064,75 @@ choosebuild() {
 
             "21")
 
-                custombuild
+                BUILD="$BUILDPATH/ring-racers-hep2"
                 break
 
                 ;;
 
             "22")
 
-                BUILD="$BUILDPATH/wadcli"
+                custombuild
                 break
 
                 ;;
 
             "23")
 
-                BUILD="$BUILDPATH/kartmaker"
+                BUILD="$BUILDPATH/wadcli"
                 break
 
                 ;;
 
             "24")
 
-                BUILD="$BUILDPATH/kartmaker-ring-racers"
+                BUILD="$BUILDPATH/kartmaker"
                 break
 
                 ;;
 
             "25")
 
-                BUILD="$BUILDPATH/followermaker"
+                BUILD="$BUILDPATH/neptunefm"
                 break
 
                 ;;
 
             "26")
 
-                BUILD="$BUILDPATH/slade"
+                BUILD="$BUILDPATH/kartmaker-ring-racers"
                 break
 
                 ;;
 
             "27")
 
-                BUILD="$BUILDPATH/ultimatezonebuilder"
+                BUILD="$BUILDPATH/followermaker"
                 break
 
                 ;;
 
             "28")
 
-                BUILD="$BUILDPATH/highvoltagering"
+                BUILD="$BUILDPATH/slade"
                 break
 
                 ;;
 
             "29")
+
+                BUILD="$BUILDPATH/ultimatezonebuilder"
+                break
+
+                ;;
+
+            "30")
+
+                BUILD="$BUILDPATH/highvoltagering"
+                break
+
+                ;;
+
+            "31")
 
                 BUILD="$BUILDPATH/aseprite"
                 break
@@ -1928,7 +1956,7 @@ EOF
 
             fi
 
-        elif [ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ]; then
 
@@ -2522,7 +2550,7 @@ EOF
     fi
 
     # Download and extract assets.
-    if ([ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]); then
+    if ([ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]); then
 
         if [ -n "\$ISNET" ]; then
 
@@ -2580,9 +2608,9 @@ else
     \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Patching $BUILDNAME's source code. Please wait..."
 
     # Modify first line of build script, to avoid issue with running it.
-    if [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
-         if [ -n "\$ISNET" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
+         if [ -n "\$ISNET" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
 
              curl -RL https://raw.githubusercontent.com/BombchuLink/kartmaker/master/build.sh -o "\$BUILD/build.sh"
 
@@ -2593,14 +2621,14 @@ else
 
          if [ "\$OS" = "Windows" ]; then
 
-             gawk -i inplace '{gsub("gcc","'\$CCACHE_BIN_PATH''\$ARCH-w64-mingw32-''\$MINGWCCVER'"); gsub("kartmaker","kartmaker.exe"); gsub("followermaker","followermaker.exe"); gsub("\r",""); print}' "\$BUILD/build.sh"
+             gawk -i inplace '{gsub("gcc","'\$CCACHE_BIN_PATH''\$ARCH-w64-mingw32-''\$MINGWCCVER'"); gsub("kartmaker","kartmaker.exe"); gsub("followermaker","followermaker.exe"); gsub("NeptuneFM","NeptuneFM.exe"); gsub("\r",""); print}' "\$BUILD/build.sh"
 
          fi
 
     fi
 
     # Patching headers, source code to avoid compilation failure for builds on Windows.
-    if [ "\$OS" = "Windows" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
+    if [ "\$OS" = "Windows" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
 
          sudo gawk -i inplace '/#if !defined\(_WIN32\) && !defined\(__CYGWIN__\)/ {suppress=1} /^\$/ {suppress=0} !suppress' /usr/*/include/_mingw.h
          sudo gawk -i inplace '/#ifndef _WIN32/ {suppress=1} /^\$/ {suppress=0} !suppress' /usr/*/include/_mingw_stdarg.h
@@ -2790,6 +2818,15 @@ else
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/f_finale.c"
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/d_netcmd.c"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\".ringracers\\"","#define DEFAULTDIR \\".ringracers'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\"ringracers\\"","#define DEFAULTDIR \\"ringracers'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("/usr/local/share/games/RingRacers","'\$SRB2BLDPREFIX'/share/games/RingRacersHEP2"); print}' "\$BUILD/src/sdl/i_system.cpp"
+        gawk -i inplace '{gsub("/usr/local/games/RingRacers","'\$SRB2BLDPREFIX'/games/RingRacersHEP2"); print}' "\$BUILD/src/sdl/i_system.cpp"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/f_finale.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/d_netcmd.c"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \\".srb2kart\\"","#define DEFAULTDIR \\".srb2kart'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
@@ -2953,7 +2990,7 @@ else
 
             BLDCMD="make CXX="\$CCACHE_BIN_PATH"\$ARCH-w64-mingw32-\$MINGWCXXVER CPLUS_INCLUDE_PATH=/usr/\$ARCH-w64-mingw32/include/.:/usr/include/\$ARCH-linux-gnu/.:\$SRB2BLDPREFIX/include/. -k -j\$NCPU -C \$BUILD WINDOWS=1"
 
-        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
             BLDCMD="\$BUILD/build.sh"
 
@@ -3075,7 +3112,7 @@ MINGWCMAKE
 
             BLDCMD="make CXX="\$CCACHE_BIN_PATH"g++ CPLUS_INCLUDE_PATH=/usr/include/\$ARCH-linux-gnu/.:\$SRB2BLDPREFIX/include/. -k -j\$NCPU -C \$BUILD STATIC=1"
 
-        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
             BLDCMD="\$BUILD/build.sh"
 
@@ -3142,9 +3179,9 @@ MINGWCMAKE
 
             cat "\$BUILD/README.md"
 
-        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
-            \$PRINTF "$NOTICE%s\n\e[0m" "No configs found for kartmaker/followermaker."
+            \$PRINTF "$NOTICE%s\n\e[0m" "No configs found for kartmaker/NeptuneFM/followermaker."
 
         elif [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
 
@@ -3191,7 +3228,7 @@ MINGWCMAKE
     fi
 
     # Download libbacktrace's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+    if [ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 
         if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$LNXOSNAME" = "NixOS" ]; then
 
@@ -3252,7 +3289,7 @@ MINGWCMAKE
     fi
 
     # Download libpng's source code, build and install it.
-#    if [ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+#    if [ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 #
 #        # Uninstall system's package libpng-dev to avoid conflicts with compiled libpng.
 #        if [ "\$LIBC" = "musl" ]; then
@@ -3396,7 +3433,7 @@ MINGWCMAKE
     fi
 
     # Download libopenmpt's source code, build and install it.
-#    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+#    if [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOOPENMPT=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ]  && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 #
 #        # Uninstall system's package libopenmpt-dev to avoid conflicts with compiled libopenmpt.
 #        if [ "\$LIBC" = "musl" ]; then
@@ -3467,7 +3504,7 @@ MINGWCMAKE
 #    fi
 
     # Download libgme's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 
         # Uninstall system's package libgme-dev to avoid conflicts with compiled libgme.
         if [ "\$LIBC" = "musl" ]; then
@@ -3544,7 +3581,7 @@ MINGWCMAKE
     fi
 
     # Download libfluidsynth's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 
         # Uninstall system's package libfluidsynth-dev to avoid conflicts with compiled libfluidsynth.
         if [ "\$LIBC" = "musl" ]; then
@@ -3905,7 +3942,7 @@ MINGWCMAKE
     fi
 
 #    # Download libyuv's source code, build and install it.
-#    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ]); then
+#    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ]); then
 #
 #        # Uninstall system's package libfluidsynth-dev to avoid conflicts with compiled libfluidsynth.
 #        if [ "\$LIBC" = "musl" ]; then
@@ -4101,7 +4138,7 @@ MINGWCMAKE
     fi
 
     # Download vcpkg's source code, build and install it.
-#    if [ "\$OS" = "Windows" ] && ([ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ]); then
+#    if [ "\$OS" = "Windows" ] && ([ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ]); then
 #
 #        if [ ! -d "\$SRB2BLDROOT/libraries/vcpkg/.git" ]; then
 #
@@ -4240,7 +4277,7 @@ MINGWCMAKE
             cp -rf "\$BUILD/dist/res/logo_icon.png" "\$BUILD/build/icon.png"
             cd "\$BUILD" || exit
 
-        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ] || [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ] || [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
             cd "\$BUILD" || exit
             \$BLDCMD \$CONF
@@ -4357,6 +4394,10 @@ MINGWCMAKE
             elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ]; then
 
                 export BUILD="/tmp/ring-racers-noire"
+
+            elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ]; then
+
+                export BUILD="/tmp/ring-racers-hep2"
 
             else
 
@@ -4546,6 +4587,10 @@ MINGWCMAKE
     elif [ -f "\$BUILD/build/kartmaker" ]; then
 
         cp -rf "\$BUILD/build/kartmaker" "\$BUILD/build/AppDir/usr/bin"
+
+    elif [ -f "\$BUILD/NeptuneFM" ]; then
+
+        cp -rf "\$BUILD/NeptuneFM" "\$BUILD/build/AppDir/usr/bin/neptunefm"
 
     elif [ -f "\$BUILD/followermaker" ]; then
 
@@ -4913,6 +4958,33 @@ Name=Software renderer
 Exec=AppRun -software
 DESKTOP
 
+    elif [ "\$(basename \$BUILD)" = "ring-racers-hep2" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Dr. Robotnik's Ring Racers HEP2
+Comment=Modified open source 3D Sonic game with kart racing gameplay with additional features
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;kart;racing;ring;racers
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=RingRacers
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
@@ -5169,6 +5241,24 @@ X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 DESKTOP
 
+    elif [ "\$BUILD" = "\$BUILDPATH/neptunefm" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=NeptuneFM (SRB2 Kart)
+Comment=A fork of followermaker for SRB2Kart Neptune
+Icon=icon
+Exec=AppRun
+Categories=Development;
+Keywords=sonic;wad;kart
+Terminal=true
+NoDisplay=false
+X-AppImage-Name=neptunefm
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+DESKTOP
+
     elif [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
@@ -5280,7 +5370,7 @@ DESKTOP
     fi
 
     # Get app icon.
-    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
         if [ -n "\$ISNET" ]; then
 
@@ -5396,7 +5486,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdlsrb2JTE" "\$@"
 APPRUNBIN
 
-    elif [ "\$(basename \$BUILD)" = "ring-racers" ] || [ "\$(basename \$BUILD)" = "ring-racers-noire" ]; then
+    elif [ "\$(basename \$BUILD)" = "ring-racers" ] || [ "\$(basename \$BUILD)" = "ring-racers-noire" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep2" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export RINGRACERSWADDIR="\$HERE/usr/games/RingRacers"
@@ -5422,6 +5512,12 @@ APPRUNBIN
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 exec "\$HERE/usr/bin/kartmaker" "\$@"
+APPRUNBIN
+
+    elif [ "\$BUILD" = "\$BUILDPATH/neptunefm" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+exec "\$HERE/usr/bin/neptunefm" "\$@"
 APPRUNBIN
 
     elif [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
@@ -5476,7 +5572,7 @@ exec "\$HERE/lib/p7zip/7z" "\$@"
     chmod 755 "\$BUILD/build/AppDir/AppRun"
 
     # Copying libraries to AppDir.
-    if [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
+    if [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
 
         cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
@@ -5547,7 +5643,7 @@ exec "\$HERE/lib/p7zip/7z" "\$@"
 
 else
 
-    if [ "\$FLATPAK" = "1" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
+    if [ "\$FLATPAK" = "1" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
 
         cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
@@ -5808,6 +5904,25 @@ DESKTOP
     cp -f "\$BUILD/build/AppDir/usr/share/applications/ring-racers-noire-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/ring-racers-noire-opengl.desktop"
     gawk -i inplace '{gsub("Name=Dr. Robotnik'\''s Ring Racers Noire \\\(Software\\\)","Name=Dr. Robotnik'\''s Ring Racers Noire (OpenGL)") || gsub("Exec=ringracersnoire -software","Exec=ringracersnoire -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/ring-racers-noire-opengl.desktop"
 
+    elif [ "\$(basename \$BUILD)" = "ring-racers-hep2" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/ring-racers-hep2-software.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Dr. Robotnik's Ring Racers HEP2 (Software)
+Comment=Modified open source 3D Sonic game with kart racing gameplay with additional features
+Icon=ringracershep2
+Exec=ringracershep2 -software
+Categories=Game;
+Keywords=sonic;kart;racing;ring;racers
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/ring-racers-hep2-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/ring-racers-hep2-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Dr. Robotnik'\''s Ring Racers HEP2 \\\(Software\\\)","Name=Dr. Robotnik'\''s Ring Racers HEP2 (OpenGL)") || gsub("Exec=ringracershep2 -software","Exec=ringracershep2 -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/ring-racers-hep2-opengl.desktop"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/srb2-kart-software.desktop" << DESKTOP
@@ -5996,6 +6111,22 @@ Terminal=true
 NoDisplay=false
 DESKTOP
 
+    elif [ "\$BUILD" = "\$BUILDPATH/neptunefm" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/neptunefm.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=NeptuneFM (SRB2 Kart)
+Comment=A fork of followermaker for SRB2Kart Neptune
+Icon=neptunefm
+Exec=neptunefm
+Categories=Development;
+Keywords=sonic;wad;kart
+Terminal=true
+NoDisplay=false
+DESKTOP
+
     elif [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/kartmaker-ring-racers.desktop" << DESKTOP
@@ -6097,7 +6228,7 @@ DESKTOP
     # Modify desktop files for flatpaks.
     if [ "\$FLATPAK" = "1" ]; then
 
-        if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
             gawk -i inplace '{gsub("Icon=.*","Icon=org.srb2bld.'\$(\$PRINTF \$BUILD | gawk -F'/' '{print \$NF}')'"); print}' "\$BUILD/build/AppDir/usr/share/applications/\$(\$PRINTF \$BUILD | gawk -F'/' '{print \$NF}').desktop"
 
@@ -6119,14 +6250,14 @@ DESKTOP
 
     fi
 
-    if ([ "\$LNXOSNAME" = "NixOS" ] || [ "\$BUILD" = "\$BUILDPATH/slade" ]) && [ "\$LIBC" != "musl" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
+    if ([ "\$LNXOSNAME" = "NixOS" ] || [ "\$BUILD" = "\$BUILDPATH/slade" ]) && [ "\$LIBC" != "musl" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
 
         cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libm.so|libpthread.so|libresolv.so|librt.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
     # Get app icon.
-    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
         if [ -n "\$ISNET" ]; then
 
@@ -6246,6 +6377,10 @@ DESKTOP
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/ringracersnoire.png"
 
+    elif [ "\$(basename \$BUILD)" = "ring-racers-hep2" ]; then
+
+        cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/ringracershep2.png"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2kart.png"
@@ -6285,6 +6420,10 @@ DESKTOP
     elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ]; then
 
         cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/kartmaker.png"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/neptunefm" ]; then
+
+        cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/neptunefm.png"
 
     elif [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ]; then
 
@@ -6830,7 +6969,7 @@ containerrun() {
 
         fi
 
-    elif [ "$OS" = "Windows" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]); then
+    elif [ "$OS" = "Windows" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]); then
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for Windows SRB2 tools. Please wait..."
 
@@ -6860,7 +6999,7 @@ containerrun() {
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$($PRINTF "%s\n" "$USERPROFILE")\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" --volume="$($PRINTF "%s\n" "$USERPROFILE")\\.cache\\ccache:$CCACHE_DIR:rw" --volume="$($PRINTF "%s\n" "$USERPROFILE")\\.cache\\vcpkg:/home/srb2bld/.cache/vcpkg:rw" srb2-games-windows-container
 
-    elif [ "$LIBC" = "musl" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]); then
+    elif [ "$LIBC" = "musl" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]); then
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for musl based Linux SRB2 tools. Please wait..."
 
@@ -6890,7 +7029,7 @@ containerrun() {
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-games-linux-musl-container
 
-    elif [ "$OS" = "Linux" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]); then
+    elif [ "$OS" = "Linux" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]); then
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for glibc based Linux SRB2 tools. Please wait..."
 
@@ -7071,7 +7210,7 @@ extractmacosassets() {
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-rphys" ]; then
 
-            SRB2RPHYSASSETURL=$(curl -s "$SRB2RPHYSASSETURL/latest" | gawk -F'"' '/browser_download_url.*-windows.zip/ {print $4}' | head -n1)
+            SRB2RPHYSASSETURL=$(curl -s "$SRB2RPHYSASSETURL" | gawk -F'"' '/browser_download_url.*-windows.zip/ {print $4}' | head -n1)
             if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "$SRB2RPHYSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2rphys.zip" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2rphys.zip"
@@ -7164,10 +7303,10 @@ EOF
 
         unrar x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "$BUILD/assets/installer"
 
-    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
         # Getting missing patch.pk3 file from SRB2 asset pack.
-        if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ]; then
+        if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
 
             if [ -n "$ISNET" ]; then
 
@@ -7813,11 +7952,15 @@ flatpak() {
 }
 FLATPAK
 
-    elif [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
         if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
             FLATPAKCMD="wadcli"
+
+        elif [ "$BUILD" = "$BUILDPATH/neptunefm" ]; then
+
+            FLATPAKCMD="neptunefm"
 
         elif [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
@@ -8051,7 +8194,7 @@ FLATPAK
     else
 
         # Set variables for each SRB2/SRB2Kart/Ring Racers build.
-        if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ]; then
+        if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
 
             SRB2CONFDIR=".ringracers$GITVERCONF"
             WADDIR="RINGRACERSWADDIR"
@@ -8989,6 +9132,28 @@ installtolinux() {
 
         fi
 
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
+
+        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/RingRacersHEP2"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/ringracershep2"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/ring-racers-hep2-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/ring-racers-hep2-opengl.desktop"
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/ringracershep2.png"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's ringracershep2 binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/ringracers" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -d "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+
+        fi
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2Kart"
@@ -9204,6 +9369,22 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/kartmaker" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+
+        fi
+
+    elif [ "$BUILD" = "$BUILDPATH/neptunefm" ]; then
+
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/neptunefm"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/neptunefm.desktop"
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}')
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/neptunefm.png"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's neptunefm binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/neptunefm" "$SRB2BINARYLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
 
@@ -9438,7 +9619,7 @@ HVR
 }
 NIX
 
-        elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
+        elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
             # Setting path to interpreter.
             $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" || true
@@ -10310,7 +10491,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 cat "$BUILD/README.md"
                 BLDCMD="make -k -j$NCPU -C $BUILD"
 
-            elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
+            elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
                 BLDCMD="$BUILD/build.sh"
 
@@ -10409,7 +10590,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Download and extract assets.
-    if [ -z "$(find "$BUILD/build/assets/installer/"* -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] && ([ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]); then
+    if [ -z "$(find "$BUILD/build/assets/installer/"* -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] && ([ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]); then
 
         if [ -n "$ISNET" ]; then
 
@@ -10443,7 +10624,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ]; then
+    if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
 
         # Download vcpkg's source code, build and install it.
         if [ ! -d "$SRB2BLDROOT/libraries/vcpkg/.git" ]; then
@@ -10515,9 +10696,9 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         fi
 
-    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
-        $PRINTF "$NOTICE%s\n\e[0m" "No dependencies to install for kartmaker/followermaker."
+        $PRINTF "$NOTICE%s\n\e[0m" "No dependencies to install for kartmaker/NeptuneFM/followermaker."
 
     elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
@@ -11204,7 +11385,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
-    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ]; then
+    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ]; then
 
         gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)"); print}' "$BUILD/CMakeLists.txt"
 
@@ -11220,7 +11401,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     # Patching SRB2 rphys' source code to add missing file rphys.pk3.
     elif [ "$BUILD" = "$BUILDPATH/srb2-rphys" ]; then
 
-        gawk -i inplace '{gsub("set\\(SRB2_ASSETS_GAME","set(SRB2_ASSETS_GAME\n\t\"rphys.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
+        gawk -i inplace '{gsub("set\\(SRB2_ASSETS_GAME","set(SRB2_ASSETS_GAME\n\t\"reveries.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
 
     # Patching SRB2 Persona's source code to fix error with implicit declaration of function W_GetNumForNameMusic is invalid in C99 [-Werror,-Wimplicit-function-declaration].
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
@@ -11240,11 +11421,11 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     fi
 
     # Modify first line of build script, to avoid issue with running it.
-    if [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ]; then
+    if [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
         cd "$BUILD" || exit
 
-        if [ -n "$ISNET" ]; then
+        if [ -n "$ISNET" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ]; then
 
             curl -RL https://raw.githubusercontent.com/BombchuLink/kartmaker/master/build.sh -o "$BUILD/build.sh"
             chmod 755 "$BUILD/build.sh"
@@ -11280,7 +11461,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2kart\"","#define DEFAULTDIR \"srb2kart'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
 
-    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
 
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/f_finale.c"
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/d_netcmd.c"
@@ -11297,7 +11478,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $BUILDNAME. Please wait..."
     mkdir -p "$BUILD/build"
 
-    if [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
+    if [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
         eval $BLDCMD $CONF
 
@@ -11308,7 +11489,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
+    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
 
         # Get app icon.
         mkdir -p "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
@@ -11637,6 +11818,15 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             cd "$BUILD" || exit
             hdiutil create -volname "$BUILDNAME" -srcfolder "$BUILD/build" "$BUILD/build/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')-$GITVER-$COMREV.dmg"
 
+        elif [ "$BUILD" = "$BUILDPATH/neptunefm" ]; then
+
+            mkdir -p "$BUILD/build"
+            cd "$BUILD/build" || exit
+            ln -sf /Applications Application
+            cp -f "$BUILD/LICENSE.txt" "$BUILD/NeptuneFM" "$BUILD/build"
+            cd "$BUILD" || exit
+            hdiutil create -volname "$BUILDNAME" -srcfolder "$BUILD/build" "$BUILD/build/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')-$GITVER-$COMREV.dmg"
+
         elif [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
             mkdir -p "$BUILD/build"
@@ -11709,6 +11899,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
             sudo mv -f "$BUILD/build/kartmaker" "$SRB2BLDPREFIX"
 
+        elif [ "$BUILD" = "$BUILDPATH/neptunefm" ]; then
+
+            sudo mv -f "$BUILD/NeptuneFM" "$SRB2BLDPREFIX/neptunefm"
+
         elif [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ]; then
 
             sudo mv -f "$BUILD/build/kartmaker" "$SRB2BLDPREFIX/kartmaker_rr"
@@ -11769,6 +11963,11 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
             SRB2MACPATH="$SRB2BLDPREFIX/kartmaker"
             SRB2MACLINK="/usr/local/bin/kartmaker"
+
+        elif [ "$BUILD" = "$BUILDPATH/neptunefm" ]; then
+
+            SRB2MACPATH="$SRB2BLDPREFIX/neptunefm"
+            SRB2MACLINK="/usr/local/bin/neptunefm"
 
         elif [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ]; then
 
@@ -11990,6 +12189,19 @@ installtowindows() {
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
+
+        SRB2WINDIR="Ring Racers HEP2"
+        SRB2WINMENUDIR="Dr. Robotnik's Ring Racers HEP2"
+        SRB2WINBIN=$(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        mkdir -p "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
 
         SRB2WINDIR="SRB2 Kart"
@@ -12135,6 +12347,17 @@ installtowindows() {
         cp -rf "$BUILD/build/$SRB2WINBIN" "$SRB2WINPATH/$SRB2WINBIN.exe"
         $PRINTF "@echo off\nstart $SRB2WINBIN.exe" > "$SRB2WINPATH/$SRB2WINDIR.bat"
 
+    elif [ "$BUILD" = "$BUILDPATH/neptunefm" ]; then
+
+        SRB2WINDIR="NeptuneFM"
+        SRB2WINMENUDIR="NeptuneFM (SRB2 Kart)"
+        SRB2WINBIN="neptunefm"
+        SRB2WINPATH="$HOME/SRB2 Software/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        mkdir -p "$SRB2WINPATH"
+        cp -rf "$BUILD/$SRB2WINBIN" "$SRB2WINPATH/$SRB2WINBIN.exe"
+        $PRINTF "@echo off\nstart $SRB2WINBIN.exe" > "$SRB2WINPATH/$SRB2WINDIR.bat"
+
     elif [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ]; then
 
         SRB2WINDIR="kartmakerringracers"
@@ -12207,7 +12430,7 @@ installtowindows() {
     fi
 
     # Using VBScript to create menu entry for Windows.
-    if [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
+    if [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
 
         cat > "$BUILD/build/CreateShortcut.vbs" << WINMENUSHORTCUT
 Set oWS = CreateObject("WScript.Shell")
@@ -12410,7 +12633,7 @@ preparebuild() {
             ASSETAPPDIR="RingRacers"
             mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
 
-        elif [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
+        elif [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
 
             ASSETAPPDIR="SRB2"
             mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
@@ -12421,7 +12644,7 @@ preparebuild() {
 
     cd "$BUILD" || exit
 
-    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
+    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
 
         if [ "$GITVER" != "$GITDEFVER" ]; then
 
