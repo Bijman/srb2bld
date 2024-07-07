@@ -4195,8 +4195,8 @@ MINGWCMAKE
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
-                ln -sf /usr/local/bin/i686-w64-mingw32-ld /usr/bin/i686-w64-mingw32-ld
-                ln -sf /usr/local/bin/i686-w64-mingw32-as /usr/bin/i686-w64-mingw32-as
+                sudo ln -sf /usr/local/bin/i686-w64-mingw32-ld /usr/bin/i686-w64-mingw32-ld
+                sudo ln -sf /usr/local/bin/i686-w64-mingw32-as /usr/bin/i686-w64-mingw32-as
 
                 \$BLDCMD \$CONF
                 i686-w64-mingw32-objdump -x "\$BUILD/bin/Mingw/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
@@ -4267,9 +4267,9 @@ MINGWCMAKE
             cd "\$BUILD/build" || exit
             rm -f "\$BUILD/slade.pk3"
             7z a -tzip "\$BUILD/build/slade.pk3" "\$BUILD/dist/res/"*
-            ln -s /usr/\$ARCH-linux-gnu/include/bits /usr/include/bits
-            ln -s /usr/include/\$ARCH-linux-gnu/gnu /usr/include/gnu
-            ln -s /usr/include/\$ARCH-linux-gnu/asm /usr/include/asm
+            sudo ln -s /usr/\$ARCH-linux-gnu/include/bits /usr/include/bits
+            sudo ln -s /usr/include/\$ARCH-linux-gnu/gnu /usr/include/gnu
+            sudo ln -s /usr/include/\$ARCH-linux-gnu/asm /usr/include/asm
             \$BLDCMD \$CONF
             make -k -j"\$NCPU" -C "\$BUILD/build"
             make -C "\$BUILD/build" install
