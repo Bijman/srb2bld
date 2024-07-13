@@ -1656,6 +1656,7 @@ containerentry() {
     export LIBC="$LIBC"
     export OSVIRT=\$(\$PRINTF "%s\n" "$OSVIRT" | gawk 'match(\$0, /docker|podman/) {print substr(\$0, RSTART, RLENGTH)}')
     export SRB2BLDROOT="$SRB2BLDROOT"
+    export HOSTUSERID=\$(ls -ld "\$SRB2BLDROOT" | gawk '{print \$3}')
     export BUILDPATH="$BUILDPATH"
     export BUILD="$BUILD"
     export BUILDMAIN="$BUILD"
@@ -1791,7 +1792,7 @@ containerentry() {
 
     elif [ "\$OS" = "Linux" ]; then
 
-        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
+        trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group \$HOSTUSERID -exec chown -R \$HOSTUSERID:\$HOSTUSERID {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process." ; exit 1' 0 1 2 3 6 15
 
     fi
 
@@ -4544,6 +4545,14 @@ MINGWCMAKE
 
         cp -rf "\$BUILD/bin/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
 
+    elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2legacy" ]; then
+
+        cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
+
+    elif [ -f "\$BUILD/bin/lsdl2srb2legacy" ]; then
+
+        cp -rf "\$BUILD/bin/lsdl2srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
+
     elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" ]; then
 
         cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
@@ -6475,7 +6484,7 @@ elif [ "\$OS" = "Linux" ] && [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s
 
 elif [ "\$OS" = "Linux" ]; then
 
-    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true ; exit 0' 0
+    trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group \$HOSTUSERID -exec chown -R \$HOSTUSERID:\$HOSTUSERID {} \; 2> /dev/null || true ; exit 0' 0
 
 fi
 
