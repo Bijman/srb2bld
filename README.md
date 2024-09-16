@@ -74,7 +74,7 @@ As for macOS users, they need to install these additional dependencies:
 
 - Systems with immutable root filesystems (with exception of home directory and others depending on distro) like Steam Deck's SteamOS need rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like "/usr/local":
 	1. Docker (Rootless mode): run `curl -fsSL https://get.docker.com/rootless | sh` to install Docker to user's home directory. For more details read [HERE](https://docs.docker.com/engine/security/rootless),
-	2. Package managers:
+	2. Install dependencies with one of below package managers:
 		- [Homebrew](https://brew.sh): `brew install make git coreutils findutils ncurses curl gawk stow libfuse@2 patchelf gdk-pixbuf`,
 		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'`.
 
