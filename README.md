@@ -8,7 +8,7 @@ https://github.com/Bijman/srb2bld/assets/16626326/7533a945-116a-4e1d-b738-41526b
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
 - Supports installing SRB2 builds and its dependencies for glibc based Linux distros like: Debian, Ubuntu, Arch, Manjaro, Gentoo, OpenSUSE, Fedora, Void and musl based like: Void, Alpine,
-- Systems with immutable root filesystems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) are supported too,
+- Systems with immutable root filesystems (Steam Deck's SteamOS, Fedora Silverblue/Fedora Kinoite/Universal Blue) are supported too,
 - Compiling builds on ARM CPU too (tested on ODROID XU4 with Ubuntu Linux 18.04),
 - Creating customizable AppImages (Linux only), Flatpaks (Linux only) and App Bundles (macOS only) for x86/x64 and ARM CPUs,
 - Building Android APKs (Linux and Windows only),
@@ -17,9 +17,11 @@ https://github.com/Bijman/srb2bld/assets/16626326/7533a945-116a-4e1d-b738-41526b
 - Runs on Linux, macOS and Windows (Git Bash).
 
 # Dependencies
+1. General dependencies:
 - Basic system utilities like GNU Coreutils, BusyBox or macOS out-of-the-box system utilities,
 - Bash or any POSIX compliant shell,
 - Findutils,
+- File,
 - Which,
 - Curl,
 - Git,
@@ -27,12 +29,17 @@ https://github.com/Bijman/srb2bld/assets/16626326/7533a945-116a-4e1d-b738-41526b
 - Ncurses,
 - Docker or Podman (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
-- FUSE or Libfuse2/Fuse-libs (Linux only),
 - Patchelf (Linux only),
 - GDK-Pixbuf (Linux only),
-- Flatpak (Linux only),
-- Flatpak-builder (Linux only),
-- Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package) (Linux only).
+2. AppImage building (Linux only, 32-bit versions of packages are needed too for old SRB2 builds like SRB2 Final Demo and SRB2 JTE):
+- Fuse/Libfuse2/Fuse-libs,
+- File,
+- Zlib/Zlib1g/Zlib-ng-compat/Libz1,
+3. Flatpak building (Linux only):
+- Flatpak,
+- Flatpak-builder.
+
+Optionally for updating icons and menu entries: gtk-update-icon-cache or kservice (can be part of GNOME or KDE desktop environment package) (Linux only).
 Windows users need to also have installed Git Bash or MSYS to run this script.
 
 As for macOS users, they need to install these additional dependencies:
@@ -48,35 +55,35 @@ As for macOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following command:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils ncurses-bin curl gawk docker.io stow libfuse2 patchelf libgdk-pixbuf2.0-bin flatpak flatpak-builder`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils file ncurses-bin curl gawk docker.io stow libfuse2 zlib1g patchelf libgdk-pixbuf2.0-bin flatpak flatpak-builder`,
 
-- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils ncurses curl gawk docker stow fuse2 patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils file ncurses curl gawk docker stow fuse2 zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Gentoo/Gentoo based: `sudo emerge -av dev-vcs/git sys-apps/which sys-apps/coreutils sys-apps/findutils sys-libs/ncurses net-misc/curl sys-apps/gawk app-containers/docker app-admin/stow sys-fs/fuse:0 dev-util/patchelf x11-libs/gdk-pixbuf sys-apps/flatpak dev-util/flatpak-builder`,
+- Gentoo/Gentoo based: `sudo emerge -av dev-vcs/git sys-apps/which sys-apps/coreutils sys-apps/findutils sys-apps/file sys-libs/ncurses net-misc/curl sys-apps/gawk app-containers/docker app-admin/stow sys-fs/fuse:0 sys-libs/zlib dev-util/patchelf x11-libs/gdk-pixbuf sys-apps/flatpak dev-util/flatpak-builder`,
 
-- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse-libs patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Fedora Silverblue/Fedora Kinoite/Fedora Onyx/Fedora Sericea: `rpm-ostree install -A --allow-inactive make git which coreutils findutils ncurses curl gawk docker stow fuse-libs patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- RHEL/RHEL based: `sudo dnf install make git which coreutils findutils ncurses curl gawk docker stow fuse-libs patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- RHEL/RHEL based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- openSUSE Leap/openSUSE Tumbleweed/openSUSE Leap based/openSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
+- openSUSE Leap/openSUSE Tumbleweed/openSUSE Leap based/openSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils file ncurses curl gawk docker stow libfuse2 libz1 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
 
-- openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils ncurses curl gawk docker stow libfuse2 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder && sudo transactional-update apply`,
+- openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils file ncurses curl gawk docker stow libfuse2 libz1 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder && sudo transactional-update apply`,
 
-- Void/Void based: `sudo xbps-install -S make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
+- Void/Void based: `sudo xbps-install -S make git which coreutils findutils file ncurses curl gawk docker stow fuse zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- Alpine/Alpine based: `sudo apk add make git which coreutils findutils ncurses curl gawk docker stow fuse patchelf gdk-pixbuf flatpak flatpak-builder`,
+- Alpine/Alpine based: `sudo apk add make git which coreutils findutils file shadow ncurses curl gawk docker stow fuse zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- Solus/Solus based: `sudo eopkg it make git which coreutils findutils ncurses curl gawk docker stow fuse2 patchelf gdk-pixbuf flatpak flatpak-builder`,
+- Solus/Solus based: `sudo eopkg it make git which coreutils findutils file ncurses curl gawk docker stow fuse2 zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- NixOS/NixOS based: `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`. For Flatpak, set "services.flatpak.enable = true;" in "/etc/nixos/configuration.nix".
+- NixOS/NixOS based: `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#file nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#zlib nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`. For Flatpak, set "services.flatpak.enable = true;" in "/etc/nixos/configuration.nix".
 
 - Systems with immutable root filesystems (with exception of home directory and others depending on distro) like Steam Deck's SteamOS need rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like "/usr/local":
 	1. Docker (Rootless mode): run `curl -fsSL https://get.docker.com/rootless | sh` to install Docker to user's home directory. For more details read [HERE](https://docs.docker.com/engine/security/rootless),
 	2. Install dependencies with one of below package managers:
-		- [Homebrew](https://brew.sh): `brew install make git coreutils findutils ncurses curl gawk stow libfuse@2 patchelf gdk-pixbuf`,
-		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'`.
+		- [Homebrew](https://brew.sh): `brew install make git coreutils findutils file ncurses curl gawk stow libfuse@2 zlib patchelf gdk-pixbuf`,
+		- [Nix Portable](https://github.com/DavHau/nix-portable): `nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#file nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#zlib nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'`.
 
 **Windows:**
 1. Installing Git Bash:
@@ -140,7 +147,7 @@ As for macOS users, they need to install these additional dependencies:
 
 # Configuration
 **Linux (Notice: This part can be skipped, if you have installed podman.):**
-1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. For immutable systems (Steam Deck's SteamOS, Fedora Silverblue/Kinoite) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
+1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. For immutable systems (Steam Deck's SteamOS, Fedora Silverblue/Fedora Kinoite/Universal Blue) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
 
 **Windows:**
 1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system is logged out or rebooted.
@@ -149,7 +156,7 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 01-07-2024)
+# Compatibility (as of 19-09-2024)
 |                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -179,8 +186,8 @@ As for macOS users, they need to install these additional dependencies:
 | kartmaker (RR)           |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | followermaker (RR)       |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SLADE                    |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
-| Ultimate Zone Builder    |          ✅           |         ✅           |        ⛔         |        ✅       |       ⛔      |
-| High Voltage Ring        |          🟨****       |         🟨****       |        ⛔         |        🟨****   |       ⛔      |
+| Ultimate Zone Builder    |          ✅           |         🟨****       |        ⛔         |        ✅       |       ⛔      |
+| High Voltage Ring        |          ✅           |         🟨****       |        ⛔         |        ✅       |       ⛔      |
 | Aseprite w/ Kart Builder |          ✅           |         ⛔           |        ⛔         |        ⛔       |       ✅      |
 
 **Legend:**
@@ -199,7 +206,7 @@ As for macOS users, they need to install these additional dependencies:
 
 ***Compiles successfully, but it can throw SIGABRT error on some macOS versions. Compiled build runs fine on macOS 10.14/Mojave.
 
-****Compiles successfully from Ubuntu 18.04 Docker container, but it throws exception when running build everytime.
+****Compiles successfully from Ubuntu 18.04 Docker container. It requires glibc compatibility layer named gcompat. 
 
 # Supported Android builds
 - SRB2 Android by Lactozilla
@@ -268,15 +275,21 @@ Usage: srb2bld [OPTIONS]
 
          - Debian/Ubuntu/Debian based/Ubuntu based: "sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386",
 
-         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do "sudo pacman -Syu --needed" and then use one of the AUR helpers that you have installed - "pikaur -S --needed lib32-fuse2 lib32-glibc" or "paru -S --needed lib32-fuse2 lib32-glibc" or "yay -S --needed lib32-fuse2 lib32-glibc",
+         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do "sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-zlib" or use one of the AUR helpers that you have installed - "pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-zlib" or "paru -Su --needed lib32-fuse2 lib32-glibc lib32-zlib" or "yay -Su --needed lib32-fuse2 lib32-glibc lib32-zlib",
 
-         - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc",
+         - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib",
 
-         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686" for Fedora Workstation/Server or "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686" for Fedora Silverblue/Kinoite,
+         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686 zlib-ng-compat.i686", 
 
-         - OpenSUSE/OpenSUSE based: "sudo zypper in libfuse2-32bit glibc-32bit",
+         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 zlib-ng-compat.i686",
 
-         - Void: "sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su && sudo xbps-install -S fuse-32bit glibc-32bit".
+         - RHEL/RHEL based: "sudo dnf install fuse-libs.i686 glibc.i686 zlib.i686",
+
+         - openSUSE/openSUSE based: "sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit",
+
+         - openSUSE MicroOS/openSUSE MicroOS based: "sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit && sudo transactional-update apply",
+
+         - Void/Void based: "sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit zlib-32bit".
 
      6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set: export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" in "~/.bash_profile" or "~/.zshrc".
 
@@ -370,15 +383,21 @@ Usage: srb2bld [OPTIONS]
 
          - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386`,
 
-         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Syu --needed` and then use one of the AUR helpers that you have installed - `pikaur -S --needed lib32-fuse2 lib32-glibc` or `paru -S --needed lib32-fuse2 lib32-glibc` or `yay -S --needed lib32-fuse2 lib32-glibc`,
+         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-zlib` or use one of the AUR helpers that you have installed - `pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-zlib` or `paru -Su --needed lib32-fuse2 lib32-glibc lib32-zlib` or `yay -Su --needed lib32-fuse2 lib32-glibc lib32-zlib`,
 
-         - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc`,
+         - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib`,
 
-         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686` for Fedora Workstation/Server or `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686` for Fedora Silverblue/Kinoite,
+         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686 zlib-ng-compat.i686`,
 
-         - OpenSUSE/OpenSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit`,
+         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 zlib-ng-compat.i686`,
 
-         - Void: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su && sudo xbps-install -S fuse-32bit glibc-32bit`.
+         - RHEL/RHEL based: `sudo dnf install fuse-libs.i686 glibc.i686 zlib.i686`,
+
+         - openSUSE/openSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit`,
+
+         - openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit && sudo transactional-update apply`,
+
+         - Void/Void based: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit zlib-32bit`.
 
 6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set `export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"` in "\~/.bash_profile" or "\~/.zshrc".
 
