@@ -3010,7 +3010,7 @@ else
 
         elif [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
 
-            BLDCMD="cmake -S \$BUILD --preset ninja-x86_mingw_static_vcpkg-release -DVCPKG_TARGET_TRIPLET=x86-mingw-static -DCMAKE_C_COMPILER="\$CCACHE_BIN_PATH"i686-w64-mingw32-gcc-posix -DCMAKE_CXX_COMPILER="\$CCACHE_BIN_PATH"i686-w64-mingw32-g++-posix -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=\$VCPKG_ROOT/scripts/toolchains/mingw.cmake"
+            BLDCMD="cmake -S \$BUILD --preset ninja-x86_mingw_static_vcpkg-release -DVCPKG_TARGET_TRIPLET=x86-mingw-static -DCMAKE_C_COMPILER="\$CCACHE_BIN_PATH"i686-w64-mingw32-gcc-posix -DCMAKE_CXX_COMPILER="\$CCACHE_BIN_PATH"i686-w64-mingw32-g++-posix -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=\$VCPKG_ROOT/scripts/toolchains/mingw.cmake -DCMAKE_TOOLCHAIN_FILE=\$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DSRB2_CONFIG_SKIP_COMPTIME=ON"
 
         elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
 
@@ -3218,9 +3218,16 @@ MINGWCMAKE
                 \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading vcpkg's source code. Please wait..."
                 git clone \$GITOPTS https://github.com/microsoft/vcpkg.git --recursive --branch "$LNXVCPKGVER" "\$VCPKG_ROOT"
 
+                # Fix issue of broken configure build script for libvpx within container mounted to host's path.
+                if [ -d "\$BUILD/thirdparty/vcpkg-overlays/libvpx" ]; then
+
+                    git -C "\$BUILD" restore --worktree thirdparty/vcpkg-overlays/libvpx
+
+                fi
+
             fi
 
-            \$BLDCMD -LAH 2> /dev/null 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null || true
+            \$BLDCMD -LAH 2> /dev/null 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ] || [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
 
