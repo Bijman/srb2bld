@@ -71,7 +71,7 @@ As for macOS users, they need to install these additional dependencies:
 
 - openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils file ncurses curl gawk docker stow libfuse2 libz1 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder && sudo transactional-update apply`,
 
-- Void/Void based: `sudo xbps-install -S make git which coreutils findutils file ncurses curl gawk docker stow fuse zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
+- Void/Void based: `sudo xbps-install make git which coreutils findutils file ncurses curl gawk docker stow fuse zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
 
 - Alpine/Alpine based: `sudo apk add make git which coreutils findutils file shadow ncurses curl gawk docker stow fuse zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
 
