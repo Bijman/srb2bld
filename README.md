@@ -3,7 +3,7 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://github.com/Bijman/srb2bld/assets/16626326/7533a945-116a-4e1d-b738-41526b5cb33a
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries (rphys), SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 JTE, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Ring Racers, Ring Racers Noire, Ring Racers HEP2, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries (rphys), SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.0, SRB2 Final Demo, SRB2 JTE, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers Freaky Build, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
@@ -154,7 +154,7 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 19-09-2024)
+# Compatibility (as of 25-11-2024)
 |                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -178,6 +178,7 @@ As for macOS users, they need to install these additional dependencies:
 | Ring Racers              |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers Noire        |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers HEP2         |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
+| Ring Racers Freaky Build |          ✅           |         🟨           |        ⛔         |        ✅*      |       ✅      |
 | wadcli                   |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
 | kartmaker (SRB2 Kart)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | NeptuneFM (SRB2 Kart)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |

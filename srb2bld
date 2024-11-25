@@ -172,7 +172,7 @@ UBUSOFTVER="focal" # Ubuntu 20.04 LTS
 UBUUZBVER="bionic" # Ubuntu 18.04 LTS
 SRB2NETPLUSASSETURL="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.9/SRB2-v229-Patch.zip"
 SRB2RPHYSASSETURL="https://api.github.com/repos/hazepastel/srb2/releases"
-SRB2TSOURDT3RDASSETURL="https://api.github.com/repos/StarManiaKG/The-Story-Of-Uncapped-Revengence-Discord-the-3rd/releases/latest"
+#SRB2TSOURDT3RDASSETURL="https://mb.srb2.org/addons/the-story-of-uncapped-revengence-discord-the-3rd.4932/download"
 SRB2VRASSETURL="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.9/SRB2-v229-Patch.zip"
 SRB2LEGACYASSETURL="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.1.25/SRB2-v2125-Installer.exe"
 SRB220ASSETURL="https://archive.org/download/srb20ya-v20/SRB2_v206.exe"
@@ -249,6 +249,7 @@ LNXFMODVER="fmodapi375linux"
 LNXBACKTRACEVER="master"
 LNXPNGVER="master"
 LNXPNG12VER="libpng12"
+LNXSDL2VER="release-2.0.18"
 LNXSDL2MIXERXVER="2.5.0"
 LNXOPENMPTVER="libopenmpt-0.6.12"
 LNXGMEVER="0.6.3"
@@ -706,7 +707,7 @@ buildvar() {
     elif [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ]; then
 
         BUILDNAME="Ring Racers Noire"
-        GITDEFVER="Noire"
+        GITDEFVER="Noire-Stable"
         GITVER="$GITDEFVER"
         GITURL="https://github.com/NepDisk/RingRacers-Noire.git"
 
@@ -716,6 +717,13 @@ buildvar() {
         GITDEFVER="idk"
         GITVER="$GITDEFVER"
         GITURL="https://github.com/hayaunderscore/RingRacers.git"
+
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+
+        BUILDNAME="Ring Racers Freaky Build"
+        GITDEFVER="freaky-build"
+        GITVER="$GITDEFVER"
+        GITURL="https://git.do.srb2.org/FreakyMutantMan/RingRacers.git"
 
     elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
 
@@ -925,7 +933,7 @@ choosebuild() {
     while
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Reveries (rphys)" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart Neptune" "Build SRB2 Kart VR" "Build Ring Racers" "Build Ring Racers Noire" "Build Ring Racers HEP2" "Build SRB2 Custom" "Build wadcli" "Build kartmaker (SRB2 Kart)" "Build NeptuneFM (SRB2 Kart)" "Build kartmaker (Ring Racers)" "Build followermaker (Ring Racers)" "Build SLADE" "Build Ultimate Zone Builder" "Build High Voltage Ring" "Build Aseprite with Kart Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Reveries (rphys)" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart Neptune" "Build SRB2 Kart VR" "Build Ring Racers" "Build Ring Racers Noire" "Build Ring Racers HEP2" "Build Ring Racers Freaky Build" "Build SRB2 Custom" "Build wadcli" "Build kartmaker (SRB2 Kart)" "Build NeptuneFM (SRB2 Kart)" "Build kartmaker (Ring Racers)" "Build followermaker (Ring Racers)" "Build SLADE" "Build Ultimate Zone Builder" "Build High Voltage Ring" "Build Aseprite with Kart Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -1082,68 +1090,75 @@ choosebuild() {
 
             "22")
 
-                custombuild
+                BUILD="$BUILDPATH/ring-racers-freaky-build"
                 break
 
                 ;;
 
             "23")
 
-                BUILD="$BUILDPATH/wadcli"
+                custombuild
                 break
 
                 ;;
 
             "24")
 
-                BUILD="$BUILDPATH/kartmaker"
+                BUILD="$BUILDPATH/wadcli"
                 break
 
                 ;;
 
             "25")
 
-                BUILD="$BUILDPATH/neptunefm"
+                BUILD="$BUILDPATH/kartmaker"
                 break
 
                 ;;
 
             "26")
 
-                BUILD="$BUILDPATH/kartmaker-ring-racers"
+                BUILD="$BUILDPATH/neptunefm"
                 break
 
                 ;;
 
             "27")
 
-                BUILD="$BUILDPATH/followermaker"
+                BUILD="$BUILDPATH/kartmaker-ring-racers"
                 break
 
                 ;;
 
             "28")
 
-                BUILD="$BUILDPATH/slade"
+                BUILD="$BUILDPATH/followermaker"
                 break
 
                 ;;
 
             "29")
 
-                BUILD="$BUILDPATH/ultimatezonebuilder"
+                BUILD="$BUILDPATH/slade"
                 break
 
                 ;;
 
             "30")
 
-                BUILD="$BUILDPATH/highvoltagering"
+                BUILD="$BUILDPATH/ultimatezonebuilder"
                 break
 
                 ;;
 
             "31")
+
+                BUILD="$BUILDPATH/highvoltagering"
+                break
+
+                ;;
+
+            "32")
 
                 BUILD="$BUILDPATH/aseprite"
                 break
@@ -1853,25 +1868,23 @@ containerentry() {
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
 
-                SRB2TSOURDT3RDASSETURL=\$(curl -s "\$SRB2TSOURDT3RDASSETURL" | gawk -F'"' '/browser_download_url.*TSoURDt3rd.zip/ {print \$4}')
-                if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "\$SRB2TSOURDT3RDASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip" 2> /dev/null)" ]; then
+                if [ -n "\$ISNET" ] && [ "\$(curl -X GET -LI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
 
-                    rm -f "\$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip"
-                    curl -RL "\$SRB2TSOURDT3RDASSETURL" -o "\$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip"
-
-                fi
-
-                7z e -y -r "\$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip" "*.pk3" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-
-                #Temporary fix for mismatched tsourdt3rd.pk3 file from the latest commits.
-                if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/ca1a8998213fae48cfa6fb66f36f6d1a88c3cca1/releases/v4.0/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
-
-#                    curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/v4.0/tsourdt3rd.pk3" -o "\$SRB2BLDROOT/assets/tsourdt3rd.pk3"
-                    curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/ca1a8998213fae48cfa6fb66f36f6d1a88c3cca1/releases/v4.0/tsourdt3rd.pk3" -o "\$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+                    rm -f "\$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+                    curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" -o "\$SRB2BLDROOT/assets/tsourdt3rd.pk3"
 
                 fi
 
-                cp -f "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -rf "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" "\$BUILD/build/AppDir/usr/games/SRB2"
+
+                if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/jukebox.pk3" 2> /dev/null)" ]; then
+
+                    rm -f "\$SRB2BLDROOT/assets/jukebox.pk3"
+                    curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" -o "\$SRB2BLDROOT/assets/jukebox.pk3"
+
+                fi
+
+                cp -rf "\$SRB2BLDROOT/assets/jukebox.pk3" "\$BUILD/build/AppDir/usr/games/SRB2"
 
             fi
 
@@ -1983,7 +1996,7 @@ EOF
 
             fi
 
-        elif [ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ]; then
 
@@ -2011,6 +2024,10 @@ EOF
                 fi
 
                 7z e -y "\$SRB2BLDROOT/assets/SRB2KartNeptune.zip" "*/*.kart" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+
+            elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]; then
+
+                cp -rf "\$BUILD/!REQUIRED ASSETS/"*.pk3 "\$BUILD/build/AppDir/usr/games/RingRacers"
 
             fi
 
@@ -2050,7 +2067,7 @@ EOF
             elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDASSETPATH" | gawk '/drive.google.com/ {print}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDASSETPATH" | gawk '/drive.usercontent.google.com/ {print}')" ]; then
 
                 SRB2ASSETID=\$(\$PRINTF "%s\n" "\$SRB2BLDASSETPATH" | gawk '{gsub("https://drive.google.com/file/d/|https://drive.usercontent.google.com/download\\\?id=|&export=download|/view|/edit|\\\?usp=sharing",""); print}')
-                SRB2BLDASSETPATH="https://drive.usercontent.google.com/download?export=download&confirm=t&id=\$SRB2ASSETID"
+                SRB2BLDASSETPATH="https://drive.usercontent.google.com/download?confirm=t&id=\$SRB2ASSETID"
                 FILETYPE=\$(curl -X GET -sLI "\$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"",""); print \$NF}')
 
             elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDASSETPATH" | gawk '/mega.nz/ {print}')" ]; then
@@ -2094,7 +2111,7 @@ EOF
 
             if [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDASSETPATH" | gawk '/drive.google.com/ {print}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDASSETPATH" | gawk '/drive.usercontent.google.com/ {print}')" ]; then
 
-                curl -RL "https://drive.google.com/uc?export=download&confirm=t&id=\$SRB2ASSETID" -o"\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
+                curl -RL "https://drive.usercontent.google.com/download?confirm=t&id=\$SRB2ASSETID" -o"\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER.\$FILETYPE"
 
             elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDASSETPATH" | gawk '/mega.co.nz/ {print}')" ]; then
 
@@ -2189,7 +2206,7 @@ EOF
             elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/drive.google.com/ {print}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/drive.usercontent.google.com/ {print}')" ]; then
 
                 SRB2ASSETID=\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '{gsub("https://drive.google.com/file/d/|https://drive.usercontent.google.com/download\\\?id=|&export=download|/view|/edit|\\\?usp=sharing",""); print}')
-                SRB2BLDEXTRAASSETPATH="https://drive.usercontent.google.com/download?export=download&confirm=t&id=\$SRB2ASSETID"
+                SRB2BLDEXTRAASSETPATH="https://drive.usercontent.google.com/download?confirm=t&id=\$SRB2ASSETID"
                 FILETYPE=\$(curl -X GET -sLI "\$SRB2BLDEXTRAASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"",""); print \$NF}')
 
             elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/mega.nz/ {print}')" ]; then
@@ -2228,7 +2245,7 @@ EOF
 
             if [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/drive.google.com/ {print}')" ] || [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/drive.usercontent.google.com/ {print}')" ]; then
 
-                curl -RL "https://drive.google.com/uc?export=download&confirm=t&id=\$SRB2ASSETID" -o"\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER-extras.\$FILETYPE"
+                curl -RL "https://drive.usercontent.google.com/download?confirm=t&id=\$SRB2ASSETID" -o"\$SRB2BLDROOT/assets/\$BUILDPREFIX-\$GITVER-extras.\$FILETYPE"
 
             elif [ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDEXTRAASSETPATH" | gawk '/mega.co.nz/ {print}')" ]; then
 
@@ -2295,10 +2312,18 @@ EOF
             if [ -n "\$ISNET" ]; then
 
                 SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_\$SRB2VER'\/.*Full.zip/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
 
-                    rm -f "\$SRB2BLDROOT/assets/SRB2-Older.zip"
-                    curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-Older.zip"
+                if [ -z "\$SRB2ASSETURL" ]; then
+
+                    SRB2ASSETURL=\$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
+                    \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
+
+                fi
+
+                if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-\$SRB2VER.zip" 2> /dev/null)" ]; then
+
+                    rm -f "\$SRB2BLDROOT/assets/SRB2-\$SRB2VER.zip"
+                    curl -RL "\$SRB2ASSETURL" -o "\$SRB2BLDROOT/assets/SRB2-\$SRB2VER.zip"
 
                 fi
 
@@ -2306,11 +2331,11 @@ EOF
 
             if [ "\$ANDROID" = "1" ]; then
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/android/app/src/main/assets"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-\$SRB2VER.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/android/app/src/main/assets"
 
             else
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-\$SRB2VER.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
             fi
 
@@ -2401,16 +2426,24 @@ EOF
                 if [ -n "\$ISNET" ]; then
 
                     RINGRACERSASSETURL=\$(curl -s https://api.github.com/repos/KartKrewDev/RingRacers/releases | gawk -F'"' '/'\$RINGRACERSVER'\/.*Installer.exe/ {print \$4}')
-                    if [ "\$(curl -X GET -sLI "\$RINGRACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/RingRacers-Older.exe" 2> /dev/null)" ]; then
 
-                        rm -f "\$SRB2BLDROOT/assets/RingRacers-Older.exe"
-                        curl -RL "\$RINGRACERSASSETURL" -o "\$SRB2BLDROOT/assets/RingRacers-Older.exe"
+                    if [ -z "\$RINGRACERSASSETURL" ]; then
+
+                        RINGRACERSASSETURL=\$(curl -s https://api.github.com/repos/KartKrewDev/RingRacers/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
+                        \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
+
+                    fi
+
+                    if [ "\$(curl -X GET -sLI "\$RINGRACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/RingRacers-\$RINGRACERSVER.exe" 2> /dev/null)" ]; then
+
+                        rm -f "\$SRB2BLDROOT/assets/RingRacers-\$RINGRACERSVER.exe"
+                        curl -RL "\$RINGRACERSASSETURL" -o "\$SRB2BLDROOT/assets/RingRacers-\$RINGRACERSVER.exe"
 
                     fi
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/RingRacers-Older.exe" "*.pk3" "*.dat" "data/*" "models/*" -o"\$BUILD/build/AppDir/usr/games/RingRacers"
+                7z x -y "\$SRB2BLDROOT/assets/RingRacers-\$RINGRACERSVER.exe" "*.pk3" "*.dat" "data/*" "models/*" -o"\$BUILD/build/AppDir/usr/games/RingRacers"
 
             else
 
@@ -2484,16 +2517,24 @@ EOF
             if [ -n "\$ISNET" ]; then
 
                 SRB2KARTASSETURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F'"' '/'\$SRB2KARTVER'\/.*Installer.exe/ {print \$4}')
-                if [ "\$(curl -X GET -sLI "\$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe" 2> /dev/null)" ]; then
 
-                    rm -f "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
-                    curl -RL "\$SRB2KARTASSETURL" -o "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
+                if [ -z "\$SRB2KARTASSETURL" ]; then
+
+                    SRB2KARTASSETURL=\$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
+                    \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
+
+                fi
+
+                if [ "\$(curl -X GET -sLI "\$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2Kart-\$SRB2KARTVER.exe" 2> /dev/null)" ]; then
+
+                    rm -f "\$SRB2BLDROOT/assets/SRB2Kart-\$SRB2KARTVER.exe"
+                    curl -RL "\$SRB2KARTASSETURL" -o "\$SRB2BLDROOT/assets/SRB2Kart-\$SRB2KARTVER.exe"
 
                 fi
 
             fi
 
-            7z x -y "\$SRB2BLDROOT/assets/SRB2Kart-Older.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+            7z x -y "\$SRB2BLDROOT/assets/SRB2Kart-\$SRB2KARTVER.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
 
         else
 
@@ -2854,6 +2895,13 @@ else
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/f_finale.c"
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/d_netcmd.c"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\".ringracers\\"","#define DEFAULTDIR \\".ringracers'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\"ringracers\\"","#define DEFAULTDIR \\"ringracers'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("/usr/local/share/games/RingRacers","'\$SRB2BLDPREFIX'/share/games/RingRacersFreakyBuild"); print}' "\$BUILD/src/sdl/i_system.cpp"
+        gawk -i inplace '{gsub("/usr/local/games/RingRacers","'\$SRB2BLDPREFIX'/games/RingRacersFreakyBuild"); print}' "\$BUILD/src/sdl/i_system.cpp"
+
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \\".srb2kart\\"","#define DEFAULTDIR \\".srb2kart'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
@@ -3188,6 +3236,28 @@ MINGWCMAKE
 
     fi
 
+    if [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
+
+        find "\$BUILD" -name "*.cmake" -executable -type f -exec gawk -i inplace '{gsub("\r","");print}' '{}' \;
+
+        if [ "\$OS" = "Windows" ]; then
+
+            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading vcpkg's source code. Please wait..."
+            git clone \$GITOPTS https://github.com/microsoft/vcpkg.git --recursive --branch "$LNXVCPKGVER" "\$VCPKG_ROOT"
+
+            # Fix issue of broken configure build script for libvpx within container mounted to host's path.
+            if [ -d "\$BUILD/thirdparty/vcpkg-overlays/libvpx" ]; then
+
+                git -C "\$BUILD" restore --worktree thirdparty/vcpkg-overlays/libvpx
+
+            fi
+
+        fi
+
+        \$BLDCMD -LAH 2> /dev/null 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+
+    fi
+
     if [ -n "\$UPGRADEBUILD" ] && [ -z "\$CUSTOMDIR" ]; then
 
         export CONF="\$(gawk '/---------------/ {gsub("---------------","");getline; print}' "\$SRB2BLDROOT/installed/\$UPGRADEBUILD")"
@@ -3210,26 +3280,6 @@ MINGWCMAKE
 
             \$PRINTF "$NOTICE%s\n\e[0m" "No configs found for kartmaker/NeptuneFM/followermaker."
 
-        elif [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
-
-            find "\$BUILD" -name "*.cmake" -executable -type f -exec gawk -i inplace '{gsub("\r","");print}' '{}' \;
-
-            if [ "\$OS" = "Windows" ]; then
-
-                \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading vcpkg's source code. Please wait..."
-                git clone \$GITOPTS https://github.com/microsoft/vcpkg.git --recursive --branch "$LNXVCPKGVER" "\$VCPKG_ROOT"
-
-                # Fix issue of broken configure build script for libvpx within container mounted to host's path.
-                if [ -d "\$BUILD/thirdparty/vcpkg-overlays/libvpx" ]; then
-
-                    git -C "\$BUILD" restore --worktree thirdparty/vcpkg-overlays/libvpx
-
-                fi
-
-            fi
-
-            \$BLDCMD -LAH 2> /dev/null 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ] || [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
 
             \$BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
@@ -3238,7 +3288,7 @@ MINGWCMAKE
 
             cat "\$BUILD/Makefile"
 
-        else
+        elif [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
 
             set +o noglob
             gawk '/^#/,/ / {print}' "\$BUILD/src/"*akefile
@@ -3303,6 +3353,14 @@ MINGWCMAKE
             cd "\$SRB2BLDROOT/libraries/libbacktrace" || exit
             CC=""\$CCACHE_BIN_PATH"\$GCCVER" CXX=""\$CCACHE_BIN_PATH"\$GXXVER" "\$SRB2BLDROOT/libraries/libbacktrace/configure" --prefix="\$LIBBACKTRACEPREFIX" --enable-shared
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libbacktrace"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/libbacktrace" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt libbacktrace
+                sudo rm -rf "\$LIBBACKTRACEPREFIX"
+
+            fi
+
             sudo -E make -C "\$SRB2BLDROOT/libraries/libbacktrace" install
 
             if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -3367,6 +3425,14 @@ MINGWCMAKE
             cd "\$SRB2BLDROOT/libraries/libpng" || exit
             CC=""\$CCACHE_BIN_PATH"\$GCCVER" CXX=""\$CCACHE_BIN_PATH"\$GXXVER" "\$SRB2BLDROOT/libraries/libpng/configure" --prefix="\$LIBPNGPREFIX"
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libpng"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/libpng" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt libpng
+                sudo rm -rf "\$LIBPNGPREFIX"
+
+            fi
+
             sudo -E make -C "\$SRB2BLDROOT/libraries/libpng" install
 
             if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -3439,6 +3505,14 @@ MINGWCMAKE
             cd "\$SRB2BLDROOT/libraries/libpng12" || exit
             CC=""\$CCACHE_BIN_PATH"\$GCCVER" CXX=""\$CCACHE_BIN_PATH"\$GXXVER" "\$SRB2BLDROOT/libraries/libpng12/configure" --prefix="\$LIBPNG12PREFIX"
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libpng12"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/libpng12" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt libpng12
+                sudo rm -rf "\$LIBPNG12PREFIX"
+
+            fi
+
             sudo -E make -C "\$SRB2BLDROOT/libraries/libpng12" install
 
             if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ]; then
@@ -3510,6 +3584,14 @@ MINGWCMAKE
 #            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing libopenmpt. Please wait..."
 #            gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0"); gsub("STATIC_LIB=1","STATIC_LIB=0"); gsub("EXAMPLES=1","EXAMPLES=0"); gsub("OPENMPT123=1","OPENMPT123=0"); gsub("TEST=1","TEST=0"); print}' "\$SRB2BLDROOT/libraries/libopenmpt/Makefile"
 #            CC=""\$CCACHE_BIN_PATH"\$GCCVER" CXX=""\$CCACHE_BIN_PATH"\$GXXVER" make -k -j\$((\$(nproc) + 1)) -C "\$SRB2BLDROOT/libraries/libopenmpt" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1
+#
+#            if [ -d "\$SRB2BLDPREFIX/stow/libopenmpt" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+#
+#                sudo -E stow -Dv --adopt libopenmpt
+#                sudo rm -rf "\$LIBOPENMPTPREFIX"
+#
+#            fi
+#
 #            sudo make -C "\$SRB2BLDROOT/libraries/libopenmpt" PREFIX="\$LIBOPENMPTPREFIX" install
 #
 #            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -3587,6 +3669,14 @@ MINGWCMAKE
 #            cmake --build "\$SRB2BLDROOT/libraries/libgme/build" -j"\$NCPU" --config Release
 #            sudo -E cmake --install "\$SRB2BLDROOT/libraries/libgme/build"
             CC="\$GCCVER" make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libgme/build"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/libgme" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt libgme
+                sudo rm -rf "\$LIBGMEPREFIX"
+
+            fi
+
             sudo make -C "\$SRB2BLDROOT/libraries/libgme/build" install
 
             if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -3661,6 +3751,14 @@ MINGWCMAKE
             cd "\$SRB2BLDROOT/libraries/libfluidsynth/build" || exit
             cmake .. -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib -DCMAKE_INSTALL_PREFIX="\$LIBFLUIDSYNTHPREFIX"
             CC="\$GCCVER" make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libfluidsynth/build"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/libfluidsynth" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt libfluidsynth
+                sudo rm -rf "\$LIBFLUIDSYNTHPREFIX"
+
+            fi
+
             sudo make -C "\$SRB2BLDROOT/libraries/libfluidsynth/build" install
 
             if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -3680,8 +3778,61 @@ MINGWCMAKE
 
     fi
 
+    # Download libSDL2's source code, build and install it.
+    if [ "\$OS" = "Linux" ] && [ "\$LIBC" != "musl" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
+
+        sudo dpkg --remove --force-depends libsdl2-dev libsdl2-2.0-0
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2/.git" ]; then
+
+            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading libSDL2's source code. Please wait..."
+            git clone \$GITOPTS https://github.com/libsdl-org/SDL.git --recursive --branch "$LNXSDL2VER" "\$SRB2BLDROOT/libraries/libsdl2"
+
+        else
+
+            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating and cleaning up libSDL2's source code. Please wait..."
+            git config --global --add safe.directory "\$SRB2BLDROOT/libraries/libsdl2"
+            git -C "\$SRB2BLDROOT/libraries/libsdl2" clean -qdffx -e .comrev
+            git -C "\$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libsdl2" checkout -q main
+
+            if [ -n "\$ISNET" ]; then
+
+                git -C "\$SRB2BLDROOT/libraries/libsdl2" pull --recurse-submodules --rebase --autostash
+
+            fi
+
+            git -C "\$SRB2BLDROOT/libraries/libsdl2" checkout -q "$LNXSDL2VER"
+
+        fi
+
+            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing libSDL2. Please wait..."
+            cd "\$SRB2BLDROOT/libraries/libsdl2" || exit
+
+            CC=""\$CCACHE_BIN_PATH"\$GCCVER" CXX=""\$CCACHE_BIN_PATH"\$GXXVER" "\$SRB2BLDROOT/libraries/libsdl2/configure" --prefix="/usr"
+            make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libsdl2"
+            sudo make -C "\$SRB2BLDROOT/libraries/libsdl2" install
+
+            git -C "\$SRB2BLDROOT/libraries/libsdl2" clean -qdffx -e .comrev
+            git -C "\$SRB2BLDROOT/libraries/libsdl2" reset -q --hard
+
+            cd "\$BUILD" || exit
+
+    fi
+
     # Download libSDL2_mixerX's source code, build and install it.
     if [ "\$OS" = "Linux" ] && [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
+
+        # Temporary fix to install latest commit of libSDL2_mixerX for SRB2 TSoURDt3rd.
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
+
+            LNXSDL2MIXERXVER="master"
+
+        else
+
+            LNXSDL2MIXERXVER="$LNXSDL2MIXERXVER"
+
+        fi
 
         if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$LNXOSNAME" = "NixOS" ]; then
 
@@ -3696,7 +3847,7 @@ MINGWCMAKE
         if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2-mixerx/.git" ]; then
 
             \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading libSDL2_mixerX's source code. Please wait..."
-            git clone \$GITOPTS https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "$LNXSDL2MIXERXVER" "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
+            git clone \$GITOPTS https://github.com/WohlSoft/SDL-Mixer-X.git --recursive --branch "\$LNXSDL2MIXERXVER" "\$SRB2BLDROOT/libraries/libsdl2-mixerx"
 
         else
 
@@ -3712,7 +3863,7 @@ MINGWCMAKE
 
             fi
 
-            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "$LNXSDL2MIXERXVER"
+            git -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx" checkout -q "\$LNXSDL2MIXERXVER"
 
         fi
 
@@ -3727,6 +3878,14 @@ MINGWCMAKE
 #            cmake --build "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j"\$NCPU" --config Release
 #            sudo -E cmake --install "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/libsdl2-mixerx" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt libsdl2-mixerx
+                sudo rm -rf "\$LIBSDL2MIXERXPREFIX"
+
+            fi
+
             sudo make -C "\$SRB2BLDROOT/libraries/libsdl2-mixerx/build" install
 
             if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -3812,6 +3971,14 @@ MINGWCMAKE
 #            cmake -S "\$SRB2BLDROOT/libraries/discord-rpc" -B "\$SRB2BLDROOT/libraries/discord-rpc/build" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX="\$DISCORDRPCPREFIX"
             cmake .. -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="\$DISCORDRPCPREFIX"
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/discord-rpc/build"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/discord-rpc" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt discord-rpc
+                sudo rm -rf "\$DISCORDRPCPREFIX"
+
+            fi
+
             sudo make -C "\$SRB2BLDROOT/libraries/discord-rpc/build" install
 #            cmake --build "\$SRB2BLDROOT/libraries/discord-rpc/build" -j"\$NCPU" --config Release
 #            sudo -E cmake --install "\$SRB2BLDROOT/libraries/discord-rpc/build"
@@ -3885,6 +4052,14 @@ MINGWCMAKE
 #            cmake --build "\$SRB2BLDROOT/libraries/libopenvr/build" -j"\$NCPU" --config Release
 #            sudo -E cmake --install "\$SRB2BLDROOT/libraries/libopenvr/build"
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libopenvr/build"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/libopenvr" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt libopenvr
+                sudo rm -rf "\$LIBOPENVRPREFIX"
+
+            fi
+
             sudo make -C "\$SRB2BLDROOT/libraries/libopenvr/build" install
 
             if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -3948,6 +4123,14 @@ MINGWCMAKE
             patch -Np1 -i "\$SRB2BLDROOT/libraries/liblzf/debian/patches/"*.patch
             CC=""\$CCACHE_BIN_PATH"\$GCCVER" CXX=""\$CCACHE_BIN_PATH"\$GXXVER" "\$SRB2BLDROOT/libraries/liblzf/configure" --prefix="\$LIBLZFPREFIX" --includedir="\$LIBLZFPREFIX/include/liblzf"
             make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/liblzf"
+
+            if [ -d "\$SRB2BLDPREFIX/stow/liblzf" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+
+                sudo -E stow -Dv --adopt liblzf
+                sudo rm -rf "\$LIBLZFPREFIX"
+
+            fi
+
             sudo make -C "\$SRB2BLDROOT/libraries/liblzf" install
 
             if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -3968,7 +4151,7 @@ MINGWCMAKE
     fi
 
 #    # Download libyuv's source code, build and install it.
-#    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ]); then
+#    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]); then
 #
 #        # Uninstall system's package libfluidsynth-dev to avoid conflicts with compiled libfluidsynth.
 #        if [ "\$LIBC" = "musl" ]; then
@@ -4023,6 +4206,14 @@ MINGWCMAKE
 #            cd "\$SRB2BLDROOT/libraries/libyuv/build" || exit
 #            cmake .. -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="\$LIBYUVPREFIX"
 #            CC="\$GCCVER" make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libyuv/build"
+#
+#            if [ -d "\$SRB2BLDPREFIX/stow/libyuv" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
+#
+#                sudo -E stow -Dv --adopt libyuv
+#                sudo rm -rf "\$LIBYUVPREFIX"
+#
+#            fi
+#
 #            sudo make -C "\$SRB2BLDROOT/libraries/libyuv/build" install
 #
 #            if [ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -4164,7 +4355,7 @@ MINGWCMAKE
     fi
 
     # Download vcpkg's source code, build and install it.
-#    if [ "\$OS" = "Windows" ] && ([ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ]); then
+#    if [ "\$OS" = "Windows" ] && ([ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]); then
 #
 #        if [ ! -d "\$SRB2BLDROOT/libraries/vcpkg/.git" ]; then
 #
@@ -4438,6 +4629,10 @@ MINGWCMAKE
 
                 export BUILD="/tmp/ring-racers-hep2"
 
+            elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]; then
+
+                export BUILD="/tmp/ring-racers-freaky-build"
+
             else
 
                 export BUILD="/tmp/srb2-custom"
@@ -4562,83 +4757,91 @@ MINGWCMAKE
 
     fi
 
-    \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Copying $BUILDNAME's binary, libraries, icons, desktop file and AppRun to AppDir. Please wait..."
-    # Copy compiled binary to AppDir.
-    if [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2" ]; then
+    if [ "\$OS" = "Linux" ]; then
 
-        cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
+        \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Copying $BUILDNAME's binary, libraries, icons, desktop file and AppRun to AppDir. Please wait..."
+        # Copy compiled binary to AppDir.
+        if [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2" ]; then
 
-    elif [ -f "\$BUILD/bin/lsdl2srb2" ]; then
+            cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/bin/lsdl2srb2" ]; then
 
-    elif [ -f "\$BUILD/bin/Linux\$IS64/Release/srb2legacy" ]; then
+            cp -rf "\$BUILD/bin/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/Linux\$IS64/Release/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
+        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/srb2legacy" ]; then
 
-    elif [ -f "\$BUILD/bin/srb2legacy" ]; then
+            cp -rf "\$BUILD/bin/Linux\$IS64/Release/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
 
-        cp -rf "\$BUILD/bin/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
+        elif [ -f "\$BUILD/bin/srb2legacy" ]; then
 
-    elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2legacy" ]; then
+            cp -rf "\$BUILD/bin/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
 
-        cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
+        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2legacy" ]; then
 
-    elif [ -f "\$BUILD/bin/lsdl2srb2legacy" ]; then
+            cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
 
-        cp -rf "\$BUILD/bin/lsdl2srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
+        elif [ -f "\$BUILD/bin/lsdl2srb2legacy" ]; then
 
-    elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" ]; then
+            cp -rf "\$BUILD/bin/lsdl2srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
 
-        cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" ]; then
 
-    elif [ -f "\$BUILD/bin/Linux/Release/lsdlsrb2" ]; then
+            cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/bin/Linux/Release/lsdlsrb2" ]; then
 
-    elif [ -f "\$BUILD/bin/lsdlsrb2" ]; then
+            cp -rf "\$BUILD/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/bin/lsdlsrb2" ]; then
 
-    elif [ -f "\$BUILD/bin/Linux/Release/lsdlsrb2JTE" ]; then
+            cp -rf "\$BUILD/bin/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/Linux/Release/lsdlsrb2JTE" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/bin/Linux/Release/lsdlsrb2JTE" ]; then
 
-    elif [ -f "\$BUILD/bin/Linux/Release/lsdl2srb2" ]; then
+            cp -rf "\$BUILD/bin/Linux/Release/lsdlsrb2JTE" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/Linux/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/bin/Linux/Release/lsdl2srb2" ]; then
 
-    elif [ -f "\$BUILD/build/bin/ringracers" ]; then
+            cp -rf "\$BUILD/bin/Linux/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/build/bin/ringracers" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/build/bin/ringracers" ]; then
 
-    elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" ]; then
+            cp -rf "\$BUILD/build/bin/ringracers" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" ]; then
 
-    elif [ -f "\$BUILD/bin/lsdl2srb2kart" ]; then
+            cp -rf "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/bin/lsdl2srb2kart" ]; then
 
-    elif [ -f "\$BUILD/bin/Linux\$IS64/Release/srb2kart-neptune" ]; then
+            cp -rf "\$BUILD/bin/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/bin/Linux\$IS64/Release/srb2kart-neptune" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart"
+        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/srb2kart-neptune" ]; then
 
-    elif [ -f "\$BUILD/wadcli" ]; then
+            cp -rf "\$BUILD/bin/Linux\$IS64/Release/srb2kart-neptune" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart"
 
-        cp -rf "\$BUILD/wadcli" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/wadcli" ]; then
 
-    elif [ -f "\$BUILD/build/kartmaker" ]; then
+            cp -rf "\$BUILD/wadcli" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/build/kartmaker" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/build/kartmaker" ]; then
 
-    elif [ -f "\$BUILD/NeptuneFM" ]; then
+            cp -rf "\$BUILD/build/kartmaker" "\$BUILD/build/AppDir/usr/bin"
 
-        cp -rf "\$BUILD/NeptuneFM" "\$BUILD/build/AppDir/usr/bin/neptunefm"
+        elif [ -f "\$BUILD/NeptuneFM" ]; then
 
-    elif [ -f "\$BUILD/followermaker" ]; then
+            cp -rf "\$BUILD/NeptuneFM" "\$BUILD/build/AppDir/usr/bin/neptunefm"
 
-        cp -rf "\$BUILD/followermaker" "\$BUILD/build/AppDir/usr/bin"
+        elif [ -f "\$BUILD/followermaker" ]; then
+
+            cp -rf "\$BUILD/followermaker" "\$BUILD/build/AppDir/usr/bin"
+
+        else
+
+            cp -rf \$(find "\$BUILD/bin" -mindepth 1 -maxdepth 1 -type f ! -name "*.debug" 2> /dev/null) "\$BUILD/build/AppDir/usr/bin" 2> /dev/null || true
+
+        fi
 
     fi
 
@@ -5009,6 +5212,33 @@ DESKTOP
 Type=Application
 Name=Dr. Robotnik's Ring Racers HEP2
 Comment=Modified open source 3D Sonic game with kart racing gameplay with additional features
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;kart;racing;ring;racers
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=RingRacers
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$(basename \$BUILD)" = "ring-racers-freaky-build" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Dr. Robotnik's Ring Racers Freaky Build
+Comment=Modified open source 3D Sonic game with kart racing gameplay with additional features like color profiles
 Icon=icon
 Exec=AppRun
 Categories=Game;
@@ -5531,7 +5761,7 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/lsdlsrb2JTE" "\$@"
 APPRUNBIN
 
-    elif [ "\$(basename \$BUILD)" = "ring-racers" ] || [ "\$(basename \$BUILD)" = "ring-racers-noire" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep2" ]; then
+    elif [ "\$(basename \$BUILD)" = "ring-racers" ] || [ "\$(basename \$BUILD)" = "ring-racers-noire" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep2" ] || [ "\$(basename \$BUILD)" = "ring-racers-freaky-build" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export RINGRACERSWADDIR="\$HERE/usr/games/RingRacers"
@@ -5688,6 +5918,9 @@ exec "\$HERE/lib/p7zip/7z" "\$@"
 
 else
 
+ # Saving configuration flags for future upgrades.
+ \$PRINTF "%s\n" "\$CONF" > "\$BUILD/conf"
+
  if [ "\$OS" = "Linux" ]; then
 
     if ([ "\$FLATPAK" = "1" ] && ([ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ])) || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
@@ -5713,9 +5946,6 @@ else
         cp -Lf \$(ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '/libminiupnpc.so.17/ {print \$3}') "\$BUILD/build/AppDir/usr/lib/libminiupnpc.so.17"
 
     fi
-
-    # Saving configuration flags for future upgrades.
-    \$PRINTF "%s\n" "\$CONF" > "\$BUILD/conf"
 
     # Create desktop file.
     COMREV=\$(sudo git -C "\$BUILD" rev-parse --short HEAD)
@@ -5987,6 +6217,25 @@ DESKTOP
 
     cp -f "\$BUILD/build/AppDir/usr/share/applications/ring-racers-hep2-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/ring-racers-hep2-opengl.desktop"
     gawk -i inplace '{gsub("Name=Dr. Robotnik'\''s Ring Racers HEP2 \\\(Software\\\)","Name=Dr. Robotnik'\''s Ring Racers HEP2 (OpenGL)") || gsub("Exec=ringracershep2 -software","Exec=ringracershep2 -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/ring-racers-hep2-opengl.desktop"
+
+    elif [ "\$(basename \$BUILD)" = "ring-racers-freaky-build" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/ring-racers-freaky-build-software.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Dr. Robotnik's Ring Racers Freaky Build (Software)
+Comment=Modified open source 3D Sonic game with kart racing gameplay with additional features like color profiles
+Icon=ringracersfreakybuild
+Exec=ringracersfreakybuild -software
+Categories=Game;
+Keywords=sonic;kart;racing;ring;racers
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/ring-racers-freaky-build-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/ring-racers-freaky-build-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Dr. Robotnik'\''s Ring Racers Freaky Build \\\(Software\\\)","Name=Dr. Robotnik'\''s Ring Racers Freaky Build (OpenGL)") || gsub("Exec=ringracersfreakybuild -software","Exec=ringracersfreakybuild -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/ring-racers-freaky-build-opengl.desktop"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
@@ -6446,6 +6695,10 @@ DESKTOP
         elif [ "\$(basename \$BUILD)" = "ring-racers-hep2" ]; then
 
             cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/ringracershep2.png"
+
+        elif [ "\$(basename \$BUILD)" = "ring-racers-freaky-build" ]; then
+
+            cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/ringracersfreakybuild.png"
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ]; then
 
@@ -7320,25 +7573,23 @@ extractmacosassets() {
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ]; then
 
-            SRB2TSOURDT3RDASSETURL=$(curl -s "$SRB2TSOURDT3RDASSETURL" | gawk -F'"' '/browser_download_url.*TSoURDt3rd.zip/ {print $4}')
-            if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "$SRB2TSOURDT3RDASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip" 2> /dev/null)" ]; then
+            if [ -n "$ISNET" ] && [ "$(curl -X GET -LI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
 
-                rm -f "$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip"
-                curl -RL "$SRB2TSOURDT3RDASSETURL" -o "$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip"
-
-            fi
-
-            7z e -y -r "$SRB2BLDROOT/assets/SRB2TSoURDt3rd.zip" "*.pk3" -o"$BUILD/assets/installer"
-
-            #Temporary fix for mismatched tsourdt3rd.pk3 file from the latest commits.
-            if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/ca1a8998213fae48cfa6fb66f36f6d1a88c3cca1/releases/v4.0/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
-
-                #                    curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/v4.0/tsourdt3rd.pk3" -o "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
-                curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/ca1a8998213fae48cfa6fb66f36f6d1a88c3cca1/releases/v4.0/tsourdt3rd.pk3" -o "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+                rm -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+                curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" -o "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
 
             fi
 
-            cp -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3" "$BUILD/assets/installer"
+            cp -rf "$SRB2BLDROOT/assets/tsourdt3rd.pk3" "$BUILD/assets/installer"
+
+            if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/jukebox.pk3" 2> /dev/null)" ]; then
+
+                rm -f "$SRB2BLDROOT/assets/jukebox.pk3"
+                curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" -o "$SRB2BLDROOT/assets/jukebox.pk3"
+
+            fi
+
+            cp -rf "$SRB2BLDROOT/assets/jukebox.pk3" "$BUILD/assets/installer"
 
         fi
 
@@ -7402,10 +7653,10 @@ EOF
 
         unrar x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "$BUILD/assets/installer"
 
-    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
         # Getting missing patch.pk3 file from SRB2 asset pack.
-        if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
+        if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
 
             if [ -n "$ISNET" ]; then
 
@@ -7423,6 +7674,12 @@ EOF
             cp -f "$BUILD/README.md" "$BUILD/assets/installer/README.txt"
             touch "$BUILD/assets/installer/README-SDL.txt"
             touch "$BUILD/assets/installer/HISTORY.txt"
+
+            if [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+
+                cp -rf "$BUILD/!REQUIRED ASSETS/"*.pk3 "$BUILD/assets/installer"
+
+            fi
 
             find "$BUILD/assets/installer" -type d -exec chmod 755 {} \;
 
@@ -7491,7 +7748,7 @@ extractmacoscustomassets() {
         elif [ -n "$($PRINTF "%s\n" "$SRB2BLDASSETPATH" | gawk '/drive.google.com/ {print}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDASSETPATH" | gawk '/drive.usercontent.google.com/ {print}')" ]; then
 
             SRB2ASSETID=$($PRINTF "%s\n" "$SRB2BLDASSETPATH" | gawk '{gsub("https://drive.google.com/file/d/|https://drive.usercontent.google.com/download\\?id=|&export=download|/view|/edit|\\?usp=sharing",""); print}')
-            SRB2BLDASSETPATH="https://drive.usercontent.google.com/download?export=download&confirm=t&id=$SRB2ASSETID"
+            SRB2BLDASSETPATH="https://drive.usercontent.google.com/download?confirm=t&id=$SRB2ASSETID"
             FILETYPE=$(curl -X GET -sLI "$SRB2BLDASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"",""); print $NF}')
 
         elif [ -n "$($PRINTF "%s\n" "$SRB2BLDASSETPATH" | gawk '/mega.nz/ {print}')" ]; then
@@ -7535,7 +7792,7 @@ extractmacoscustomassets() {
 
         if [ -n "$($PRINTF "%s\n" "$SRB2BLDASSETPATH" | gawk '/drive.google.com/ {print}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDASSETPATH" | gawk '/drive.usercontent.google.com/ {print}')" ]; then
 
-            curl -RL "https://drive.google.com/uc?export=download&confirm=t&id=$SRB2ASSETID" -o"$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
+            curl -RL "https://drive.usercontent.google.com/download?confirm=t&id=$SRB2ASSETID" -o"$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER.$FILETYPE"
 
         elif [ -n "$($PRINTF "%s\n" "$SRB2BLDASSETPATH" | gawk '/mega.co.nz/ {print}')" ]; then
 
@@ -7618,7 +7875,7 @@ extractmacosextracustomassets() {
         elif [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/drive.google.com/ {print}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/drive.usercontent.google.com/ {print}')" ]; then
 
             SRB2ASSETID=$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '{gsub("https://drive.google.com/file/d/|https://drive.usercontent.google.com/download\\?id=|&export=download|/view|/edit|\\?usp=sharing",""); print}')
-            SRB2BLDEXTRAASSETPATH="https://drive.usercontent.google.com/download?export=download&confirm=t&id=$SRB2ASSETID"
+            SRB2BLDEXTRAASSETPATH="https://drive.usercontent.google.com/download?confirm=t&id=$SRB2ASSETID"
             FILETYPE=$(curl -X GET -sLI "$SRB2BLDEXTRAASSETPATH" | gawk -F'.' '/content-disposition:/ {gsub("\r|\"",""); print $NF}')
 
         elif [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/mega.nz/ {print}')" ]; then
@@ -7657,7 +7914,7 @@ extractmacosextracustomassets() {
 
         if [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/drive.google.com/ {print}')" ] || [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/drive.usercontent.google.com/ {print}')" ]; then
 
-            curl -RL "https://drive.google.com/uc?export=download&confirm=t&id=$SRB2ASSETID" -o"$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER-extras.$FILETYPE"
+            curl -RL "https://drive.usercontent.google.com/download?confirm=t&id=$SRB2ASSETID" -o"$SRB2BLDROOT/assets/$BUILDPREFIX-$GITVER-extras.$FILETYPE"
 
         elif [ -n "$($PRINTF "%s\n" "$SRB2BLDEXTRAASSETPATH" | gawk '/mega.co.nz/ {print}')" ]; then
 
@@ -7730,16 +7987,24 @@ extractsrb2macosassets() {
         if [ -n "$ISNET" ]; then
 
             SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases | gawk -F'"' '/'SRB2_release_$SRB2VER'\/.*Full.zip/ {print $4}')
-            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Older.zip" 2> /dev/null)" ]; then
 
-                rm -f "$SRB2BLDROOT/assets/SRB2-Older.zip"
-                curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-Older.zip"
+            if [ -z "$SRB2ASSETURL" ]; then
+
+                SRB2ASSETURL=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+                $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
+
+            fi
+
+            if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-$SRB2VER.zip" 2> /dev/null)" ]; then
+
+                rm -f "$SRB2BLDROOT/assets/SRB2-$SRB2VER.zip"
+                curl -RL "$SRB2ASSETURL" -o "$SRB2BLDROOT/assets/SRB2-$SRB2VER.zip"
 
             fi
 
         fi
 
-        7z x -y "$SRB2BLDROOT/assets/SRB2-Older.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
+        7z x -y "$SRB2BLDROOT/assets/SRB2-$SRB2VER.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"$BUILD/assets/installer"
 
     else
 
@@ -7774,17 +8039,25 @@ extractsrb2kartmacosassets() {
             if [ -n "$ISNET" ]; then
 
                 RINGRACERSASSETURL=$(curl -s https://api.github.com/repos/KartKrewDev/RingRacers/releases | gawk -F'"' '/'$RINGRACERSVER'\/.*Installer.exe/ {print $4}')
-                if [ "$(curl -X GET -sLI "$RINGRACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/RingRacers-Older.exe" 2> /dev/null)" ]; then
 
-                    rm -f "$SRB2BLDROOT/assets/RingRacers-Older.exe"
-                    curl -RL "$RINGRACERSASSETURL" -o "$SRB2BLDROOT/assets/RingRacers-Older.exe"
+                if [ -z "$RINGRACERSASSETURL" ]; then
+
+                    RINGRACERSASSETURL=$(curl -s https://api.github.com/repos/KartKrewDev/RingRacers/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                    $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
+
+                fi
+
+                if [ "$(curl -X GET -sLI "$RINGRACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/RingRacers-$RINGRACERSVER.exe" 2> /dev/null)" ]; then
+
+                    rm -f "$SRB2BLDROOT/assets/RingRacers-$RINGRACERSVER.exe"
+                    curl -RL "$RINGRACERSASSETURL" -o "$SRB2BLDROOT/assets/RingRacers-$RINGRACERSVER.exe"
 
                 fi
 
             fi
 
-            unrar x -y "$SRB2BLDROOT/assets/RingRacers-Older.exe" "models/*" "$BUILD/assets/installer"
-            unrar e -y "$SRB2BLDROOT/assets/RingRacers-Older.exe" "*.pk3" "*.dat" "*.txt" "data/*" "$BUILD/assets/installer"
+            unrar x -y "$SRB2BLDROOT/assets/RingRacers-$RINGRACERSVER.exe" "models/*" "$BUILD/assets/installer"
+            unrar e -y "$SRB2BLDROOT/assets/RingRacers-$RINGRACERSVER.exe" "*.pk3" "*.dat" "*.txt" "data/*" "$BUILD/assets/installer"
 
         else
 
@@ -7818,16 +8091,24 @@ extractsrb2kartmacosassets() {
             if [ -n "$ISNET" ]; then
 
                 SRB2KARTASSETURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases | gawk -F'"' '/'$SRB2KARTVER'\/.*Installer.exe/ {print $4}')
-                if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Kart-Older.exe" 2> /dev/null)" ]; then
 
-                    rm -f "$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
-                    curl -RL "$SRB2KARTASSETURL" -o "$SRB2BLDROOT/assets/SRB2Kart-Older.exe"
+                if [ -z "$SRB2KARTASSETURL" ]; then
+
+                    SRB2KARTASSETURL=$(curl -s https://api.github.com/repos/STJr/Kart-Public/releases/latest | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                    $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
+
+                fi
+
+                if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Kart-$SRB2KARTVER.exe" 2> /dev/null)" ]; then
+
+                    rm -f "$SRB2BLDROOT/assets/SRB2Kart-$SRB2KARTVER.exe"
+                    curl -RL "$SRB2KARTASSETURL" -o "$SRB2BLDROOT/assets/SRB2Kart-$SRB2KARTVER.exe"
 
                 fi
 
             fi
 
-            unrar x -y "$SRB2BLDROOT/assets/SRB2Kart-Older.exe" "*.kart" "*.srb" "*.dat" "mdls/*" "$BUILD/assets/installer"
+            unrar x -y "$SRB2BLDROOT/assets/SRB2Kart-$SRB2KARTVER.exe" "*.kart" "*.srb" "*.dat" "mdls/*" "$BUILD/assets/installer"
 
         else
 
@@ -8323,7 +8604,7 @@ FLATPAK
             SRB2CONFDIR=".srb2persona$GITVERCONF"
             WADDIR="SRB2WADDIR"
 
-        elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
+        elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
 
             SRB2CONFDIR=".ringracers$GITVERCONF"
             WADDIR="RINGRACERSWADDIR"
@@ -9335,6 +9616,28 @@ installtolinux() {
 
         fi
 
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+
+        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/RingRacersFreakyBuild"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/ringracersfreakybuild"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/ring-racers-freaky-build-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/ring-racers-freaky-build-opengl.desktop"
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}' | head -n1)
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/ringracersfreakybuild.png"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's ringracersfreakybuild binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/ringracers" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -d "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+
+        fi
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
 
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2Kart"
@@ -9505,7 +9808,7 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 -type f 2> /dev/null) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 -type f ! -name "*.debug" 2> /dev/null) "$SRB2BINARYLNXPATH"
 
             if [ -f "$(find "$BUILD/bin" "$BUILD/build/bin" -name "*.debug" 2> /dev/null)" ]; then
 
@@ -10587,10 +10890,16 @@ installtomacos() {
     export MACOSX_DEPLOYMENT_TARGET="$MACOSVER"
     export SDKROOT="$SDKROOT"
     export PATH="$SRB2BLDROOT/libraries/depot_tools:$MACPORTPREFIX/bin:$HOMEBREWPREFIX/bin:$PATH"
-    export LIBRARY_PATH="$SRB2BLDPREFIX/lib:$MACPORTPREFIX/lib:$HOMEBREWPREFIX/lib:$LIBRARY_PATH"
-    export C_INCLUDE_PATH="$SRB2BLDPREFIX/include:$MACPORTPREFIX/include:$HOMEBREWPREFIX/include:$C_INCLUDE_PATH"
-    export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
-    export PKG_CONFIG_PATH="$SRB2BLDPREFIX/lib/pkgconfig:$MACPORTPREFIX/lib/pkgconfig:$HOMEBREWPREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+    if [ "$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
+
+        export LIBRARY_PATH="$SRB2BLDPREFIX/lib:$MACPORTPREFIX/lib:$HOMEBREWPREFIX/lib:$LIBRARY_PATH"
+        export C_INCLUDE_PATH="$SRB2BLDPREFIX/include:$MACPORTPREFIX/include:$HOMEBREWPREFIX/include:$C_INCLUDE_PATH"
+        export CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
+        export PKG_CONFIG_PATH="$SRB2BLDPREFIX/lib/pkgconfig:$MACPORTPREFIX/lib/pkgconfig:$HOMEBREWPREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+    fi
+
     export STOW_DIR="$SRB2BLDPREFIX/stow"
     export VCPKG_ROOT="$SRB2BLDROOT/libraries/vcpkg"
 
@@ -10682,6 +10991,40 @@ installtomacos() {
 
     fi
 
+    $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Preparing and displaying $BUILDNAME's configure options for compilation. Please wait..."
+
+    # Display content of Makefile for a good view of available compilation flags.
+    if [ "$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
+
+        BLDCMD="cmake -S $BUILD -B $BUILD/build --preset ninja-x64_osx_vcpkg-release -DVCPKG_TARGET_TRIPLET=x64-osx -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVERSLADE -DCMAKE_BUILD_TYPE=Release -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DSRB2_CONFIG_ENABLE_WEBM_MOVIES=ON -G 'Unix Makefiles'"
+        eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+
+    elif [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
+
+        cat "$BUILD/README.md"
+        BLDCMD="make -k -j$NCPU -C $BUILD"
+
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
+
+        BLDCMD="$BUILD/build.sh"
+
+    elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
+
+        BLDCMD="cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(command -v $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVERSLADE -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DMPG123_INCLUDE_DIR=$LIBMPG123PREFIX/include -DMPG123_LIBRARIES=$LIBMPG123PREFIX/lib/libmpg123.dylib"
+        eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+
+    elif [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
+
+        BLDCMD="cmake -S $BUILD -B $BUILD/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=$ARCH -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_OSX_SYSROOT=$SDKROOT -DBUILD_TESTING=OFF -DCLIP_TESTS=OFF -DCMARK_TESTS=OFF -DENABLE_TEST=OFF -DENABLE_TESTS=OFF -DFMT_CUDA_TEST=OFF -DFMT_TEST=OFF -DJSON11_BUILD_TESTS=OFF -DLAF_WITH_TESTS=OFF -DOBSERVABLE_TESTS=OFF -DPNG_TESTS=OFF -DUNDO_TESTS=OFF -Dtinyxml2_BUILD_TESTING=OFF -DLAF_BACKEND=skia -DSKIA_DIR=$SRB2BLDROOT/libraries/libskia -DSKIA_LIBRARY_DIR=$SRB2BLDROOT/libraries/libskia/out/Release-x64 -DSKIA_LIBRARY=$SRB2BLDROOT/libraries/libskia/out/Release-x64/libskia.a -G Ninja"
+        eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+
+    else
+
+        BLDCMD="cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_BUILD_TYPE=Release -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CONFIG_SHARED_INTERNAL_LIBRARIES=ON -DSRB2_CONFIG_SYSTEM_LIBRARIES=ON -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DCMAKE_EXE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_MODULE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DSDL2_MIXER_INCLUDE_DIR=$LIBSDL2MIXERPREFIX/include/SDL2 -DSDL2_MIXER_LIBRARY=$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DPNG_PNG_INCLUDE_DIR=$LIBPNGPREFIX/include -DPNG_LIBRARY=$LIBPNGPREFIX/lib/libpng.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON"
+        eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
+
+    fi
+
     # Upgrade build. Making sure, that there are only used compilation flags.
     if [ -n "$UPGRADEBUILD" ] && [ -z "$CUSTOMDIR" ]; then
 
@@ -10760,40 +11103,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         read -r CONFIRM
 
         if [ "$CONFIRM" = y ] || [ "$CONFIRM" = Y ] || [ "$CONFIRM" = yes ] || [ "$CONFIRM" = Yes ]; then
-
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Preparing and displaying $BUILDNAME's configure options for compilation. Please wait..."
-
-            # Display content of Makefile for a good view of available compilation flags.
-            if [ "$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
-
-                BLDCMD="cmake -S $BUILD -B $BUILD/build --preset ninja-x64_osx_vcpkg-release -DVCPKG_TARGET_TRIPLET=x64-osx -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVERSLADE -DCMAKE_BUILD_TYPE=Release -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DSRB2_CONFIG_ENABLE_WEBM_MOVIES=ON -G 'Unix Makefiles'"
-                eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-
-            elif [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
-
-                cat "$BUILD/README.md"
-                BLDCMD="make -k -j$NCPU -C $BUILD"
-
-            elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
-
-                BLDCMD="$BUILD/build.sh"
-
-            elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
-
-                BLDCMD="cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(command -v $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVERSLADE -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DMPG123_INCLUDE_DIR=$LIBMPG123PREFIX/include -DMPG123_LIBRARIES=$LIBMPG123PREFIX/lib/libmpg123.dylib"
-                eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-
-            elif [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
-
-                BLDCMD="cmake -S $BUILD -B $BUILD/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=$ARCH -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_OSX_SYSROOT=$SDKROOT -DBUILD_TESTING=OFF -DCLIP_TESTS=OFF -DCMARK_TESTS=OFF -DENABLE_TEST=OFF -DENABLE_TESTS=OFF -DFMT_CUDA_TEST=OFF -DFMT_TEST=OFF -DJSON11_BUILD_TESTS=OFF -DLAF_WITH_TESTS=OFF -DOBSERVABLE_TESTS=OFF -DPNG_TESTS=OFF -DUNDO_TESTS=OFF -Dtinyxml2_BUILD_TESTING=OFF -DLAF_BACKEND=skia -DSKIA_DIR=$SRB2BLDROOT/libraries/libskia -DSKIA_LIBRARY_DIR=$SRB2BLDROOT/libraries/libskia/out/Release-x64 -DSKIA_LIBRARY=$SRB2BLDROOT/libraries/libskia/out/Release-x64/libskia.a -G Ninja"
-                eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-
-            else
-
-                BLDCMD="cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_BUILD_TYPE=Release -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CONFIG_SHARED_INTERNAL_LIBRARIES=ON -DSRB2_CONFIG_SYSTEM_LIBRARIES=ON -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DCMAKE_EXE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_MODULE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DSDL2_MIXER_INCLUDE_DIR=$LIBSDL2MIXERPREFIX/include/SDL2 -DSDL2_MIXER_LIBRARY=$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DPNG_PNG_INCLUDE_DIR=$LIBPNGPREFIX/include -DPNG_LIBRARY=$LIBPNGPREFIX/lib/libpng.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON"
-                eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
-
-            fi
 
             $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please enter $BUILDNAME's space separated compilation flags and then press enter, or just press enter to begin compiling. Default command and flags for compilation:"
             $PRINTF "$NOTICE%s\n\e[0m" "$BLDCMD [YOUR-COMPILATION-FLAGS-WILL-BE-HERE]"
@@ -10907,7 +11216,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
+    if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
 
         # Download vcpkg's source code, build and install it.
         if [ ! -d "$SRB2BLDROOT/libraries/vcpkg/.git" ]; then
@@ -10967,6 +11276,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             patch -Np1 -i "$SRB2BLDROOT/libraries/liblzf/debian/patches/"*.patch
             CC="/usr/bin/gcc" CXX="/usr/bin/g++" "$SRB2BLDROOT/libraries/liblzf/configure" --prefix="$SRB2BLDPREFIX/stow/liblzf" --includedir="$SRB2BLDPREFIX/stow/liblzf/include/liblzf"
             make -k -j"$NCPU" -C "$SRB2BLDROOT/libraries/liblzf"
+
+            if [ -d "$SRB2BLDPREFIX/stow/liblzf" ]; then
+
+                sudo -E stow -Dv --adopt liblzf
+                sudo rm -rf "$SRB2BLDPREFIX/stow/liblzf"
+
+            fi
+
             sudo make -C "$SRB2BLDROOT/libraries/liblzf" install
             sudo -E stow -v --adopt liblzf
 
@@ -11121,6 +11438,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 cd "$SRB2BLDROOT/libraries/libpng" || exit
                 ./configure --prefix=$SRB2BLDPREFIX/stow/libpng
                 make -k -j"$NCPU"
+
+                if [ -d "$SRB2BLDPREFIX/stow/libpng" ]; then
+
+                    sudo -E stow -Dv --adopt libpng
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libpng"
+
+                fi
+
                 sudo -E make install
                 sudo -E stow -v --adopt libpng
 
@@ -11165,6 +11490,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 mkdir -p "$SRB2BLDROOT/libraries/libogg/build"
                 cmake -S "$SRB2BLDROOT/libraries/libogg" -B "$SRB2BLDROOT/libraries/libogg/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libogg -DCMAKE_MACOSX_RPATH=OFF
                 cmake --build "$SRB2BLDROOT/libraries/libogg/build" -j"$NCPU" --config Release
+
+                if [ -d "$SRB2BLDPREFIX/stow/libogg" ]; then
+
+                    sudo -E stow -Dv --adopt libogg
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libogg"
+
+                fi
+
                 sudo -E cmake --install "$SRB2BLDROOT/libraries/libogg/build"
                 sudo -E stow -v --adopt libogg
 
@@ -11211,6 +11544,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 ./autogen.sh
                 ./configure --prefix=$SRB2BLDPREFIX/stow/libvorbis
                 make -k -j"$NCPU"
+
+                if [ -d "$SRB2BLDPREFIX/stow/libvorbis" ]; then
+
+                    sudo -E stow -Dv --adopt libvorbis
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libvorbis"
+
+                fi
+
                 sudo -E make install
                 sudo -E stow -v --adopt libvorbis
 
@@ -11246,7 +11587,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
                 fi
 
-                #                git -C "$SRB2BLDROOT/libraries/libmpg123" checkout -q c81472cffd430e27e
                 git -C "$SRB2BLDROOT/libraries/libmpg123" checkout -q "$MACOSMPG123VER"
 
             fi
@@ -11258,6 +11598,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 autoreconf -iv
                 ./configure --prefix=$SRB2BLDPREFIX/stow/libmpg123
                 make -k -j"$NCPU"
+
+                if [ -d "$SRB2BLDPREFIX/stow/libmpg123" ]; then
+
+                    sudo -E stow -Dv --adopt libmpg123
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libmpg123"
+
+                fi
+
                 sudo -E make install
                 sudo -E stow -v --adopt libmpg123
 
@@ -11305,6 +11653,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             cd "$SRB2BLDROOT/libraries/libsdl2" || exit
             ./configure --prefix=$SRB2BLDPREFIX/stow/libsdl2 --enable-rpath=no
             make -k -j"$NCPU"
+
+            if [ -d "$SRB2BLDPREFIX/stow/libsdl2" ]; then
+
+                sudo -E stow -Dv --adopt libsdl2
+                sudo rm -rf "$SRB2BLDPREFIX/stow/libsdl2"
+
+            fi
+
             sudo -E make install
             sudo -E stow -v --adopt libsdl2
 
@@ -11349,6 +11705,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 gawk -i inplace '{gsub("DYNLINK=1","DYNLINK=0"); gsub("TEST=1","TEST=0"); gsub("SOSUFFIX=.so","SOSUFFIX=.dylib"); gsub("STATIC_LIB=1","STATIC_LIB=0"); gsub("EXAMPLES=1","EXAMPLES=0"); gsub("OPENMPT123=1","OPENMPT123=0"); print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
                 gawk -i inplace '{gsub("\\$\\(INSTALL_DATA\\) bin/libopenmpt.pc \\$\\(DESTDIR\\)\\$\\(PREFIX\\)/lib/pkgconfig/libopenmpt.pc|\\$\\(INSTALL_LIB\\) bin/\\$\\(LIBOPENMPT_SONAME\\) \\$\\(DESTDIR\\)\\$\\(PREFIX\\)/lib/\\$\\(LIBOPENMPT_SONAME\\)|\\$\\(INSTALL_LIB\\) bin/libopenmpt\\$\\(SOSUFFIX\\) \\$\\(DESTDIR\\)\\$\\(PREFIX\\)/lib/libopenmpt\\$\\(SOSUFFIX\\)",""); print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
                 gawk -i inplace '{gsub("bin/libopenmpt","'$SRB2BLDPREFIX'/stow/libopenmpt/lib/libopenmpt"); print}' "$SRB2BLDROOT/libraries/libopenmpt/Makefile"
+
                 sudo -E make -k -j"$NCPU" NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_SNDFILE=1 NO_FLAC=1 NO_PULSEAUDIO=1
                 sudo -E make PREFIX=$SRB2BLDPREFIX/stow/libopenmpt install
                 sudo -E stow -v --adopt libopenmpt
@@ -11395,6 +11752,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 mkdir -p "$SRB2BLDROOT/libraries/libgme/build"
                 cmake -S "$SRB2BLDROOT/libraries/libgme" -B "$SRB2BLDROOT/libraries/libgme/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DGME_YM2612_EMU=MAME -DENABLE_UBSAN=OFF -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libgme -DCMAKE_MACOSX_RPATH=OFF
                 cmake --build "$SRB2BLDROOT/libraries/libgme/build" -j"$NCPU" --config Release
+
+                if [ -d "$SRB2BLDPREFIX/stow/libgme" ]; then
+
+                    sudo -E stow -Dv --adopt libgme
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libgme"
+
+                fi
+
                 sudo -E cmake --install "$SRB2BLDROOT/libraries/libgme/build"
                 sudo -E stow -v --adopt libgme
 
@@ -11439,6 +11804,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 mkdir -p "$SRB2BLDROOT/libraries/libmodplug/build"
                 cmake -S "$SRB2BLDROOT/libraries/libmodplug" -B "$SRB2BLDROOT/libraries/libmodplug/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libmodplug -DCMAKE_MACOSX_RPATH=OFF
                 cmake --build "$SRB2BLDROOT/libraries/libmodplug/build" -j"$NCPU" --config Release
+
+                if [ -d "$SRB2BLDPREFIX/stow/libmodplug" ]; then
+
+                    sudo -E stow -Dv --adopt libmodplug
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libmodplug"
+
+                fi
+
                 sudo -E cmake --install "$SRB2BLDROOT/libraries/libmodplug/build"
                 sudo -E stow -v --adopt libmodplug
 
@@ -11505,6 +11878,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                     --enable-music-wave \
                     --prefix=$SRB2BLDPREFIX/stow/libsdl2-mixer
                 make -k -j"$NCPU"
+
+                if [ -d "$SRB2BLDPREFIX/stow/libsdl2-mixer" ]; then
+
+                    sudo -E stow -Dv --adopt libsdl2-mixer
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libsdl2-mixer"
+
+                fi
+
                 sudo -E make install
                 sudo -E stow -v --adopt libsdl2-mixer
 
@@ -11550,6 +11931,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 mkdir -p "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
                 cmake -S "$SRB2BLDROOT/libraries/libsdl2-mixerx" -B "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_AUDIO_CODECS_DEPENDENCY=ON -DAUDIO_CODECS_BUILD_LOCAL_SDL2=OFF -DUSE_SYSTEM_SDL2=ON -DSDL_MIXER_X_STATIC=OFF -DUSE_GME=ON -DUSE_MIDI=ON -DUSE_MIDI_FLUIDSYNTH=ON -DUSE_MIDI_FLUIDLITE=OFF -DUSE_MIDI_TIMIDITY=ON -DUSE_MIDI_OPNMIDI=OFF -DUSE_MIDI_ADLMIDI=OFF -DUSE_MIDI_EDMIDI=OFF -DUSE_MIDI_NATIVE=OFF -DUSE_SYSTEM_AUDIO_LIBRARIES=ON -DMIXERX_ENABLE_LGPL=ON -DMIXERX_ENABLE_GPL=ON -DUSE_FLAC=OFF -DUSE_MP3_MPG123=OFF -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libsdl2-mixerx -DCMAKE_MACOSX_RPATH=OFF
                 cmake --build "$SRB2BLDROOT/libraries/libsdl2-mixerx/build" -j"$NCPU" --config Release
+
+                if [ -d "$SRB2BLDPREFIX/stow/libsdl2-mixerx" ]; then
+
+                    sudo -E stow -Dv --adopt libsdl2-mixerx
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libsdl2-mixerx"
+
+                fi
+
                 sudo -E cmake --install "$SRB2BLDROOT/libraries/libsdl2-mixerx/build"
                 sudo -E stow -v --adopt libsdl2-mixerx
 
@@ -11594,6 +11983,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 mkdir -p "$SRB2BLDROOT/libraries/discord-rpc/build"
                 cmake -S "$SRB2BLDROOT/libraries/discord-rpc" -B "$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/discord-rpc -DCMAKE_MACOSX_RPATH=OFF
                 cmake --build "$SRB2BLDROOT/libraries/discord-rpc/build" -j"$NCPU" --config Release
+
+                if [ -d "$SRB2BLDPREFIX/stow/discord-rpc" ]; then
+
+                    sudo -E stow -Dv --adopt discord-rpc
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/discord-rpc"
+
+                fi
+
                 sudo -E cmake --install "$SRB2BLDROOT/libraries/discord-rpc/build"
                 sudo -E stow -v --adopt discord-rpc
 
@@ -11639,6 +12036,14 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 cp -rf "$SRB2BLDROOT/libraries/libopenvr/src/vrcommon" "$SRB2BLDROOT/libraries/libopenvr/src/vrcore"
                 cmake -S "$SRB2BLDROOT/libraries/libopenvr" -B "$SRB2BLDROOT/libraries/libopenvr/build" -DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSVER" -DCMAKE_BUILD_TYPE=Release -DBUILD_UNIVERSAL=OFF -DBUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX/stow/libopenvr -DCMAKE_MACOSX_RPATH=OFF
                 cmake --build "$SRB2BLDROOT/libraries/libopenvr/build" -j"$NCPU" --config Release
+
+                if [ -d "$SRB2BLDPREFIX/stow/libopenvr" ]; then
+
+                    sudo -E stow -Dv --adopt libopenvr
+                    sudo rm -rf "$SRB2BLDPREFIX/stow/libopenvr"
+
+                fi
+
                 sudo -E cmake --install "$SRB2BLDROOT/libraries/libopenvr/build"
                 sudo -E stow -v --adopt libopenvr
 
@@ -11671,7 +12076,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ]; then
 
         gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)"); print}' "$BUILD/CMakeLists.txt"
-
         gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)",""); print}' "$BUILD/src/CMakeLists.txt"
 
     fi
@@ -11681,7 +12085,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         gawk -i inplace '{gsub("#include \"doomdef.h\"","#include \"r_fps.h\"\n#include \"doomdef.h\""); print}' "$BUILD/src/p_setup.c"
 
-    # Patching SRB2 rphys' source code to add missing file rphys.pk3.
+    # Patching SRB2 Reveries' source code to add missing file rphys.pk3.
     elif [ "$BUILD" = "$BUILDPATH/srb2-rphys" ]; then
 
         gawk -i inplace '{gsub("set\\(SRB2_ASSETS_GAME","set(SRB2_ASSETS_GAME\n\t\"reveries.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
@@ -11690,21 +12094,27 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
     elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
         gawk -i inplace '/\/\/ W_GetNumForNameMusic/ {suppress=1} /\/\/ Like W_GetNumForName/ {suppress=0} !suppress' "$BUILD/src/w_wad.c"
-
         gawk -i inplace -v RS="^$" '{gsub("\\/\\/\\/ ------------------------\n\nstatic lumpnum_t S_GetMusicLumpNum\\(const char \\*mname\\)","\nlumpnum_t W_GetNumForNameMusic(const char *name)\n{\n\tlumpnum_t i;\n\n\ti = W_CheckNumForName(name);\n\n\treturn i;\n}\n\nstatic lumpnum_t S_GetMusicLumpNum(const char *mname)"); print}' "$BUILD/src/s_sound.c"
 
-    fi
+    # Patching some SRB2 Ring Racers' builds to remove uncommited changes message from main menu.
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
+
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/f_finale.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/d_netcmd.c"
+
+    # Removing unecessary assets for Ring Racers Freaky Build.
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+
+        gawk -i inplace '{gsub("\"patch.pk3\"","\"patch.pk3\"\n\"FreakyBuildAssets.pk3\"\n\"ColorProfileHardcodeTest.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
 
     # Replace path to liblzf in Makefile.
-    if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
         cd "$BUILD" || exit
         gawk -i inplace '{gsub("_LDLIBS=-l:liblzf.so","_LDLIBS=-L'$SRB2BLDPREFIX'/lib"); print}' "$BUILD/makefile"
 
-    fi
-
     # Modify first line of build script, to avoid issue with running it.
-    if [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
         cd "$BUILD" || exit
 
@@ -11744,16 +12154,11 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2kart\"","#define DEFAULTDIR \"srb2kart'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
 
-    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ]; then
-
-        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/f_finale.c"
-        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/d_netcmd.c"
-
     elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
 
         SRB2CASSETDIR=$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)
         SRB2CCONFDIR=$($PRINTF "%s\n" "$SRB2CASSETDIR" | gawk '{print tolower($0)}')
-        gawk -i inplace '{gsub("#define DEFAULTDIR \\"'$SRB2CCONFDIR'\\"","#define DEFAULTDIR \\"'$SRB2CCONFDIR'c'$CUSTOMDIR''$GITVERCONF'\\""); print}' "$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"'$SRB2CCONFDIR'\"","#define DEFAULTDIR \"'$SRB2CCONFDIR'c'$CUSTOMDIR''$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
 
     fi
 
@@ -12485,6 +12890,19 @@ installtowindows() {
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+
+        SRB2WINDIR="Ring Racers Freaky Build"
+        SRB2WINMENUDIR="Dr. Robotnik's Ring Racers Freaky Build"
+        SRB2WINBIN=$(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        mkdir -p "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ]; then
 
         SRB2WINDIR="SRB2 Kart"
@@ -12985,7 +13403,7 @@ preparebuild() {
 
                         if [ "$OS" = "Darwin" ]; then
 
-                            cp -rf "$SRB2BLDASSETPATH/"* "$BUILD/build/assets/installer/$ASSETAPPDIR"
+                            cp -rf "$SRB2BLDASSETPATH/"* "$BUILD/assets/installer/$ASSETAPPDIR"
 
                         else
 
@@ -13041,7 +13459,7 @@ preparebuild() {
 
                     if [ "$OS" = "Darwin" ]; then
 
-                        cp -rf "$SRB2BLDEXTRAASSETPATH/"* "$BUILD/build/assets/installer/$ASSETAPPDIR"
+                        cp -rf "$SRB2BLDEXTRAASSETPATH/"* "$BUILD/assets/installer/$ASSETAPPDIR"
 
                     else
 
@@ -13380,11 +13798,11 @@ upgradetasks() {
         # Checking installation prefix for to be upgraded build.
         if [ -n "$UPGRADEBUILD" ] && [ -z "$CUSTOMDIR" ] && [ -f "$SRB2BLDROOT/installed/$UPGRADEBUILD" ]; then
 
-            SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$UPGRADEBUILD" | head -n1)"
+            SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local\/opt\/srb2-apps|\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$UPGRADEBUILD" | head -n1)"
 
         elif [ -n "$UPGRADEBUILD" ] && [ -n "$CUSTOMDIR" ] && [ -f "$SRB2BLDROOT/installed/$CUSTOMDIR" ]; then
 
-            SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$CUSTOMDIR" | head -n1)"
+            SRB2BLDPREFIX="$(gawk 'match($0, /\/usr\/local\/opt\/srb2-apps|\/usr\/local|\/home\/'$USER'\/.local|\/home\/'$USER'\/Local|\/home\/'$USER'\/SRB2 Games|\/home\/'$USER'\/SRB2 Software/) {print substr($0, RSTART, RLENGTH)}' "$SRB2BLDROOT/installed/$CUSTOMDIR" | head -n1)"
 
         fi
 
