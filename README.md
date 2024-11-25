@@ -161,7 +161,7 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 Uncapped PLUS       |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus             |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 Reveries (rphys)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 TSoURDt3rd          |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
+| SRB2 TSoURDt3rd          |          ✅           |         🟨           |        🟨         |        ✅       |       🟨      |
 | SRB2 VR                  |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 v2.0                |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
