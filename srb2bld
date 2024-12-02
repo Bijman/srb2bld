@@ -12746,8 +12746,8 @@ installtowindows() {
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-rphys" ]; then
 
-        SRB2WINDIR="SRB2 rphys"
-        SRB2WINMENUDIR="Sonic Robo Blast 2 rphys"
+        SRB2WINDIR="SRB2 Reveries"
+        SRB2WINMENUDIR="Sonic Robo Blast 2 Reveries"
         SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
