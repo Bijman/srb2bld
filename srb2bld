@@ -588,7 +588,7 @@ buildvar() {
 
         if [ "$BUILD" = "$BUILDPATH/srb2-android-rphys" ]; then
 
-            GITDEFVER="rphys-android"
+            GITDEFVER="reveries-mini"
 
         else
 
@@ -597,7 +597,7 @@ buildvar() {
         fi
 
         GITVER="$GITDEFVER"
-        GITURL="https://git.do.srb2.org/pastel/SRB2.git"
+        GITURL="https://github.com/hazepastel/srb2.git"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ]; then
 
@@ -1848,7 +1848,7 @@ containerentry() {
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-rphys" ]; then
 
-                SRB2RPHYSASSETURL=\$(curl -s "\$SRB2RPHYSASSETURL" | gawk -F'"' '/browser_download_url.*-windows.zip/ {print \$4}' | head -n1)
+                SRB2RPHYSASSETURL=\$(curl -s "\$SRB2RPHYSASSETURL" | gawk -F'"' '/browser_download_url.*windows.*.zip/ {print \$4}' | head -n1)
                 if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "\$SRB2RPHYSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2rphys.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2rphys.zip"
@@ -2729,7 +2729,7 @@ else
     fi
 
     # Removing SDL_OpenURL, because of using outdated SDL2 in Ubuntu 18.04 Docker/Podman container according to issue #21 from https://github.com/bijman/srb2bld/issues/21.
-    if [ -f "\$BUILD/src/sdl/i_system.c" ] && [ "\$(gawk 'match(\$0, /SDL_OpenURL/) {print substr(\$0, RSTART, RLENGTH)}' \$BUILD/src/sdl/i_system.c 2> /dev/null)" = "SDL_OpenURL" ]; then
+    if [ -f "\$BUILD/src/sdl/i_system.c" ] && [ "\$(gawk 'match(\$0, /SDL_OpenURL/) {print substr(\$0, RSTART, RLENGTH)}' \$BUILD/src/sdl/i_system.c 2> /dev/null | head -n1)" = "SDL_OpenURL" ]; then
 
         gawk -i inplace '/if \(buttonid == 1\)/ {suppress=1} /}/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_system.c"
         gawk -i inplace '/#if SDL_VERSION_ATLEAST\([0-9].*\)/ {suppress=1} /}/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_system.c"
@@ -2743,9 +2743,16 @@ else
 
 #    fi
 
+    # Removing APPIMAGE compile flag from Makefile to prevent triggering build's AppImage_build.sh script.
+    if [ -f "\$BUILD/src/Makefile" ] && [ "\$(gawk 'match(\$0, /APPIMAGE/) {print substr(\$0, RSTART, RLENGTH)}' \$BUILD/src/Makefile 2> /dev/null | head -n1)" = "APPIMAGE" ]; then
+
+        gawk -i inplace '/APPIMAGE/ {suppress=1} /^$/ {suppress=0} !suppress' "\$BUILD/src/Makefile"
+
+    fi
+
     if [ "\$GITVERCONF" = "\$GITDEFVER" ] && [ -z "\$SRB2BLDGITVER" ]; then
 
-       unset GITVERCONF
+        unset GITVERCONF
 
     fi
 
@@ -7561,7 +7568,7 @@ extractmacosassets() {
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-rphys" ]; then
 
-            SRB2RPHYSASSETURL=$(curl -s "$SRB2RPHYSASSETURL" | gawk -F'"' '/browser_download_url.*-windows.zip/ {print $4}' | head -n1)
+            SRB2RPHYSASSETURL=$(curl -s "$SRB2RPHYSASSETURL" | gawk -F'"' '/browser_download_url.*windows.*.zip/ {print $4}' | head -n1)
             if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "$SRB2RPHYSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2rphys.zip" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/SRB2rphys.zip"
@@ -13333,25 +13340,23 @@ preparebuild() {
 
         mkdir -p "$SRB2BLDROOT/builds" "$SRB2BLDROOT/assets" "$SRB2BLDROOT/libraries" "$BUILD/build/AppDir/usr/bin" "$BUILD/build/AppDir/usr/games" "$BUILD/build/AppDir/usr/lib" "$BUILD/build/AppDir/usr/share/applications"
 
-        if [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+        if [ "$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)" = "SRB2Kart" ]; then
 
             ASSETAPPDIR="SRB2Kart"
-            mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
 
         elif [ "$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
 
             ASSETAPPDIR="RingRacers"
-            mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
 
         elif [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
 
             ASSETAPPDIR="SRB2"
-            mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
 
         fi
 
     fi
 
+    mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
     cd "$BUILD" || exit
 
     if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
