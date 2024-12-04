@@ -180,7 +180,7 @@ SRB2FINALDEMOASSETURL="https://archive.org/download/srb20ya-finaldemo/FinalDemo1
 SRB2JTEASSETURL="https://archive.org/download/SRB2JTE-69-1/srb2jte.zip"
 SRB2PERSONAASSETURL="https://mb.srb2.org/addons/166/download"
 SRB2KARTHEPASSETURL="https://mb.srb2.org/addons/5254/download"
-SRB2KARTNEPTUNEASSETURL="https://api.github.com/repos/NepDisk/srb2k-neptune/releases/latest"
+SRB2KARTNEPTUNEASSETURL="https://api.github.com/repos/NepDisk/srb2k-neptune/releases"
 MINGWCCVER="gcc"
 MINGWCXXVER="g++"
 MINGWOLDCCVER="gcc-4.9-win32"
@@ -404,7 +404,7 @@ android() {
 
     containerrun
 
-    # Set name of AppImage in message.
+    # Set name of APK in message.
     APKNAME=$(find "$BUILD/android/app/build/outputs/apk/gameFull/debug" -name "*.apk" 2> /dev/null | gawk -F'/' '{print $NF}')
 
     # Move created APK to working directory.
@@ -7466,6 +7466,12 @@ custombuild() {
 
     done
 
+    if [ "$ANDROID" = "1" ]; then
+
+        CUSTOMDIR="$CUSTOMDIR-android"
+
+    fi
+
     BUILD="$BUILDPATH/srb2-custom/$CUSTOMDIR"
 
     # Check whether SRB2BLDGITPATH environment variable is set or not.
@@ -13751,13 +13757,13 @@ upgrade() {
     ISNET=$(curl -vI https://github.com 2>&1 | gawk '/> Host:/ {gsub("\r",""); print $NF}')
 
     # Make a loop to find the SRB2 source code directories and then update them one by one.
-    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort -u); do
+    for u in $(find "$BUILDPATH" -mindepth 1 -maxdepth 1 -type d ! -name "*android*" 2> /dev/null | gawk -F'/' '{print $NF}' | sort -u); do
 
         unset GITVERCONF
 
         if [ "$u" = "srb2-custom" ]; then
 
-            for d in $(find "$BUILDPATH/$u" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | gawk -F'/' '{print $NF}' | sort -u); do
+            for d in $(find "$BUILDPATH/$u" -mindepth 1 -maxdepth 1 -type d ! -name "*android*" 2> /dev/null | gawk -F'/' '{print $NF}' | sort -u); do
 
                 unset CONF CUSTOMDIR UPGRADEBUILD
                 export BUILD="$BUILDPATH/$u/$d"
