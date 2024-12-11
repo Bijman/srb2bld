@@ -620,6 +620,13 @@ buildvar() {
         GITVER="$GITDEFVER"
         GITURL="https://github.com/P-AS/srb2-legacy.git"
 
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-fusion-advance" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 v2.1 Fusion Advance"
+        GITDEFVER="master"
+        GITVER="$GITDEFVER"
+        GITURL="https://github.com/SuperSRB2GamesZ/SRB2FusionAdvance.git"
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ]; then
 
         BUILDNAME="Sonic Robo Blast 2 v2.0"
@@ -933,7 +940,7 @@ choosebuild() {
     while
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Reveries (rphys)" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart Neptune" "Build SRB2 Kart VR" "Build Ring Racers" "Build Ring Racers Noire" "Build Ring Racers HEP2" "Build Ring Racers Freaky Build" "Build SRB2 Custom" "Build wadcli" "Build kartmaker (SRB2 Kart)" "Build NeptuneFM (SRB2 Kart)" "Build kartmaker (Ring Racers)" "Build followermaker (Ring Racers)" "Build SLADE" "Build Ultimate Zone Builder" "Build High Voltage Ring" "Build Aseprite with Kart Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Reveries (rphys)" "Build SRB2 TSoURDt3rd" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 v2.1 Fusion Advance" "Build SRB2 v2.0" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart Neptune" "Build SRB2 Kart VR" "Build Ring Racers" "Build Ring Racers Noire" "Build Ring Racers HEP2" "Build Ring Racers Freaky Build" "Build SRB2 Custom" "Build wadcli" "Build kartmaker (SRB2 Kart)" "Build NeptuneFM (SRB2 Kart)" "Build kartmaker (Ring Racers)" "Build followermaker (Ring Racers)" "Build SLADE" "Build Ultimate Zone Builder" "Build High Voltage Ring" "Build Aseprite with Kart Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -992,173 +999,180 @@ choosebuild() {
 
             "8")
 
-                BUILD="$BUILDPATH/srb2-2.0"
+                BUILD="$BUILDPATH/srb2-2.1-fusion-advance"
                 break
 
                 ;;
 
             "9")
 
-                BUILD="$BUILDPATH/srb2-final-demo"
+                BUILD="$BUILDPATH/srb2-2.0"
                 break
 
                 ;;
 
             "10")
 
-                BUILD="$BUILDPATH/srb2-jte"
+                BUILD="$BUILDPATH/srb2-final-demo"
                 break
 
                 ;;
 
             "11")
 
-                BUILD="$BUILDPATH/srb2-persona"
+                BUILD="$BUILDPATH/srb2-jte"
                 break
 
                 ;;
 
             "12")
 
-                BUILD="$BUILDPATH/srb2-kart"
+                BUILD="$BUILDPATH/srb2-persona"
                 break
 
                 ;;
 
             "13")
 
-                BUILD="$BUILDPATH/srb2-kart-moe-mansion"
+                BUILD="$BUILDPATH/srb2-kart"
                 break
 
                 ;;
 
             "14")
 
-                BUILD="$BUILDPATH/srb2-kart-galaxy"
+                BUILD="$BUILDPATH/srb2-kart-moe-mansion"
                 break
 
                 ;;
 
             "15")
 
-                BUILD="$BUILDPATH/srb2-kart-hep"
+                BUILD="$BUILDPATH/srb2-kart-galaxy"
                 break
 
                 ;;
 
             "16")
 
-                BUILD="$BUILDPATH/srb2-kart-saturn"
+                BUILD="$BUILDPATH/srb2-kart-hep"
                 break
 
                 ;;
 
             "17")
 
-                BUILD="$BUILDPATH/srb2-kart-neptune"
+                BUILD="$BUILDPATH/srb2-kart-saturn"
                 break
 
                 ;;
 
             "18")
 
-                BUILD="$BUILDPATH/srb2-kart-vr"
+                BUILD="$BUILDPATH/srb2-kart-neptune"
                 break
 
                 ;;
 
             "19")
 
-                BUILD="$BUILDPATH/ring-racers"
+                BUILD="$BUILDPATH/srb2-kart-vr"
                 break
 
                 ;;
 
             "20")
 
-                BUILD="$BUILDPATH/ring-racers-noire"
+                BUILD="$BUILDPATH/ring-racers"
                 break
 
                 ;;
 
             "21")
 
-                BUILD="$BUILDPATH/ring-racers-hep2"
+                BUILD="$BUILDPATH/ring-racers-noire"
                 break
 
                 ;;
 
             "22")
 
-                BUILD="$BUILDPATH/ring-racers-freaky-build"
+                BUILD="$BUILDPATH/ring-racers-hep2"
                 break
 
                 ;;
 
             "23")
 
-                custombuild
+                BUILD="$BUILDPATH/ring-racers-freaky-build"
                 break
 
                 ;;
 
             "24")
 
-                BUILD="$BUILDPATH/wadcli"
+                custombuild
                 break
 
                 ;;
 
             "25")
 
-                BUILD="$BUILDPATH/kartmaker"
+                BUILD="$BUILDPATH/wadcli"
                 break
 
                 ;;
 
             "26")
 
-                BUILD="$BUILDPATH/neptunefm"
+                BUILD="$BUILDPATH/kartmaker"
                 break
 
                 ;;
 
             "27")
 
-                BUILD="$BUILDPATH/kartmaker-ring-racers"
+                BUILD="$BUILDPATH/neptunefm"
                 break
 
                 ;;
 
             "28")
 
-                BUILD="$BUILDPATH/followermaker"
+                BUILD="$BUILDPATH/kartmaker-ring-racers"
                 break
 
                 ;;
 
             "29")
 
-                BUILD="$BUILDPATH/slade"
+                BUILD="$BUILDPATH/followermaker"
                 break
 
                 ;;
 
             "30")
 
-                BUILD="$BUILDPATH/ultimatezonebuilder"
+                BUILD="$BUILDPATH/slade"
                 break
 
                 ;;
 
             "31")
 
-                BUILD="$BUILDPATH/highvoltagering"
+                BUILD="$BUILDPATH/ultimatezonebuilder"
                 break
 
                 ;;
 
             "32")
+
+                BUILD="$BUILDPATH/highvoltagering"
+                break
+
+                ;;
+
+            "33")
 
                 BUILD="$BUILDPATH/aseprite"
                 break
@@ -1906,7 +1920,7 @@ EOF
             7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.zip" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
             extractsrb2assets
 
-        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ]; then
 
             if [ -n "\$ISNET" ]; then
 
@@ -2822,8 +2836,15 @@ else
         gawk -i inplace '{gsub("#define DEFAULTDIR \\"srb2_21\\"","#define DEFAULTDIR \\"srb2_2.1'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
         gawk -i inplace '{gsub("/usr/local/share/games/SRB2legacy","'\$SRB2BLDPREFIX'/share/games/SRB2legacy"); print}' "\$BUILD/src/sdl/i_system.c"
         gawk -i inplace '{gsub("/usr/local/games/SRB2legacy","'\$SRB2BLDPREFIX'/games/SRB2legacy"); print}' "\$BUILD/src/sdl/i_system.c"
-        gawk -i inplace '{gsub("/usr/share/games/SRB2legacy","/usr/share/games/SRB2legacy"); print}' "\$BUILD/src/sdl/i_system.c"
-        gawk -i inplace '{gsub("/usr/games/SRB2legacy","/usr/games/SRB2legacy"); print}' "\$BUILD/src/sdl/i_system.c"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\".srb2_21\\"","#define DEFAULTDIR \\".srb2_2.1'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\"srb2_21\\"","#define DEFAULTDIR \\"srb2_2.1'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("/usr/local/share/games/SRB2legacy","'\$SRB2BLDPREFIX'/share/games/SRB2FusionAdvance"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("/usr/local/games/SRB2legacy","'\$SRB2BLDPREFIX'/games/SRB2FusionAdvance"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("/usr/share/games/SRB2legacy","/usr/share/games/SRB2FusionAdvance"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("/usr/games/SRB2legacy","/usr/games/SRB2FusionAdvance"); print}' "\$BUILD/src/sdl/i_system.c"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
@@ -4521,7 +4542,7 @@ MINGWCMAKE
                 \$BLDCMD \$CONF
 
                 # Making list of build's dependencies to copy them to game directory on Windows later.
-                if [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+                if [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ]; then
 
                     if [ "\$IS64" = "64" ]; then
 
@@ -4564,7 +4585,7 @@ MINGWCMAKE
                 \$BLDCMD \$CONF
 
                 # Making list of build's dependencies to copy them to game directory on Windows later.
-                if [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+                if [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
                     \$ARCH-w64-mingw32-objdump -x "\$BUILD/bin/Mingw\$IS64/Release/srb2win.exe" | gawk '/DLL/ && /.dll/ {print \$NF}' > "\$BUILD/deps"
 
@@ -5038,6 +5059,33 @@ Actions=OpenGL;Software;
 Terminal=false
 NoDisplay=false
 X-AppImage-Name=SRB2-2.1-Legacy
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 v2.1 Fusion Advance
+Comment=Modified open source 3D Sonic platformer based on Doom Legacy engine with improved framerate, coronas and orbital camera
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2-2.1-Fusion-Advance
 X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 
@@ -5699,7 +5747,7 @@ DESKTOP
 
             convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
-        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ]; then
 
             convert "\$BUILD/src/win32/Srb2win.ico[8]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
@@ -5730,7 +5778,7 @@ export HERE="\$(dirname "\$(readlink -f "\$0")")"
 export LD_LIBRARY_PATH="\$HERE/usr/lib:\$HERE/usr/lib/gtk-3.0/modules:\$HERE/usr/lib/gdk-pixbuf/loaders:\$LD_LIBRARY_PATH"
 APPRUN
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2"
@@ -6091,6 +6139,25 @@ DESKTOP
 
     cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2-2.1-legacy-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-2.1-legacy-opengl.desktop"
     gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 v2.1 Legacy \\\(Software\\\)","Name=Sonic Robo Blast 2 v2.1 Legacy (OpenGL)") || gsub("Exec=srb2legacy -software","Exec=srb2legacy -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-2.1-legacy-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2-2.1-fusion-advance-software.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 v2.1 Fusion Advance (Software)
+Comment=Modified open source 3D Sonic platformer based on Doom Legacy engine with improved framerate, coronas and orbital camera
+Icon=srb2fusionadvance
+Exec=srb2fa -software
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2-2.1-fusion-advance-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-2.1-fusion-advance-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 v2.1 Fusion Advance \\\(Software\\\)","Name=Sonic Robo Blast 2 v2.1 Fusion Advance (OpenGL)") || gsub("Exec=srb2fa -software","Exec=srb2fa -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-2.1-fusion-advance-opengl.desktop"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
@@ -6674,6 +6741,10 @@ DESKTOP
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ]; then
 
             cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2legacy.png"
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-fusion-advance" ]; then
+
+            cp -f "\$BUILD/build/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2fusionadvance.png"
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ]; then
 
@@ -7624,7 +7695,7 @@ EOF
         7z x -y "$SRB2BLDROOT/assets/SRB2P_MP.zip" "*.pk3" "*.wad" -o"$BUILD/assets/installer"
         extractsrb2macosassets
 
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ] || [ "$BUILD" = "$BUILDPATH/srb2-2.1-fusion-advance" ]; then
 
         if [ -n "$ISNET" ]; then
 
@@ -8602,7 +8673,7 @@ FLATPAK
     else
 
         # Set variables for each SRB2/SRB2Kart/Ring Racers build.
-        if [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+        if [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ] || [ "$BUILD" = "$BUILDPATH/srb2-2.1-fusion-advance" ]; then
 
             SRB2CONFDIR=".srb2_2.1$GITVERCONF"
             WADDIR="SRB2LEGACYWADDIR"
@@ -9461,6 +9532,28 @@ installtolinux() {
         SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}' | head -n1)
         SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2legacy.png"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2legacy binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -d "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* -t "$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps"
+
+        fi
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-fusion-advance" ]; then
+
+        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2FusionAdvance"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2fa"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-2.1-fusion-advance-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-2.1-fusion-advance-opengl.desktop"
+        SRB2LNXICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor/"*/apps -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'hicolor/|/apps' '{print $2}' | gawk '!a[$0]++ {print}' | head -n1)
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2fusionadvance.png"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2fa binary, assets, icons and desktop file to the system. Please wait..."
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
@@ -11004,6 +11097,20 @@ installtomacos() {
 
     fi
 
+    if [ -f "$HOMEBREWPREFIX/lib/libmodplug.dylib" ]; then
+
+        LIBMODPLUGPREFIX="$HOMEBREWPREFIX"
+
+    elif [ -f "$MACPORTPREFIX/lib/libmodplug.dylib" ]; then
+
+        LIBMODPLUGPREFIX="$MACPORTPREFIX"
+
+    else
+
+        LIBMODPLUGPREFIX="$SRB2BLDPREFIX"
+
+    fi
+
     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Preparing and displaying $BUILDNAME's configure options for compilation. Please wait..."
 
     # Display content of Makefile for a good view of available compilation flags.
@@ -11033,7 +11140,7 @@ installtomacos() {
 
     else
 
-        BLDCMD="cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_BUILD_TYPE=Release -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CONFIG_SHARED_INTERNAL_LIBRARIES=ON -DSRB2_CONFIG_SYSTEM_LIBRARIES=ON -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DCMAKE_EXE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_MODULE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DSDL2_MIXER_INCLUDE_DIR=$LIBSDL2MIXERPREFIX/include/SDL2 -DSDL2_MIXER_LIBRARY=$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DPNG_PNG_INCLUDE_DIR=$LIBPNGPREFIX/include -DPNG_LIBRARY=$LIBPNGPREFIX/lib/libpng.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON"
+        BLDCMD="cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_BUILD_TYPE=Release -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CONFIG_SHARED_INTERNAL_LIBRARIES=ON -DSRB2_CONFIG_SYSTEM_LIBRARIES=ON -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DCMAKE_EXE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_MODULE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DSDL2_MIXER_INCLUDE_DIR=$LIBSDL2MIXERPREFIX/include/SDL2 -DSDL2_MIXER_LIBRARY=$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DPNG_PNG_INCLUDE_DIR=$LIBPNGPREFIX/include -DPNG_LIBRARY=$LIBPNGPREFIX/lib/libpng.dylib -DMODPLUG_INCLUDE_DIR=$LIBMODPLUGPREFIX/include -DMODPLUG_LIBRARY=$LIBMODPLUGPREFIX/lib/libmodplug.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON"
         eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
     fi
@@ -12147,7 +12254,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
 
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ] || [ "$BUILD" = "$BUILDPATH/srb2-2.1-fusion-advance" ]; then
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2_21\"","#define DEFAULTDIR \"srb2_2.1\""); print}' "$BUILD/src/doomdef.h"
 
@@ -12797,6 +12904,20 @@ installtowindows() {
 
         SRB2WINDIR="SRB2 v2.1 Legacy"
         SRB2WINMENUDIR="Sonic Robo Blast 2 v2.1 Legacy"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        mkdir -p "$SRB2WINPATH"
+        cp -rf $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-fusion-advance" ]; then
+
+        SRB2WINDIR="SRB2 v2.1 Fusion Advance"
+        SRB2WINMENUDIR="Sonic Robo Blast 2 v2.1 Fusion Advance"
         SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
