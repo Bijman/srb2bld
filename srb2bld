@@ -3807,7 +3807,7 @@ MINGWCMAKE
     fi
 
     # Download libSDL2's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ "\$LIBC" != "musl" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
+    if [ "\$OS" = "Linux" ] && [ "\$LIBC" != "musl" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-rphys" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
 
         sudo dpkg --remove --force-depends libsdl2-dev libsdl2-2.0-0
 
