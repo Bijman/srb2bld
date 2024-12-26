@@ -269,11 +269,11 @@ Usage: srb2bld [OPTIONS]
 
          - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib",
 
-         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686 zlib-ng-compat.i686", 
+         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686", 
 
-         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 zlib-ng-compat.i686",
+         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686",
 
-         - RHEL/RHEL based: "sudo dnf install fuse-libs.i686 glibc.i686 zlib.i686",
+         - RHEL/RHEL based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686",
 
          - openSUSE/openSUSE based: "sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit",
 
@@ -377,11 +377,11 @@ Usage: srb2bld [OPTIONS]
 
          - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib`,
 
-         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686 zlib-ng-compat.i686`,
+         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686`,
 
-         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 zlib-ng-compat.i686`,
+         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686`,
 
-         - RHEL/RHEL based: `sudo dnf install fuse-libs.i686 glibc.i686 zlib.i686`,
+         - RHEL/RHEL based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686`,
 
          - openSUSE/openSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit`,
 

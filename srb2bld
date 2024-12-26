@@ -1989,7 +1989,7 @@ EOF
 
             fi
 
-            7z x -y "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "3drend.dll" -o"\$BUILD/build/AppDir/usr/games/SRB2"
 
             if [ "\$OS" = "Windows" ]; then
 
@@ -6924,17 +6924,17 @@ ENTRYPOINT
     # Set CPU architecture for Docker/Podman images in case of building old SRB2 versions.
     if ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]); then
 
-        ISARM="i386/"
+        PLATFORM="--platform linux/i386"
 
     elif ([ "$ARCH" = "armhf" ] || [ "$ARCH" = "aarch64" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]); then
 
-        ISARM="armhf/"
+        PLATFORM="--platform linux/armhf"
 
     fi
 
     # Create Dockerfiles.
     cat > "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container/Dockerfile" << DOCKERFILE
-FROM docker.io/"$ISARM"ubuntu:"$UBUVER"
+FROM docker.io/ubuntu:"$UBUVER"
 
 ENV container $(printf "%s\n" "$OSVIRT" | gawk '{print $1}')
 
@@ -6983,7 +6983,7 @@ ENTRYPOINT [ "sh", "/home/srb2bld/Entrypoint" ]
 DOCKERFILE
 
     cat > "$SRB2BLDROOT/containers/srb2-tools-linux-glibc-container/Dockerfile" << DOCKERFILE
-FROM docker.io/"$ISARM"ubuntu:"$UBUSOFTVER"
+FROM docker.io/ubuntu:"$UBUSOFTVER"
 
 ENV container $(printf "%s\n" "$OSVIRT" | gawk '{print $1}')
 
@@ -7023,7 +7023,7 @@ ENTRYPOINT [ "sh", "/home/srb2bld/Entrypoint" ]
 DOCKERFILE
 
     cat > "$SRB2BLDROOT/containers/srb2-uzb-linux-glibc-container/Dockerfile" << DOCKERFILE
-FROM docker.io/"$ISARM"ubuntu:"$UBUUZBVER"
+FROM docker.io/ubuntu:"$UBUUZBVER"
 
 ENV container $(printf "%s\n" "$OSVIRT" | gawk '{print $1}')
 
@@ -7061,7 +7061,7 @@ ENTRYPOINT [ "sh", "/home/srb2bld/Entrypoint" ]
 DOCKERFILE
 
     cat > "$SRB2BLDROOT/containers/srb2-games-linux-musl-container/Dockerfile" << DOCKERFILE
-FROM docker.io/"$ISARM"alpine:latest
+FROM docker.io/alpine:latest
 
 ENV container $(printf "%s\n" "$OSVIRT" | gawk '{print $1}')
 
@@ -7109,7 +7109,7 @@ ENTRYPOINT [ "sh", "/home/srb2bld/Entrypoint" ]
 DOCKERFILE
 
     cat > "$SRB2BLDROOT/containers/srb2-tools-linux-musl-container/Dockerfile" << DOCKERFILE
-FROM docker.io/"$ISARM"alpine:latest
+FROM docker.io/alpine:latest
 
 ENV container $(printf "%s\n" "$OSVIRT" | gawk '{print $1}')
 
@@ -7143,7 +7143,7 @@ ENTRYPOINT [ "sh", "/home/srb2bld/Entrypoint" ]
 DOCKERFILE
 
     cat > "$SRB2BLDROOT/containers/srb2-games-windows-container/Dockerfile" << DOCKERFILE
-FROM docker.io/"$ISARM"debian:latest
+FROM docker.io/debian:latest
 
 ENV container $(printf "%s\n" "$OSVIRT" | gawk '{print $1}')
 
@@ -7240,7 +7240,7 @@ fi
 DOCKERFILE
 
     cat > "$SRB2BLDROOT/containers/srb2-tools-windows-container/Dockerfile" << DOCKERFILE
-FROM docker.io/"$ISARM"ubuntu:"$UBUSOFTVER"
+FROM docker.io/ubuntu:"$UBUSOFTVER"
 
 ENV container $(printf "%s\n" "$OSVIRT" | gawk '{print $1}')
 
@@ -7380,12 +7380,12 @@ containerrun() {
 
         if [ -n "$ISNET" ]; then
 
-            $OSVIRT pull docker.io/alvrme/alpine-android-base:"$ANDROIDSDKVER"
+            $OSVIRT pull $PLATFORM docker.io/alvrme/alpine-android-base:"$ANDROIDSDKVER"
 
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for SRB2 Android. Please wait..."
-        $OSVIRT build --rm -t srb2-games-android-container "$SRB2BLDROOT/containers/srb2-games-android-container"
+        $OSVIRT build --rm $PLATFORM -t srb2-games-android-container "$SRB2BLDROOT/containers/srb2-games-android-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
 
         if [ "$OS" = "Windows" ]; then
@@ -7404,12 +7404,12 @@ containerrun() {
 
         if [ -n "$ISNET" ]; then
 
-            $OSVIRT pull docker.io/"$ISARM"ubuntu:"$UBUSOFTVER"
+            $OSVIRT pull $PLATFORM docker.io/ubuntu:"$UBUSOFTVER"
 
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for Windows SRB2 tools. Please wait..."
-        $OSVIRT build --rm -t srb2-tools-windows-container "$SRB2BLDROOT/containers/srb2-tools-windows-container"
+        $OSVIRT build --rm $PLATFORM -t srb2-tools-windows-container "$SRB2BLDROOT/containers/srb2-tools-windows-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$($PRINTF "%s\n" "$USERPROFILE")\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" --volume="$($PRINTF "%s\n" "$USERPROFILE")\\.cache\\ccache:$CCACHE_DIR:rw" srb2-tools-windows-container
 
@@ -7419,12 +7419,12 @@ containerrun() {
 
         if [ -n "$ISNET" ]; then
 
-            $OSVIRT pull docker.io/"$ISARM"debian:latest
+            $OSVIRT pull $PLATFORM docker.io/debian:latest
 
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for Windows SRB2 builds. Please wait..."
-        $OSVIRT build --rm -t srb2-games-windows-container "$SRB2BLDROOT/containers/srb2-games-windows-container"
+        $OSVIRT build --rm $PLATFORM -t srb2-games-windows-container "$SRB2BLDROOT/containers/srb2-games-windows-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$($PRINTF "%s\n" "$USERPROFILE")\\AppData\\Roaming\\srb2bld:$SRB2BLDROOT:rw" --volume="$($PRINTF "%s\n" "$USERPROFILE")\\.cache\\ccache:$CCACHE_DIR:rw" --volume="$($PRINTF "%s\n" "$USERPROFILE")\\.cache\\vcpkg:/home/srb2bld/.cache/vcpkg:rw" srb2-games-windows-container
 
@@ -7434,12 +7434,12 @@ containerrun() {
 
         if [ -n "$ISNET" ]; then
 
-            $OSVIRT pull docker.io/"$ISARM"alpine:latest
+            $OSVIRT pull $PLATFORM docker.io/alpine:latest
 
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for musl based Linux SRB2 tools. Please wait..."
-        $OSVIRT build --rm -t srb2-tools-linux-musl-container "$SRB2BLDROOT/containers/srb2-tools-linux-musl-container"
+        $OSVIRT build --rm $PLATFORM -t srb2-tools-linux-musl-container "$SRB2BLDROOT/containers/srb2-tools-linux-musl-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-tools-linux-musl-container
 
@@ -7449,12 +7449,12 @@ containerrun() {
 
         if [ -n "$ISNET" ]; then
 
-            $OSVIRT pull docker.io/"$ISARM"alpine:latest
+            $OSVIRT pull $PLATFORM docker.io/alpine:latest
 
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for musl based Linux SRB2 builds. Please wait..."
-        $OSVIRT build --rm -t srb2-games-linux-musl-container "$SRB2BLDROOT/containers/srb2-games-linux-musl-container"
+        $OSVIRT build --rm $PLATFORM -t srb2-games-linux-musl-container "$SRB2BLDROOT/containers/srb2-games-linux-musl-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-games-linux-musl-container
 
@@ -7464,12 +7464,12 @@ containerrun() {
 
         if [ -n "$ISNET" ]; then
 
-            $OSVIRT pull docker.io/"$ISARM"ubuntu:"$UBUSOFTVER"
+            $OSVIRT pull $PLATFORM docker.io/ubuntu:"$UBUSOFTVER"
 
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for glibc based Linux SRB2 tools. Please wait..."
-        $OSVIRT build --rm -t srb2-tools-linux-glibc-container "$SRB2BLDROOT/containers/srb2-tools-linux-glibc-container"
+        $OSVIRT build --rm $PLATFORM -t srb2-tools-linux-glibc-container "$SRB2BLDROOT/containers/srb2-tools-linux-glibc-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-tools-linux-glibc-container
 
@@ -7479,12 +7479,12 @@ containerrun() {
 
         if [ -n "$ISNET" ]; then
 
-            $OSVIRT pull docker.io/"$ISARM"ubuntu:"$UBUUZBVER"
+            $OSVIRT pull $PLATFORM docker.io/ubuntu:"$UBUUZBVER"
 
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for glibc based Linux Ultimate Zone Builder or High Voltage Ring. Please wait..."
-        $OSVIRT build --rm -t srb2-uzb-linux-glibc-container "$SRB2BLDROOT/containers/srb2-uzb-linux-glibc-container"
+        $OSVIRT build --rm $PLATFORM -t srb2-uzb-linux-glibc-container "$SRB2BLDROOT/containers/srb2-uzb-linux-glibc-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-uzb-linux-glibc-container
 
@@ -7494,12 +7494,12 @@ containerrun() {
 
         if [ -n "$ISNET" ]; then
 
-            $OSVIRT pull docker.io/"$ISARM"ubuntu:"$UBUVER"
+            $OSVIRT pull $PLATFORM docker.io/ubuntu:"$UBUVER"
 
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for glibc based Linux SRB2 builds. Please wait..."
-        $OSVIRT build --rm -t srb2-games-linux-glibc-container "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container"
+        $OSVIRT build --rm $PLATFORM -t srb2-games-linux-glibc-container "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-games-linux-glibc-container
 
@@ -7735,7 +7735,7 @@ EOF
 
         fi
 
-        unrar x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "$BUILD/assets/installer"
+        unrar x -y "$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "3drend.dll" "$BUILD/assets/installer"
 
     elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
 
@@ -8912,29 +8912,13 @@ installdepsglibc() {
 
                     VERSION_ID=$(gawk -F'=' '/VERSION_ID/ {print $2}' /etc/os-release)
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
-
-                        toolbox run dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]",""); print $1"."$NF}'
-
-                    else
-
-                        toolbox run dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]",""); print $1"."$NF}'
-
-                    fi
+                    toolbox run dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}' | gawk -F'\\.| ' '{gsub("-[0-9]|:[0-9]",""); print $1"."$NF}'
 
                 elif [ -x "$(PATH=/usr/sbin:$PATH command -v transactional-update 2> /dev/null)" ]; then
 
                     l="$($PRINTF "%s\n" "$l" | gawk '{gsub(".so$","*.so.*"); print}')"
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
-
-                        zypper -q search --provides "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
-
-                    else
-
-                        zypper -q search --provides "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
-
-                    fi
+                    zypper -q search --provides "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
 
                 elif [ -x "$(command -v nix 2> /dev/null)" ]; then
 
@@ -8961,15 +8945,7 @@ installdepsglibc() {
 
                 elif [ -x "$(command -v pacman 2> /dev/null)" ]; then
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
-
-                        pacman -Fqx "$l" | gawk '{print}'
-
-                    else
-
-                        pacman -Fqx "$l" | gawk '!/lib32-/ {print}'
-
-                    fi
+                    pacman -Fqx "$l" | gawk '!/lib32-/ {print}'
 
                 elif [ -x "$(command -v apt-get 2> /dev/null)" ]; then
 
@@ -8979,41 +8955,17 @@ installdepsglibc() {
 
                     l="$($PRINTF "%s\n" "$l" | gawk '{gsub(".so$","*.so.*"); print}')"
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
-
-                        zypper -q search --provides "$l" | gawk -F'|' '!/Name/ && /32bit/ {print $2}' | gawk 'NF{print}'
-
-                    else
-
-                        zypper -q search --provides "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
-
-                    fi
+                    zypper -q search --provides "$l" | gawk -F'|' '!/Name|32bit/ {print $2}' | gawk 'NF{print}'
 
                 elif [ -x "$(command -v dnf 2> /dev/null)" ]; then
 
                     VERSION_ID=$(gawk -F'"' '/VERSION_ID/ {print $2}' /etc/os-release)
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
-
-                        dnf provides -q "/usr/lib/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}'
-
-                    else
-
-                        dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}'
-
-                    fi
+                    dnf provides -q "/usr/lib$IS64/$l" | gawk '/.fc'$VERSION_ID'.|.el'$($PRINTF "%s\n" $VERSION_ID | gawk -F'\\.' '{print $1}')'./ {print $1}'
 
                 elif [ -x "$(command -v xbps-install 2> /dev/null)" ]; then
 
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
-
-                        xlocate "$l" | gawk '!/-devel-/ && /-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
-
-                    else
-
-                        xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
-
-                    fi
+                    xlocate "$l" | gawk '!/-devel-|-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
 
                 elif [ -x "$(command -v nix 2> /dev/null)" ]; then
 
@@ -9091,13 +9043,6 @@ installdepsglibc() {
                     $SUDO pacman -S --needed --noconfirm $PACKAGE || true
 
                 elif [ -x "$(command -v apt-get 2> /dev/null)" ]; then
-
-                    if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
-
-                        ISARM=$($PRINTF "%s\n" "$ISARM" | gawk -F'/' '{print $1}')
-                        PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk '!/nvidia|primus|virtualbox/ {gsub("$","':$ISARM'"); print}')
-
-                    fi
 
                     $SUDO apt-get install -y $PACKAGE || true
 
@@ -9230,15 +9175,7 @@ installdepsmusl() {
 
                 l="$($PRINTF "%s\n" "$l" | gawk '{gsub("liblua.*","libluajit.*"); print}')"
 
-                if [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ]; then
-
-                    xlocate "$l" | gawk '!/-devel-|primus/ && /-32bit-/ {print $1}' | gawk '!a[$0]++ {print}'
-
-                else
-
-                    xlocate "$l" | gawk '!/-devel-|-32bit-|primus/ {print $1}' | gawk '!a[$0]++ {print}'
-
-                fi
+                xlocate "$l" | gawk '!/-devel-|-32bit-|primus/ {print $1}' | gawk '!a[$0]++ {print}'
 
             fi
 
@@ -14074,11 +14011,11 @@ have installed - \"pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-zlib\" or \
 
          - Gentoo/Gentoo based: \"ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib\",
 
-         - Fedora/Fedora based: \"sudo dnf install fuse-libs.i686 glibc.i686 zlib-ng-compat.i686\",
+         - Fedora/Fedora based: \"sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686\",
 
-         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): \"rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 zlib-ng-compat.i686\",
+         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): \"rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686\",
 
-         - RHEL/RHEL based: \"sudo dnf install fuse-libs.i686 glibc.i686 zlib.i686\",
+         - RHEL/RHEL based: \"sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686\",
 
          - openSUSE/openSUSE based: \"sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit\",
 
