@@ -3,7 +3,7 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://github.com/Bijman/srb2bld/assets/16626326/7533a945-116a-4e1d-b738-41526b5cb33a
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries (rphys), SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 v2.1 Fusion Advance, SRB2 v2.0, SRB2 Final Demo, SRB2 JTE, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers Freaky Build, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries, SRB2 TSoURDt3rd, SRB2 VR, SRB2 v2.1 Legacy, SRB2 Fusion Advance, SRB2 Top Down, SRB2 v2.0, XSRB2, SRB2 SF94-Serv, SRB2 Riders, Super SRB2 Kart Z, Super Bomberman Blast 2, SRB2 Final Demo, SRB2 JTE, ShufflarB2, SRB2 Live, SRB2 LoZ, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Blankart, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers HEP3, Ring Racers Freaky Build, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
@@ -30,11 +30,11 @@ https://github.com/Bijman/srb2bld/assets/16626326/7533a945-116a-4e1d-b738-41526b
 - Docker or Podman (Linux and Windows only),
 - GNU Stow (Linux and macOS only),
 - Patchelf (Linux only),
-- GDK-Pixbuf (Linux only),
+- GDK-Pixbuf (Linux only).
 2. AppImage building (Linux only, 32-bit versions of packages are needed too for old SRB2 builds like SRB2 Final Demo and SRB2 JTE):
 - Fuse/Libfuse2/Fuse-libs,
 - File,
-- Zlib/Zlib1g/Zlib-ng-compat/Libz1,
+- Zlib/Zlib1g/Zlib-ng-compat/Libz1.
 3. Flatpak building (Linux only):
 - Flatpak,
 - Flatpak-builder.
@@ -63,7 +63,7 @@ As for macOS users, they need to install these additional dependencies:
 
 - Fedora/Fedora based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora Silverblue/Fedora Kinoite/Fedora Sway/Fedora Budgie/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder `,
 
 - RHEL/RHEL based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
@@ -144,31 +144,42 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 11-12-2024)
+# Compatibility (as of 25-04-2025)
 |                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Uncapped PLUS       |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus             |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 Reveries (rphys)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 Reveries            |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 TSoURDt3rd          |          ✅           |         🟨           |        🟨         |        ✅       |       🟨      |
 | SRB2 VR                  |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 v2.1 Fusion Advance |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 v2.0                |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| SRB2 Fusion Advance      |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
+| SRB2 Top Down            |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
+| SRB2 v2.0                |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
+| XSRB2                    |          ✅*          |         ✅*          |        ❔*        |        ✅*      |       ⛔      |
+| SRB2 SF94-Serv           |          ✅*          |         ✅*          |        ❔*        |        ✅*      |       ⛔      |
+| SRB2 Riders              |          ✅*          |         ✅*          |        ❔*        |        ✅*      |       ⛔      |
+| Super SRB2 Kart Z        |          ✅*          |         ✅*          |        ❔*        |        ✅*      |       ⛔      |
+| Super Bomberman Blast 2  |          ✅*          |         ✅*          |        ❔*        |        ✅*      |       ⛔      |
 | SRB2 Final Demo          |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
-| SRB2 JTE                 |          🟨*          |         🟨*          |        🟨*        |        ⛔       |       ⛔      |
+| SRB2 JTE                 |          🟨*          |         🟨*          |        ❔*        |        🟨*      |       ⛔      |
+| ShufflarB2               |          ✅*          |         ✅*          |        ❔*        |        ✅*      |       ⛔      |
+| SRB2 Live                |          ✅*          |         ✅*          |        ❔*        |        ✅*      |       ⛔      |
+| SRB2 LoZ                 |          🟨*          |         🟨*          |        🟨*        |        🟨*      |       ⛔      |
 | SRB2 Persona             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart                |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
 | SRB2 Kart Moe Mansion    |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 Kart Galaxy         |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
 | SRB2 Kart HEP            |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
 | SRB2 Kart Saturn         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Kart Neptune        |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
+| SRB2 Kart Neptune        |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart VR             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
+| BlanKart                 |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
 | Ring Racers              |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers Noire        |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers HEP2         |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
+| Ring Racers HEP3         |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers Freaky Build |          ✅           |         🟨           |        ⛔         |        ✅*      |       ✅      |
 | wadcli                   |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
 | kartmaker (SRB2 Kart)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -178,7 +189,7 @@ As for macOS users, they need to install these additional dependencies:
 | SLADE                    |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
 | Ultimate Zone Builder    |          ✅           |         🟨****       |        ⛔         |        ✅       |       ⛔      |
 | High Voltage Ring        |          ✅           |         🟨****       |        ⛔         |        ✅       |       ⛔      |
-| Aseprite w/ Kart Builder |          ✅           |         ⛔           |        ⛔         |        ⛔       |       ✅      |
+| Aseprite w/ Kart Builder |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
 
 **Legend:**
 
@@ -201,7 +212,7 @@ As for macOS users, they need to install these additional dependencies:
 # Supported Android builds
 - SRB2 Android by Lactozilla
 - SRB2 Android by bitten2up
-- SRB2 Reveries (rphys)
+- SRB2 Reveries
 - SRB2 Custom (requires custom build that supports building with gradle files in directory "android" in SRB2 custom build directory)
 
 # Usage (from help text)
@@ -263,9 +274,9 @@ Usage: srb2bld [OPTIONS]
 
      5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
 
-         - Debian/Ubuntu/Debian based/Ubuntu based: "sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386",
+         - Debian/Ubuntu/Debian based/Ubuntu based: "sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install libfuse2:i386 libc6:i386 zlib1g:i386",
 
-         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do "sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-zlib" or use one of the AUR helpers that you have installed - "pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-zlib" or "paru -Su --needed lib32-fuse2 lib32-glibc lib32-zlib" or "yay -Su --needed lib32-fuse2 lib32-glibc lib32-zlib",
+         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do "sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib" or use one of the AUR helpers that you have installed - "pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib" or "paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib" or "yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib",
 
          - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib",
 
@@ -279,7 +290,7 @@ Usage: srb2bld [OPTIONS]
 
          - openSUSE MicroOS/openSUSE MicroOS based: "sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit && sudo transactional-update apply",
 
-         - Void/Void based: "sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit zlib-32bit".
+         - Void/Void based: "sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit libgcc-32bit zlib-32bit".
 
      6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set: export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" in "~/.bash_profile" or "~/.zshrc".
 
@@ -291,15 +302,19 @@ Usage: srb2bld [OPTIONS]
 
      10. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
 
-     11. If you get "unhandled exception" when running Ultimate Zone Builder or High Voltage Ring, uninstall mono in your system.
+     11. If docker fails to run despite following installation/configuration instructions and notes from srb2bld's README, consider switching to "podman".
 
-     12. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
+     12. If you get "unhandled exception" when running Ultimate Zone Builder or High Voltage Ring, uninstall mono in your system.
 
-     13. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
+     13. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
 
-     14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+     14. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
 
-     15. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+     15. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+
+     16. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
+
+     17. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -345,7 +360,7 @@ Usage: srb2bld [OPTIONS]
 
           Then choose "Build SRB2 Custom", when running script.
 
-     16. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+     18. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -371,9 +386,9 @@ Usage: srb2bld [OPTIONS]
 
 5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
 
-         - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install fuse:i386 libc6:i386 zlib1g:i386`,
+         - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install libfuse2:i386 libc6:i386 zlib1g:i386`,
 
-         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-zlib` or use one of the AUR helpers that you have installed - `pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-zlib` or `paru -Su --needed lib32-fuse2 lib32-glibc lib32-zlib` or `yay -Su --needed lib32-fuse2 lib32-glibc lib32-zlib`,
+         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib` or use one of the AUR helpers that you have installed - `pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib` or `paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib` or `yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib`,
 
          - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib`,
 
@@ -387,7 +402,7 @@ Usage: srb2bld [OPTIONS]
 
          - openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit && sudo transactional-update apply`,
 
-         - Void/Void based: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit zlib-32bit`.
+         - Void/Void based: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit libgcc-32bit zlib-32bit`.
 
 6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set `export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"` in "\~/.bash_profile" or "\~/.zshrc".
 
@@ -399,15 +414,19 @@ Usage: srb2bld [OPTIONS]
 
 10. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
 
-11. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
+11. If docker fails to run despite following installation/configuration instructions and notes from srb2bld's README, consider switching to "podman".
 
-12. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
+12. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
 
-13. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
+13. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
 
-14. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+14. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
 
-15. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+15. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+
+16. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
+
+17. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
     - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -453,7 +472,7 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-16. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+18. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
