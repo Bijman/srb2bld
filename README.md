@@ -1,6 +1,6 @@
 srb2bld is a shell script, that automates and simplifies process of downloading source code, configuring, compilation, installation to system or creating portable executable bundles of various SRB2 related builds.
 
-https://github.com/user-attachments/assets/22d362f1-dbf4-4f4a-868e-65ba9a93c194
+https://github.com/user-attachments/assets/a8a188be-9431-46af-8a31-d2f394c1dc14
 
 # Features
 - Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 v2.2 Classic, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries, SRB2 TSoURDt3rd, SRB2 Project Astral, SRB2 VR, SRB2 v2.1 Legacy, SRB2 Fusion Advance, SRB2 Top Down, SRB2 v2.0, XSRB2, SRB2 SF94-Serv, SRB2 Riders, Super SRB2 Kart Z, Super Bomberman Blast 2, SRB2 Final Demo, SRB2 JTE, ShufflarB2, SRB2 Live, SRB2 LoZ, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Blankart, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers HEP3, Ring Racers Freaky Build, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
