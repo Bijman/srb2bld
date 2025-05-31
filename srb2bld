@@ -2516,9 +2516,14 @@ EOF
 
                 fi
 
-                # Create main.pk3 file using blankart-assets repository for BlanKart.
+                # Create assets using blankart-assets repository for BlanKart.
                 7z x -y "\$SRB2BLDROOT/assets/BlanKart.zip" -o"\$BUILD/build"
-                7z a -tzip -mx=0 "\$BUILD/build/AppDir/usr/games/SRB2Kart/main.pk3" "\$BUILD/build/blankart-assets/src/main/"*
+
+                for a in \$(ls "\$BUILD/build/blankart-assets/src"); do
+
+                    7z a -y -tzip -mx=0 "\$BUILD/build/AppDir/usr/games/SRB2Kart/\$a.pk3" "\$BUILD/build/blankart-assets/src/\$a/"*
+
+                done
 
             elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]; then
 
@@ -3813,8 +3818,12 @@ else
         # Fixing error with backtrace linking on musl-based distros.
         gawk -i inplace '/size = backtrace\(array, BT_SIZE\);/ {suppress=1} /CRASHLOG_WRITE/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_system.cpp"
 
-        # Replace XXH3 hash for main.pk3 after creating file.
-        gawk -i inplace '{gsub("'\$(gawk -F'0x' '/#define ASSET_HASH_MAIN_PK3/ {print \$2}' "\$BUILD/src/d_main.cpp")'","'\$(xxhsum -H3 --tag "\$BUILD/build/AppDir/usr/games/SRB2Kart/main.pk3" | gawk '{print \$NF}')'"); print}' "\$BUILD/src/d_main.cpp"
+        # Replace XXH3 hashes after creating assets.
+        for a in \$(ls "\$BUILD/build/blankart-assets/src"); do
+
+            gawk -i inplace '{gsub("'\$(gawk -F'0x' '/#define ASSET_HASH_'\$(\$PRINTF "\$a" | gawk '{print toupper(\$0)}')'_PK3/ {print \$2}' "\$BUILD/src/d_main.cpp")'","'\$(xxhsum -H3 --tag "\$BUILD/build/AppDir/usr/games/SRB2Kart/\$a.pk3" | gawk '{print \$NF}')'"); print}' "\$BUILD/src/d_main.cpp"
+
+        done
 
     elif [ "\$BUILD" = "\$BUILDPATH/ring-racers" ]; then
 
@@ -5296,7 +5305,7 @@ else
 
             mkdir -p "\$BUILD/build"
             rm -f "\$BUILD/slade.pk3"
-            7z a -tzip "\$BUILD/build/slade.pk3" "\$BUILD/dist/res/"*
+            7z a -y -tzip "\$BUILD/build/slade.pk3" "\$BUILD/dist/res/"*
             sudo ln -s /usr/include/\$ARCH-linux-gnu/bits /usr/include/bits
             sudo ln -s /usr/include/\$ARCH-linux-gnu/gnu /usr/include/gnu
             sudo ln -s /usr/include/\$ARCH-linux-gnu/asm /usr/include/asm
@@ -5456,7 +5465,7 @@ else
 
             mkdir -p "\$BUILD/build/AppDir/usr/lib/gtk-3.0/modules" "\$BUILD/build/AppDir/usr/lib/gio/modules" "\$BUILD/build/AppDir/usr/lib/gdk-pixbuf" "\$BUILD/build/AppDir/usr/share/glib-2.0/schemas" "\$BUILD/build/AppDir/usr/share/mime" "\$BUILD/build/AppDir/usr/share/icons"
             rm -f "\$BUILD/slade.pk3"
-            7z a -tzip "\$BUILD/build/slade.pk3" "\$BUILD/dist/res/"*
+            7z a -y -tzip "\$BUILD/build/slade.pk3" "\$BUILD/dist/res/"*
 
             WX_LIBRARIES=\$(find /usr -name "libwx_gtk3u*.so.*" -printf "%p;" 2> /dev/null | gawk '{gsub(";$",""); print}')
 
@@ -9371,12 +9380,21 @@ EOF
 
             fi
 
-            # Create main.pk3 file using blankart-assets repository for BlanKart.
+            # Create assets using blankart-assets repository for BlanKart.
             7z x -y "$SRB2BLDROOT/assets/BlanKart.zip" -o"$BUILD/build"
-            7z a -tzip -mx=0 "$BUILD/assets/installer/main.pk3" "$BUILD/build/blankart-assets/src/main/"*
 
-            # Replace XXH3 hash for main.pk3 after creating file.
-            gawk -i inplace '{gsub("'$(gawk -F'0x' '/#define ASSET_HASH_MAIN_PK3/ {print $2}' "$BUILD/src/d_main.cpp")'","'$(xxhsum -H3 --tag "$BUILD/assets/installer/main.pk3" | gawk '{print $NF}')'"); print}' "$BUILD/src/d_main.cpp"
+            for a in $(ls "$BUILD/build/blankart-assets/src"); do
+
+                7z a -y -tzip -mx=0 "$BUILD/assets/installer/$a.pk3" "$BUILD/build/blankart-assets/src/$a/"*
+
+            done
+
+            # Replace XXH3 hashes after creating assets.
+            for a in $(ls "$BUILD/build/blankart-assets/src"); do
+
+                gawk -i inplace '{gsub("'$(gawk -F'0x' '/#define ASSET_HASH_'$($PRINTF "$a" | gawk '{print toupper($0)}')'_PK3/ {print $2}' "$BUILD/src/d_main.cpp")'","'$(xxhsum -H3 --tag "$BUILD/assets/installer/$a.pk3" | gawk '{print $NF}')'"); print}' "$BUILD/src/d_main.cpp"
+
+            done
 
         fi
 
@@ -14427,7 +14445,58 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         gawk -i inplace '/bool operator==\(const divider<T, ALGO> &other\) const {/ {suppress=1} /bool operator!=\(const divider<T, ALGO> &other\) const { return !\(\*this == other\); }/ {suppress=0} !suppress' "$BUILD/src/libdivide.h"
 
         # Replacing assets filenames.
-        gawk -i inplace '!/followers.pk3/ {gsub("set\\(SRB2_ASSETS_GAME","set(SRB2_ASSETS_GAME\n\t\"bonuschars.kart\"\n\t\"music.kart\"\n\t\"sounds.kart\"\n\t\"srb2.srb\"\n\t\"mdls.dat\""); gsub(".pk3",".kart"); gsub("main.kart","main.pk3"); gsub("models","mdls"); gsub("\"patch.kart\"",""); print}' "$BUILD/assets/CMakeLists.txt"
+        gawk -i inplace -v home="$HOME" '
+BEGIN {
+    # Dynamically generate PK3 entries from folder names.
+    asset_path = home "/Library/srb2bld/assets/blankart-assets/src"
+    cmd = "find \"" asset_path "\" -mindepth 1 -maxdepth 1 -type d -exec basename {} \\; 2>/dev/null"
+    while ( (cmd | getline dir) > 0 ) {
+        pk3_entries = pk3_entries "        \"" dir ".pk3\"\n"
+    }
+    close(cmd)
+}
+
+/^set\(SRB2_ASSETS_GAME/ {
+    print $0
+    # Static entries.
+    print "        \"bonuschars.kart\""
+    print "        \"music.kart\""
+    print "        \"sounds.kart\""
+    print "        \"srb2.srb\""
+    print "        \"mdls.dat\""
+    print "        \"main.pk3\""
+    print "        \"gfx.kart\""
+    print "        \"textures.kart\""
+    print "        \"chars.kart\""
+    print "        \"maps.kart\""
+
+    # Add dynamic PK3 entries if any folders exist.
+    if (pk3_entries) {
+        printf "%s", pk3_entries
+    }
+
+    # Preserve empty line before closing parenthesis.
+    print ""
+    in_block = 1
+    next
+}
+
+in_block && /^)/ {
+    print $0
+    in_block = 0
+    next
+}
+
+in_block {
+    next
+}
+
+# Global replacement for "mdls" to "models" in remaining lines.
+{
+    gsub("models", "mdls")
+    print
+}
+' "$BUILD/assets/CMakeLists.txt"
 
         # Patching BlanKart to remove uncommitted changes message from main menu.
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/m_menu.c"
