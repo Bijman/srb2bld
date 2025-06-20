@@ -3,7 +3,7 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://github.com/user-attachments/assets/a8a188be-9431-46af-8a31-d2f394c1dc14
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 v2.2 Classic, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries, SRB2 TSoURDt3rd, SRB2 Project Astral, SRB2 VR, SRB2 v2.1 Legacy, SRB2 Fusion Advance, SRB2 Top Down, SRB2 v2.0, XSRB2, SRB2 SF94-Serv, SRB2 Riders, Super SRB2 Kart Z, Super Bomberman Blast 2, SRB2 Final Demo, SRB2 JTE, ShufflarB2, SRB2 Live, SRB2 LoZ, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Blankart, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers HEP3, Ring Racers Freaky Build, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 v2.2 Classic, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries, SRB2 TSoURDt3rd, SRB2 Edit, SRB2 Project Astral, SRB2 VR, SRB2 v2.1 Legacy, SRB2 Fusion Advance, SRB2 Top Down, SRB2 v2.0, XSRB2, SRB2 SF94-Serv, SRB2 Riders, Super SRB2 Kart Z, Super Bomberman Blast 2, SRB2 Final Demo, SRB2 JTE, ShufflarB2, SRB2 Live, SRB2 LoZ, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Blankart, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers HEP3, Ring Racers Freaky Build, Radio Racers, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, Ultimate Lowee Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
@@ -145,15 +145,16 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 10-05-2025)
+# Compatibility (as of 15-06-2025)
 |                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 v2.2 Classic        |          ✅           |         ✅           |        ❔         |        ✅       |       🟨      |
+| SRB2 v2.2 Classic        |          ✅           |         🟨           |        ❔         |        ✅       |       🟨      |
 | SRB2 Uncapped PLUS       |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus             |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 Reveries            |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 TSoURDt3rd          |          ✅           |         🟨           |        🟨         |        ✅       |       🟨      |
+| SRB2 Edit                |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
 | SRB2 Project Astral      |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
 | SRB2 VR                  |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -171,10 +172,10 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 Live                |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 LoZ                 |          🟨*          |         🟨*          |        🟨*        |        🟨*      |       ⛔      |
 | SRB2 Persona             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Kart                |          ✅           |         ✅           |        ✅         |        ✅       |       🟨***   |
-| SRB2 Kart Moe Mansion    |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 Kart Galaxy         |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
-| SRB2 Kart HEP            |          ✅           |         ✅           |        🟨         |        ✅       |       ⛔      |
+| SRB2 Kart                |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 Kart Moe Mansion    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
+| SRB2 Kart Galaxy         |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
+| SRB2 Kart HEP            |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
 | SRB2 Kart Saturn         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart Neptune        |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart VR             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
@@ -184,14 +185,16 @@ As for macOS users, they need to install these additional dependencies:
 | Ring Racers HEP2         |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers HEP3         |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers Freaky Build |          ✅           |         🟨           |        ⛔         |        ✅*      |       ✅      |
+| Radio Racers             |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | wadcli                   |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
 | kartmaker (SRB2 Kart)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | NeptuneFM (SRB2 Kart)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | kartmaker (RR)           |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | followermaker (RR)       |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SLADE                    |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
-| Ultimate Zone Builder    |          ✅           |         🟨****       |        ⛔         |        ✅       |       ⛔      |
-| High Voltage Ring        |          ✅           |         🟨****       |        ⛔         |        ✅       |       ⛔      |
+| Ultimate Zone Builder    |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
+| Ultimate Lowee Builder   |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
+| High Voltage Ring        |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
 | Aseprite w/ Kart Builder |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
 
 **Legend:**
@@ -208,9 +211,7 @@ As for macOS users, they need to install these additional dependencies:
 
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
-***Compiles successfully, but it can throw SIGABRT error on some macOS versions. Compiled build runs fine on macOS 10.14/Mojave.
-
-****Compiles successfully from Ubuntu 18.04 Docker container. It requires glibc compatibility layer named gcompat. 
+***Compiles successfully from Ubuntu 18.04 Docker container. It requires glibc compatibility layer named gcompat.
 
 # Supported Android builds
 - SRB2 Android by Lactozilla

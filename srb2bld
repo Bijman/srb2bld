@@ -191,6 +191,7 @@ SRB2KARTSATURNASSETURL="https://api.github.com/repos/Indev450/SRB2Kart-Saturn/re
 SRB2KARTNEPTUNEASSETURL="https://api.github.com/repos/NepDisk/srb2k-neptune/releases"
 BLANKARTASSETURL="https://codeberg.org/NepDisk/blankart-assets/archive/main.zip"
 RINGRACERSASSETURL="https://api.github.com/repos/KartKrewDev/RingRacers/releases"
+RADIORACERSASSETURL="https://api.github.com/repos/blondedradio/RadioRacers/releases"
 MINGWCCVER="gcc"
 MINGWCXXVER="g++"
 MINGWOLDCCVER="gcc-4.9-win32"
@@ -639,7 +640,7 @@ buildvar() {
         BUILDNAME="Sonic Robo Blast 2 v2.2 Classic"
         GITDEFVER="next"
         GITVER="$GITDEFVER"
-        GITURL="https://git.do.srb2.org/Hanicef/SRB2Classic.git"
+        GITURL="https://codeberg.org/srb2classic/srb2classic.git"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
@@ -678,6 +679,13 @@ buildvar() {
         GITDEFVER="main"
         GITVER="$GITDEFVER"
         GITURL="https://git.do.srb2.org/StarManiaKG/The-Story-of-Uncapped-Revengence-Discord-the-3rd.git"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-edit" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 Edit"
+        GITDEFVER="master"
+        GITVER="$GITDEFVER"
+        GITURL="https://github.com/luigi-budd/SRB2-edit.git"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-project-astral" ]; then
 
@@ -903,6 +911,13 @@ buildvar() {
         GITVER="$GITDEFVER"
         GITURL="https://git.do.srb2.org/FreakyMutantMan/RingRacers.git"
 
+    elif [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
+
+        BUILDNAME="Radio Racers"
+        GITDEFVER="radioracers"
+        GITVER="$GITDEFVER"
+        GITURL="https://github.com/blondedradio/RadioRacers.git"
+
     elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
 
         BUILDNAME="Sonic Robo Blast 2 Custom $CUSTOMDIR"
@@ -955,6 +970,13 @@ buildvar() {
         GITDEFVER="master"
         GITVER="$GITDEFVER"
         GITURL="https://git.do.srb2.org/STJr/UltimateZoneBuilder.git"
+
+    elif [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ]; then
+
+        BUILDNAME="Ultimate Lowee Builder"
+        GITDEFVER="master"
+        GITVER="$GITDEFVER"
+        GITURL="https://codeberg.org/NepDisk/UltimateLoweeBuilder.git"
 
     elif [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
 
@@ -1113,7 +1135,7 @@ choosebuild() {
     while
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 v2.2 Classic" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Reveries" "Build SRB2 TSoURDt3rd" "Build SRB2 Project Astral" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 Fusion Advance" "Build SRB2 Top Down" "Build SRB2 v2.0" "Build XSRB2" "Build SRB2 SF94-Serv" "Build SRB2 Riders" "Build Super SRB2 Kart Z" "Build Super Bomberman Blast 2" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build ShufflarB2" "Build SRB2 Live" "Build SRB2 LoZ" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart Neptune" "Build SRB2 Kart VR" "Build BlanKart" "Build Ring Racers" "Build Ring Racers Noire" "Build Ring Racers HEP2" "Build Ring Racers HEP3" "Build Ring Racers Freaky Build" "Build SRB2 Custom" "Build wadcli" "Build kartmaker (SRB2 Kart)" "Build NeptuneFM (SRB2 Kart)" "Build kartmaker (Ring Racers)" "Build followermaker (Ring Racers)" "Build SLADE" "Build Ultimate Zone Builder" "Build High Voltage Ring" "Build Aseprite with Kart Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 v2.2 Classic" "Build SRB2 Uncapped Plus" "Build SRB2 NetPlus" "Build SRB2 Reveries" "Build SRB2 TSoURDt3rd" "Build SRB2 Edit" "Build SRB2 Project Astral" "Build SRB2 VR" "Build SRB2 v2.1 Legacy" "Build SRB2 Fusion Advance" "Build SRB2 Top Down" "Build SRB2 v2.0" "Build XSRB2" "Build SRB2 SF94-Serv" "Build SRB2 Riders" "Build Super SRB2 Kart Z" "Build Super Bomberman Blast 2" "Build SRB2 Final Demo" "Build SRB2 JTE" "Build ShufflarB2" "Build SRB2 Live" "Build SRB2 LoZ" "Build SRB2 Persona" "Build SRB2 Kart" "Build SRB2 Kart Moe Mansion" "Build SRB2 Kart Galaxy" "Build SRB2 Kart HEP" "Build SRB2 Kart Saturn" "Build SRB2 Kart Neptune" "Build SRB2 Kart VR" "Build BlanKart" "Build Ring Racers" "Build Ring Racers Noire" "Build Ring Racers HEP2" "Build Ring Racers HEP3" "Build Ring Racers Freaky Build" "Build Radio Racers" "Build SRB2 Custom" "Build wadcli" "Build kartmaker (SRB2 Kart)" "Build NeptuneFM (SRB2 Kart)" "Build kartmaker (Ring Racers)" "Build followermaker (Ring Racers)" "Build SLADE" "Build Ultimate Zone Builder" "Build Ultimate Lowee Builder" "Build High Voltage Ring" "Build Aseprite with Kart Builder"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -1165,278 +1187,299 @@ choosebuild() {
 
             "7")
 
-                BUILD="$BUILDPATH/srb2-project-astral"
+                BUILD="$BUILDPATH/srb2-edit"
                 break
 
                 ;;
 
             "8")
 
-                BUILD="$BUILDPATH/srb2-vr"
+                BUILD="$BUILDPATH/srb2-project-astral"
                 break
 
                 ;;
 
             "9")
 
-                BUILD="$BUILDPATH/srb2-2.1-legacy"
+                BUILD="$BUILDPATH/srb2-vr"
                 break
 
                 ;;
 
             "10")
 
-                BUILD="$BUILDPATH/srb2-fusion-advance"
+                BUILD="$BUILDPATH/srb2-2.1-legacy"
                 break
 
                 ;;
 
             "11")
 
-                BUILD="$BUILDPATH/srb2-top-down"
+                BUILD="$BUILDPATH/srb2-fusion-advance"
                 break
 
                 ;;
 
             "12")
 
-                BUILD="$BUILDPATH/srb2-2.0"
+                BUILD="$BUILDPATH/srb2-top-down"
                 break
 
                 ;;
 
             "13")
 
-                BUILD="$BUILDPATH/xsrb2"
+                BUILD="$BUILDPATH/srb2-2.0"
                 break
 
                 ;;
 
             "14")
 
-                BUILD="$BUILDPATH/srb2-sf94-serv"
+                BUILD="$BUILDPATH/xsrb2"
                 break
 
                 ;;
 
             "15")
 
-                BUILD="$BUILDPATH/srb2-riders"
+                BUILD="$BUILDPATH/srb2-sf94-serv"
                 break
 
                 ;;
 
             "16")
 
-                BUILD="$BUILDPATH/super-srb2-kart-z"
+                BUILD="$BUILDPATH/srb2-riders"
                 break
 
                 ;;
 
             "17")
 
-                BUILD="$BUILDPATH/sbb2"
+                BUILD="$BUILDPATH/super-srb2-kart-z"
                 break
 
                 ;;
 
             "18")
 
-                BUILD="$BUILDPATH/srb2-final-demo"
+                BUILD="$BUILDPATH/sbb2"
                 break
 
                 ;;
 
             "19")
 
-                BUILD="$BUILDPATH/srb2-jte"
+                BUILD="$BUILDPATH/srb2-final-demo"
                 break
 
                 ;;
 
             "20")
 
-                BUILD="$BUILDPATH/shufflarb2"
+                BUILD="$BUILDPATH/srb2-jte"
                 break
 
                 ;;
 
             "21")
 
-                BUILD="$BUILDPATH/srb2-live"
+                BUILD="$BUILDPATH/shufflarb2"
                 break
 
                 ;;
 
             "22")
 
-                BUILD="$BUILDPATH/srb2-loz"
+                BUILD="$BUILDPATH/srb2-live"
                 break
 
                 ;;
 
             "23")
 
-                BUILD="$BUILDPATH/srb2-persona"
+                BUILD="$BUILDPATH/srb2-loz"
                 break
 
                 ;;
 
             "24")
 
-                BUILD="$BUILDPATH/srb2-kart"
+                BUILD="$BUILDPATH/srb2-persona"
                 break
 
                 ;;
 
             "25")
 
-                BUILD="$BUILDPATH/srb2-kart-moe-mansion"
+                BUILD="$BUILDPATH/srb2-kart"
                 break
 
                 ;;
 
             "26")
 
-                BUILD="$BUILDPATH/srb2-kart-galaxy"
+                BUILD="$BUILDPATH/srb2-kart-moe-mansion"
                 break
 
                 ;;
 
             "27")
 
-                BUILD="$BUILDPATH/srb2-kart-hep"
+                BUILD="$BUILDPATH/srb2-kart-galaxy"
                 break
 
                 ;;
 
             "28")
 
-                BUILD="$BUILDPATH/srb2-kart-saturn"
+                BUILD="$BUILDPATH/srb2-kart-hep"
                 break
 
                 ;;
 
             "29")
 
-                BUILD="$BUILDPATH/srb2-kart-neptune"
+                BUILD="$BUILDPATH/srb2-kart-saturn"
                 break
 
                 ;;
 
             "30")
 
-                BUILD="$BUILDPATH/srb2-kart-vr"
+                BUILD="$BUILDPATH/srb2-kart-neptune"
                 break
 
                 ;;
 
             "31")
 
-                BUILD="$BUILDPATH/blankart"
+                BUILD="$BUILDPATH/srb2-kart-vr"
                 break
 
                 ;;
 
             "32")
 
-                BUILD="$BUILDPATH/ring-racers"
+                BUILD="$BUILDPATH/blankart"
                 break
 
                 ;;
 
             "33")
 
-                BUILD="$BUILDPATH/ring-racers-noire"
+                BUILD="$BUILDPATH/ring-racers"
                 break
 
                 ;;
 
             "34")
 
-                BUILD="$BUILDPATH/ring-racers-hep2"
+                BUILD="$BUILDPATH/ring-racers-noire"
                 break
 
                 ;;
 
             "35")
 
-                BUILD="$BUILDPATH/ring-racers-hep3"
+                BUILD="$BUILDPATH/ring-racers-hep2"
                 break
 
                 ;;
 
             "36")
 
-                BUILD="$BUILDPATH/ring-racers-freaky-build"
+                BUILD="$BUILDPATH/ring-racers-hep3"
                 break
 
                 ;;
 
             "37")
 
-                custombuild
+                BUILD="$BUILDPATH/ring-racers-freaky-build"
                 break
 
                 ;;
 
             "38")
 
-                BUILD="$BUILDPATH/wadcli"
+                BUILD="$BUILDPATH/radio-racers"
                 break
 
                 ;;
 
             "39")
 
-                BUILD="$BUILDPATH/kartmaker"
+                custombuild
                 break
 
                 ;;
 
             "40")
 
-                BUILD="$BUILDPATH/neptunefm"
+                BUILD="$BUILDPATH/wadcli"
                 break
 
                 ;;
 
             "41")
 
-                BUILD="$BUILDPATH/kartmaker-ring-racers"
+                BUILD="$BUILDPATH/kartmaker"
                 break
 
                 ;;
 
             "42")
 
-                BUILD="$BUILDPATH/followermaker"
+                BUILD="$BUILDPATH/neptunefm"
                 break
 
                 ;;
 
             "43")
 
-                BUILD="$BUILDPATH/slade"
+                BUILD="$BUILDPATH/kartmaker-ring-racers"
                 break
 
                 ;;
 
             "44")
 
-                BUILD="$BUILDPATH/ultimatezonebuilder"
+                BUILD="$BUILDPATH/followermaker"
                 break
 
                 ;;
 
             "45")
 
-                BUILD="$BUILDPATH/highvoltagering"
+                BUILD="$BUILDPATH/slade"
                 break
 
                 ;;
 
             "46")
+
+                BUILD="$BUILDPATH/ultimatezonebuilder"
+                break
+
+                ;;
+
+            "47")
+
+                BUILD="$BUILDPATH/ultimateloweebuilder"
+                break
+
+                ;;
+
+            "48")
+
+                BUILD="$BUILDPATH/highvoltagering"
+                break
+
+                ;;
+
+            "49")
 
                 BUILD="$BUILDPATH/aseprite"
                 break
@@ -2019,6 +2062,7 @@ containerentry() {
     export SRB2KARTNEPTUNEASSETURL="$SRB2KARTNEPTUNEASSETURL"
     export BLANKARTASSETURL="$BLANKARTASSETURL"
     export RINGRACERSASSETURL="$RINGRACERSASSETURL"
+    export RADIORACERSASSETURL="$RADIORACERSASSETURL"
     export SRB2BLDDEVMODE="$SRB2BLDDEVMODE"
     export SRB2BLDGITVER="$SRB2BLDGITVER"
     export SRB2BLDASSETPATH="$SRB2BLDASSETPATH"
@@ -2065,7 +2109,7 @@ containerentry() {
     export SRB2BLDNOCCACHE="$SRB2BLDNOCCACHE"
 
     # Remove musl variable for Ultimate Zone Builder and High Voltage Ring to compile in glibc environment.
-    if [ "\$LIBC" = "musl" ] && ([ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]); then
+    if [ "\$LIBC" = "musl" ] && ([ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]); then
 
        unset LIBC
 
@@ -2148,7 +2192,7 @@ containerentry() {
     git -C "\$BUILD" config advice.nameTooLong false
 
     extractassets() {
-        if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-bitten" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-bitten" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-reveries" ]; then
 
@@ -2302,7 +2346,7 @@ EOF
 
             fi
 
-        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/xsrb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-sf94-serv" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-riders" ]  || [ "\$BUILD" = "\$BUILDPATH/super-srb2-kart-z" ] || [ "\$BUILD" = "\$BUILDPATH/sbb2" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/xsrb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-sf94-serv" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-riders" ] || [ "\$BUILD" = "\$BUILDPATH/super-srb2-kart-z" ] || [ "\$BUILD" = "\$BUILDPATH/sbb2" ]; then
 
             if [ -n "\$ISNET" ]; then
 
@@ -2454,7 +2498,7 @@ EOF
 
             fi
 
-        elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep3" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-noire" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep2" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-hep3" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ] || [ "\$BUILD" = "\$BUILDPATH/radio-racers" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ]; then
 
@@ -2528,6 +2572,22 @@ EOF
             elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]; then
 
                 cp -f "\$BUILD/!REQUIRED ASSETS/"*.pk3 "\$BUILD/build/AppDir/usr/games/RingRacers"
+
+            elif [ "\$BUILD" = "\$BUILDPATH/radio-racers" ]; then
+
+                if [ -n "\$ISNET" ]; then
+
+                    RADIORACERSASSETURL=\$(curl -s "\$RADIORACERSASSETURL" | gawk -F'"' '/browser_download_url.*radioracers_assets.zip/ {print \$4}' | head -n1)
+                    if [ "\$(curl -X GET -sLI "\$RADIORACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/RadioRacers.zip" 2> /dev/null)" ]; then
+
+                        rm -f "\$SRB2BLDROOT/assets/RadioRacers.zip"
+                        curl -RL "\$RADIORACERSASSETURL" -o "\$SRB2BLDROOT/assets/RadioRacers.zip"
+
+                    fi
+
+                fi
+
+                7z x -y "\$SRB2BLDROOT/assets/RadioRacers.zip" -o"\$BUILD/build/AppDir/usr/games/RingRacers"
 
             fi
 
@@ -3237,7 +3297,7 @@ EOF
     fi
 
     # Download and extract assets.
-    if ([ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]); then
+    if ([ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimateloweebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]); then
 
         if [ -n "\$ISNET" ]; then
 
@@ -3356,7 +3416,7 @@ else
     fi
 
     # Patching headers, source code to avoid compilation failure for builds on Windows.
-    if [ "\$OS" = "Windows" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
+    if [ "\$OS" = "Windows" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimateloweebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
 
          sudo gawk -i inplace '/#if !defined\(_WIN32\) && !defined\(__CYGWIN__\)/ {suppress=1} /^\$/ {suppress=0} !suppress' /usr/*/include/_mingw.h
          sudo gawk -i inplace '/#ifndef _WIN32/ {suppress=1} /^\$/ {suppress=0} !suppress' /usr/*/include/_mingw_stdarg.h
@@ -3485,6 +3545,16 @@ else
         gawk -i inplace '{gsub("/usr/share/games/SRB2","/usr/share/games/SRB2TSoURDt3rd"); print}' "\$BUILD/src/sdl/i_system.c"
         gawk -i inplace '{gsub("/usr/games/SRB2","/usr/games/SRB2TSoURDt3rd"); print}' "\$BUILD/src/sdl/i_system.c"
         gawk -i inplace '{gsub("\\\\\\\srb2","\\\\srb2tsourdt3rd"); print}' "\$BUILD/src/sdl/i_system.c"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\".srb2\\"","#define DEFAULTDIR \\".srb2'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\"srb2\\"","#define DEFAULTDIR \\"srb2'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("/usr/local/share/games/SRB2","'\$SRB2BLDPREFIX'/share/games/SRB2Edit"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("/usr/local/games/SRB2","'\$SRB2BLDPREFIX'/games/SRB2Edit"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("/usr/share/games/SRB2","/usr/share/games/SRB2Edit"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("/usr/games/SRB2","/usr/games/SRB2Edit"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("\\\\\\\srb2","\\\\srb2edit"); print}' "\$BUILD/src/sdl/i_system.c"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ]; then
 
@@ -3868,6 +3938,18 @@ else
         gawk -i inplace '{gsub("/usr/local/share/games/RingRacers","'\$SRB2BLDPREFIX'/share/games/RingRacersFreakyBuild"); print}' "\$BUILD/src/sdl/i_system.cpp"
         gawk -i inplace '{gsub("/usr/local/games/RingRacers","'\$SRB2BLDPREFIX'/games/RingRacersFreakyBuild"); print}' "\$BUILD/src/sdl/i_system.cpp"
 
+    elif [ "\$BUILD" = "\$BUILDPATH/radio-racers" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\".ringracers\\"","#define DEFAULTDIR \\".ringracers'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("#define DEFAULTDIR \\"ringracers\\"","#define DEFAULTDIR \\"ringracers'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
+        gawk -i inplace '{gsub("/usr/local/share/games/RingRacers","'\$SRB2BLDPREFIX'/share/games/RadioRacers"); print}' "\$BUILD/src/sdl/i_system.cpp"
+        gawk -i inplace '{gsub("/usr/local/games/RingRacers","'\$SRB2BLDPREFIX'/games/RadioRacers"); print}' "\$BUILD/src/sdl/i_system.cpp"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/f_finale.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/d_netcmd.c"
+
+        # Fixed in src/radioracers/hud/rr_hud.cpp: error: 'CONST' was not declared in this scope and error: cannot bind non-const lvalue reference of type 'tic_t&' {aka 'unsigned int&'}.
+        gawk -i inplace '{gsub("CONST","const"); gsub(/size_t& frame = emoteFrameMap\[emote\];/,"&\n    std::unordered_map<emote_t*, tic_t> emoteLastUpdate;");gsub(/size_t& frame = chatEmoteFrameMap\[emote\];/,"&\n    std::unordered_map<emote_t*, tic_t> chatEmoteLastUpdate;");print}' "\$BUILD/src/radioracers/hud/rr_hud.cpp"
+
     elif [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ]; then
 
         SRB2CASSETDIRTMP=\$(gawk -F'"' '/\/usr\/local/ {print \$2}' \$BUILD/src/*/i_system.c* | gawk -F'/' '/games/ {print \$NF}' | gawk '!/games/ {print}' 2> /dev/null | head -n1)
@@ -3930,7 +4012,15 @@ else
     # Add compilation flags.
     if [ "\$OS" = "Windows" ]; then
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
+
+#            BLDCMD="cmake -S \$BUILD -B \$BUILD/build -DCMAKE_POLICY_VERSION_MINIMUM=\$CMAKEPOLVER -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=/usr/bin/\$ARCH-w64-mingw32-gcc-posix -DCMAKE_CXX_COMPILER=/usr/bin/\$ARCH-w64-mingw32-g++-posix -DCMAKE_TOOLCHAIN_FILE=\$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-mingw-static -DCMAKE_BUILD_TYPE=Release"
+
+#            C_INCLUDE_PATH=$BUILD/libs/SDL2/\$ARCH-w64-mingw32/include/SDL2:$BUILD/libs/SDLMixerX/\$ARCH-w64-mingw32/include/SDL2:$BUILD/libs/libpng-src:$BUILD/libs/curl/include:$BUILD/libs/miniupnpc/include:$BUILD/libs/gme/include:$BUILD/libs/libopenmpt/inc:$BUILD/libs/zlib CC=/usr/bin/\$ARCH-w64-mingw32-gcc CXX=/usr/bin/\$ARCH-w64-mingw32-g++ make --directory=src CCACHE=1 ERRORMODE=1 MINGW64=1 SDL=1
+
+            BLDCMD="make -j\$NCPU -C \$BUILD/src -k MINGW=1 PREFIX=\$ARCH-w64-mingw32 SDL=1 NOOBJDUMP=1 NOVERSION=1 NOUPX=1"
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
 
             if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ] || [ "\$ARCH" = "x86_64" ]; then
 
@@ -3999,7 +4089,7 @@ else
 
             BLDCMD="cmake -S \$BUILD -B \$BUILD/build -DCMAKE_C_COMPILER="\$CCACHE_BIN_PATH"\$ARCH-w64-mingw32-\$MINGWCCVER -DCMAKE_CXX_COMPILER="\$CCACHE_BIN_PATH"\$ARCH-w64-mingw32-\$MINGWCXXVER -DCMAKE_INCLUDE_PATH=/usr/include/\$ARCH-linux-gnu;\$BUILD/thirdparty/fmt/include -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\$BUILD/AppDir/usr -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=\$ARCH-w64-mingw32 -DCMAKE_FIND_ROOT_PATH=/usr/\$ARCH-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DNO_WEBVIEW=ON -DwxWidgets_CONFIG_EXECUTABLE=/usr/bin/wx-config -DFREETYPE_INCLUDE_DIRS=/usr/include/freetype2/freetype -DFREETYPE_LIBRARY=/usr/lib/\$ARCH-linux-gnu/libfreetype.so -DFTGL_INCLUDE_DIR=/usr/include/FTGL -DFTGL_LIBRARIES=/usr/lib/\$ARCH-linux-gnu/libftgl.so -DFLUIDSYNTH_INCLUDE_DIR=/usr/include/fluidsynth -DFLUIDSYNTH_LIBRARIES=/usr/lib/\$ARCH-linux-gnu/libfluidsynth.so -DFREEIMAGE_INCLUDE_DIR=/usr/include -DFREEIMAGE_LIBRARIES=/usr/lib/\$ARCH-linux-gnu/libfreeimage.so -DSFML_DIR=/usr/lib/\$ARCH-linux-gnu/cmake/SFML -DSFML_INCLUDE_DIR=/usr/include/SFML -DSFML_MAIN_LIBRARY_SHARED_NONDEBUG=/usr/lib/\$ARCH-linux-gnu/libsfml-system.so -DSFML_AUDIO_INCLUDE_DIR=/usr/include/SFML/Audio -DSFML_AUDIO_LIBRARY_SHARED_NONDEBUG=/usr/lib/\$ARCH-linux-gnu/libsfml-audio.so -DSFML_NETWORK_INCLUDE_DIR=/usr/include/SFML/Network -DSFML_NETWORK_LIBRARY_SHARED_NONDEBUG=/usr/lib/\$ARCH-linux-gnu/libsfml-network.so -DSFML_SYSTEM_INCLUDE_DIR=/usr/include/SFML/System -DSFML_SYSTEM_LIBRARY_SHARED_NONDEBUG=/usr/lib/\$ARCH-linux-gnu/libsfml-system.so -DSFML_WINDOW_INCLUDE_DIR=/usr/include/SFML/Window -DSFML_WINDOW_LIBRARY_SHARED_NONDEBUG=/usr/lib/\$ARCH-linux-gnu/libsfml-window.so -DLUA_INCLUDE_DIR=/usr/include/lua5.3 -DLUA_LIBRARIES=/usr/lib/\$ARCH-linux-gnu/liblua5.3.so -DMPG123_INCLUDE_DIR=/usr/include -DMPG123_LIBRARIES=/usr/lib/\$ARCH-linux-gnu/libmpg123.so -DZLIB_INCLUDE_DIR=/usr/include -DZLIB_LIBRARY=/usr/lib/\$ARCH-linux-gnu/libz.so -DBZIP2_INCLUDE_DIR=/usr/include -DBZIP2_LIBRARIES=/usr/lib/\$ARCH-linux-gnu/libz.so -DWebP_DIR=/usr/lib/\$ARCH-linux-gnu/cmake/WebP"
 
-        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
             BLDCMD="make CXX="\$CCACHE_BIN_PATH"\$MINGWCXXVER CPLUS_INCLUDE_PATH=/usr/include/\$ARCH-linux-gnu/. -k -j\$NCPU -C \$BUILD"
 
@@ -4139,7 +4229,7 @@ else
 
             fi
 
-        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
             BLDCMD="make CXX="\$CCACHE_BIN_PATH"\$GXXVER CPLUS_INCLUDE_PATH=/usr/include/\$ARCH-linux-gnu/. -k -j\$NCPU -C \$BUILD"
 
@@ -4237,7 +4327,7 @@ else
 
             \$BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
-        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
             cat "\$BUILD/Makefile"
 
@@ -4273,7 +4363,7 @@ else
     fi
 
     # Download libbacktrace's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/xsrb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-sf94-serv" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-riders" ] && [ "\$BUILD" != "\$BUILDPATH/super-srb2-kart-z" ] && [ "\$BUILD" != "\$BUILDPATH/sbb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-final-demo" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ] && [ "\$BUILD" != "\$BUILDPATH/shufflarb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-live" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-loz" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+    if [ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/xsrb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-sf94-serv" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-riders" ] && [ "\$BUILD" != "\$BUILDPATH/super-srb2-kart-z" ] && [ "\$BUILD" != "\$BUILDPATH/sbb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-final-demo" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ] && [ "\$BUILD" != "\$BUILDPATH/shufflarb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-live" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-loz" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimateloweebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 
         if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$LNXOSNAME" = "NixOS" ]; then
 
@@ -4341,7 +4431,7 @@ else
     fi
 
     # Download libpng's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/xsrb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-sf94-serv" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-riders" ] && [ "\$BUILD" != "\$BUILDPATH/super-srb2-kart-z" ] && [ "\$BUILD" != "\$BUILDPATH/sbb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-final-demo" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ] && [ "\$BUILD" != "\$BUILDPATH/shufflarb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-live" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-loz" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+    if [ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOPNG=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/xsrb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-sf94-serv" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-riders" ] && [ "\$BUILD" != "\$BUILDPATH/super-srb2-kart-z" ] && [ "\$BUILD" != "\$BUILDPATH/sbb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-final-demo" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ] && [ "\$BUILD" != "\$BUILDPATH/shufflarb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-live" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-loz" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimateloweebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 
         # Uninstall system's package libpng-dev to avoid conflicts with compiled libpng.
         sudo apk del libpng-dev
@@ -4457,7 +4547,7 @@ else
     fi
 
     # Download libgme's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimateloweebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 
         # Uninstall system's package libgme-dev to avoid conflicts with compiled libgme.
         if [ "\$LIBC" = "musl" ]; then
@@ -4535,7 +4625,7 @@ else
     fi
 
     # Download libfluidsynth's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
+    if [ "\$OS" = "Linux" ] && [ -z "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /NOGME=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ -n "\$(\$PRINTF "%s\n" "\$CONF" | gawk 'match(\$0, /HAVE_MIXERX=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimatezonebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimateloweebuilder" ] && [ "\$BUILD" != "\$BUILDPATH/highvoltagering" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]; then
 
         # Uninstall system's package libfluidsynth-dev to avoid conflicts with compiled libfluidsynth.
         if [ "\$LIBC" = "musl" ]; then
@@ -5207,7 +5297,7 @@ else
     fi
 
     # Download zdbsp's source code, build and install it.
-    if [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/zdbsp/.git" ]; then
 
@@ -5318,7 +5408,7 @@ else
             sudo rm -rf "\$BUILD/build/AppDir/usr/share/applications/net.mancubus.SLADE.desktop" "\$BUILD/build/AppDir/usr/share/icons/net.mancubus.SLADE.png" "\$BUILD/build/AppDir/usr/share/metainfo"
             cp -f "\$BUILD/dist/res/logo_icon.png" "\$BUILD/build/icon.png"
 
-        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ] || [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ] || [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
             cd "\$BUILD" || exit
             \$BLDCMD \$CONF
@@ -5437,6 +5527,10 @@ else
 
                 export BUILD="/tmp/ring-racers-freaky-build"
 
+            elif [ "\$BUILD" = "\$BUILDPATH/radio-racers" ]; then
+
+                export BUILD="/tmp/radio-racers"
+
             else
 
                 export BUILD="/tmp/srb2-custom"
@@ -5506,24 +5600,22 @@ else
             sudo rm -rf "\$BUILD/build/AppDir/usr/share/applications/net.mancubus.SLADE.desktop" "\$BUILD/build/AppDir/usr/share/icons/net.mancubus.SLADE.png" "\$BUILD/build/AppDir/usr/share/metainfo"
             cp -f "\$BUILD/dist/res/logo_icon.png" "\$BUILD/build/icon.png"
 
-        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
-            \$BLDCMD \$CONF
+            if [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ]; then
 
-            if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$LNXOSNAME" != "NixOS" ]; then
+                UZBBIN="uzb"
 
-                mkbundle --fetch-target "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64"
-                cp -f "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/etc/mono/config" "\$BUILD/Build/config"
-                gawk -i inplace '{gsub("\\\\\$mono_libdir/",""); print}' "\$BUILD/Build/config"
-                mkbundle --deps --cross "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64" --config "\$BUILD/Build/config" --machine-config "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/etc/mono/4.5/machine.config" -L "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/lib/mono/4.5" -L "\$BUILD/Build" --library /lib/\$ARCH-linux-gnu/libc.so.6 --library /usr/lib/\$ARCH-linux-gnu/libjpeg.so.8 --library /usr/lib/\$ARCH-linux-gnu/libjbig.so.0 --library /usr/lib/\$ARCH-linux-gnu/libtiff.so.5 --library /lib/\$ARCH-linux-gnu/liblzma.so.5 --library /lib/\$ARCH-linux-gnu/libz.so.1 --library /usr/lib/\$ARCH-linux-gnu/libX11.so.6 --library /usr/lib/\$ARCH-linux-gnu/libxcb.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXau.so.6 --library /lib/\$ARCH-linux-gnu/libbsd.so.0 --library /usr/lib/\$ARCH-linux-gnu/libXdmcp.so.6 --library /usr/lib/\$ARCH-linux-gnu/libexif.so.12 --library /usr/lib/libgdiplus.so --library /usr/lib/\$ARCH-linux-gnu/libcairo.so.2 --library /usr/lib/\$ARCH-linux-gnu/libfreetype.so.6 --library /usr/lib/\$ARCH-linux-gnu/libgif.so.7 --library /usr/lib/\$ARCH-linux-gnu/libpng16.so.16 --library /usr/lib/\$ARCH-linux-gnu/libfontconfig.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXext.so.6 --library /usr/lib/\$ARCH-linux-gnu/libXrender.so.1 --library /usr/lib/\$ARCH-linux-gnu/libxcb-render.so.0 --library /usr/lib/\$ARCH-linux-gnu/libxcb-shm.so.0 --library /usr/lib/\$ARCH-linux-gnu/libpixman-1.so.0 --library /lib/\$ARCH-linux-gnu/libbz2.so.1.0 --library /usr/lib/\$ARCH-linux-gnu/libharfbuzz.so.0 --library /lib/\$ARCH-linux-gnu/libexpat.so.1 --library /usr/lib/\$ARCH-linux-gnu/libgraphite2.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXcursor.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXfixes.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXinerama.so.1 --library /lib/\$ARCH-linux-gnu/libkeyutils.so.1 --library /usr/lib/\$ARCH-linux-gnu/libkrb5support.so.0 --library /usr/lib/\$ARCH-linux-gnu/libk5crypto.so.3 --library /usr/lib/\$ARCH-linux-gnu/libkrb5.so.3 --library /usr/lib/\$ARCH-linux-gnu/libgssapi_krb5.so.2 --library /lib/\$ARCH-linux-gnu/libcom_err.so.2 --library /lib/\$ARCH-linux-gnu/libresolv.so.2 --library /usr/lib/libmono-native.so --library /usr/lib/libMonoPosixHelper.so --library /usr/lib/libMonoSupportW.so -o "\$BUILD/build/AppDir/usr/bin/uzb.bin" "\$BUILD/Build/Builder.exe"
+            elif [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ]; then
+
+                UZBBIN="ulb"
+
+            elif [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
+
+                UZBBIN="hvr"
 
             fi
 
-            cp -rf "\$BUILD/Build/"* "\$BUILD/build/AppDir/usr/bin"
-            cp -rf /usr/share/icons/Adwaita "\$BUILD/build/AppDir/usr/share/icons"
-
-        elif [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
-
             \$BLDCMD \$CONF
 
             if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$LNXOSNAME" != "NixOS" ]; then
@@ -5531,7 +5623,7 @@ else
                 mkbundle --fetch-target "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64"
                 cp -f "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/etc/mono/config" "\$BUILD/Build/config"
                 gawk -i inplace '{gsub("\\\\\$mono_libdir/",""); print}' "\$BUILD/Build/config"
-                mkbundle --deps --cross "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64" --config "\$BUILD/Build/config" --machine-config "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/etc/mono/4.5/machine.config" -L "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/lib/mono/4.5" -L "\$BUILD/Build" --library /lib/\$ARCH-linux-gnu/libc.so.6 --library /usr/lib/\$ARCH-linux-gnu/libjpeg.so.8 --library /usr/lib/\$ARCH-linux-gnu/libjbig.so.0 --library /usr/lib/\$ARCH-linux-gnu/libtiff.so.5 --library /lib/\$ARCH-linux-gnu/liblzma.so.5 --library /lib/\$ARCH-linux-gnu/libz.so.1 --library /usr/lib/\$ARCH-linux-gnu/libX11.so.6 --library /usr/lib/\$ARCH-linux-gnu/libxcb.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXau.so.6 --library /lib/\$ARCH-linux-gnu/libbsd.so.0 --library /usr/lib/\$ARCH-linux-gnu/libXdmcp.so.6 --library /usr/lib/\$ARCH-linux-gnu/libexif.so.12 --library /usr/lib/libgdiplus.so --library /usr/lib/\$ARCH-linux-gnu/libcairo.so.2 --library /usr/lib/\$ARCH-linux-gnu/libfreetype.so.6 --library /usr/lib/\$ARCH-linux-gnu/libgif.so.7 --library /usr/lib/\$ARCH-linux-gnu/libpng16.so.16 --library /usr/lib/\$ARCH-linux-gnu/libfontconfig.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXext.so.6 --library /usr/lib/\$ARCH-linux-gnu/libXrender.so.1 --library /usr/lib/\$ARCH-linux-gnu/libxcb-render.so.0 --library /usr/lib/\$ARCH-linux-gnu/libxcb-shm.so.0 --library /usr/lib/\$ARCH-linux-gnu/libpixman-1.so.0 --library /lib/\$ARCH-linux-gnu/libbz2.so.1.0 --library /usr/lib/\$ARCH-linux-gnu/libharfbuzz.so.0 --library /lib/\$ARCH-linux-gnu/libexpat.so.1 --library /usr/lib/\$ARCH-linux-gnu/libgraphite2.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXcursor.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXfixes.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXinerama.so.1 --library /lib/\$ARCH-linux-gnu/libkeyutils.so.1 --library /usr/lib/\$ARCH-linux-gnu/libkrb5support.so.0 --library /usr/lib/\$ARCH-linux-gnu/libk5crypto.so.3 --library /usr/lib/\$ARCH-linux-gnu/libkrb5.so.3 --library /usr/lib/\$ARCH-linux-gnu/libgssapi_krb5.so.2 --library /lib/\$ARCH-linux-gnu/libcom_err.so.2 --library /lib/\$ARCH-linux-gnu/libresolv.so.2 --library /usr/lib/libmono-native.so --library /usr/lib/libMonoPosixHelper.so --library /usr/lib/libMonoSupportW.so -o "\$BUILD/build/AppDir/usr/bin/hvr.bin" "\$BUILD/Build/Builder.exe"
+                mkbundle --deps --cross "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64" --config "\$BUILD/Build/config" --machine-config "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/etc/mono/4.5/machine.config" -L "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/lib/mono/4.5" -L "\$BUILD/Build" --library /lib/\$ARCH-linux-gnu/libc.so.6 --library /usr/lib/\$ARCH-linux-gnu/libjpeg.so.8 --library /usr/lib/\$ARCH-linux-gnu/libjbig.so.0 --library /usr/lib/\$ARCH-linux-gnu/libtiff.so.5 --library /lib/\$ARCH-linux-gnu/liblzma.so.5 --library /lib/\$ARCH-linux-gnu/libz.so.1 --library /usr/lib/\$ARCH-linux-gnu/libX11.so.6 --library /usr/lib/\$ARCH-linux-gnu/libxcb.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXau.so.6 --library /lib/\$ARCH-linux-gnu/libbsd.so.0 --library /usr/lib/\$ARCH-linux-gnu/libXdmcp.so.6 --library /usr/lib/\$ARCH-linux-gnu/libexif.so.12 --library /usr/lib/libgdiplus.so --library /usr/lib/\$ARCH-linux-gnu/libcairo.so.2 --library /usr/lib/\$ARCH-linux-gnu/libfreetype.so.6 --library /usr/lib/\$ARCH-linux-gnu/libgif.so.7 --library /usr/lib/\$ARCH-linux-gnu/libpng16.so.16 --library /usr/lib/\$ARCH-linux-gnu/libfontconfig.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXext.so.6 --library /usr/lib/\$ARCH-linux-gnu/libXrender.so.1 --library /usr/lib/\$ARCH-linux-gnu/libxcb-render.so.0 --library /usr/lib/\$ARCH-linux-gnu/libxcb-shm.so.0 --library /usr/lib/\$ARCH-linux-gnu/libpixman-1.so.0 --library /lib/\$ARCH-linux-gnu/libbz2.so.1.0 --library /usr/lib/\$ARCH-linux-gnu/libharfbuzz.so.0 --library /lib/\$ARCH-linux-gnu/libexpat.so.1 --library /usr/lib/\$ARCH-linux-gnu/libgraphite2.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXcursor.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXfixes.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXinerama.so.1 --library /lib/\$ARCH-linux-gnu/libkeyutils.so.1 --library /usr/lib/\$ARCH-linux-gnu/libkrb5support.so.0 --library /usr/lib/\$ARCH-linux-gnu/libk5crypto.so.3 --library /usr/lib/\$ARCH-linux-gnu/libkrb5.so.3 --library /usr/lib/\$ARCH-linux-gnu/libgssapi_krb5.so.2 --library /lib/\$ARCH-linux-gnu/libcom_err.so.2 --library /lib/\$ARCH-linux-gnu/libresolv.so.2 --library /usr/lib/libmono-native.so --library /usr/lib/libMonoPosixHelper.so --library /usr/lib/libMonoSupportW.so -o "\$BUILD/build/AppDir/usr/bin/\$UZBBIN.bin" "\$BUILD/Build/Builder.exe"
 
             fi
 
@@ -5564,99 +5656,7 @@ else
         \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Copying $BUILDNAME's binary, libraries, icons, desktop file and AppRun to AppDir. Please wait..."
 
         # Copy compiled binary to AppDir.
-        if [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2" ]; then
-
-            cp -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/lsdl2srb2" ]; then
-
-            cp -f "\$BUILD/bin/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/srb2legacy" ]; then
-
-            cp -f "\$BUILD/bin/Linux\$IS64/Release/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
-
-        elif [ -f "\$BUILD/bin/srb2legacy" ]; then
-
-            cp -f "\$BUILD/bin/srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
-
-        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2legacy" ]; then
-
-            cp -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
-
-        elif [ -f "\$BUILD/bin/lsdl2srb2legacy" ]; then
-
-            cp -f "\$BUILD/bin/lsdl2srb2legacy" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
-
-        elif [ -f "\$BUILD/bin/lsdl2srb2fa" ]; then
-
-            cp -f "\$BUILD/bin/lsdl2srb2fa" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2"
-
-        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" ]; then
-
-            cp -f "\$BUILD/bin/Linux\$IS64/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/Linux/Release/lsdlsrb2" ]; then
-
-            cp -f "\$BUILD/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/lsdlsrb2" ]; then
-
-            cp -f "\$BUILD/bin/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/SRB2/branches/XMOD/bin/Linux/Release/lsdlxsrb2" ]; then
-
-            cp -f "\$BUILD/SRB2/branches/XMOD/bin/Linux/Release/lsdlxsrb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/SRB2/branches/SF94/bin/Linux/Release/SF94SRB2" ]; then
-
-            cp -f "\$BUILD/SRB2/branches/SF94/bin/Linux/Release/SF94SRB2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/SRB2/branches/RIDER/bin/Linux/Release/lsdlsrb2" ]; then
-
-            cp -f "\$BUILD/SRB2/branches/RIDER/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/SRB2/branches/FLAME/bin/Linux/BOMB/Release/lsdlsbb2" ]; then
-
-            cp -f "\$BUILD/SRB2/branches/FLAME/bin/Linux/BOMB/Release/lsdlsbb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/SRB21094/branches/JTESHUFFLE/bin/Linux/Release/lsdlsrb2" ]; then
-
-            cp -f "\$BUILD/SRB21094/branches/JTESHUFFLE/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/SRB21094/branches/LIVE/bin/Linux/Release/lsdlsrb2" ]; then
-
-            cp -f "\$BUILD/SRB21094/branches/LIVE/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/SRB21094/branches/LOZ/bin/Linux/Release/lsdlsrb2" ]; then
-
-            cp -f "\$BUILD/SRB21094/branches/LOZ/bin/Linux/Release/lsdlsrb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/Linux/Release/lsdlsrb2JTE" ]; then
-
-            cp -f "\$BUILD/bin/Linux/Release/lsdlsrb2JTE" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/Linux/Release/lsdl2srb2" ]; then
-
-            cp -f "\$BUILD/bin/Linux/Release/lsdl2srb2" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/build/bin/ringracers" ]; then
-
-            cp -f "\$BUILD/build/bin/ringracers" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" ]; then
-
-            cp -f "\$BUILD/bin/Linux\$IS64/Release/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/lsdl2srb2kart" ]; then
-
-            cp -f "\$BUILD/bin/lsdl2srb2kart" "\$BUILD/build/AppDir/usr/bin"
-
-        elif [ -f "\$BUILD/bin/Linux\$IS64/Release/srb2kart-neptune" ]; then
-
-            cp -f "\$BUILD/bin/Linux\$IS64/Release/srb2kart-neptune" "\$BUILD/build/AppDir/usr/bin/lsdl2srb2kart"
-
-        elif [ -f "\$BUILD/wadcli" ]; then
+        if [ -f "\$BUILD/wadcli" ]; then
 
             cp -f "\$BUILD/wadcli" "\$BUILD/build/AppDir/usr/bin"
 
@@ -5678,7 +5678,9 @@ else
 
         else
 
-            cp -f \$(find "\$BUILD/bin" "\$BUILD/build/bin" -mindepth 1 -maxdepth 1 -type f ! -name "*.debug" 2> /dev/null) "\$BUILD/build/AppDir/usr/bin" 2> /dev/null || true
+            set +o noglob
+            cp -f \$(find "\$BUILD/bin" "\$BUILD/build/bin" "\$BUILD/SRB2"*/branches/*/bin/Linux/Release -mindepth 1 -executable -type f ! -name "*.debug" 2> /dev/null | head -n1) "\$BUILD/build/AppDir/usr/bin" 2> /dev/null || true
+            set -o noglob
 
         fi
 
@@ -5839,6 +5841,33 @@ Actions=OpenGL;Software;
 Terminal=false
 NoDisplay=false
 X-AppImage-Name=SRB2TSoURDt3rd
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Sonic Robo Blast 2 Edit
+Comment=Modified open source 3D Sonic platformer with multiplayer enchancements, Lua additions and other changes
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;platformer;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=SRB2Edit
 X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 
@@ -6575,7 +6604,7 @@ Keywords=sonic;kart;racing;ring;racers;
 Actions=OpenGL;Software;
 Terminal=false
 NoDisplay=false
-X-AppImage-Name=RingRacers
+X-AppImage-Name=RingRacersNoire
 X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 
@@ -6602,7 +6631,7 @@ Keywords=sonic;kart;racing;ring;racers;
 Actions=OpenGL;Software;
 Terminal=false
 NoDisplay=false
-X-AppImage-Name=RingRacers
+X-AppImage-Name=RingRacersHEP2
 X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 
@@ -6629,7 +6658,7 @@ Keywords=sonic;kart;racing;ring;racers;
 Actions=OpenGL;Software;
 Terminal=false
 NoDisplay=false
-X-AppImage-Name=RingRacers
+X-AppImage-Name=RingRacersHEP3
 X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 
@@ -6656,7 +6685,34 @@ Keywords=sonic;kart;racing;ring;racers;
 Actions=OpenGL;Software;
 Terminal=false
 NoDisplay=false
-X-AppImage-Name=RingRacers
+X-AppImage-Name=RingRacersFreakyBuild
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+
+[Desktop Action OpenGL]
+Name=OpenGL renderer
+Exec=AppRun -opengl
+
+[Desktop Action Software]
+Name=Software renderer
+Exec=AppRun -software
+DESKTOP
+
+    elif [ "\$(basename \$BUILD)" = "radio-racers" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Radio Racers
+Comment=Modified open source 3D Sonic game with kart racing gameplay with additional features
+Icon=icon
+Exec=AppRun
+Categories=Game;
+Keywords=sonic;kart;racing;ring;racers;
+Actions=OpenGL;Software;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=RadioRacers
 X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 
@@ -6822,6 +6878,24 @@ X-AppImage-Arch=\$ARCH
 X-AppImage-Version=\$COMREV
 DESKTOP
 
+    elif [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Ultimate Lowee Builder
+Comment=A map editor for UDMF levels in BlanKart, forked from Ultimate Zone Builder.
+Icon=icon
+Exec=AppRun
+Categories=Development;
+Keywords=sonic;wad;ulb;
+Terminal=false
+NoDisplay=false
+X-AppImage-Name=ultimateloweebuilder
+X-AppImage-Arch=\$ARCH
+X-AppImage-Version=\$COMREV
+DESKTOP
+
     elif [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/app.desktop" << DESKTOP
@@ -6867,7 +6941,7 @@ export HERE="\$(dirname "\$(readlink -f "\$0")")"
 export LD_LIBRARY_PATH="\$HERE/usr/lib:\$HERE/usr/lib/gtk-3.0/modules:\$HERE/usr/lib/gdk-pixbuf/loaders:\$LD_LIBRARY_PATH"
 APPRUN
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-fusion-advance" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-top-down" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-fusion-advance" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-top-down" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2"
@@ -6875,7 +6949,7 @@ export SRB2LEGACYWADDIR="\$HERE/usr/games/SRB2"
 export SDL_SOUNDFONTS="\$SDL_SOUNDFONTS"
 export SDL_FORCE_SOUNDFONTS=1
 
-exec "\$HERE/usr/bin/lsdl2srb2" "\$@"
+exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" "\$@"
 APPRUNBIN
 
     elif [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "\$(dirname \$BUILDMAIN)" = "\$BUILDPATH/srb2-custom" ]; then
@@ -6933,31 +7007,23 @@ fi
 
 cd "\$HERE/usr/games/SRB2"
 
-exec "\$HERE/usr/bin/lsdlsrb2" -opengl "\$@"
+exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" -opengl "\$@"
 APPRUNBIN
 
-    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ]; then
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
 
-exec "\$HERE/usr/bin/lsdl2srb2kart" "\$@"
+exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" "\$@"
 APPRUNBIN
 
-    elif [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
-
-        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
-export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
-
-exec "\$HERE/usr/bin/blankart" "\$@"
-APPRUNBIN
-
-    elif [ "\$(basename \$BUILD)" = "ring-racers" ] || [ "\$(basename \$BUILD)" = "ring-racers-noire" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep2" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep3" ] || [ "\$(basename \$BUILD)" = "ring-racers-freaky-build" ]; then
+    elif [ "\$(basename \$BUILD)" = "ring-racers" ] || [ "\$(basename \$BUILD)" = "ring-racers-noire" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep2" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep3" ] || [ "\$(basename \$BUILD)" = "ring-racers-freaky-build" ] || [ "\$(basename \$BUILD)" = "radio-racers" ]; then
 
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 export RINGRACERSWADDIR="\$HERE/usr/games/RingRacers"
 
-exec "\$HERE/usr/bin/ringracers" "\$@"
+exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" "\$@"
 APPRUNBIN
 
     elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
@@ -7005,6 +7071,13 @@ APPRUNBIN
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 cd "\$HERE/usr/bin"
 exec "\$HERE/usr/bin/uzb.bin" "\$@"
+APPRUNBIN
+
+    elif [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ]; then
+
+        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
+cd "\$HERE/usr/bin"
+exec "\$HERE/usr/bin/ulb.bin" "\$@"
 APPRUNBIN
 
     elif [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
@@ -7237,6 +7310,25 @@ DESKTOP
 
     cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2-tsourdt3rd-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-tsourdt3rd-opengl.desktop"
     gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 TSoURDt3rd \\\(Software\\\)","Name=Sonic Robo Blast 2 TSoURDt3rd (OpenGL)") || gsub("Exec=$SRB2BLDPREFIX/bin/srb2tsourdt3rd -software","Exec=$SRB2BLDPREFIX/bin/srb2tsourdt3rd -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-tsourdt3rd-opengl.desktop"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/srb2-edit-software.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Sonic Robo Blast 2 Edit (Software)
+Comment=Modified open source 3D Sonic platformer with multiplayer enchancements, Lua additions and other changes
+Icon=srb2edit
+Exec=$SRB2BLDPREFIX/bin/srb2edit -software
+Categories=Game;
+Keywords=sonic;platformer;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/srb2-edit-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/srb2-edit-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Sonic Robo Blast 2 Edit \\\(Software\\\)","Name=Sonic Robo Blast 2 Edit (OpenGL)") || gsub("Exec=$SRB2BLDPREFIX/bin/srb2edit -software","Exec=$SRB2BLDPREFIX/bin/srb2edit -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/srb2-edit-opengl.desktop"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ]; then
 
@@ -7813,9 +7905,28 @@ DESKTOP
     cp -f "\$BUILD/build/AppDir/usr/share/applications/ring-racers-freaky-build-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/ring-racers-freaky-build-opengl.desktop"
     gawk -i inplace '{gsub("Name=Dr. Robotnik'\''s Ring Racers Freaky Build \\\(Software\\\)","Name=Dr. Robotnik'\''s Ring Racers Freaky Build (OpenGL)") || gsub("Exec=$SRB2BLDPREFIX/bin/ringracersfreakybuild -software","Exec=$SRB2BLDPREFIX/bin/ringracersfreakybuild -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/ring-racers-freaky-build-opengl.desktop"
 
+    elif [ "\$(basename \$BUILD)" = "radio-racers" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/radio-racers-software.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Radio Racers (Software)
+Comment=Modified open source 3D Sonic game with kart racing gameplay with additional features
+Icon=radioracers
+Exec=$SRB2BLDPREFIX/bin/radioracers -software
+Categories=Game;
+Keywords=sonic;kart;racing;ring;racers;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
+    cp -f "\$BUILD/build/AppDir/usr/share/applications/radio-racers-software.desktop" "\$BUILD/build/AppDir/usr/share/applications/radio-racers-opengl.desktop"
+    gawk -i inplace '{gsub("Name=Radio Racers \\\(Software\\\)","Name=Radio Racers (OpenGL)") || gsub("Exec=$SRB2BLDPREFIX/bin/radioracers -software","Exec=$SRB2BLDPREFIX/bin/radioracers -opengl"); print}' "\$BUILD/build/AppDir/usr/share/applications/radio-racers-opengl.desktop"
+
     elif [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "\$(dirname \$BUILDMAIN)" = "\$BUILDPATH/srb2-custom" ]; then
 
-        SRB2CNAME="\$SRB2CCONFDIR"c"\$CUSTOMDIR""\$GITVERCONF"
+        SRB2CNAME="\$SRB2CCONFDIR"c"\$CUSTOMDIR"
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/\$SRB2CNAME-software.desktop" << DESKTOP
 [Desktop Entry]
@@ -7946,6 +8057,22 @@ Terminal=false
 NoDisplay=false
 DESKTOP
 
+    elif [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ]; then
+
+        cat > "\$BUILD/build/AppDir/usr/share/applications/ultimateloweebuilder.desktop" << DESKTOP
+[Desktop Entry]
+Version=\$COMREV
+Type=Application
+Name=Ultimate Lowee Builder
+Comment=A map editor for UDMF levels in BlanKart, forked from Ultimate Zone Builder.
+Icon=ultimateloweebuilder
+Exec=$SRB2BLDPREFIX/bin/ulb
+Categories=Development;
+Keywords=sonic;wad;ulb;
+Terminal=false
+NoDisplay=false
+DESKTOP
+
     elif [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
         cat > "\$BUILD/build/AppDir/usr/share/applications/highvoltagering.desktop" << DESKTOP
@@ -7987,7 +8114,7 @@ DESKTOP
 
             gawk -i inplace '{gsub("Icon=.*","Icon=org.srb2bld.'\$(\$PRINTF \$BUILD | gawk -F'/' '{print \$NF}')'"); print}' "\$BUILD/build/AppDir/usr/share/applications/\$(\$PRINTF \$BUILD | gawk -F'/' '{print \$NF}').desktop"
 
-        elif [ "\$BUILD" = "\$BUILDPATH/slade" ] || [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ] || [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
+        elif [ "\$BUILD" = "\$BUILDPATH/slade" ] || [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ] || [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
 
             gawk -i inplace '{gsub("Exec=.*","Exec=AppRun") || gsub("Icon=.*","Icon=org.srb2bld.'\$(\$PRINTF \$BUILD | gawk -F'/' '{print \$NF}')'"); print}' "\$BUILD/build/AppDir/usr/share/applications/\$(\$PRINTF \$BUILD | gawk -F'/' '{print \$NF}').desktop"
 
@@ -8033,7 +8160,7 @@ if [ "\$ANDROID" != "1" ]; then
         convert "\$BUILD/dist/res/slade.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
         cp -f "\$BUILD/dist/res/slade.ico" "\$BUILD/build/icon.ico"
 
-    elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ]; then
+    elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ]; then
 
         convert "\$BUILD/Setup/UZB-small.bmp" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
         convert "\$BUILD/Setup/UZB-small.bmp" -alpha on -background none "\$BUILD/build/icon.ico"
@@ -8111,6 +8238,10 @@ if [ "\$ANDROID" != "1" ]; then
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
 
             mv -f "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2tsourdt3rd.png"
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ]; then
+
+            mv -f "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/srb2edit.png"
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ]; then
 
@@ -8232,6 +8363,10 @@ if [ "\$ANDROID" != "1" ]; then
 
             mv -f "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/ringracersfreakybuild.png"
 
+        elif [ "\$(basename \$BUILD)" = "radio-racers" ]; then
+
+            mv -f "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/radioracers.png"
+
         elif [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "\$(dirname \$BUILDMAIN)" = "\$BUILDPATH/srb2-custom" ]; then
 
             mv -f "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/"\$SRB2CCONFDIR"c"\$CUSTOMDIR".png"
@@ -8263,6 +8398,10 @@ if [ "\$ANDROID" != "1" ]; then
         elif [ "\$BUILD" = "\$BUILDPATH/ultimatezonebuilder" ]; then
 
             mv -f "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/ultimatezonebuilder.png"
+
+        elif [ "\$BUILD" = "\$BUILDPATH/ultimateloweebuilder" ]; then
+
+            mv -f "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/icon.png" "\$BUILD/build/AppDir/usr/share/icons/hicolor/\$ICONSIZE/apps/ultimateloweebuilder.png"
 
         elif [ "\$BUILD" = "\$BUILDPATH/highvoltagering" ]; then
 
@@ -8608,7 +8747,7 @@ apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-
 RUN git clone https://github.com/Cyan4973/xxHash --branch release /tmp/xxHash && \
 make -C /tmp/xxHash PREFIX=/usr install
 
-RUN if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then \
+RUN if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then \
 apt-get install -y powershell ; \
 fi
 
@@ -8828,7 +8967,7 @@ containerrun() {
 
         fi
 
-    elif [ "$OS" = "Windows" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]); then
+    elif [ "$OS" = "Windows" ] && ([ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]); then
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for Windows SRB2 tools. Please wait..."
 
@@ -8873,7 +9012,7 @@ containerrun() {
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-tools-linux-musl-container
 
-    elif [ "$LIBC" = "musl" ] && ([ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ]); then
+    elif [ "$LIBC" = "musl" ] && ([ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/ultimateloweebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ]); then
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for musl based Linux SRB2 builds. Please wait..."
 
@@ -8903,7 +9042,7 @@ containerrun() {
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-tools-linux-glibc-container
 
-    elif [ "$OS" = "Linux" ] && ([ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ]); then
+    elif [ "$OS" = "Linux" ] && ([ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ]); then
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for glibc based Linux SRB2 tools. Please wait..."
 
@@ -8913,7 +9052,7 @@ containerrun() {
 
         fi
 
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for glibc based Linux Ultimate Zone Builder or High Voltage Ring. Please wait..."
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') image for glibc based Linux Ultimate Zone Builder or Ultimate Lowee Builder or High Voltage Ring. Please wait..."
         $OSVIRT build --rm $PLATFORM --network host -t srb2-uzb-linux-glibc-container "$SRB2BLDROOT/containers/srb2-uzb-linux-glibc-container"
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Running $($PRINTF "%s\n" "$OSVIRT" | gawk 'match($0, /docker|podman/) {print substr($0, RSTART, RLENGTH)}') container from built image for $BUILDNAME. Please wait..."
         $OSVIRT run $OSVIRTOPTS --volume="$SRB2BLDROOT:$SRB2BLDROOT:rw" --volume="$SRB2BLDPREFIX:$SRB2BLDPREFIX:rw" --volume="$CCACHE_DIR:$CCACHE_DIR:rw" srb2-uzb-linux-glibc-container
@@ -9060,7 +9199,7 @@ defaultmessage() {
 }
 
 extractmacosassets() {
-    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-reveries" ] || [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ] || [ "$BUILD" = "$BUILDPATH/srb2-project-astral" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-reveries" ] || [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ] || [ "$BUILD" = "$BUILDPATH/srb2-edit" ] || [ "$BUILD" = "$BUILDPATH/srb2-project-astral" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ] || [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
 
         # Copying documentation and license file to installer path.
         cp -f "$BUILD/assets/"*.txt $(find "$BUILD" -name "README-SDL.txt" 2> /dev/null | head -n1) "$BUILD/assets/installer"
@@ -9305,22 +9444,12 @@ EOF
 
         fi
 
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ] || [ "$BUILD" = "$BUILDPATH/blankart" ] || [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ] || [ "$BUILD" = "$BUILDPATH/blankart" ] || [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
 
         # Copying documentation and license file to installer path.
         cp -f "$BUILD/assets/"*.txt $(find "$BUILD" -name "README-SDL.txt" 2> /dev/null | head -n1) "$BUILD/assets/installer"
 
-        if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
-
-            if [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
-
-                cp -f "$BUILD/!REQUIRED ASSETS/"*.pk3 "$BUILD/assets/installer"
-
-            fi
-
-            find "$BUILD/assets/installer" -type d -exec chmod 755 {} \;
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ]; then
+        if [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ]; then
 
             if [ -n "$ISNET" ]; then
 
@@ -9337,7 +9466,7 @@ EOF
 
             fi
 
-            7z e -y "$SRB2BLDROOT/assets/SRB2KartHEP.zip" "*.kart" -o"$BUILD/assets/installer"
+            7z e -y "$SRB2BLDROOT/assets/SRB2KartHEP.zip" "*/*.kart" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ]; then
 
@@ -9395,6 +9524,32 @@ EOF
                 gawk -i inplace '{gsub("'$(gawk -F'0x' '/#define ASSET_HASH_'$($PRINTF "$a" | gawk '{print toupper($0)}')'_PK3/ {print $2}' "$BUILD/src/d_main.cpp")'","'$(xxhsum -H3 --tag "$BUILD/assets/installer/$a.pk3" | gawk '{print $NF}')'"); print}' "$BUILD/src/d_main.cpp"
 
             done
+
+        elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
+
+            find "$BUILD/assets/installer" -type d -exec chmod 755 {} \;
+
+            if [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+
+                cp -f "$BUILD/!REQUIRED ASSETS/"*.pk3 "$BUILD/assets/installer"
+
+            elif [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
+
+                if [ -n "$ISNET" ]; then
+
+                    RADIORACERSASSETURL=$(curl -s "$RADIORACERSASSETURL" | gawk -F'"' '/browser_download_url.*radioracers_assets.zip/ {print $4}' | head -n1)
+                    if [ "$(curl -X GET -sLI "$RADIORACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -c %s "$SRB2BLDROOT/assets/RadioRacers.zip" 2> /dev/null)" ]; then
+
+                        rm -f "$SRB2BLDROOT/assets/RadioRacers.zip"
+                        curl -RL "$RADIORACERSASSETURL" -o "$SRB2BLDROOT/assets/RadioRacers.zip"
+
+                    fi
+
+                fi
+
+                7z x -y "$SRB2BLDROOT/assets/RadioRacers.zip" -o"$BUILD/assets/installer"
+
+            fi
 
         fi
 
@@ -10373,7 +10528,24 @@ FLATPAK
 }
 FLATPAK
 
-    elif [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
+
+        if [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]; then
+
+            UZBSHARE="ultimatezonebuilder"
+            UZBBIN="uzb"
+
+        elif [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ]; then
+
+            UZBSHARE="ultimateloweebuilder"
+            UZBBIN="ulb"
+
+        elif [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
+
+            UZBSHARE="highvoltagering"
+            UZBBIN="hvr"
+
+        fi
 
         cat > "$BUILD/build/$FLATPAKNAME.json" << FLATPAK
 {
@@ -10402,52 +10574,9 @@ FLATPAK
         }
       ],
       "build-commands": [
-        "mkdir -p /app/bin /app/lib /app/share/ultimatezonebuilder",
-        "cp -rf bin/* /app/share/ultimatezonebuilder",
-        "printf '#!/bin/sh\n\ncd /app/share/ultimatezonebuilder\nexec /app/share/ultimatezonebuilder/uzb.bin \"\$@\"\n' > /app/bin/AppRun",
-        "chmod 755 /app/bin/AppRun",
-        "cp -rf lib/* /app/lib",
-        "cp -rf share/* /app/share",
-        "mv -f /app/share/applications/*.desktop /app/share/applications/$FLATPAKNAME.desktop",
-        "mv -f \$(find /app/share/icons/hicolor -name *.png 2> /dev/null | gawk '!/scalable/ {print}' | head -n1) \$(find /app/share/icons/hicolor -name apps 2> /dev/null | gawk '!/scalable/ {print}' | head -n1)/$FLATPAKNAME.png"
-      ]
-    }
-  ]
-}
-FLATPAK
-
-    elif [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
-
-        cat > "$BUILD/build/$FLATPAKNAME.json" << FLATPAK
-{
-  "app-id": "$FLATPAKNAME",
-  "name": "$FLATPAKNAME",
-  "runtime": "org.freedesktop.Platform",
-  "runtime-version": "$($PRINTF $FLATPAKPLATFORM | gawk -F'/' '{print $NF}')",
-  "sdk": "org.freedesktop.Sdk",
-  "command": "AppRun",
-  "finish-args": [
-    "--share=ipc",
-    "--share=network",
-    "--socket=fallback-x11",
-    "--socket=pulseaudio",
-    "--socket=wayland",
-    "--device=all"
-  ],
-  "modules": [
-    {
-      "name": "$FLATPAKNAME",
-      "buildsystem": "simple",
-      "sources": [
-        {
-          "type": "dir",
-          "path": "$BUILD/build/AppDir/usr"
-        }
-      ],
-      "build-commands": [
-        "mkdir -p /app/bin /app/lib /app/share/highvoltagering",
-        "cp -rf bin/* /app/share/highvoltagering",
-        "printf '#!/bin/sh\n\ncd /app/share/highvoltagering\nexec /app/share/highvoltagering/hvr.bin \"\$@\"\n' > /app/bin/AppRun",
+        "mkdir -p /app/bin /app/lib /app/share/$UZBSHARE",
+        "cp -rf bin/* /app/share/$UZBSHARE",
+        "printf '#!/bin/sh\n\ncd /app/share/$UZBSHARE\nexec /app/share/$UZBSHARE/$UZBBIN.bin \"\$@\"\n' > /app/bin/AppRun",
         "chmod 755 /app/bin/AppRun",
         "cp -rf lib/* /app/lib",
         "cp -rf share/* /app/share",
@@ -10525,7 +10654,7 @@ FLATPAK
             SRB2CONFDIR=".srb2persona$GITVERCONF"
             WADDIR="SRB2WADDIR"
 
-        elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+        elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
 
             SRB2CONFDIR=".ringracers$GITVERCONF"
             WADDIR="RINGRACERSWADDIR"
@@ -11144,8 +11273,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11165,8 +11294,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11186,8 +11315,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11207,8 +11336,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11228,8 +11357,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11249,8 +11378,29 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -d "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
+
+        fi
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-edit" ]; then
+
+        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/SRB2Edit"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/srb2edit"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-edit-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/srb2-edit-opengl.desktop"
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/srb2edit.png"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's srb2edit binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11270,8 +11420,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11292,8 +11442,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11313,8 +11463,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11334,8 +11484,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11355,8 +11505,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11388,7 +11538,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO chmod 755 "$SRB2BINARYLNXPATH.debug"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            $SUDO install -Dm755 $(find "$BUILD" -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11420,7 +11570,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO chmod 755 "$SRB2BINARYLNXPATH.debug"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlxsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            $SUDO install -Dm755 $(find "$BUILD" -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11452,7 +11602,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO chmod 755 "$SRB2BINARYLNXPATH.debug"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/SF94SRB2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            $SUDO install -Dm755 $(find "$BUILD" -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11484,7 +11634,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO chmod 755 "$SRB2BINARYLNXPATH.debug"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            $SUDO install -Dm755 $(find "$BUILD" -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11516,7 +11666,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO chmod 755 "$SRB2BINARYLNXPATH.debug"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            $SUDO install -Dm755 $(find "$BUILD" -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11548,7 +11698,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO chmod 755 "$SRB2BINARYLNXPATH.debug"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsbb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
-            $SUDO install -Dm755 $(find "$BUILD" -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11576,7 +11726,7 @@ installtolinux() {
             $SUDO install -d "$SRB2ASSETLNXPATH"
             printf '#!/bin/sh\n\nexport SRB2WADDIR='$SRB2ASSETLNXPATH'\nexport LD_LIBRARY_PATH='$SRB2ASSETLNXPATH'\nexport DBUS_FATAL_WARNINGS=0\n\nexec '$LDMUSL' '$SRB2ASSETLNXPATH'/'$($PRINTF "%s\n" $SRB2BINARYLNXPATH | gawk -F'/' '{print $NF}')'.bin "$@"\n' | $SUDO tee "$SRB2BINARYLNXPATH" > /dev/null
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11604,7 +11754,7 @@ installtolinux() {
             $SUDO install -d "$SRB2ASSETLNXPATH"
             printf '#!/bin/sh\n\nexport SRB2WADDIR='$SRB2ASSETLNXPATH'\nexport LD_LIBRARY_PATH='$SRB2ASSETLNXPATH'\nexport DBUS_FATAL_WARNINGS=0\n\nexec '$LDMUSL' '$SRB2ASSETLNXPATH'/'$($PRINTF "%s\n" $SRB2BINARYLNXPATH | gawk -F'/' '{print $NF}')'.bin "$@"\n' | $SUDO tee "$SRB2BINARYLNXPATH" > /dev/null
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2JTE" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11708,8 +11858,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11729,8 +11879,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11750,8 +11900,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11771,8 +11921,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11792,8 +11942,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11813,8 +11963,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11834,8 +11984,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11856,8 +12006,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdl2srb2kart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11877,8 +12027,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/blankart" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/build/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11898,8 +12048,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/ringracers" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/build/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11919,8 +12069,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/ringracers" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/build/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11940,8 +12090,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/ringracers" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/build/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11961,8 +12111,8 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/ringracers" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/build/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11982,8 +12132,29 @@ installtolinux() {
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
-            $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/ringracers" "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/build/bin" -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
+            $SUDO install -d "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
+
+        fi
+
+    elif [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
+
+        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/RadioRacers"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/radioracers"
+        SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/radio-racers-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/radio-racers-opengl.desktop"
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/radioracers.png"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's radioracers binary, assets, icons and desktop file to the system. Please wait..."
+
+        if [ "$LNXOSNAME" != "NixOS" ]; then
+
+            $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
+            $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -11994,22 +12165,21 @@ installtolinux() {
     elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
 
         SRB2CASSETDIR=$(gawk -F'"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)
-        SRB2CCONFDIR=$(gawk -F'\"' '/DEFAULTDIR/ {gsub(" |\\.",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null | head -n1)
         SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/games/"$SRB2CASSETDIR"C"$CUSTOMDIR""
-        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/$SRB2CCONFDIR"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/$($PRINTF "%s\n" "$SRB2CASSETDIR" | gawk '{print tolower($0)}')c"$CUSTOMDIR""
         SRB2BINARYDEBUGLNXPATH=""$SRB2BINARYLNXPATH".debug"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/$SRB2CCONFDIR-software.desktop"
-        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/$SRB2CCONFDIR-opengl.desktop"
-        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/$SRB2CCONFDIR.png"
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's $SRB2CCONFDIR binary, assets, icons and desktop file to the system. Please wait..."
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/$($PRINTF "%s\n" "$SRB2CASSETDIR" | gawk '{print tolower($0)}')c"$CUSTOMDIR"-software.desktop"
+        SRB2DESKTOPOPENGLLNXPATH="$SRB2BLDPREFIX/share/applications/$($PRINTF "%s\n" "$SRB2CASSETDIR" | gawk '{print tolower($0)}')c"$CUSTOMDIR"-opengl.desktop"
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/$($PRINTF "%s\n" "$SRB2CASSETDIR" | gawk '{print tolower($0)}')c"$CUSTOMDIR".png"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's $($PRINTF "%s\n" "$SRB2CASSETDIR" | gawk '{print tolower($0)}')c"$CUSTOMDIR" binary, assets, icons and desktop file to the system. Please wait..."
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -mindepth 1 -maxdepth 1 -type f ! -name "*.debug" 2> /dev/null) "$SRB2BINARYLNXPATH"
 
-            if [ -f "$(find "$BUILD/bin" "$BUILD/build/bin" -name "*.debug" 2> /dev/null)" ]; then
+            if [ -f "$(find "$BUILD/bin" "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null)" ]; then
 
-                $SUDO install -Dm755 $(find "$BUILD/bin" "$BUILD/build/bin" -name "*.debug" 2> /dev/null) "$SRB2BINARYDEBUGLNXPATH"
+                $SUDO install -Dm755 $(find "$BUILD/bin" "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null) "$SRB2BINARYDEBUGLNXPATH"
 
             fi
 
@@ -12137,13 +12307,30 @@ installtolinux() {
 
         fi
 
-    elif [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]; then
+    elif [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
 
-        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/ultimatezonebuilder"
-        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/uzb"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/ultimatezonebuilder.desktop"
-        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/ultimatezonebuilder.png"
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's uzb binary, assets, icons and desktop file to the system. Please wait..."
+        if [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ]; then
+
+            UZBSHARE="ultimatezonebuilder"
+            UZBBIN="uzb"
+
+        elif [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ]; then
+
+            UZBSHARE="ultimateloweebuilder"
+            UZBBIN="ulb"
+
+        elif [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
+
+            UZBSHARE="highvoltagering"
+            UZBBIN="hvr"
+
+        fi
+
+        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/$UZBSHARE"
+        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/$UZBBIN"
+        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/$UZBSHARE.desktop"
+        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/$UZBSHARE.png"
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's $UZBBIN binary, assets, icons and desktop file to the system. Please wait..."
 
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
@@ -12153,20 +12340,20 @@ installtolinux() {
 cd "$SRB2ASSETLNXPATH"
 
 PRINTF=\$(which -a printf 2> /dev/null | gawk '/bin/ {print}' | head -n1)
-UZBLIBRARIES=\$(DISPLAY= "$SRB2ASSETLNXPATH/uzb.bin" 2>&1 | gawk -F':' '{IGNORECASE=1} /Error/ && /no such file or directory/ && !/ld-linux/ || /undefined symbol|symbol not found/ {print \$2}' | gawk '{print \$NF}')
+UZBLIBRARIES=\$(DISPLAY= "$SRB2ASSETLNXPATH/$UZBBIN.bin" 2>&1 | gawk -F':' '{IGNORECASE=1} /Error/ && /no such file or directory/ && !/ld-linux/ || /undefined symbol|symbol not found/ {print \$2}' | gawk '{print \$NF}')
 
 if [ -n "\$UZBLIBRARIES" ]; then
 
-    \$PRINTF "\e[1;93m\n%s\n\e[0m" "Ultimate Zone Builder wasn't run in Mono bundle successfully due to error:
-\$(DISPLAY= "$SRB2ASSETLNXPATH/uzb.bin" 2>&1 | gawk -F':' '{IGNORECASE=1} /Error/ && /no such file or directory/ && !/ld-linux/ || /undefined symbol|symbol not found/ {print \$2}')
+    \$PRINTF "\e[1;93m\n%s\n\e[0m" "$BUILDNAME wasn't run in Mono bundle successfully due to error:
+\$(DISPLAY= "$SRB2ASSETLNXPATH/$UZBBIN.bin" 2>&1 | gawk -F':' '{IGNORECASE=1} /Error/ && /no such file or directory/ && !/ld-linux/ || /undefined symbol|symbol not found/ {print \$2}')
 
-Mono command will start UZB instead."
+Mono command will start $(printf "%s\n" "$UZBBIN" | gawk '{print toupper($0)}') instead."
 
     if [ -x "\$(command -v mono)" ]; then
 
         UZBLIBRARIES=\$(DISPLAY= MONO_LOG_LEVEL=debug mono Builder.exe 2>&1 | gawk -F''\''' '/DllImport unable to load library/ {print \$2}' | uniq)
 
-        mono Builder.exe "\$@" || [ -n "\$UZBLIBRARIES" ] && \$PRINTF "\e[1;93m\n%s\n\e[0m" "Ultimate Zone Builder didn't run successfully. Please check if you have these libraries in your path and install them if they are not there:
+        mono Builder.exe "\$@" || [ -n "\$UZBLIBRARIES" ] && \$PRINTF "\e[1;93m\n%s\n\e[0m" "$BUILDNAME didn't run successfully. Please check if you have these libraries in your path and install them if they are not there:
 "\$UZBLIBRARIES"
 
 Exiting..."
@@ -12187,75 +12374,11 @@ else
 
     fi
 
-    "$SRB2ASSETLNXPATH/uzb.bin" "\$@" || [ "\$?" != "137" ] && (([ ! -x "\$(command -v mono)" ] && (([ "\$(command -v zenity)" ] && zenity --warning --text "Please install \"mono\" to run program." || exit 1) || \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"mono\" to run program." && exit 1)) || mono Builder.exe "\$@")
+    "$SRB2ASSETLNXPATH/$UZBBIN.bin" "\$@" || [ "\$?" != "137" ] && (([ ! -x "\$(command -v mono)" ] && (([ "\$(command -v zenity)" ] && zenity --warning --text "Please install \"mono\" to run program." || exit 1) || \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"mono\" to run program." && exit 1)) || mono Builder.exe "\$@")
 
 fi
 
 UZB
-
-            $SUDO chmod 755 "$SRB2BINARYLNXPATH"
-            $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/bin/"* "$SRB2ASSETLNXPATH"
-            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
-            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
-
-        fi
-
-    elif [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
-
-        SRB2ASSETLNXPATH="$SRB2BLDPREFIX/share/highvoltagering"
-        SRB2BINARYLNXPATH="$SRB2BLDPREFIX/bin/hvr"
-        SRB2DESKTOPLNXPATH="$SRB2BLDPREFIX/share/applications/highvoltagering.desktop"
-        SRB2ICONLNXPATH="$SRB2BLDPREFIX/share/icons/hicolor/$SRB2LNXICONSIZE/apps/highvoltagering.png"
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing $BUILDNAME's hvr binary, assets, icons and desktop file to the system. Please wait..."
-
-        if [ "$LNXOSNAME" != "NixOS" ]; then
-
-            cat << HVR | $SUDO tee "$SRB2BINARYLNXPATH" > /dev/null
-#!/bin/sh
-
-cd "$SRB2ASSETLNXPATH"
-
-PRINTF=\$(which -a printf 2> /dev/null | gawk '/bin/ {print}' | head -n1)
-HVRLIBRARIES=\$(DISPLAY= "$SRB2ASSETLNXPATH/hvr.bin" 2>&1 | gawk -F':' '{IGNORECASE=1} /Error/ && /no such file or directory/ && !/ld-linux/ || /undefined symbol|symbol not found/ {print \$2}' | gawk '{print \$NF}')
-
-if [ -n "\$HVRLIBRARIES" ]; then
-
-    \$PRINTF "\e[1;93m\n%s\n\e[0m" "High Voltage Ring wasn't run in Mono bundle successfully due to error:
-\$(DISPLAY= "$SRB2ASSETLNXPATH/hvr.bin" 2>&1 | gawk -F':' '{IGNORECASE=1} /Error/ && /no such file or directory/ && !/ld-linux/ || /undefined symbol|symbol not found/ {print \$2}')
-
-Mono command will start HVR instead."
-
-    if [ -x "\$(command -v mono)" ]; then
-
-        HVRLIBRARIES=\$(DISPLAY= MONO_LOG_LEVEL=debug mono Builder.exe 2>&1 | gawk -F''\''' '/DllImport unable to load library/ {print \$2}' | uniq)
-
-        mono Builder.exe "\$@" || [ -n "\$HVRLIBRARIES" ] && \$PRINTF "\e[1;93m\n%s\n\e[0m" "High Voltage Ring didn't run successfully. Please check if you have these libraries in your path and install them if they are not there:
-"\$HVRLIBRARIES"
-
-Exiting..."
-
-    else
-
-        \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"mono\" to run program."
-        exit 1
-
-    fi
-
-else
-
-    if [ "\$(ldd --version 2>&1 | gawk 'match(\$0, /musl/) {print substr(\$0, RSTART, RLENGTH)}' | gawk '!a[\$0]++ {print}')" = "musl" ] && [ ! -f "/usr/lib/libgcompat.so.0" ]; then
-
-        \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"gcompat\" to run program."
-        exit 1
-
-    fi
-
-    "$SRB2ASSETLNXPATH/hvr.bin" "\$@" || [ "\$?" != "137" ] && (([ ! -x "\$(command -v mono)" ] && (([ "\$(command -v zenity)" ] && zenity --warning --text "Please install \"mono\" to run program." || exit 1) || \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"mono\" to run program." && exit 1)) || mono Builder.exe "\$@")
-
-fi
-
-HVR
 
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
@@ -12459,7 +12582,7 @@ NIX
 }
 NIX
 
-        elif [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
+        elif [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
 
             cat > "/tmp/flake-build/flake.nix" << NIX
 {
@@ -12607,9 +12730,9 @@ NIX
         else
 
             # Copy debug binary files.
-            if [ -x "$(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1)" ]; then
+            if [ -x "$(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1)" ]; then
 
-                cp -f $(find "$BUILD/bin" -name "*.debug" 2> /dev/null | head -n1) "/tmp/flake-build/usr/bin"
+                cp -f $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "/tmp/flake-build/usr/bin"
 
             fi
 
@@ -13167,6 +13290,316 @@ installtomacos() {
 
     fi
 
+    # Download and extract assets.
+    if [ -z "$(find "$BUILD/build/assets/installer/"* -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] && ([ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/ultimateloweebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]); then
+
+        if [ -n "$ISNET" ]; then
+
+            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
+
+        else
+
+            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Extracting $BUILDNAME's assets. Please wait..."
+
+        fi
+
+        if [ "$GITVER" != "$GITDEFVER" ] || [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
+
+            extractmacoscustomassets
+
+        else
+
+            extractmacosassets
+
+        fi
+
+    fi
+
+    $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Patching $BUILDNAME's source code. Please wait..."
+
+    # Removing patch.pk3 and README-SDL.txt from CMakeLists.txt, if they are nonexistent.
+    if [ ! -f "$BUILD/assets/installer/patch.pk3" ]; then
+
+        gawk -i inplace '{gsub("\"patch.pk3\"",""); print}' "$BUILD/assets/CMakeLists.txt"
+
+    fi
+
+    if [ ! -f "$BUILD/assets/installer/README-SDL.txt" ]; then
+
+        gawk -i inplace '{gsub("\"README-SDL.txt\"",""); print}' "$BUILD/assets/CMakeLists.txt"
+
+    fi
+
+    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/xsrb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-sf94-serv" ] && [ "$BUILD" != "$BUILDPATH/srb2-riders" ] && [ "$BUILD" != "$BUILDPATH/super-srb2-kart-z" ] && [ "$BUILD" != "$BUILDPATH/sbb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/shufflarb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-live" ] && [ "$BUILD" != "$BUILDPATH/srb2-loz" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimate-zone-builder" ] && [ "$BUILD" != "$BUILDPATH/hig-voltage-ring" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
+
+        # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
+        gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)"); print}' "$BUILD/CMakeLists.txt"
+        gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)",""); print}' "$BUILD/src/CMakeLists.txt"
+
+    fi
+
+    # Patching SRB2 Uncapped Plus' source code to fix error with implicit declaration of function R_ResetFirstLerp is invalid in C99 [-Werror,-Wimplicit-function-declaration]. Thanks Lach for help with this.
+    if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
+
+        gawk -i inplace '{gsub("#include \"doomdef.h\"","#include \"r_fps.h\"\n#include \"doomdef.h\""); print}' "$BUILD/src/p_setup.c"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-reveries" ]; then
+
+        # Patching SRB2 Reveries' source code to add missing file reveries.pk3.
+        gawk -i inplace '{gsub("set\\(SRB2_ASSETS_GAME","set(SRB2_ASSETS_GAME\n\t\"reveries.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
+
+        # Adding missing files to CMakeLists.txt due to linking errors.
+        gawk -i inplace '{gsub("p_floor.c","p_floor.c\n\tp_haptic.c"); print}' "$BUILD/src/CMakeLists.txt"
+        gawk -i inplace '{gsub("ogl_sdl.c","ogl_sdl.c\n\ti_gamepad.c"); print}' "$BUILD/src/sdl/CMakeLists.txt"
+
+    # Adding missing file lua_custombuild.c to CMakeLists.txt due to linking errors.
+    elif [ "$BUILD" = "$BUILDPATH/srb2-edit" ]; then
+
+        gawk -i inplace '{gsub("lua_script.c","lua_script.c\n\tlua_custombuild.c"); print}' "$BUILD/src/CMakeLists.txt"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-top-down" ]; then
+
+        # Change path to CMakeLists.txt for assets to be found by Cmake.
+        gawk -i inplace '{gsub("add_subdirectory\\(assets\\)","add_subdirectory(assets/installer)"); print}' "$BUILD/CMakeLists.txt"
+
+        # Renaming SRB2 Top Down .app filename to proper name to avoid issue of not copying compiled game and icons.
+        gawk -i inplace '{gsub("Sonic Robo Blast 2","Sonic Robo Blast 2 Top Down"); print}' "$BUILD/src/sdl/CMakeLists.txt"
+
+        # Replacing condition, so assets are installed to .app file.
+        gawk -i inplace '{gsub("CLANG","${CMAKE_SYSTEM} MATCHES Darwin"); print}' "$BUILD/assets/CMakeLists.txt"
+
+    # Patching SRB2 Persona's source code to fix error with implicit declaration of function W_GetNumForNameMusic is invalid in C99 [-Werror,-Wimplicit-function-declaration].
+    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+        gawk -i inplace '/\/\/ W_GetNumForNameMusic/ {suppress=1} /\/\/ Like W_GetNumForName/ {suppress=0} !suppress' "$BUILD/src/w_wad.c"
+        gawk -i inplace -v RS="^$" '{gsub("\\/\\/\\/ ------------------------\n\nstatic lumpnum_t S_GetMusicLumpNum\\(const char \\*mname\\)","\nlumpnum_t W_GetNumForNameMusic(const char *name)\n{\n\tlumpnum_t i;\n\n\ti = W_CheckNumForName(name);\n\n\treturn i;\n}\n\nstatic lumpnum_t S_GetMusicLumpNum(const char *mname)"); print}' "$BUILD/src/s_sound.c"
+
+    # Adding missing file d_protocol.c and d_protocol.h to CMakeLists.txt due to linking errors.
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ]; then
+
+        gawk -i inplace '{gsub("d_netfil.c","d_netfil.c\n\td_protocol.c"); gsub("d_netfil.h","d_netfil.h\n\td_protocol.h"); print}' "$BUILD/src/CMakeLists.txt"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ]; then
+
+        # Adding missing file d_protocol.c and d_protocol.h to CMakeLists.txt due to linking errors.
+        gawk -i inplace '{gsub("d_netfil.c","d_netfil.c\n\td_protocol.c"); gsub("d_netfil.h","d_netfil.h\n\td_protocol.h"); print}' "$BUILD/src/CMakeLists.txt"
+
+        # Adding missing asset snowy_files.kart to CMakeLists.txt.
+        gawk -i inplace '{gsub("srb2.srb;\\\\","srb2.srb;\\\nsnowy_files.kart;\\"); print}' "$BUILD/assets/CMakeLists.txt"
+
+        # Fixed compilation issues "error: incompatible pointer to integer conversion initializing 'int32_t' (aka 'int') with an expression of type 'void *' [-Wint-conversion]".
+        gawk -i inplace '/consvar_t cv_fakelocalskin =/ {sub(/CV_SAVE, NULL, 0, NULL/, "CV_SAVE, NULL, 0, 0"); sub(/NULL};$/, "0};");}1' "$BUILD/src/d_netcmd.c"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ]; then
+
+        # Enable #include <poll.h> to fix error: use of undeclared identifier 'POLLIN'.
+        gawk -i inplace '{gsub("#include <signal.h>","#include <signal.h>\n#include <poll.h>"); print}' "$BUILD/src/sdl/i_system.c"
+
+        # Patching error use of undeclared identifier 'errno'.
+        gawk -i inplace '/^#ifdef __unix__$/,/^#endif$/ {if (/^#ifdef|^#endif/) next; print; next} 1' "$BUILD/src/sdl/i_main.c"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ]; then
+
+        # Enable #include <poll.h> to fix error: use of undeclared identifier 'POLLIN'.
+        gawk -i inplace '{gsub("#include <signal.h>","#include <signal.h>\n#include <poll.h>"); print}' "$BUILD/src/sdl/i_system.c"
+
+        # Patching error use of undeclared identifier 'errno'.
+        gawk -i inplace '/^#ifdef __unix__$/,/^#endif$/ {if (/^#ifdef|^#endif/) next; print; next} 1' "$BUILD/src/sdl/i_main.c"
+
+        # Enable subdirectory assets to allow cmake to copy assets.
+        gawk -i inplace '{gsub("#add_subdirectory\\(assets\\)","add_subdirectory(assets)"); print}' "$BUILD/CMakeLists.txt"
+
+        # Adding missing assets to CMakeLists.txt.
+        gawk -i inplace -v RS="" '{gsub("set\\(SRB2_ASSET_HASHED\n\"srb2.srb;\\\\","set(SRB2_ASSET_HASHED\n\"srb2.srb;\\\nextra.kart;\\\nextra2.kart;\\\nkv.kart;\\\nneptune.kart;\\"); print}' "$BUILD/assets/CMakeLists.txt"
+
+    elif [ "$BUILD" = "$BUILDPATH/blankart" ]; then
+
+        # Fixing linking error "Undefined symbols for architecture x86_64: "OSX_GetResourcesPath(char*)", referenced from:_I_LocateWad in i_system.cpp.o".
+        gawk -i inplace '{gsub("void OSX_GetResourcesPath\\(char \\* buffer\\);","#ifdef __cplusplus\nextern \"C\" {\n#endif\n\nvoid OSX_GetResourcesPath(char * buffer);\n\n#ifdef __cplusplus\n}\n#endif\n"); print}' "$BUILD/src/sdl/macosx/mac_resources.h"
+
+        # Removing code from src/libdivide.h to fix "error: no member named 'denom' in 'divider<T, ALGO>'".
+        gawk -i inplace '/bool operator==\(const divider<T, ALGO> &other\) const {/ {suppress=1} /bool operator!=\(const divider<T, ALGO> &other\) const { return !\(\*this == other\); }/ {suppress=0} !suppress' "$BUILD/src/libdivide.h"
+
+        # Replacing assets filenames.
+        gawk -i inplace -v home="$BUILD" '
+BEGIN {
+    # Dynamically generate PK3 entries from folder names.
+    asset_path = home "/build/blankart-assets/src"
+    cmd = "find \"" asset_path "\" -mindepth 1 -maxdepth 1 -type d -exec basename {} \\; 2>/dev/null"
+    while ( (cmd | getline dir) > 0 ) {
+        pk3_entries = pk3_entries "        \"" dir ".pk3\"\n"
+    }
+    close(cmd)
+}
+
+/^set\(SRB2_ASSETS_GAME/ {
+    print $0
+    # Static entries.
+    print "        \"bonuschars.kart\""
+    print "        \"music.kart\""
+    print "        \"sounds.kart\""
+    print "        \"srb2.srb\""
+    print "        \"mdls.dat\""
+    print "        \"main.pk3\""
+    print "        \"gfx.kart\""
+    print "        \"textures.kart\""
+    print "        \"chars.kart\""
+    print "        \"maps.kart\""
+
+    # Add dynamic PK3 entries if any folders exist.
+    if (pk3_entries) {
+        printf "%s", pk3_entries
+    }
+
+    # Preserve empty line before closing parenthesis.
+    print ""
+    in_block = 1
+    next
+}
+
+in_block && /^)/ {
+    print $0
+    in_block = 0
+    next
+}
+
+in_block {
+    next
+}
+
+# Global replacement for "models" to "mdls" in remaining lines.
+{
+    gsub("models", "mdls")
+    print
+}
+' "$BUILD/assets/CMakeLists.txt"
+
+        # Patching BlanKart to remove uncommitted changes message from main menu.
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/m_menu.c"
+
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
+
+        # Removing patch.pk3 and README-SDL.txt from CMakeLists.txt, if they are nonexistent.
+        if [ ! -f "$BUILD/assets/installer/patch.pk3" ]; then
+
+            gawk -i inplace '{gsub("\"patch.pk3\"",""); print}' "$BUILD/assets/CMakeLists.txt"
+
+        fi
+
+        if [ ! -f "$BUILD/assets/installer/README-SDL.txt" ]; then
+
+            gawk -i inplace '{gsub("\"README-SDL.txt\"",""); print}' "$BUILD/assets/CMakeLists.txt"
+
+        fi
+
+        # Patching SRB2 Ring Racers' builds to remove uncommitted changes message from main menu.
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/f_finale.c"
+        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/d_netcmd.c"
+
+        # Fixing issue of out of range error with hex escape \x85A by changing to octal equivalent.
+        gawk -i inplace '{gsub("CONS_Printf\\(\"\\\\x85Access denied.\\\\n\"\\);","CONS_Printf(\"\\205Access denied.\\n\");"); print}' "$BUILD/src/d_netcmd.c"
+
+        # Fixing error: implicit instantiation of undefined template 'std::char_traits<std::byte>'.
+        gawk -i inplace '{gsub("js = json::from_ubjson\\(slice\\).template get<StandingsJson>\\(\\);","auto char_span = tcb::span(reinterpret_cast<const char*>(slice.data()), slice.size());\n\t\tjs = json::from_ubjson(char_span).template get<StandingsJson>();"); print}' "$BUILD/src/g_demo.cpp"
+
+        # Fixing error: no member named 'denom' in 'divider<T, ALGO>' for Ring Racers Noire, HEP2, HEP3, Freaky Build, Radio Racers.
+        gawk -i inplace '{gsub(/other\.denom/, "other.div.denom")} 1' "$BUILD/src/libdivide.h"
+
+        # Dirty workaround for buffer overflow from Noa options menu for Ring Racers HEP3.
+        if [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ]; then
+
+            gawk -i inplace '{gsub("include\\(CheckCXXCompilerFlag\\)","include(CheckCXXCompilerFlag)\n\nset(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=0\")\nset(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} -D_FORTIFY_SOURCE=0\")"); print}' "$BUILD/CMakeLists.txt"
+
+        # Adding missing assets for Ring Racers Freaky Build.
+        elif [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+
+            gawk -i inplace '{gsub("\"bios.pk3\"","\"bios.pk3\"\n\"FreakyBuildAssets.pk3\"\n\"PhotosensHardcodeTest.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
+
+        elif [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
+
+            # Adding missing assets for Radio Racers.
+            gawk -i inplace '{gsub("\"bios.pk3\"","\"bios.pk3\"\n\"radioracers.pk3\"\n\"radioracers_plus.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
+
+            # Fixed in src/radioracers/hud/rr_hud.cpp: error: 'CONST' was not declared in this scope and error: cannot bind non-const lvalue reference of type 'tic_t&' {aka 'unsigned int&'}.
+            gawk -i inplace '{gsub("CONST","const"); gsub(/size_t& frame = emoteFrameMap\[emote\];/,"&\n    std::unordered_map<emote_t*, tic_t> emoteLastUpdate;");gsub(/size_t& frame = chatEmoteFrameMap\[emote\];/,"&\n    std::unordered_map<emote_t*, tic_t> chatEmoteLastUpdate;");print}' "$BUILD/src/radioracers/hud/rr_hud.cpp"
+
+        fi
+
+    # Replace path to liblzf in Makefile.
+    elif [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
+
+        cd "$BUILD" || exit
+        gawk -i inplace '{gsub("_LDLIBS=-l:liblzf.so","_LDLIBS=-L'$SRB2BLDPREFIX'/lib"); print}' "$BUILD/makefile"
+
+    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
+
+        cd "$BUILD" || exit
+
+        # Replacing build script for some kartmaker builds.
+        if [ -n "$ISNET" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ]; then
+
+            curl -RL https://raw.githubusercontent.com/BombchuLink/kartmaker/master/build.sh -o "$BUILD/build.sh"
+            chmod 755 "$BUILD/build.sh"
+
+        fi
+
+        # Replacing shebang #!/bin/env sh to #!/bin/sh due to run error with build script.
+        gawk -i inplace '{gsub("#!/bin/env sh","#!/bin/sh"); print}' "$BUILD/build.sh"
+
+    fi
+
+    # Modify the build's configuration names to avoid conflicts between installed builds.
+    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-reveries" ] || [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ] || [ "$BUILD" = "$BUILDPATH/srb2-edit" ] || [ "$BUILD" = "$BUILDPATH/srb2-project-astral" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2classic\"","#define DEFAULTDIR \"srb2classic'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ] || [ "$BUILD" = "$BUILDPATH/srb2-fusion-advance" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2_21\"","#define DEFAULTDIR \"srb2_2.1'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-top-down" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2td'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/xsrb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-sf94-serv" ] || [ "$BUILD" = "$BUILDPATH/srb2-riders" ] || [ "$BUILD" = "$BUILDPATH/super-srb2-kart-z" ] || [ "$BUILD" = "$BUILDPATH/sbb2" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb21094\"","#define DEFAULTDIR \"srb2fd'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-jte" ] || [ "$BUILD" = "$BUILDPATH/shufflarb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-live" ] || [ "$BUILD" = "$BUILDPATH/srb2-loz" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2fd'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2kart\"","#define DEFAULTDIR \"srb2kart'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/blankart" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2kart-v2\"","#define DEFAULTDIR \"srb2kart-v2'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
+
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"ringracers\"","#define DEFAULTDIR \"ringracers'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
+
+        SRB2CCONFDIR=$(gawk -F'\"' '/DEFAULTDIR/ {gsub(" |\\.",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null | head -n1)
+        gawk -i inplace '{gsub("#define DEFAULTDIR \"'$SRB2CCONFDIR'\"","#define DEFAULTDIR \"'$SRB2CCONFDIR'c'$CUSTOMDIR''$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
+
+    fi
+
     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Preparing and displaying $BUILDNAME's configure options for compilation. Please wait..."
 
     # Display content of Makefile for a good view of available compilation flags.
@@ -13395,31 +13828,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    # Download and extract assets.
-    if [ -z "$(find "$BUILD/build/assets/installer/"* -mindepth 1 -maxdepth 1 2> /dev/null | head -n1)" ] && ([ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]); then
-
-        if [ -n "$ISNET" ]; then
-
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading and extracting $BUILDNAME's assets. Please wait..."
-
-        else
-
-            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Extracting $BUILDNAME's assets. Please wait..."
-
-        fi
-
-        if [ "$GITVER" != "$GITDEFVER" ] || [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
-
-            extractmacoscustomassets
-
-        else
-
-            extractmacosassets
-
-        fi
-
-    fi
-
     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing missing dependencies. Please wait..."
     sudo_ping
 
@@ -13430,7 +13838,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
+    if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
 
         # Download vcpkg's source code, build and install it.
         if [ ! -d "$SRB2BLDROOT/libraries/vcpkg/.git" ]; then
@@ -13933,7 +14341,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
                 fi
 
-                git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -q "libopenmpt-$MACOSOPENMPTVER"
+                git -C "$SRB2BLDROOT/libraries/libopenmpt" checkout -qf "libopenmpt-$MACOSOPENMPTVER"
 
             fi
 
@@ -14360,262 +14768,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
     fi
 
-    $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Patching $BUILDNAME's source code. Please wait..."
-
-    # Removing patch.pk3 and README-SDL.txt from CMakeLists.txt, if they are nonexistent.
-    if [ ! -f "$BUILD/assets/installer/patch.pk3" ]; then
-
-        gawk -i inplace '{gsub("\"patch.pk3\"",""); print}' "$BUILD/assets/CMakeLists.txt"
-
-    fi
-
-    if [ ! -f "$BUILD/assets/installer/README-SDL.txt" ]; then
-
-        gawk -i inplace '{gsub("\"README-SDL.txt\"",""); print}' "$BUILD/assets/CMakeLists.txt"
-
-    fi
-
-    if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/xsrb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-sf94-serv" ] && [ "$BUILD" != "$BUILDPATH/srb2-riders" ] && [ "$BUILD" != "$BUILDPATH/super-srb2-kart-z" ] && [ "$BUILD" != "$BUILDPATH/sbb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/shufflarb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-live" ] && [ "$BUILD" != "$BUILDPATH/srb2-loz" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimate-zone-builder" ] && [ "$BUILD" != "$BUILDPATH/hig-voltage-ring" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
-
-        # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
-        gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)"); print}' "$BUILD/CMakeLists.txt"
-        gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)",""); print}' "$BUILD/src/CMakeLists.txt"
-
-    fi
-
-    # Patching SRB2 Uncapped Plus' source code to fix error with implicit declaration of function R_ResetFirstLerp is invalid in C99 [-Werror,-Wimplicit-function-declaration]. Thanks Lach for help with this.
-    if [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
-
-        gawk -i inplace '{gsub("#include \"doomdef.h\"","#include \"r_fps.h\"\n#include \"doomdef.h\""); print}' "$BUILD/src/p_setup.c"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-reveries" ]; then
-
-        # Patching SRB2 Reveries' source code to add missing file reveries.pk3.
-        gawk -i inplace '{gsub("set\\(SRB2_ASSETS_GAME","set(SRB2_ASSETS_GAME\n\t\"reveries.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
-
-        # Adding missing files to CMakeLists.txt due to linking errors.
-        gawk -i inplace '{gsub("p_floor.c","p_floor.c\n\tp_haptic.c"); print}' "$BUILD/src/CMakeLists.txt"
-        gawk -i inplace '{gsub("ogl_sdl.c","ogl_sdl.c\n\ti_gamepad.c"); print}' "$BUILD/src/sdl/CMakeLists.txt"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-top-down" ]; then
-
-        # Change path to CMakeLists.txt for assets to be found by Cmake.
-        gawk -i inplace '{gsub("add_subdirectory\\(assets\\)","add_subdirectory(assets/installer)"); print}' "$BUILD/CMakeLists.txt"
-
-        # Renaming SRB2 Top Down .app filename to proper name to avoid issue of not copying compiled game and icons.
-        gawk -i inplace '{gsub("Sonic Robo Blast 2","Sonic Robo Blast 2 Top Down"); print}' "$BUILD/src/sdl/CMakeLists.txt"
-
-        # Replacing condition, so assets are installed to .app file.
-        gawk -i inplace '{gsub("CLANG","${CMAKE_SYSTEM} MATCHES Darwin"); print}' "$BUILD/assets/CMakeLists.txt"
-
-    # Patching SRB2 Persona's source code to fix error with implicit declaration of function W_GetNumForNameMusic is invalid in C99 [-Werror,-Wimplicit-function-declaration].
-    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
-
-        gawk -i inplace '/\/\/ W_GetNumForNameMusic/ {suppress=1} /\/\/ Like W_GetNumForName/ {suppress=0} !suppress' "$BUILD/src/w_wad.c"
-        gawk -i inplace -v RS="^$" '{gsub("\\/\\/\\/ ------------------------\n\nstatic lumpnum_t S_GetMusicLumpNum\\(const char \\*mname\\)","\nlumpnum_t W_GetNumForNameMusic(const char *name)\n{\n\tlumpnum_t i;\n\n\ti = W_CheckNumForName(name);\n\n\treturn i;\n}\n\nstatic lumpnum_t S_GetMusicLumpNum(const char *mname)"); print}' "$BUILD/src/s_sound.c"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ]; then
-
-        # Enable #include <poll.h> to fix error: use of undeclared identifier 'POLLIN'.
-        gawk -i inplace '{gsub("#include <signal.h>","#include <signal.h>\n#include <poll.h>"); print}' "$BUILD/src/sdl/i_system.c"
-
-        # Patching error use of undeclared identifier 'errno'.
-        gawk -i inplace '/^#ifdef __unix__$/,/^#endif$/ {if (/^#ifdef|^#endif/) next; print; next} 1' "$BUILD/src/sdl/i_main.c"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ]; then
-
-        # Enable #include <poll.h> to fix error: use of undeclared identifier 'POLLIN'.
-        gawk -i inplace '{gsub("#include <signal.h>","#include <signal.h>\n#include <poll.h>"); print}' "$BUILD/src/sdl/i_system.c"
-
-        # Patching error use of undeclared identifier 'errno'.
-        gawk -i inplace '/^#ifdef __unix__$/,/^#endif$/ {if (/^#ifdef|^#endif/) next; print; next} 1' "$BUILD/src/sdl/i_main.c"
-
-        # Enable subdirectory assets to allow cmake to copy assets.
-        gawk -i inplace '{gsub("#add_subdirectory\\(assets\\)","add_subdirectory(assets)"); print}' "$BUILD/CMakeLists.txt"
-
-        # Adding missing assets to CMakeLists.txt.
-        gawk -i inplace -v RS="" '{gsub("set\\(SRB2_ASSET_HASHED\n\"srb2.srb;\\\\","set(SRB2_ASSET_HASHED\n\"srb2.srb;\\\nextra.kart;\\\nextra2.kart;\\\nkv.kart;\\\nneptune.kart;\\"); print}' "$BUILD/assets/CMakeLists.txt"
-
-    elif [ "$BUILD" = "$BUILDPATH/blankart" ]; then
-
-        # Fixing linking error "Undefined symbols for architecture x86_64: "OSX_GetResourcesPath(char*)", referenced from:_I_LocateWad in i_system.cpp.o".
-        gawk -i inplace '{gsub("void OSX_GetResourcesPath\\(char \\* buffer\\);","#ifdef __cplusplus\nextern \"C\" {\n#endif\n\nvoid OSX_GetResourcesPath(char * buffer);\n\n#ifdef __cplusplus\n}\n#endif\n"); print}' "$BUILD/src/sdl/macosx/mac_resources.h"
-
-        # Removing code from src/libdivide.h to fix "error: no member named 'denom' in 'divider<T, ALGO>'".
-        gawk -i inplace '/bool operator==\(const divider<T, ALGO> &other\) const {/ {suppress=1} /bool operator!=\(const divider<T, ALGO> &other\) const { return !\(\*this == other\); }/ {suppress=0} !suppress' "$BUILD/src/libdivide.h"
-
-        # Replacing assets filenames.
-        gawk -i inplace -v home="$HOME" '
-BEGIN {
-    # Dynamically generate PK3 entries from folder names.
-    asset_path = home "/Library/srb2bld/assets/blankart-assets/src"
-    cmd = "find \"" asset_path "\" -mindepth 1 -maxdepth 1 -type d -exec basename {} \\; 2>/dev/null"
-    while ( (cmd | getline dir) > 0 ) {
-        pk3_entries = pk3_entries "        \"" dir ".pk3\"\n"
-    }
-    close(cmd)
-}
-
-/^set\(SRB2_ASSETS_GAME/ {
-    print $0
-    # Static entries.
-    print "        \"bonuschars.kart\""
-    print "        \"music.kart\""
-    print "        \"sounds.kart\""
-    print "        \"srb2.srb\""
-    print "        \"mdls.dat\""
-    print "        \"main.pk3\""
-    print "        \"gfx.kart\""
-    print "        \"textures.kart\""
-    print "        \"chars.kart\""
-    print "        \"maps.kart\""
-
-    # Add dynamic PK3 entries if any folders exist.
-    if (pk3_entries) {
-        printf "%s", pk3_entries
-    }
-
-    # Preserve empty line before closing parenthesis.
-    print ""
-    in_block = 1
-    next
-}
-
-in_block && /^)/ {
-    print $0
-    in_block = 0
-    next
-}
-
-in_block {
-    next
-}
-
-# Global replacement for "mdls" to "models" in remaining lines.
-{
-    gsub("models", "mdls")
-    print
-}
-' "$BUILD/assets/CMakeLists.txt"
-
-        # Patching BlanKart to remove uncommitted changes message from main menu.
-        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/m_menu.c"
-
-    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
-
-        # Removing patch.pk3 and README-SDL.txt from CMakeLists.txt, if they are nonexistent.
-        if [ ! -f "$BUILD/assets/installer/patch.pk3" ]; then
-
-            gawk -i inplace '{gsub("\"patch.pk3\"",""); print}' "$BUILD/assets/CMakeLists.txt"
-
-        fi
-
-        if [ ! -f "$BUILD/assets/installer/README-SDL.txt" ]; then
-
-            gawk -i inplace '{gsub("\"README-SDL.txt\"",""); print}' "$BUILD/assets/CMakeLists.txt"
-
-        fi
-
-        # Patching SRB2 Ring Racers' builds to remove uncommitted changes message from main menu.
-        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/f_finale.c"
-        gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/d_netcmd.c"
-
-        # Fixing issue of out of range error with hex escape \x85A by changing to octal equivalent.
-        gawk -i inplace '{gsub("CONS_Printf\\(\"\\\\x85Access denied.\\\\n\"\\);","CONS_Printf(\"\\205Access denied.\\n\");"); print}' "$BUILD/src/d_netcmd.c"
-
-        # Fixing error: implicit instantiation of undefined template 'std::char_traits<std::byte>'.
-        gawk -i inplace '{gsub("js = json::from_ubjson\\(slice\\).template get<StandingsJson>\\(\\);","auto char_span = tcb::span(reinterpret_cast<const char*>(slice.data()), slice.size());\n\t\tjs = json::from_ubjson(char_span).template get<StandingsJson>();"); print}' "$BUILD/src/g_demo.cpp"
-
-        # Fixing error: no member named 'denom' in 'divider<T, ALGO>' for Ring Racers Noire, HEP2, HEP3, Freaky Build.
-        gawk -i inplace '{gsub(/other\.denom/, "other.div.denom")} 1' "$BUILD/src/libdivide.h"
-
-        # Dirty workaround for buffer overflow from Noa options menu for Ring Racers HEP3.
-        if [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ]; then
-
-            gawk -i inplace '{gsub("include\\(CheckCXXCompilerFlag\\)","include(CheckCXXCompilerFlag)\n\nset(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=0\")\nset(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} -D_FORTIFY_SOURCE=0\")"); print}' "$BUILD/CMakeLists.txt"
-
-        # Adding missing assets for Ring Racers Freaky Build.
-        elif [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
-
-            gawk -i inplace '{gsub("\"bios.pk3\"","\"bios.pk3\"\n\"FreakyBuildAssets.pk3\"\n\"PhotosensHardcodeTest.pk3\""); print}' "$BUILD/assets/CMakeLists.txt"
-
-        fi
-
-    # Replace path to liblzf in Makefile.
-    elif [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
-
-        cd "$BUILD" || exit
-        gawk -i inplace '{gsub("_LDLIBS=-l:liblzf.so","_LDLIBS=-L'$SRB2BLDPREFIX'/lib"); print}' "$BUILD/makefile"
-
-    elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
-
-        cd "$BUILD" || exit
-
-        # Replacing build script for some kartmaker builds.
-        if [ -n "$ISNET" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ]; then
-
-            curl -RL https://raw.githubusercontent.com/BombchuLink/kartmaker/master/build.sh -o "$BUILD/build.sh"
-            chmod 755 "$BUILD/build.sh"
-
-        fi
-
-        # Replacing shebang #!/bin/env sh to #!/bin/sh due to run error with build script.
-        gawk -i inplace '{gsub("#!/bin/env sh","#!/bin/sh"); print}' "$BUILD/build.sh"
-
-    fi
-
-    # Modify the build's configuration names to avoid conflicts between installed builds.
-    if [ "$BUILD" = "$BUILDPATH/srb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ] || [ "$BUILD" = "$BUILDPATH/srb2-netplus" ] || [ "$BUILD" = "$BUILDPATH/srb2-reveries" ] || [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ] || [ "$BUILD" = "$BUILDPATH/srb2-project-astral" ] || [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2classic\"","#define DEFAULTDIR \"srb2classic'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ] || [ "$BUILD" = "$BUILDPATH/srb2-fusion-advance" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2_21\"","#define DEFAULTDIR \"srb2_2.1'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-top-down" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2td'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/xsrb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-sf94-serv" ] || [ "$BUILD" = "$BUILDPATH/srb2-riders" ] || [ "$BUILD" = "$BUILDPATH/super-srb2-kart-z" ] || [ "$BUILD" = "$BUILDPATH/sbb2" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2_2.0'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb21094\"","#define DEFAULTDIR \"srb2fd'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-jte" ] || [ "$BUILD" = "$BUILDPATH/shufflarb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-live" ] || [ "$BUILD" = "$BUILDPATH/srb2-loz" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2fd'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2\"","#define DEFAULTDIR \"srb2persona'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2kart\"","#define DEFAULTDIR \"srb2kart'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/blankart" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"srb2kart-v2\"","#define DEFAULTDIR \"srb2kart-v2'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ]; then
-
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"ringracers\"","#define DEFAULTDIR \"ringracers'$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
-
-        SRB2CCONFDIR=$(gawk -F'\"' '/DEFAULTDIR/ {gsub(" |\\.",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null | head -n1)
-        gawk -i inplace '{gsub("#define DEFAULTDIR \"'$SRB2CCONFDIR'\"","#define DEFAULTDIR \"'$SRB2CCONFDIR'c'$CUSTOMDIR''$GITVERCONF'\""); print}' "$BUILD/src/doomdef.h"
-
-    fi
-
     # Compile the build's source code.
     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $BUILDNAME. Please wait..."
 
@@ -14639,7 +14791,7 @@ in_block {
 
     fi
 
-    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
+    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/ultimateloweebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
 
         # Get app icon.
         mkdir -p "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
@@ -15301,6 +15453,20 @@ installtowindows() {
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
+    elif [ "$BUILD" = "$BUILDPATH/srb2-edit" ]; then
+
+        SRB2WINDIR="SRB2 Edit"
+        SRB2WINMENUDIR="Sonic Robo Blast 2 Edit"
+        SRB2WINBIN=$(find "$BUILD/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        mkdir -p "$SRB2WINPATH"
+        cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+
     elif [ "$BUILD" = "$BUILDPATH/srb2-project-astral" ]; then
 
         SRB2WINDIR="SRB2 Project Astral"
@@ -15723,6 +15889,19 @@ installtowindows() {
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
+    elif [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
+
+        SRB2WINDIR="Radio Racers"
+        SRB2WINMENUDIR="Radio Racers"
+        SRB2WINBIN=$(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINPATH="$HOME/SRB2 Games/$SRB2WINDIR"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        mkdir -p "$SRB2WINPATH"
+        cp -f $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
+        $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
+
     elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
 
         SRB2WINDIR="SRB2 Custom $CUSTOMDIR"
@@ -15831,6 +16010,18 @@ installtowindows() {
         cp -rf "$BUILD/Build/"* "$SRB2WINPATH/$SRB2WINDIR"
         $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR/$SRB2WINDIR.bat"
 
+    elif [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ]; then
+
+        SRB2WINDIR="Ultimate Lowee Builder"
+        SRB2WINMENUDIR="Ultimate Lowee Builder"
+        SRB2WINBIN=$(find "$BUILD/Build" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
+        SRB2WINPATH="$HOME/SRB2 Software"
+        SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
+        rm -rf "$BUILD/Build/AppDir" "$BUILD/Build/builder"
+        mkdir -p "$SRB2WINPATH/$SRB2WINDIR"
+        cp -rf "$BUILD/Build/"* "$SRB2WINPATH/$SRB2WINDIR"
+        $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR/$SRB2WINDIR.bat"
+
     elif [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
 
         SRB2WINDIR="High Voltage Ring"
@@ -15859,7 +16050,7 @@ installtowindows() {
     fi
 
     # Using VBScript to create menu entry for Windows.
-    if [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
+    if [ "$BUILD" = "$BUILDPATH/wadcli" ] || [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ] || [ "$BUILD" = "$BUILDPATH/slade" ] || [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ] || [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
 
         cat > "$BUILD/build/CreateShortcut.vbs" << WINMENUSHORTCUT
 Set oWS = CreateObject("WScript.Shell")
@@ -16060,7 +16251,7 @@ preparebuild() {
 
             ASSETAPPDIR="RingRacers"
 
-        elif [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
+        elif [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/ultimateloweebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
 
             ASSETAPPDIR="SRB2"
 
@@ -16071,7 +16262,7 @@ preparebuild() {
     mkdir -p "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
     cd "$BUILD" || exit
 
-    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
+    if [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimatezonebuilder" ] && [ "$BUILD" != "$BUILDPATH/ultimateloweebuilder" ] && [ "$BUILD" != "$BUILDPATH/highvoltagering" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
 
         if [ "$GITVER" != "$GITDEFVER" ]; then
 
@@ -16488,7 +16679,19 @@ upgrade() {
                 unset CONF CUSTOMDIR UPGRADEBUILD
                 export BUILD="$BUILDPATH/$u/$d"
                 export GITURL=$(git -C "$BUILD" remote -v 2> /dev/null | gawk '/fetch/ {print $2}')
-                export GITVER=$(tail -n+2 "$BUILD/.comrev" 2> /dev/null)
+                export GITDEFVER=$(gawk -F'/' '{print $NF}' "$BUILD/.git/refs/remotes/origin/HEAD" 2> /dev/null)
+
+                if [ "$(tail -n+2 "$BUILD/.comrev" 2> /dev/null)" != "$GITDEFVER" ]; then
+
+                    export GITVER=$(tail -n+2 "$BUILD/.comrev" 2> /dev/null)
+                    export GITVERCONF="$GITVER"
+
+                else
+
+                    unset GITVER
+
+                fi
+
                 export CUSTOMDIR="$d"
                 upgradetasks
 
@@ -16499,7 +16702,9 @@ upgrade() {
             unset CONF CUSTOMDIR UPGRADEBUILD
             export BUILD="$BUILDPATH/$u"
             export GITURL=$(git -C "$BUILD" remote -v 2> /dev/null | gawk '/fetch/ {print $2}')
+            export GITDEFVER=$(gawk -F'/' '{print $NF}' "$BUILD/.git/refs/remotes/origin/HEAD" 2> /dev/null)
             export GITVER=$(tail -n+2 "$BUILD/.comrev" 2> /dev/null)
+            export GITVERCONF="$GITVER"
             upgradetasks
 
         fi
