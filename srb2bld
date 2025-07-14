@@ -8177,7 +8177,11 @@ if [ "\$ANDROID" != "1" ]; then
 
     else
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
+        if [  "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
+
+            convert "\$BUILD/src/win32/srb2classic.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+        elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
 
             convert "\$BUILD/src/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
@@ -12401,7 +12405,7 @@ UZB
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/aseprite" "$SRB2BINARYLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/share/aseprite"* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
-            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
+            $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/icon.png" "$SRB2ICONLNXPATH"
 
         fi
 
@@ -13317,24 +13321,24 @@ installtomacos() {
 
     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Patching $BUILDNAME's source code. Please wait..."
 
-    # Removing patch.pk3 and README-SDL.txt from CMakeLists.txt, if they are nonexistent.
-    if [ ! -f "$BUILD/assets/installer/patch.pk3" ]; then
-
-        gawk -i inplace '{gsub("\"patch.pk3\"",""); print}' "$BUILD/assets/CMakeLists.txt"
-
-    fi
-
-    if [ ! -f "$BUILD/assets/installer/README-SDL.txt" ]; then
-
-        gawk -i inplace '{gsub("\"README-SDL.txt\"",""); print}' "$BUILD/assets/CMakeLists.txt"
-
-    fi
-
     if [ "$BUILD" != "$BUILDPATH/srb2-2.0" ] && [ "$BUILD" != "$BUILDPATH/xsrb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-sf94-serv" ] && [ "$BUILD" != "$BUILDPATH/srb2-riders" ] && [ "$BUILD" != "$BUILDPATH/super-srb2-kart-z" ] && [ "$BUILD" != "$BUILDPATH/sbb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-final-demo" ] && [ "$BUILD" != "$BUILDPATH/srb2-jte" ] && [ "$BUILD" != "$BUILDPATH/shufflarb2" ] && [ "$BUILD" != "$BUILDPATH/srb2-live" ] && [ "$BUILD" != "$BUILDPATH/srb2-loz" ] && [ "$BUILD" != "$BUILDPATH/wadcli" ] && [ "$BUILD" != "$BUILDPATH/kartmaker" ] && [ "$BUILD" != "$BUILDPATH/neptunefm" ] && [ "$BUILD" != "$BUILDPATH/kartmaker-ring-racers" ] && [ "$BUILD" != "$BUILDPATH/followermaker" ] && [ "$BUILD" != "$BUILDPATH/slade" ] && [ "$BUILD" != "$BUILDPATH/ultimate-zone-builder" ] && [ "$BUILD" != "$BUILDPATH/hig-voltage-ring" ] && [ "$BUILD" != "$BUILDPATH/aseprite" ]; then
 
         # Patching CMakeLists.txt to prevent macOS from loading external frameworks prior to libraries installed by Homebrew.
         gawk -i inplace '{gsub("add_definitions\\(-DMACOSX\\)","add_definitions(-DMACOSX)\n        set(CMAKE_FIND_FRAMEWORK LAST)"); print}' "$BUILD/CMakeLists.txt"
         gawk -i inplace '{gsub("set\\(CMAKE_C_FLAGS \\${CMAKE_C_FLAGS} -Wno-trigraphs\\)",""); print}' "$BUILD/src/CMakeLists.txt"
+
+        # Removing patch.pk3 and README-SDL.txt from CMakeLists.txt, if they are nonexistent.
+        if [ ! -f "$BUILD/assets/installer/patch.pk3" ]; then
+
+            gawk -i inplace '{gsub("\"patch.pk3\"",""); print}' "$BUILD/assets/CMakeLists.txt"
+
+        fi
+
+        if [ ! -f "$BUILD/assets/installer/README-SDL.txt" ]; then
+
+            gawk -i inplace '{gsub("\"README-SDL.txt\"",""); print}' "$BUILD/assets/CMakeLists.txt"
+
+        fi
 
     fi
 
@@ -14795,7 +14799,17 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
         # Get app icon.
         mkdir -p "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
-        makeicns -in "$BUILD/src/win32/Srb2win.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
+
+        if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
+
+            makeicns -in "$BUILD/src/win32/srb2classic.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
+
+        else
+
+            makeicns -in "$BUILD/src/win32/Srb2win.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
+
+        fi
+
         gawk -i inplace -v RS= '{sub("<key>CFBundleIconFile</key>\n	<string></string>","<key>CFBundleIconFile</key>\n	<string>Srb2mac</string>"); print}' "$BUILD/build/bin/$BUILDNAME.app/Contents/Info.plist"
 
         # Create $SRB2BLDPREFIX/lib, if does not exist.
