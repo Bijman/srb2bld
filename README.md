@@ -51,7 +51,8 @@ As for macOS users, they need to install these additional dependencies:
 - P7zip,
 - Unrar/Rar,
 - Makeicns,
-- Xxhash.
+- Xxhash,
+- Python-Pillow.
 
 # Dependencies Installation
 **Linux:**
@@ -67,6 +68,8 @@ As for macOS users, they need to install these additional dependencies:
 - Fedora Silverblue/Fedora Kinoite/Fedora Sway/Fedora Budgie/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder `,
 
 - RHEL/RHEL based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+
+- Mageia/Mageia based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow lib64fuse2 lib64zlib1 patchelf gdk-pixbuf2.0 flatpak flatpak-builder`,
 
 - openSUSE Leap/openSUSE Tumbleweed/openSUSE Leap based/openSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils file ncurses curl gawk docker stow libfuse2 libz1 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
 
@@ -99,8 +102,8 @@ As for macOS users, they need to install these additional dependencies:
 
 **macOS:**
 1. In terminal enter this following command:
-- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl makeicns nasm xxhash`,
-- MacPorts: `sudo port -Ncb install cmake autoconf automake pkgconfig libtool gawk stow perl5.28 libiconv p7zip unrar curl makeicns nasm xxhash`.
+- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl makeicns nasm xxhash pillow`,
+- MacPorts: `sudo port -Ncb install cmake autoconf automake pkgconfig libtool gawk stow perl5.28 libiconv p7zip unrar curl makeicns nasm xxhash py313-pillow`.
 
 # Installation
 **Linux:**
@@ -145,11 +148,11 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 15-06-2025)
+# Compatibility (as of 31-07-2025)
 |                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 v2.2 Classic        |          ✅           |         🟨           |        ❔         |        ✅       |       🟨      |
+| SRB2 v2.2 Classic        |          ✅           |         🟨           |        ❔         |        ✅       |       ✅      |
 | SRB2 Uncapped PLUS       |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus             |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 Reveries            |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -291,6 +294,8 @@ Usage: srb2bld [OPTIONS]
          - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686",
 
          - RHEL/RHEL based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686",
+
+         - Mageia/Mageia based: "sudo dnf config-manager --set-enabled mageia-i586 updates-i586 && sudo dnf install libfuse2 libzlib1",
 
          - openSUSE/openSUSE based: "sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit",
 

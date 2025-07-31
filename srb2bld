@@ -4,11 +4,11 @@
 
 if [ "$SRB2BLDDEBUG" = "1" ]; then
 
-    set -e -x
+    set -e -x +f
 
 else
 
-    set -e
+    set -e +f
 
 fi
 
@@ -171,6 +171,7 @@ UBUVER="bionic"    # Ubuntu 18.04 LTS
 UBUSOFTVER="jammy" # Ubuntu 22.04 LTS
 UBUUZBVER="bionic" # Ubuntu 18.04 LTS
 SRB2ASSETURL="https://api.github.com/repos/STJr/SRB2/releases"
+SRB2CLASSICASSETURL="https://codeberg.org/srb2classic/srb2classic-assets/archive/master.zip"
 SRB2NETPLUSASSETURL="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.9/SRB2-v229-Patch.zip"
 SRB2REVERIESASSETURL="https://codeberg.org/api/v1/repos/lavla/cherry/releases"
 #SRB2TSOURDT3RDASSETURL="https://mb.srb2.org/addons/the-story-of-uncapped-revengence-discord-the-3rd.4932/download"
@@ -556,16 +557,13 @@ appimage() {
 , appimageTools ? pkgs.appimageTools
 }:
 let
-  name = "appimagetool";
-  src = ./appimagetool;
+  pname = "appimagetool";
+  version = "1.0";  # Replace with actual version
+  src = ./appimagetool;  # Path to your AppImage file
 in
 appimageTools.wrapType2 {
-  inherit name src;
-
-  # Enable 32-bit support
-  multiArch = true;
-
-  # Optional: Add additional 32-bit packages if needed
+  inherit pname version src;
+  multiArch = true;  # Enable 32-bit support
   extraPkgs = pkgs: with pkgs; [
     pkgsi686Linux.zlib
   ];
@@ -579,11 +577,12 @@ NIX
 , appimageTools ? pkgs.appimageTools
 }:
 let
-  name = "appimagetool";
-  src = ./appimagetool;
+  pname = "appimagetool";
+  version = "1.0";  # Replace with your AppImage's actual version
+  src = ./appimagetool;  # Path to your AppImage file
 in
 appimageTools.wrapType2 {
-  inherit name src;
+  inherit pname version src;
 }
 NIX
 
@@ -1982,7 +1981,7 @@ cleansource() {
 
     if [ "$LNXOSNAME" = "NixOS" ]; then
 
-        rm -rf "/tmp/flake-build"
+        rm -rf "$NIXOSFLAKEBUILDPATH"
 
     fi
 }
@@ -2009,11 +2008,11 @@ containerentry() {
 
     if [ "$SRB2BLDDEBUG" = "1" ]; then
 
-        set -e -x
+        set -e -x +f
 
     else
 
-        set -e
+        set -e +f
 
     fi
 
@@ -2043,6 +2042,7 @@ containerentry() {
     export GITHUB_TOKEN="$GITHUB_TOKEN"
     export FILETYPE="$FILETYPE"
     export SRB2ASSETURL="$SRB2ASSETURL"
+    export SRB2CLASSICASSETURL="$SRB2CLASSICASSETURL"
     export SRB2REVERIESASSETURL="$SRB2REVERIESASSETURL"
     export SRB2TSOURDT3RDASSETURL="$SRB2TSOURDT3RDASSETURL"
     export SRB2PROJECTASTRALASSETURL="$SRB2PROJECTASTRALASSETURL"
@@ -2214,7 +2214,7 @@ containerentry() {
 
                 else
 
-                    7z x -y "\$SRB2BLDROOT/assets/SRB2Reveries.zip" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                    7z x -y "\$SRB2BLDROOT/assets/SRB2Reveries.zip" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
                 fi
 
@@ -2227,7 +2227,7 @@ containerentry() {
 
                 fi
 
-                cp -f "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -f "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
                 if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/jukebox.pk3" 2> /dev/null)" ]; then
 
@@ -2236,7 +2236,7 @@ containerentry() {
 
                 fi
 
-                cp -f "\$SRB2BLDROOT/assets/jukebox.pk3" "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -f "\$SRB2BLDROOT/assets/jukebox.pk3" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ]; then
 
@@ -2255,7 +2255,7 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2PA.zip" "*.pk3" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2PA.zip" "*.pk3" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
@@ -2274,7 +2274,7 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.zip" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2P_MP.zip" "*.pk3" "*.wad" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
 
@@ -2288,7 +2288,7 @@ EOF
 
             fi
 
-            7z x -y "\$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+            7z x -y "\$SRB2BLDROOT/assets/SRB2-2.1.exe" "*.srb" "*.dta" "*.dat" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-top-down" ]; then
 
@@ -2300,7 +2300,7 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2TD.zip.001" "*.td" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2TD.zip.001" "*.td" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
 
@@ -2354,7 +2354,7 @@ EOF
 
             fi
 
-            unrar x -y "\$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "\$BUILD/build/AppDir/usr/games/SRB2"
+            unrar x -y "\$SRB2BLDROOT/assets/SRB2-2.0.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             if [ "\$OS" = "Windows" ]; then
 
@@ -2364,7 +2364,7 @@ EOF
 
             if [ "\$BUILD" = "\$BUILDPATH/xsrb2" ]; then
 
-                cp -f "\$BUILD/SRB2/branches/XMOD/bin/Resources/"* "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -f "\$BUILD/SRB2/branches/XMOD/bin/Resources/"* "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-sf94-serv" ]; then
 
@@ -2391,26 +2391,26 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SF94-City.zip" "*.soc" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-                7z x -y "\$SRB2BLDROOT/assets/SF94-MetalSonic.zip" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-                mv -f "\$BUILD/build/AppDir/usr/games/SRB2/metalsonic.wad" "\$BUILD/build/AppDir/usr/games/SRB2/SF94-Metalsonic.wad"
-                7z x -y "\$SRB2BLDROOT/assets/SF94-MetalKnux.zip" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-                mv -f "\$BUILD/build/AppDir/usr/games/SRB2/metalknux.wad" "\$BUILD/build/AppDir/usr/games/SRB2/SF94-Knux.wad"
-                7z x -y "\$SRB2BLDROOT/assets/SF94-Espio.zip" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-                mv -f "\$BUILD/build/AppDir/usr/games/SRB2/espio.wad" "\$BUILD/build/AppDir/usr/games/SRB2/SF94-Espio.wad"
-                7z x -y "\$SRB2BLDROOT/assets/SF94-Nitemare.zip" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-                mv -f "\$BUILD/build/AppDir/usr/games/SRB2/nitemare.wad" "\$BUILD/build/AppDir/usr/games/SRB2/SF94-Nitemare.wad"
-                7z x -y "\$SRB2BLDROOT/assets/SF94-Senku.zip" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-                mv -f "\$BUILD/build/AppDir/usr/games/SRB2/senku.wad" "\$BUILD/build/AppDir/usr/games/SRB2/SF94-Senku.wad"
-                7z x -y "\$SRB2BLDROOT/assets/SF94-Senya.zip" -o"\$BUILD/build/AppDir/usr/games/SRB2"
-                mv -f "\$BUILD/build/AppDir/usr/games/SRB2/senya.wad" "\$BUILD/build/AppDir/usr/games/SRB2/SF94-Senya.wad"
-                unrar x -y "\$SRB2BLDROOT/assets/SF94-Zim.rar" "\$BUILD/build/AppDir/usr/games/SRB2"
-                mv -f "\$BUILD/build/AppDir/usr/games/SRB2/Zim.wad" "\$BUILD/build/AppDir/usr/games/SRB2/SF94-Zim.wad"
-                chmod 644 "\$BUILD/build/AppDir/usr/games/SRB2/"*
+                7z x -y "\$SRB2BLDROOT/assets/SF94-City.zip" "*.soc" "*.wad" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                7z x -y "\$SRB2BLDROOT/assets/SF94-MetalSonic.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                mv -f "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/metalsonic.wad" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/SF94-Metalsonic.wad"
+                7z x -y "\$SRB2BLDROOT/assets/SF94-MetalKnux.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                mv -f "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/metalknux.wad" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/SF94-Knux.wad"
+                7z x -y "\$SRB2BLDROOT/assets/SF94-Espio.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                mv -f "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/espio.wad" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/SF94-Espio.wad"
+                7z x -y "\$SRB2BLDROOT/assets/SF94-Nitemare.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                mv -f "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/nitemare.wad" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/SF94-Nitemare.wad"
+                7z x -y "\$SRB2BLDROOT/assets/SF94-Senku.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                mv -f "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/senku.wad" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/SF94-Senku.wad"
+                7z x -y "\$SRB2BLDROOT/assets/SF94-Senya.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                mv -f "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/senya.wad" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/SF94-Senya.wad"
+                unrar x -y "\$SRB2BLDROOT/assets/SF94-Zim.rar" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                mv -f "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/Zim.wad" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/SF94-Zim.wad"
+                chmod 644 "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/"*
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-riders" ]; then
 
-                cp -f "\$BUILD/SRB2/branches/RIDER/bin/Resources/"*.ridr "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -f "\$BUILD/SRB2/branches/RIDER/bin/Resources/"*.ridr "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
                 if [ -n "\$ISNET" ]; then
 
@@ -2427,7 +2427,7 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2RidersMusic.zip" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2RidersMusic.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/super-srb2-kart-z" ]; then
 
@@ -2437,11 +2437,11 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SuperSRB2KartZ.zip" "*.kart" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SuperSRB2KartZ.zip" "*.kart" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/sbb2" ]; then
 
-                cp -rf "\$BUILD/SRB2/branches/FLAME/bin/Resources/BOMBFiles" "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -rf "\$BUILD/SRB2/branches/FLAME/bin/Resources/BOMBFiles" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
 
@@ -2453,7 +2453,7 @@ EOF
 
             fi
 
-            unrar x -y "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "3drend.dll" "\$BUILD/build/AppDir/usr/games/SRB2"
+            unrar x -y "\$SRB2BLDROOT/assets/SRB2FinalDemo.exe" "*.plr" "*.dta" "*.wpn" "*.srb" "3drend.dll" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ]; then
 
@@ -2463,19 +2463,19 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2JTE.zip" "*.wad" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2JTE.zip" "*.wad" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/shufflarb2" ]; then
 
-                cp -rf "\$BUILD/SRB21094/branches/JTESHUFFLE/data/"* "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -rf "\$BUILD/SRB21094/branches/JTESHUFFLE/data/"* "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-live" ]; then
 
-                cp -rf "\$BUILD/SRB21094/branches/LIVE/data/"* "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -rf "\$BUILD/SRB21094/branches/LIVE/data/"* "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-loz" ]; then
 
-                cp -rf "\$BUILD/SRB21094/branches/LOZ/data/"* "\$BUILD/build/AppDir/usr/games/SRB2"
+                cp -rf "\$BUILD/SRB21094/branches/LOZ/data/"* "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
 
@@ -2517,7 +2517,7 @@ EOF
 
                 fi
 
-                7z e -y "\$SRB2BLDROOT/assets/SRB2KartHEP.zip" "*/*.kart" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+                7z e -y "\$SRB2BLDROOT/assets/SRB2KartHEP.zip" "*/*.kart" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]; then
 
@@ -2533,7 +2533,7 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2KartSaturn.zip" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2KartSaturn.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ]; then
 
@@ -2549,7 +2549,7 @@ EOF
 
                 fi
 
-                7z e -y "\$SRB2BLDROOT/assets/SRB2KartNeptune.zip" "*/*.kart" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+                7z e -y "\$SRB2BLDROOT/assets/SRB2KartNeptune.zip" "*/*.kart" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
 
@@ -2563,15 +2563,15 @@ EOF
                 # Create assets using blankart-assets repository for BlanKart.
                 7z x -y "\$SRB2BLDROOT/assets/BlanKart.zip" -o"\$BUILD/build"
 
-                for a in \$(ls "\$BUILD/build/blankart-assets/src"); do
+                for a in \$(ls -d "\$BUILD/build/blankart-assets/src/"* | gawk -F'/' '{print \$NF}'); do
 
-                    7z a -y -tzip -mx=0 "\$BUILD/build/AppDir/usr/games/SRB2Kart/\$a.pk3" "\$BUILD/build/blankart-assets/src/\$a/"*
+                    7z a -y -tzip -mx=0 "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/\$a.pk3" "\$BUILD/build/blankart-assets/src/\$a/"*
 
                 done
 
             elif [ "\$BUILD" = "\$BUILDPATH/ring-racers-freaky-build" ]; then
 
-                cp -f "\$BUILD/!REQUIRED ASSETS/"*.pk3 "\$BUILD/build/AppDir/usr/games/RingRacers"
+                cp -f "\$BUILD/!REQUIRED ASSETS/"*.pk3 "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/radio-racers" ]; then
 
@@ -2587,7 +2587,7 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/RadioRacers.zip" -o"\$BUILD/build/AppDir/usr/games/RingRacers"
+                7z x -y "\$SRB2BLDROOT/assets/RadioRacers.zip" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
 
@@ -2995,7 +2995,7 @@ EOF
 
             else
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2-\$SRB2VER.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-\$SRB2VER.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
 
@@ -3019,9 +3019,33 @@ EOF
 
             else
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/SRB2"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "models/*" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
+
+        fi
+
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
+
+                if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "\$SRB2CLASSICASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2Classic.zip" 2> /dev/null)" ]; then
+
+                    rm -f "\$SRB2BLDROOT/assets/SRB2Classic.zip"
+                    curl -RL "\$SRB2CLASSICASSETURL" -o "\$SRB2BLDROOT/assets/SRB2Classic.zip"
+
+                fi
+
+                # Create assets using srb2classic-assets repository for SRB2 Classic.
+                7z x -y "\$SRB2BLDROOT/assets/SRB2Classic.zip" -o"\$BUILD/build"
+
+                cd "\$BUILD/build/srb2classic-assets"
+
+                for a in \$(ls -d "\$BUILD/build/srb2classic-assets/"*.pk3dir | gawk -F'/' '{gsub(".pk3dir",".pk3"); print \$NF}'); do
+
+                    "\$BUILD/build/srb2classic-assets/assemble.py" "\$a"
+
+                done
+
+                cp -f "\$BUILD/build/srb2classic-assets/"*.pk3 "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
         fi
 
@@ -3031,7 +3055,7 @@ EOF
 
         else
 
-            find "\$BUILD/build/AppDir/usr/games/SRB2" -type d -exec chmod 755 {} \;
+            find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR" -type d -exec chmod 755 {} \;
 
         fi
 
@@ -3108,7 +3132,7 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/RingRacers-\$RINGRACERSVER.exe" "*.pk3" "*.dat" "data/*" "models/*" -o"\$BUILD/build/AppDir/usr/games/RingRacers"
+                7z x -y "\$SRB2BLDROOT/assets/RingRacers-\$RINGRACERSVER.exe" "*.pk3" "*.dat" "data/*" "models/*" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             else
 
@@ -3124,11 +3148,11 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/RingRacers-Latest.exe" "*.pk3" "*.dat" "data/*" "models/*" -o"\$BUILD/build/AppDir/usr/games/RingRacers"
+                7z x -y "\$SRB2BLDROOT/assets/RingRacers-Latest.exe" "*.pk3" "*.dat" "data/*" "models/*" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
 
-            find "\$BUILD/build/AppDir/usr/games/RingRacers" -type d -exec chmod 755 {} \;
+            find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR" -type d -exec chmod 755 {} \;
 
             if [ "\$OS" = "Windows" ] && [ -d "\$BUILD/libs" ] && [ "\$ANDROID" != "1" ]; then
 
@@ -3213,7 +3237,7 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2Kart-\$SRB2KARTVER.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2Kart-\$SRB2KARTVER.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             else
 
@@ -3229,11 +3253,11 @@ EOF
 
                 fi
 
-                7z x -y "\$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/SRB2Kart"
+                7z x -y "\$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" "*.kart" "*.srb" "*.dat" "mdls/*" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             fi
 
-            find "\$BUILD/build/AppDir/usr/games/SRB2Kart" -type d -exec chmod 755 {} \;
+            find "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR" -type d -exec chmod 755 {} \;
 
             if [ "\$OS" = "Windows" ] && [ -d "\$BUILD/libs" ] && [ "\$ANDROID" != "1" ]; then
 
@@ -3500,8 +3524,8 @@ else
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \\".srb2classic\\"","#define DEFAULTDIR \\".srb2classic'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
         gawk -i inplace '{gsub("#define DEFAULTDIR \\"srb2classic\\"","#define DEFAULTDIR \\"srb2classic'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
-        gawk -i inplace '{gsub("/usr/local/share/games/SRB2","'\$SRB2BLDPREFIX'/share/games/SRB2Classic"); print}' "\$BUILD/src/sdl/i_system.c"
-        gawk -i inplace '{gsub("/usr/local/games/SRB2","'\$SRB2BLDPREFIX'/games/SRB2Classic"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("/usr/local/share/games/srb2-classic","'\$SRB2BLDPREFIX'/share/games/SRB2Classic"); print}' "\$BUILD/src/sdl/i_system.c"
+        gawk -i inplace '{gsub("/usr/local/games/srb2-classic","'\$SRB2BLDPREFIX'/games/SRB2Classic"); print}' "\$BUILD/src/sdl/i_system.c"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ]; then
 
@@ -3889,9 +3913,9 @@ else
         gawk -i inplace '/size = backtrace\(array, BT_SIZE\);/ {suppress=1} /CRASHLOG_WRITE/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_system.cpp"
 
         # Replace XXH3 hashes after creating assets.
-        for a in \$(ls "\$BUILD/build/blankart-assets/src"); do
+        for a in \$(ls -d "\$BUILD/build/blankart-assets/src/"* | gawk -F'/' '{print \$NF}'); do
 
-            gawk -i inplace '{gsub("'\$(gawk -F'0x' '/#define ASSET_HASH_'\$(\$PRINTF "\$a" | gawk '{print toupper(\$0)}')'_PK3/ {print \$2}' "\$BUILD/src/d_main.cpp")'","'\$(xxhsum -H3 --tag "\$BUILD/build/AppDir/usr/games/SRB2Kart/\$a.pk3" | gawk '{print \$NF}')'"); print}' "\$BUILD/src/d_main.cpp"
+            gawk -i inplace '{gsub("'\$(gawk -F'0x' '/#define ASSET_HASH_'\$(\$PRINTF "\$a" | gawk '{print toupper(\$0)}')'_PK3/ {print \$2}' "\$BUILD/src/d_main.cpp")'","'\$(xxhsum -H3 --tag "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/\$a.pk3" | gawk '{print \$NF}')'"); print}' "\$BUILD/src/d_main.cpp"
 
         done
 
@@ -4061,15 +4085,6 @@ else
             fi
 
         elif [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
-
-            # Fixing issue of not copying to path "build/_deps/png-build/include" during compilation process.
-            mkdir -p "\$BUILD/build/_deps/png-build/include"
-
-            # Downloading SDL2 Mixer source code with recursively fetching its dependencies before running BlanKart's generate Makefile due to Cmake could not download and find dependencies.
-            rm -rf "\$BUILD/build/_deps/sdl2_mixer-src"
-            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading SDL2 Mixer source code and its dependencies as BlanKart's submodules. Please wait..."
-            git clone --recursive https://github.com/libsdl-org/SDL_mixer.git --branch \$(gawk -F'/' '/libsdl-org\/SDL_mixer/ {gsub("\"|.zip|\r",""); print \$NF}' "\$BUILD/thirdparty/CMakeLists.txt") "\$BUILD/build/_deps/sdl2_mixer-src"
-            cmake -S "\$BUILD/build/_deps/sdl2_mixer-src" -B "\$BUILD/build/_deps/sdl2_mixer-subbuild" -DSDL2MIXER_INSTALL=OFF -DSDL2MIXER_DEPS_SHARED=OFF -DSDL2MIXER_SAMPLES=OFF -DSDL2MIXER_VENDORED=ON -DSDL2MIXER_FLAC=ON -DSDL2MIXER_FLAC_LIBFLAC=OFF -DSDL2MIXER_FLAC_DRFLAC=ON -DSDL2MIXER_MOD=OFF -DSDL2MIXER_MP3=ON -DSDL2MIXER_MP3_DRMP3=ON -DSDL2MIXER_MIDI=ON -DSDL2MIXER_OPUS=ON -DSDL2MIXER_VORBIS=STB -DSDL2MIXER_WAVE=ON
 
             BLDCMD="cmake -S \$BUILD -B \$BUILD/build -DCMAKE_C_COMPILER="\$CCACHE_BIN_PATH"\$ARCH-w64-mingw32-gcc-posix -DCMAKE_CXX_COMPILER="\$CCACHE_BIN_PATH"\$ARCH-w64-mingw32-g++-posix -DCMAKE_SYSTEM_NAME=Windows -DTOOLCHAIN_PREFIX=\$ARCH-w64-mingw32 -DCMAKE_FIND_ROOT_PATH=/usr/\$ARCH-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DBUILD_SHARED_LIBS=OFF -DSRB2_CONFIG_SYSTEM_LIBRARIES=OFF -DSRB2_CONFIG_ENABLE_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DSRB2_SDL2_EXE_NAME=blankart -DSRB2_SDL2_EXE_SUFFIX= -DCMAKE_INSTALL_PREFIX=\$BUILD/build/AppDir/usr"
 
@@ -4311,9 +4326,7 @@ else
         # Display content of Makefile for a good view of available compilation flags.
         if [ "\$BUILD" = "\$BUILDPATH/xsrb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-sf94-serv" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-riders" ] || [ "\$BUILD" = "\$BUILDPATH/sbb2" ] || [ "\$BUILD" = "\$BUILDPATH/shufflarb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-live" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-loz" ]; then
 
-            set +o noglob
             gawk '/^#/,/ / {print}' "\$BUILD/\$SRC/"*akefile
-            set -o noglob
 
         elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
 
@@ -4333,9 +4346,7 @@ else
 
         elif [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
 
-            set +o noglob
             gawk '/^#/,/ / {print}' "\$BUILD/src/"*akefile
-            set -o noglob
 
         fi
 
@@ -5678,9 +5689,7 @@ else
 
         else
 
-            set +o noglob
             cp -f \$(find "\$BUILD/bin" "\$BUILD/build/bin" "\$BUILD/SRB2"*/branches/*/bin/Linux/Release -mindepth 1 -executable -type f ! -name "*.debug" 2> /dev/null | head -n1) "\$BUILD/build/AppDir/usr/bin" 2> /dev/null || true
-            set -o noglob
 
         fi
 
@@ -6941,23 +6950,12 @@ export HERE="\$(dirname "\$(readlink -f "\$0")")"
 export LD_LIBRARY_PATH="\$HERE/usr/lib:\$HERE/usr/lib/gtk-3.0/modules:\$HERE/usr/lib/gdk-pixbuf/loaders:\$LD_LIBRARY_PATH"
 APPRUN
 
-    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-fusion-advance" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-top-down" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-project-astral" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-fusion-advance" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-top-down" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ] || [ "\$(basename \$BUILD)" = "ring-racers" ] || [ "\$(basename \$BUILD)" = "ring-racers-noire" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep2" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep3" ] || [ "\$(basename \$BUILD)" = "ring-racers-freaky-build" ] || [ "\$(basename \$BUILD)" = "radio-racers" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "\$(dirname \$BUILDMAIN)" = "\$BUILDPATH/srb2-custom" ]; then
 
-        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
-export SRB2WADDIR="\$HERE/usr/games/SRB2"
-export SRB2LEGACYWADDIR="\$HERE/usr/games/SRB2"
-export SDL_SOUNDFONTS="\$SDL_SOUNDFONTS"
-export SDL_FORCE_SOUNDFONTS=1
-
-exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" "\$@"
-APPRUNBIN
-
-    elif [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] || [ "\$(dirname \$BUILDMAIN)" = "\$BUILDPATH/srb2-custom" ]; then
-
-        export APPIMAGEWADDIR=\$(gawk -F'"' '/envstr = I_GetEnv\(".*"\)\) != NULL\) && isWadPathOk\(envstr\)\)/ {print \$2}' "\$BUILD/src/sdl/i_system.c"* 2> /dev/null)
+        APPIMAGEWADDIR=\$(gawk -F'"' '/envstr = I_GetEnv\(".*"\)\) != NULL\) && isWadPathOk\(envstr\)\)/ {print \$2}' "\$BUILD/src/sdl/i_system.c"* 2> /dev/null)
 
         cat >> "\$BUILD/build/AppDir/AppRun" << APPRUNBIN
-export \$APPIMAGEWADDIR="\\\$HERE/usr/games/\$SRB2CASSETDIR"
+export \$APPIMAGEWADDIR="\\\$HERE/usr/games/\$ASSETAPPDIR"
 export SDL_SOUNDFONTS="\\\$SDL_SOUNDFONTS"
 export SDL_FORCE_SOUNDFONTS=1
 
@@ -6971,9 +6969,9 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 
 if [ "\$(gawk -F'=' '/^NAME=/ {gsub("\"",""); print \$NF}' /etc/os-release)" = "NixOS" ]; then
 
-    if [ "\$(patchelf --print-interpreter "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)")" != "\$(find /lib/ld-linux.so.* 2> /dev/null)" ] && [ ! -f "\$(patchelf --print-interpreter "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)")" ]; then
+    if [ ! -f "\$(patchelf --print-interpreter "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)")" ] && [ "\$(patchelf --print-interpreter "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)")" != "\$(find /lib/ld-linux.so.* 2> /dev/null)" ]; then
 
-        patchelf --set-interpreter "\$(find /nix/store -name ld-linux.so.* 2>/dev/null | sort -rV | head -n1)" "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)"
+        patchelf --set-interpreter "\$(find /nix/store -name ld-linux.so.* -type f 2> /dev/null | sort -V | tail -n1)" "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)"
 
     fi
 
@@ -6993,9 +6991,9 @@ APPRUNBIN
         cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
 if [ "\$(gawk -F'=' '/^NAME=/ {gsub("\"",""); print \$NF}' /etc/os-release)" = "NixOS" ]; then
 
-    if [ "\$(patchelf --print-interpreter "\$HERE/usr/bin/lsdlsrb2")" != "\$(find /lib/ld-linux.so.* 2> /dev/null)" ] && [ ! -f "\$(patchelf --print-interpreter "\$HERE/usr/bin/lsdlsrb2")" ]; then
+    if [ ! -f "\$(patchelf --print-interpreter "\$HERE/usr/bin/lsdlsrb2")" ] && [ "\$(patchelf --print-interpreter "\$HERE/usr/bin/lsdlsrb2")" != "\$(find /lib/ld-linux.so.* 2> /dev/null)" ]; then
 
-        patchelf --set-interpreter "\$(find /nix/store -name ld-linux.so.* 2>/dev/null | sort -rV | head -n1)" "\$HERE/usr/bin/lsdlsrb2"
+        patchelf --set-interpreter "\$(find /nix/store -name ld-linux.so.* -type f 2> /dev/null | sort -V | tail -n1)" "\$HERE/usr/bin/lsdlsrb2"
 
     fi
 
@@ -7010,21 +7008,6 @@ cd "\$HERE/usr/games/SRB2"
 exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" -opengl "\$@"
 APPRUNBIN
 
-    elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-moe-mansion" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
-
-        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
-export SRB2WADDIR="\$HERE/usr/games/SRB2Kart"
-
-exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" "\$@"
-APPRUNBIN
-
-    elif [ "\$(basename \$BUILD)" = "ring-racers" ] || [ "\$(basename \$BUILD)" = "ring-racers-noire" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep2" ] || [ "\$(basename \$BUILD)" = "ring-racers-hep3" ] || [ "\$(basename \$BUILD)" = "ring-racers-freaky-build" ] || [ "\$(basename \$BUILD)" = "radio-racers" ]; then
-
-        cat >> "\$BUILD/build/AppDir/AppRun" << 'APPRUNBIN'
-export RINGRACERSWADDIR="\$HERE/usr/games/RingRacers"
-
-exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" "\$@"
-APPRUNBIN
 
     elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ]; then
 
@@ -7181,14 +7164,11 @@ else
 
     if ([ "\$LNXOSNAME" = "NixOS" ] || [ "\$BUILD" = "\$BUILDPATH/slade" ]) && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
 
-         cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libstdc++|libdl.so|ld-|libm.so|libpthread.so|libresolv.so|librt.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+         cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libm.so|libpthread.so|libresolv.so|librt.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
     if [ "\$LIBC" = "musl" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/xsrb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-sf94-serv" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-riders" ] || [ "\$BUILD" = "\$BUILDPATH/super-srb2-kart-z" ] || [ "\$BUILD" = "\$BUILDPATH/sbb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ] || [ "\$BUILD" = "\$BUILDPATH/shufflarb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-live" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-loz" ]); then
-
-     # Enable globbing in Alpine Linux container's shell.
-     set +f
 
      cp -Lf \$(find /usr/lib/libpulse.so.[0-9] /usr/lib/pulseaudio/libpulsecommon-[0-9][0-9].[0-9].so /usr/lib/libjack.so.[0-9] /usr/lib/libasound.so.[0-9] /usr/lib/libpipewire-[0-9].[0-9].so.[0-9] /usr/lib/libxmp.so.[0-9] /usr/lib/libdbus-[0-9].so.[0-9] /usr/lib/libintl.so.[0-9] /usr/lib/libsndfile.so.[0-9] /usr/lib/libgomp.so.[0-9] /usr/lib/libfluidsynth.so.[0-9] /usr/lib/libxcb.so.[0-9] /usr/lib/libasyncns.so.[0-9] /usr/lib/libogg.so.[0-9] /usr/lib/libvorbisenc.so.[0-9] /usr/lib/libvorbisfile.so.[0-9] /usr/lib/libFLAC.so.[0-9][0-9] /usr/lib/libmpg123.so.[0-9] /usr/lib/libopus.so.[0-9] /usr/lib/libmp3lame.so.[0-9] /usr/lib/libvorbis.so.[0-9] /usr/lib/libXau.so.[0-9] /usr/lib/libXdmcp.so.[0-9] /usr/lib/libbsd.so.[0-9] /usr/lib/libmd.so.[0-9] /usr/lib/libGL.so.[0-9] /usr/lib/libX11.so.[0-9] /usr/lib/libXext.so.[0-9] /usr/lib/libXcursor.so.[0-9] /usr/lib/libXi.so.[0-9] /usr/lib/libXfixes.so.[0-9] /usr/lib/libXrandr.so.[0-9] /usr/lib/libXrender.so.[0-9] /usr/lib/libXss.so.[0-9] /usr/lib/libgbm.so.[0-9] /usr/lib/libdrm.so.[0-9] /usr/lib/libglapi.so.[0-9] /usr/lib/libGLESv2.so.[0-9] /usr/lib/libgallium-[0-9][0-9].[0-9].[0-9].so /usr/lib/libxcb-glx.so.[0-9] /usr/lib/libX11-xcb.so.[0-9] /usr/lib/libxcb-dri[0-9].so.[0-9] /usr/lib/libXxf86vm.so.[0-9] /usr/lib/libxcb-shm.so.[0-9] /usr/lib/libexpat.so.[0-9] /usr/lib/libxshmfence.so.[0-9] /usr/lib/libxcb-randr.so.[0-9] /usr/lib/libxcb-dri[0-9].so.[0-9] /usr/lib/libxcb-sync.so.[0-9] /usr/lib/libxcb-present.so.[0-9] /usr/lib/libxcb-xfixes.so.[0-9] /usr/lib/libLLVM.so.[0-9][0-9].[0-9] /usr/lib/libzstd.so.[0-9] /usr/lib/libdrm_radeon.so.[0-9] /usr/lib/libelf.so.[0-9] /usr/lib/libdrm_amdgpu.so.[0-9] /usr/lib/libdrm_intel.so.[0-9] /usr/lib/libstdc++.so.[0-9] /usr/lib/libffi.so.[0-9] /usr/lib/libxml[0-9].so.[0-9] /usr/lib/libpciaccess.so.[0-9] /usr/lib/liblzma.so.[0-9] /usr/lib/libmikmod.so.[0-9] /usr/lib/libGLU.so /usr/lib/libOSMesa.so.[0-9] /usr/lib/libSDL2-[0-9].[0-9].so.[0-9] /usr/lib/libSDL2_mixer-[0-9].[0-9].so.[0-9] /lib/ld-musl-i386.so.[0-9] /lib/libc.musl-x86.so.[0-9] /usr/lib/libgcc_s.so.[0-9] /usr/lib/libz.so.[0-9]) "\$BUILD/build/AppDir/usr/lib"
 
@@ -8517,7 +8497,7 @@ RUN apt-get update && \
 apt-get full-upgrade -y && \
 apt-get install -y apt-fast && \
 gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=true");sub("_MAXNUM=5","_MAXNUM=20"); print}' /etc/apt-fast.conf && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse nasm build-essential $GCCVER $GXXVER $GCCOLDVER $GXXOLDVER $RINGRACERSGCCVER $RINGRACERSGXXVER ccache automake libtool cmake file sudo dash gettext git stow imagemagick p7zip-full p7zip-rar zip unrar
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse nasm python3-dev python3-setuptools python3-pil python3-wheel build-essential $GCCVER $GXXVER $GCCOLDVER $GXXOLDVER $RINGRACERSGCCVER $RINGRACERSGXXVER ccache automake libtool cmake file sudo dash gettext git stow imagemagick p7zip-full p7zip-rar zip unrar
 
 RUN DEBARCH="\$(dpkg --print-architecture)" ; \
 curl -RLC - --retry 999 https://snapshot.debian.org/archive/debian/20180611T145305Z/pool/main/m/miniupnpc/libminiupnpc-dev_2.0.20180410-2_\$DEBARCH.deb -o /tmp/libminiupnpc-dev_2.1-1_\$DEBARCH.deb && \
@@ -8635,7 +8615,7 @@ ENV GNUTLS_CPUID_OVERRIDE 0x1
 RUN printf "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
 apk update && \
 apk upgrade && \
-apk add sdl2-dev sdl2_mixer-dev sdl12-compat-dev sdl_mixer-dev glu-dev libpng-dev libgme-dev libopenmpt-dev fluidsynth-dev fluidsynth libxmp libmodplug-dev mpg123-dev jack-dev curl-dev miniupnpc-dev libupnp-dev zlib-dev rapidjson-dev libpulse libxcursor libxi libxrandr libxscrnsaver libmikmod nasm build-base ccache alpine-sdk automake autoconf libtool cmake sudo bash dash shadow gawk curl git stow imagemagick zip p7zip findutils
+apk add sdl2-dev sdl2_mixer-dev sdl12-compat-dev sdl_mixer-dev glu-dev libpng-dev libgme-dev libopenmpt-dev fluidsynth-dev fluidsynth libxmp libmodplug-dev mpg123-dev jack-dev curl-dev miniupnpc-dev libupnp-dev zlib-dev rapidjson-dev libpulse libxcursor libxi libxrandr libxscrnsaver libmikmod nasm python3-dev py3-setuptools py3-wheel py3-pillow build-base ccache alpine-sdk automake autoconf libtool cmake sudo bash dash shadow gawk curl git stow imagemagick zip p7zip findutils
 
 RUN if [ "$ARCH" = "x86_64" ]; then \
 curl -L https://7-zip.org/a/7z2301-linux-x64.tar.xz -o /tmp/7z2301-linux.tar.xz ; \
@@ -8746,7 +8726,7 @@ RUN apt-get update && \
 apt-get full-upgrade -y && \
 apt-get install -y apt-fast && \
 gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=true");sub("_MAXNUM=5","_MAXNUM=20"); print}' /etc/apt-fast.conf && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libminiupnpc-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev libc6-dev-i386-cross fuse nasm build-essential ninja-build mingw-w64 ccache automake libtool cmake file sudo dash git-svn stow imagemagick p7zip-full p7zip-rar zip unzip unrar tar
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libminiupnpc-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev libc6-dev-i386-cross fuse nasm python3-dev python3-setuptools python3-pil python3-wheel build-essential ninja-build mingw-w64 ccache automake libtool cmake file sudo dash git-svn stow imagemagick p7zip-full p7zip-rar zip unzip unrar tar
 
 RUN git clone https://github.com/Cyan4973/xxHash --branch release /tmp/xxHash && \
 make -C /tmp/xxHash PREFIX=/usr install
@@ -9360,22 +9340,22 @@ EOF
 
             fi
 
-            7z x -y "$SRB2BLDROOT/assets/SF94-City.zip" "*.soc" "*.wad" -o"$BUILD/build/AppDir/usr/games/SRB2"
-            7z x -y "$SRB2BLDROOT/assets/SF94-MetalSonic.zip" -o"$BUILD/build/AppDir/usr/games/SRB2"
-            mv -f "$BUILD/build/AppDir/usr/games/SRB2/metalsonic.wad" "$BUILD/build/AppDir/usr/games/SRB2/SF94-Metalsonic.wad"
-            7z x -y "$SRB2BLDROOT/assets/SF94-MetalKnux.zip" -o"$BUILD/build/AppDir/usr/games/SRB2"
-            mv -f "$BUILD/build/AppDir/usr/games/SRB2/metalknux.wad" "$BUILD/build/AppDir/usr/games/SRB2/SF94-Knux.wad"
-            7z x -y "$SRB2BLDROOT/assets/SF94-Espio.zip" -o"$BUILD/build/AppDir/usr/games/SRB2"
-            mv -f "$BUILD/build/AppDir/usr/games/SRB2/espio.wad" "$BUILD/build/AppDir/usr/games/SRB2/SF94-Espio.wad"
-            7z x -y "$SRB2BLDROOT/assets/SF94-Nitemare.zip" -o"$BUILD/build/AppDir/usr/games/SRB2"
-            mv -f "$BUILD/build/AppDir/usr/games/SRB2/nitemare.wad" "$BUILD/build/AppDir/usr/games/SRB2/SF94-Nitemare.wad"
-            7z x -y "$SRB2BLDROOT/assets/SF94-Senku.zip" -o"$BUILD/build/AppDir/usr/games/SRB2"
-            mv -f "$BUILD/build/AppDir/usr/games/SRB2/senku.wad" "$BUILD/build/AppDir/usr/games/SRB2/SF94-Senku.wad"
-            7z x -y "$SRB2BLDROOT/assets/SF94-Senya.zip" -o"$BUILD/build/AppDir/usr/games/SRB2"
-            mv -f "$BUILD/build/AppDir/usr/games/SRB2/senya.wad" "$BUILD/build/AppDir/usr/games/SRB2/SF94-Senya.wad"
-            unrar x -y "$SRB2BLDROOT/assets/SF94-Zim.rar" "$BUILD/build/AppDir/usr/games/SRB2"
-            mv -f "$BUILD/build/AppDir/usr/games/SRB2/Zim.wad" "$BUILD/build/AppDir/usr/games/SRB2/SF94-Zim.wad"
-            chmod 644 "$BUILD/build/AppDir/usr/games/SRB2/"*
+            7z x -y "$SRB2BLDROOT/assets/SF94-City.zip" "*.soc" "*.wad" -o"$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+            7z x -y "$SRB2BLDROOT/assets/SF94-MetalSonic.zip" -o"$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+            mv -f "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/metalsonic.wad" "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/SF94-Metalsonic.wad"
+            7z x -y "$SRB2BLDROOT/assets/SF94-MetalKnux.zip" -o"$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+            mv -f "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/metalknux.wad" "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/SF94-Knux.wad"
+            7z x -y "$SRB2BLDROOT/assets/SF94-Espio.zip" -o"$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+            mv -f "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/espio.wad" "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/SF94-Espio.wad"
+            7z x -y "$SRB2BLDROOT/assets/SF94-Nitemare.zip" -o"$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+            mv -f "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/nitemare.wad" "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/SF94-Nitemare.wad"
+            7z x -y "$SRB2BLDROOT/assets/SF94-Senku.zip" -o"$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+            mv -f "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/senku.wad" "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/SF94-Senku.wad"
+            7z x -y "$SRB2BLDROOT/assets/SF94-Senya.zip" -o"$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+            mv -f "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/senya.wad" "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/SF94-Senya.wad"
+            unrar x -y "$SRB2BLDROOT/assets/SF94-Zim.rar" "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"
+            mv -f "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/Zim.wad" "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/SF94-Zim.wad"
+            chmod 644 "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"*
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-riders" ]; then
 
@@ -9516,14 +9496,14 @@ EOF
             # Create assets using blankart-assets repository for BlanKart.
             7z x -y "$SRB2BLDROOT/assets/BlanKart.zip" -o"$BUILD/build"
 
-            for a in $(ls "$BUILD/build/blankart-assets/src"); do
+            for a in $(ls -d "$BUILD/build/blankart-assets/src/"* | gawk -F'/' '{print $NF}'); do
 
                 7z a -y -tzip -mx=0 "$BUILD/assets/installer/$a.pk3" "$BUILD/build/blankart-assets/src/$a/"*
 
             done
 
             # Replace XXH3 hashes after creating assets.
-            for a in $(ls "$BUILD/build/blankart-assets/src"); do
+            for a in $(ls -d "$BUILD/build/blankart-assets/src/"* | gawk -F'/' '{print $NF}'); do
 
                 gawk -i inplace '{gsub("'$(gawk -F'0x' '/#define ASSET_HASH_'$($PRINTF "$a" | gawk '{print toupper($0)}')'_PK3/ {print $2}' "$BUILD/src/d_main.cpp")'","'$(xxhsum -H3 --tag "$BUILD/assets/installer/$a.pk3" | gawk '{print $NF}')'"); print}' "$BUILD/src/d_main.cpp"
 
@@ -9978,6 +9958,31 @@ extractsrb2macosassets() {
         fi
 
         7z x -y "$SRB2BLDROOT/assets/SRB2-Latest.zip" "*.pk3" "*.dta" "*.dat" "*.txt" "models/*" -o"$BUILD/assets/installer"
+
+    fi
+
+    if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
+
+        if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "$SRB2CLASSICASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Classic.zip" 2> /dev/null)" ]; then
+
+            rm -f "$SRB2BLDROOT/assets/SRB2Classic.zip"
+            curl -RL "$SRB2CLASSICASSETURL" -o "$SRB2BLDROOT/assets/SRB2Classic.zip"
+
+        fi
+
+        # Create assets using srb2classic-assets repository for SRB2 Classic.
+        7z x -y "$SRB2BLDROOT/assets/SRB2Classic.zip" -o"$BUILD/build"
+
+        cd "$BUILD/build/srb2classic-assets"
+
+        for a in $(ls -d "$BUILD/build/srb2classic-assets/"*.pk3dir | gawk -F'/' '{gsub(".pk3dir",".pk3"); print $NF}'); do
+
+            "$BUILD/build/srb2classic-assets/assemble.py" "$a"
+
+        done
+
+        mkdir -p "$BUILD/assets/installer"
+        cp -f "$BUILD/build/srb2classic-assets/"*.pk3 "$BUILD/assets/installer"
 
     fi
 
@@ -10638,49 +10643,22 @@ FLATPAK
     else
 
         # Set variables for each SRB2/SRB2Kart/Ring Racers build.
-        if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
-
-            SRB2CONFDIR=".srb2classic$GITVERCONF"
-            WADDIR="SRB2WADDIR"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-2.1-legacy" ] || [ "$BUILD" = "$BUILDPATH/srb2-fusion-advance" ]; then
-
-            SRB2CONFDIR=".srb2_2.1$GITVERCONF"
-            WADDIR="SRB2LEGACYWADDIR"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-top-down" ]; then
-
-            SRB2CONFDIR=".srb2td$GITVERCONF"
-            WADDIR="SRB2WADDIR"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-persona" ]; then
-
-            SRB2CONFDIR=".srb2persona$GITVERCONF"
-            WADDIR="SRB2WADDIR"
-
-        elif [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep2" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep3" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then
-
-            SRB2CONFDIR=".ringracers$GITVERCONF"
-            WADDIR="RINGRACERSWADDIR"
-
-        elif [ "$BUILD" = "$BUILDPATH/srb2-kart" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-moe-mansion" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-galaxy" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-hep" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-neptune" ] || [ "$BUILD" = "$BUILDPATH/srb2-kart-vr" ]; then
-
-            SRB2CONFDIR=".srb2kart$GITVERCONF"
-            WADDIR="SRB2WADDIR"
-
-        elif [ "$BUILD" = "$BUILDPATH/blankart" ]; then
-
-            SRB2CONFDIR=".srb2kart-v2$GITVERCONF"
-            WADDIR="SRB2WADDIR"
-
-        elif [ "$(dirname $BUILD)" = "$BUILDPATH/srb2-custom" ]; then
+        if [ -n "$(gawk -F'\"' '/DEFAULTDIR/ {gsub(" |\\.",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null | head -n1)" ]; then
 
             SRB2CONFDIR=".$(gawk -F'\"' '/DEFAULTDIR/ {gsub(" |\\.",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null | head -n1)"
-            WADDIR=$(gawk -F'"' '/envstr = I_GetEnv\(".*"\)\) != NULL\) && isWadPathOk\(envstr\)\)/ {print $2}' "$BUILD/src/sdl/i_system.c"*)
 
         else
 
             SRB2CONFDIR=".srb2$GITVERCONF"
+
+        fi
+
+        if [ -n "$(gawk -F'"' '/envstr = I_GetEnv\(".*"\)\) != NULL\) && isWadPathOk\(envstr\)\)/ {print $2}' "$BUILD/src/sdl/i_system.c"*)" ]; then
+
+            WADDIR=$(gawk -F'"' '/envstr = I_GetEnv\(".*"\)\) != NULL\) && isWadPathOk\(envstr\)\)/ {print $2}' "$BUILD/src/sdl/i_system.c"*)
+
+        else
+
             WADDIR="SRB2WADDIR"
 
         fi
@@ -10913,7 +10891,7 @@ installdepsglibc() {
 
                 elif [ -x "$(command -v pacman 2> /dev/null)" ]; then
 
-                    pacman -Fqx "$l" | gawk '!/lib32-/ {print}'
+                    pacman -Fqx "$l" | gawk -F'/' '!/lib32-/ {print $NF}'
 
                 elif [ -x "$(command -v apt-get 2> /dev/null)" ]; then
 
@@ -11280,7 +11258,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11301,7 +11279,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11322,7 +11300,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11343,7 +11321,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11364,7 +11342,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11385,7 +11363,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11406,7 +11384,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11427,7 +11405,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11449,7 +11427,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11470,7 +11448,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11491,7 +11469,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11512,7 +11490,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11544,7 +11522,7 @@ installtolinux() {
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11576,7 +11554,7 @@ installtolinux() {
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlxsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11608,7 +11586,7 @@ installtolinux() {
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/SF94SRB2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11640,7 +11618,7 @@ installtolinux() {
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11672,7 +11650,7 @@ installtolinux() {
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11704,7 +11682,7 @@ installtolinux() {
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsbb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 $(find "$BUILD" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYDEBUGLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11732,7 +11710,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11760,7 +11738,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11788,7 +11766,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11816,7 +11794,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11844,7 +11822,7 @@ installtolinux() {
             $SUDO chmod 755 "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/bin/lsdlsrb2" "$SRB2ASSETLNXPATH/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
             $SUDO install -Dm755 "$BUILD/build/AppDir/usr/lib/"*.so* -t "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11865,7 +11843,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11886,7 +11864,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11907,7 +11885,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11928,7 +11906,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11949,7 +11927,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11970,7 +11948,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -11991,7 +11969,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12013,7 +11991,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12034,7 +12012,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12055,7 +12033,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12076,7 +12054,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12097,7 +12075,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12118,7 +12096,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12139,7 +12117,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12160,7 +12138,7 @@ installtolinux() {
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
             $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
-            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/RingRacers"/* "$SRB2ASSETLNXPATH"
+            $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/icons/hicolor/$SRB2LNXICONSIZE/apps/"* "$SRB2ICONLNXPATH"
 
@@ -12414,18 +12392,20 @@ UZB
     # Create flake for NixOS.
     if [ "$LNXOSNAME" = "NixOS" ]; then
 
-        cp -rf "$BUILD/build/AppDir" "/tmp/flake-build"
+        NIXOSFLAKEBUILDPATH="/tmp/$($PRINTF "%s\n" "$BUILD" | gawk -F'/' '{print $NF}')"
+
+        cp -rf "$BUILD/build/AppDir" "$NIXOSFLAKEBUILDPATH"
 
         if [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
 
             # Setting path to interpreter.
-            if [ -z "$(ldd "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
+            if [ -z "$(ldd "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
 
-                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
+                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
 
             fi
 
-            cat > "/tmp/flake-build/flake.nix" << NIX
+            cat > "$NIXOSFLAKEBUILDPATH/flake.nix" << NIX
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -12472,13 +12452,13 @@ NIX
         elif [ "$BUILD" = "$BUILDPATH/kartmaker" ] || [ "$BUILD" = "$BUILDPATH/neptunefm" ] || [ "$BUILD" = "$BUILDPATH/kartmaker-ring-racers" ] || [ "$BUILD" = "$BUILDPATH/followermaker" ]; then
 
             # Setting path to interpreter.
-            if [ -z "$(ldd "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
+            if [ -z "$(ldd "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
 
-                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
+                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
 
             fi
 
-            cat > "/tmp/flake-build/flake.nix" << NIX
+            cat > "$NIXOSFLAKEBUILDPATH/flake.nix" << NIX
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -12523,16 +12503,16 @@ NIX
 
         elif [ "$BUILD" = "$BUILDPATH/slade" ]; then
 
-            install -Dm644 $(find "$BUILD/build" -type f -name slade.pk3 2> /dev/null | head -n1) -t "/tmp/flake-build/usr/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
+            install -Dm644 $(find "$BUILD/build" -type f -name slade.pk3 2> /dev/null | head -n1) -t "$NIXOSFLAKEBUILDPATH/usr/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
 
             # Setting path to interpreter.
-            if [ -z "$(ldd "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
+            if [ -z "$(ldd "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
 
-                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
+                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 | gawk '/ld-linux.*/ {print $3}') "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
 
             fi
 
-            cat > "/tmp/flake-build/flake.nix" << NIX
+            cat > "$NIXOSFLAKEBUILDPATH/flake.nix" << NIX
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -12588,7 +12568,7 @@ NIX
 
         elif [ "$BUILD" = "$BUILDPATH/ultimatezonebuilder" ] || [ "$BUILD" = "$BUILDPATH/ultimateloweebuilder" ] || [ "$BUILD" = "$BUILDPATH/highvoltagering" ]; then
 
-            cat > "/tmp/flake-build/flake.nix" << NIX
+            cat > "$NIXOSFLAKEBUILDPATH/flake.nix" << NIX
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -12615,7 +12595,7 @@ NIX
 
           installPhase = ''
             install -d "\$out/bin"
-            printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\ncd /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec mono Builder.exe \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
+            printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\ncd /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nmono Builder.exe \"\$@\" || ([ ! -x "\$(command -v mono)" ] && (([ "\$(command -v zenity)" ] && zenity --warning --text "Please install \\\"mono\\\" to run program." || exit 1) || $PRINTF "\\\e[1;93m\\\n%s\\\n\\\e[0m" "Please install \\\"mono\\\" to run program." && exit 1))\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
             chmod 755 "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
             install -d "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
             cp -rf "\$src/bin/"* "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')"
@@ -12630,7 +12610,7 @@ NIX
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/xsrb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-sf94-serv" ] || [ "$BUILD" = "$BUILDPATH/srb2-riders" ] || [ "$BUILD" = "$BUILDPATH/super-srb2-kart-z" ] || [ "$BUILD" = "$BUILDPATH/sbb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ] || [ "$BUILD" = "$BUILDPATH/shufflarb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-live" ] || [ "$BUILD" = "$BUILDPATH/srb2-loz" ]; then
 
-            cat > "/tmp/flake-build/flake.nix" << NIX
+            cat > "$NIXOSFLAKEBUILDPATH/flake.nix" << NIX
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -12680,13 +12660,13 @@ NIX
         elif [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
 
             # Setting path to interpreter.
-            if [ -z "$(ldd "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
+            if [ -z "$(ldd "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
 
-                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/"* 2>&1 | gawk '/ld-linux.*/ {print $3}') "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
+                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/"* 2>&1 | gawk '/ld-linux.*/ {print $3}') "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
 
             fi
 
-            cat > "/tmp/flake-build/flake.nix" << NIX
+            cat > "$NIXOSFLAKEBUILDPATH/flake.nix" << NIX
 
 {
   inputs = {
@@ -12733,21 +12713,23 @@ NIX
 
         else
 
+            WADDIR=$(gawk -F'"' '/envstr = I_GetEnv\(".*"\)\) != NULL\) && isWadPathOk\(envstr\)\)/ {print $2}' "$BUILD/src/sdl/i_system.c"*)
+
             # Copy debug binary files.
             if [ -x "$(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1)" ]; then
 
-                cp -f $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "/tmp/flake-build/usr/bin"
+                cp -f $(find "$BUILD/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$NIXOSFLAKEBUILDPATH/usr/bin"
 
             fi
 
             # Setting path to interpreter.
-            if [ -z "$(ldd "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
+            if [ -z "$(ldd "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2>&1 2> /dev/null)" ]; then
 
-                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/"* 2>&1 | gawk '/ld-linux.*/ {print $3}') "/tmp/flake-build/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
+                $SUDO patchelf --set-interpreter $(ldd "$BUILD/build/AppDir/usr/bin/"* 2>&1 | gawk '/ld-linux.*/ {print $3}') "$NIXOSFLAKEBUILDPATH/usr/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')" 2> /dev/null || true
 
             fi
 
-            cat > "/tmp/flake-build/flake.nix" << NIX
+            cat > "$NIXOSFLAKEBUILDPATH/flake.nix" << NIX
 
 {
   inputs = {
@@ -12768,7 +12750,7 @@ NIX
 
           version = "$(git -C "$BUILD" rev-parse --short HEAD)";
 
-          # Set src to the localFile path
+          # Set src to the localFile path.
           src = localFile;
 
           sourceRoot = ".";
@@ -12777,10 +12759,44 @@ NIX
             autoPatchelfHook
           ];
 
+          buildInputs = [
+            # For issue with missing libGL.so.1 library.
+            # Graphics stack
+#            libGL
+            libglvnd
+#            vulkan-loader
+#            mesa.drivers
+#            libGLU
+
+            # X11 stack
+#            xorg.libX11
+#            xorg.libXcursor
+#            xorg.libXrandr
+            xorg.libXi
+#            xorg.libXext
+#            xorg.libXxf86vm
+#            xorg.libXinerama
+
+            # Window system integration
+#            libxkbcommon
+#            wayland
+
+            # System dependencies
+#            udev
+#            alsa-lib
+#            dbus
+
+            systemdLibs
+          ];
+
+          autoPatchelfIgnoreMissingDeps = true;
+
+          dontBuild = true;
+
           installPhase = ''
             install -d "\$out/bin"
-            printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport SRB2WADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport SRB2LEGACYWADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport RINGRACERSWADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
-            printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport SRB2WADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport RINGRACERSWADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
+            printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=\${lib.makeLibraryPath buildInputs}:/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport $WADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
+            printf '#!/bin/sh\n\nexport LD_LIBRARY_PATH=\${lib.makeLibraryPath buildInputs}:/nix/var/nix/profiles/default/lib/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexport $WADDIR=/nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')\nexec /nix/var/nix/profiles/default/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')-debug.bin \"\$@\"\n' > "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
             chmod 755 "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}')"
             chmod 755 "\$out/bin/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').debug"
             install -Dm755 \$(find "\$src/bin" -type f 2> /dev/null | gawk '!/\.debug/ {print}' | head -n1) "\$out/share/$($PRINTF "%s\n" "$SRB2ASSETLNXPATH" | gawk -F'/' '{print $NF}')/$($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}').bin"
@@ -12798,9 +12814,9 @@ NIX
         fi
 
         cd "/tmp" || exit
-        $SUDO nix profile install -vv --extra-experimental-features 'nix-command flakes' "/tmp/flake-build"
+        $SUDO nix profile install -vv --extra-experimental-features 'nix-command flakes' "$NIXOSFLAKEBUILDPATH"
         SRB2NIXPATH="$(readlink -f $(command -v $($PRINTF "%s\n" $($PRINTF "%s\n" "$SRB2BINARYLNXPATH" | gawk -F'/' '{print $NF}'))) | gawk -F'/' '{print "/nix/store/"$4}')"
-        rm -rf "/tmp/flake-build"
+        rm -rf "$NIXOSFLAKEBUILDPATH"
 
     fi
 
@@ -15392,7 +15408,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15406,7 +15422,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15420,7 +15436,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15434,7 +15450,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15448,7 +15464,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15462,7 +15478,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15476,7 +15492,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15490,7 +15506,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15504,7 +15520,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15519,7 +15535,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15533,7 +15549,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15547,7 +15563,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15561,7 +15577,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         touch "$SRB2WINPATH/md2.dat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
@@ -15576,7 +15592,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/SRB2/branches/XMOD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         touch "$SRB2WINPATH/md2.dat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
@@ -15591,7 +15607,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/SRB2/branches/SF94/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         touch "$SRB2WINPATH/md2.dat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
@@ -15606,7 +15622,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/SRB2/branches/RIDER/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         touch "$SRB2WINPATH/md2.dat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
@@ -15621,7 +15637,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         touch "$SRB2WINPATH/md2.dat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
@@ -15636,7 +15652,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/SRB2/branches/FLAME/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         touch "$SRB2WINPATH/md2.dat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
@@ -15651,7 +15667,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15665,7 +15681,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15679,7 +15695,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/SRB21094/branches/JTESHUFFLE/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15693,7 +15709,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/SRB21094/branches/LIVE/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15707,7 +15723,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/SRB21094/branches/LOZ/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15721,7 +15737,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15735,7 +15751,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15749,7 +15765,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15763,7 +15779,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15777,7 +15793,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15791,7 +15807,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15805,7 +15821,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15819,7 +15835,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
@@ -15834,7 +15850,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/build/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/SRB2Kart/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -15847,7 +15863,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -15860,7 +15876,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -15873,7 +15889,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -15886,7 +15902,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -15899,7 +15915,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -15912,7 +15928,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/build/ninja-x86_mingw_static_vcpkg-release/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
-        cp -rf "$BUILD/build/AppDir/usr/games/RingRacers/"* "$SRB2WINPATH"
+        cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl -noexchndl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -16898,6 +16914,8 @@ have installed - \"pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs li
          - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): \"rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686\",
 
          - RHEL/RHEL based: \"sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686\",
+
+         - Mageia/Mageia based: \"sudo dnf config-manager --set-enabled mageia-i586 updates-i586 && sudo dnf install libfuse2 libzlib1\",
 
          - openSUSE/openSUSE based: \"sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit\",
 
