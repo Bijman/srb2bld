@@ -873,7 +873,7 @@ buildvar() {
         BUILDNAME="Ring Racers"
         GITDEFVER="master"
         GITVER="$GITDEFVER"
-        GITURL="https://git.do.srb2.org/KartKrew/RingRacers.git"
+        GITURL="https://gitlab.com/kart-krew-dev/ring-racers.git"
 
     elif [ "$BUILD" = "$BUILDPATH/ring-racers-android" ]; then
 
@@ -2967,7 +2967,7 @@ EOF
 
         fi
 
-        if [ -n "\$SRB2LATESTVER" ] && ([ "\$SRB2VER" != "\$SRB2LATESTVER" ] && [ "\$(\$PRINTF "\$SRB2VER" | gawk '{gsub("\\\.|[a-z]|[A-Z]",""); print}')" -lt "\$(\$PRINTF "\$SRB2LATESTVER" | gawk '{gsub("\\\.|[a-z]|[A-Z]",""); print}')" ]); then
+        if [ -n "\$SRB2LATESTVER" ] && ([ "\$SRB2VER" != "\$SRB2LATESTVER" ] && [ "\$(\$PRINTF "\$SRB2VER" | gawk '{gsub("\\\.|-|[a-z]|[A-Z]",""); print}')" -lt "\$(\$PRINTF "\$SRB2LATESTVER" | gawk '{gsub("\\\.|-|[a-z]|[A-Z]",""); print}')" ]); then
 
             if [ -n "\$ISNET" ]; then
 
@@ -3110,15 +3110,15 @@ EOF
             RINGRACERSLATESTVER=\$(\$PRINTF "%s\n" "\$RINGRACERSVERS" | head -n1)
             RINGRACERSVER=\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null || \$PRINTF "%s\n" "\$RINGRACERSLATESTVER")
 
-            if [ -n "\$RINGRACERSLATESTVER" ] && ([ "v\$RINGRACERSVER" != "\$RINGRACERSLATESTVER" ] && [ "\$(\$PRINTF "\$RINGRACERSVER" | gawk '{gsub("\\\.|[a-z]|[A-Z]",""); print}')" -lt "\$(\$PRINTF "\$RINGRACERSLATESTVER" | gawk '{gsub("\\\.|[a-z]|[A-Z]",""); print}')" ]); then
+            if [ -n "\$RINGRACERSLATESTVER" ] && ([ "v\$RINGRACERSVER" != "\$RINGRACERSLATESTVER" ] && [ "\$(\$PRINTF "\$RINGRACERSVER" | gawk '{gsub("\\\.|-|[a-z]|[A-Z]",""); print}')" -lt "\$(\$PRINTF "\$RINGRACERSLATESTVER" | gawk '{gsub("\\\.|-|[a-z]|[A-Z]",""); print}')" ]); then
 
                 if [ -n "\$ISNET" ]; then
 
-                    RINGRACERSASSETURL=\$(curl -s "\$RINGRACERSASSETURL" | gawk -F'"' '/'\$RINGRACERSVER'\/.*Installer.exe/ {print \$4}')
+                    RINGRACERSASSETURL=\$(curl -s "\$RINGRACERSASSETURL" | gawk -F'"' '/browser_download_url.*'\$RINGRACERSVER'.*Installer.exe/ {print \$4}')
 
                     if [ -z "\$RINGRACERSASSETURL" ]; then
 
-                        RINGRACERSASSETURL=\$(curl -s "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
+                        RINGRACERSASSETURL=\$(curl -s "$RINGRACERSASSETURL" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
                         \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
                     fi
@@ -3138,7 +3138,7 @@ EOF
 
                 if [ -n "\$ISNET" ]; then
 
-                    RINGRACERSASSETURL=\$(curl -s "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
+                    RINGRACERSASSETURL=\$(curl -s "$RINGRACERSASSETURL" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
                     if [ "\$(curl -X GET -sLI "\$RINGRACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/RingRacers-Latest.exe" 2> /dev/null)" ]; then
 
                         rm -f "\$SRB2BLDROOT/assets/RingRacers-Latest.exe"
@@ -3215,7 +3215,7 @@ EOF
 
             fi
 
-            if [ -n "\$SRB2KARTLATESTVER" ] && ([ "\$SRB2KARTVER" != "\$SRB2KARTLATESTVER" ] && [ "\$(\$PRINTF "\$SRB2KARTVER" | gawk '{gsub("\\\.|[a-z]|[A-Z]",""); print}')" -lt "\$(\$PRINTF "\$SRB2KARTLATESTVER" | gawk '{gsub("\\\.|[a-z]|[A-Z]",""); print}')" ]); then
+            if [ -n "\$SRB2KARTLATESTVER" ] && ([ "\$SRB2KARTVER" != "\$SRB2KARTLATESTVER" ] && [ "\$(\$PRINTF "\$SRB2KARTVER" | gawk '{gsub("\\\.|-|[a-z]|[A-Z]",""); print}')" -lt "\$(\$PRINTF "\$SRB2KARTLATESTVER" | gawk '{gsub("\\\.|-|[a-z]|[A-Z]",""); print}')" ]); then
 
                 if [ -n "\$ISNET" ]; then
 
@@ -4012,7 +4012,7 @@ else
 
         fi
 
-        if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3250" ] && [ "\$LIBC" != "musl" ]; then
+        if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3250" ] && [ "\$LIBC" != "musl" ]; then
 
             gawk -i inplace '!/REGEX REPLACE "windres"/ {print}' "\$BUILD/cmake/unix.cmake"
             gawk -i inplace '{gsub("\\\\$<BUILD_INTERFACE:|>",""); print}' "\$BUILD/thirdparty/fmt/CMakeLists.txt"
@@ -4226,13 +4226,13 @@ else
 
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
-            if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -le "3113" ] && [ "\$LIBC" != "musl" ] || [ "\$ARCH" != "x86_64" ]; then
+            if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -le "3113" ] && [ "\$LIBC" != "musl" ] || [ "\$ARCH" != "x86_64" ]; then
 
                 sudo apt install -y $LNXWXGTK30PKG
 
                 BLDCMD="cmake -S \$BUILD -B \$BUILD/build -DCMAKE_POLICY_VERSION_MINIMUM=\$CMAKEPOLVER -DNO_WEBVIEW=ON -DwxWidgets_CONFIG_EXECUTABLE=/usr/bin/wx-config -DCMAKE_C_COMPILER="\$CCACHE_BIN_PATH"\$SLADEGCCOLDVER -DCMAKE_CXX_COMPILER="\$CCACHE_BIN_PATH"\$SLADEGXXOLDVER -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\$BUILD/build/AppDir/usr"
 
-            elif [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3113" ] && [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -le "3250" ] && [ "\$LIBC" != "musl" ] || [ "\$ARCH" != "x86_64" ]; then
+            elif [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3113" ] && [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -le "3250" ] && [ "\$LIBC" != "musl" ] || [ "\$ARCH" != "x86_64" ]; then
 
                 sudo apt install -y $LNXWXGTKPKG
 
@@ -4715,9 +4715,25 @@ else
     fi
 
     # Download libSDL2's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ "\$LIBC" != "musl" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || ([ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ])); then
+    if [ "\$OS" = "Linux" ] && [ "\$LIBC" != "musl" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/ring-racers" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ]); then
 
         sudo dpkg --remove --force-depends libsdl2-dev libsdl2-2.0-0
+
+        # Version 2.28.x of libSDL2 for SRB2 Classic is required to fix "linking error /tmp/ccB0EVlI.ltrans0.ltrans.o: In function VID_CheckRenderer': <artificial>:(.text+0xc9bf): undefined reference to SDL_DestroyWindowSurface'". This version needs to be installed on Linux disributions with older version package.
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
+
+            LNXSDL2VER="release-2.28.0"
+
+        # Version 2.0.22 of libSDL2 for Ring Racers is required to fix error: 'SDL_GetErrorMsg' was not declared in this scope; did you mean 'SDL_GetError'?
+        elif [ "\$BUILD" = "\$BUILDPATH/ring-racers" ]; then
+
+            LNXSDL2VER="release-2.0.22"
+
+        else
+
+            LNXSDL2VER="$LNXSDL2VER"
+
+        fi
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libsdl2/.git" ]; then
 
@@ -5056,7 +5072,7 @@ else
     fi
 
     # Download libwxgtk's source code, build and install it.
-    if [ "\$BUILD" = "\$BUILDPATH/slade" ] && ([ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3260" ] && [ "\$LIBC" != "musl" ] || [ "\$ARCH" != "x86_64" ]); then
+    if [ "\$BUILD" = "\$BUILDPATH/slade" ] && ([ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3260" ] && [ "\$LIBC" != "musl" ] || [ "\$ARCH" != "x86_64" ]); then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libwxgtk/.git" ]; then
 
@@ -5096,7 +5112,7 @@ else
     fi
 
     # Download libwebp's source code, build and install it.
-    if [ "\$BUILD" = "\$BUILDPATH/slade" ] && ([ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3260" ] || [ "\$ARCH" != "x86_64" ]); then
+    if [ "\$BUILD" = "\$BUILDPATH/slade" ] && ([ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3260" ] || [ "\$ARCH" != "x86_64" ]); then
 
         if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$LNXOSNAME" = "NixOS" ]; then
 
@@ -5511,12 +5527,12 @@ else
 
         elif [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
 
-            if [ "\$LIBC" != "musl" ]; then
-
-                sudo apt install -y libjpeg62-dev
-                sudo apt autoremove -y
-
-            fi
+#            if [ "\$LIBC" != "musl" ]; then
+#
+#                sudo apt install -y libjpeg62-dev
+#                sudo apt autoremove -y
+#
+#            fi
 
             if [ "\$BUILD" = "\$BUILDPATH/ring-racers" ]; then
 
@@ -5553,7 +5569,7 @@ else
 
             if [ "\$LIBC" != "musl" ]; then
 
-                gawk -i inplace '{gsub("\\\\$<IF:\\\\$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>","/usr/lib/x86_64-linux-gnu/libSDL2.so"); print}' "\$BUILD/src/sdl/CMakeLists.txt"
+                gawk -i inplace '{gsub("\\\\$<IF:\\\\$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>","/usr/lib/libSDL2.so"); print}' "\$BUILD/src/sdl/CMakeLists.txt"
 
             fi
 
@@ -8497,7 +8513,7 @@ RUN apt-get update && \
 apt-get full-upgrade -y && \
 apt-get install -y apt-fast && \
 gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=true");sub("_MAXNUM=5","_MAXNUM=20"); print}' /etc/apt-fast.conf && \
-apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse nasm python3-dev python3-setuptools python3-pil python3-wheel build-essential $GCCVER $GXXVER $GCCOLDVER $GXXOLDVER $RINGRACERSGCCVER $RINGRACERSGXXVER ccache automake libtool cmake file sudo dash gettext git stow imagemagick p7zip-full p7zip-rar zip unrar
+apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libpng-dev libgme-dev libopenmpt-dev libfluidsynth-dev libmodplug-dev libopus-dev libjack-dev libcurl4-openssl-dev libupnp-dev zlib1g-dev rapidjson-dev libfuse-dev fuse nasm python3-dev python3-setuptools python3-pil python3-wheel build-essential $GCCVER $GXXVER $GCCOLDVER $GXXOLDVER $RINGRACERSGCCVER $RINGRACERSGXXVER ccache automake libtool cmake file sudo dash gettext git stow imagemagick p7zip-full p7zip-rar zip unrar
 
 RUN DEBARCH="\$(dpkg --print-architecture)" ; \
 curl -RLC - --retry 999 https://snapshot.debian.org/archive/debian/20180611T145305Z/pool/main/m/miniupnpc/libminiupnpc-dev_2.0.20180410-2_\$DEBARCH.deb -o /tmp/libminiupnpc-dev_2.1-1_\$DEBARCH.deb && \
@@ -9916,16 +9932,15 @@ extractsrb2macosassets() {
 
     fi
 
-    if [ -n "$SRB2LATESTVER" ] && ([ "$SRB2VER" != "$SRB2LATESTVER" ] && [ "$($PRINTF "$SRB2VER" | gawk '{gsub("\\.|[a-z]|[A-Z]",""); print}')" -lt "$($PRINTF "$SRB2LATESTVER" | gawk '{gsub("\\.|[a-z]|[A-Z]",""); print}')" ]); then
+    if [ -n "$SRB2LATESTVER" ] && ([ "$SRB2VER" != "$SRB2LATESTVER" ] && [ "$($PRINTF "$SRB2VER" | gawk '{gsub("\\.|-|[a-z]|[A-Z]",""); print}')" -lt "$($PRINTF "$SRB2LATESTVER" | gawk '{gsub("\\.|-|[a-z]|[A-Z]",""); print}')" ]); then
 
         if [ -n "$ISNET" ]; then
 
-            SRB2ASSETLATESTURL="$SRB2ASSETURL/latest"
             SRB2ASSETURL=$(curl -s "$SRB2ASSETURL" | gawk -F'"' '/'SRB2_release_$SRB2VER'\/.*Full.zip/ {print $4}')
 
             if [ -z "$SRB2ASSETURL" ]; then
 
-                SRB2ASSETURL=$(curl -s "$SRB2ASSETLATESTURL" | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+                SRB2ASSETURL=$(curl -s "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
                 $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
             fi
@@ -9945,8 +9960,7 @@ extractsrb2macosassets() {
 
         if [ -n "$ISNET" ]; then
 
-            SRB2ASSETLATESTURL="$SRB2ASSETURL/latest"
-            SRB2ASSETURL=$(curl -s "$SRB2ASSETLATESTURL" | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+            SRB2ASSETURL=$(curl -s "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
 
             if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
@@ -10001,16 +10015,15 @@ extractsrb2kartmacosassets() {
         RINGRACERSLATESTVER=$($PRINTF "%s\n" "$RINGRACERSVERS" | head -n1)
         RINGRACERSVER=$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null || $PRINTF "%s\n" "$RINGRACERSLATESTVER")
 
-        if [ -n "$RINGRACERSLATESTVER" ] && ([ "v$RINGRACERSVER" != "$RINGRACERSLATESTVER" ] && [ "$($PRINTF "$RINGRACERSVER" | gawk '{gsub("\\.|[a-z]|[A-Z]",""); print}')" -lt "$($PRINTF "$RINGRACERSLATESTVER" | gawk '{gsub("\\.|[a-z]|[A-Z]",""); print}')" ]); then
+        if [ -n "$RINGRACERSLATESTVER" ] && ([ "v$RINGRACERSVER" != "$RINGRACERSLATESTVER" ] && [ "$($PRINTF "$RINGRACERSVER" | gawk '{gsub("\\.|-|[a-z]|[A-Z]",""); print}')" -lt "$($PRINTF "$RINGRACERSLATESTVER" | gawk '{gsub("\\.|-|[a-z]|[A-Z]",""); print}')" ]); then
 
             if [ -n "$ISNET" ]; then
 
-                RINGRACERSASSETLATESTURL="$RINGRACERSASSETURL/latest"
                 RINGRACERSASSETURL=$(curl -s "$RINGRACERSASSETURL" | gawk -F'"' '/'$RINGRACERSVER'\/.*Installer.exe/ {print $4}')
 
                 if [ -z "$RINGRACERSASSETURL" ]; then
 
-                    RINGRACERSASSETURL=$(curl -s "$RINGRACERSASSETLATESTURL" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                    RINGRACERSASSETURL=$(curl -s "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
                     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
                 fi
@@ -10040,8 +10053,7 @@ extractsrb2kartmacosassets() {
 
             if [ -n "$ISNET" ]; then
 
-                RINGRACERSASSETLATESTURL="$RINGRACERSASSETURL/latest"
-                RINGRACERSASSETURL=$(curl -s "$RINGRACERSASSETLATESTURL" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                RINGRACERSASSETURL=$(curl -s "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
 
                 if [ "$(curl -X GET -sLI "$RINGRACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/RingRacers-Latest.exe" 2> /dev/null)" ]; then
 
@@ -10088,16 +10100,15 @@ extractsrb2kartmacosassets() {
 
         fi
 
-        if [ -n "$SRB2KARTLATESTVER" ] && ([ "$SRB2KARTVER" != "$SRB2KARTLATESTVER" ] && [ "$($PRINTF "$SRB2KARTVER" | gawk '{gsub("\\.|[a-z]|[A-Z]",""); print}')" -lt "$($PRINTF "$SRB2KARTLATESTVER" | gawk '{gsub("\\.|[a-z]|[A-Z]",""); print}')" ]); then
+        if [ -n "$SRB2KARTLATESTVER" ] && ([ "$SRB2KARTVER" != "$SRB2KARTLATESTVER" ] && [ "$($PRINTF "$SRB2KARTVER" | gawk '{gsub("\\.|-|[a-z]|[A-Z]",""); print}')" -lt "$($PRINTF "$SRB2KARTLATESTVER" | gawk '{gsub("\\.|-|[a-z]|[A-Z]",""); print}')" ]); then
 
             if [ -n "$ISNET" ]; then
 
-                SRB2KARTASSETLATESTURL="$SRB2KARTASSETURL/latest"
                 SRB2KARTASSETURL=$(curl -s "$SRB2KARTASSETURL" | gawk -F'"' '/'$SRB2KARTVER'\/.*Installer.exe/ {print $4}')
 
                 if [ -z "$SRB2KARTASSETURL" ]; then
 
-                    SRB2KARTASSETURL=$(curl -s "$SRB2KARTASSETLATESTURL" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                    SRB2KARTASSETURL=$(curl -s "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
                     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
                 fi
@@ -10125,8 +10136,7 @@ extractsrb2kartmacosassets() {
 
             if [ -n "$ISNET" ]; then
 
-                SRB2KARTASSETLATESTURL="$SRB2KARTASSETURL/latest"
-                SRB2KARTASSETURL=$(curl -s "$SRB2KARTASSETLATESTURL" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                SRB2KARTASSETURL=$(curl -s "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
 
                 if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" 2> /dev/null)" ]; then
 
