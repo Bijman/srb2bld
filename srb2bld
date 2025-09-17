@@ -3109,8 +3109,15 @@ EOF
 
             RINGRACERSLATESTVER=\$(\$PRINTF "%s\n" "\$RINGRACERSVERS" | head -n1)
             RINGRACERSVER=\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null || \$PRINTF "%s\n" "\$RINGRACERSLATESTVER")
+            RINGRACERSBETAVER=\$(gawk -F'\"' '/BETAVERSION/ {print tolower(\$2)}' "\$BUILD/src/version.h" 2> /dev/null || true)
 
             if [ -n "\$RINGRACERSLATESTVER" ] && ([ "v\$RINGRACERSVER" != "\$RINGRACERSLATESTVER" ] && [ "\$(\$PRINTF "\$RINGRACERSVER" | gawk '{gsub("\\\.|-|[a-z]|[A-Z]",""); print}')" -lt "\$(\$PRINTF "\$RINGRACERSLATESTVER" | gawk '{gsub("\\\.|-|[a-z]|[A-Z]",""); print}')" ]); then
+
+                if [ -n "\$RINGRACERSBETAVER" ]; then
+
+                    RINGRACERSVER="\$RINGRACERSVER-\$RINGRACERSBETAVER"
+
+                fi
 
                 if [ -n "\$ISNET" ]; then
 
@@ -10014,8 +10021,15 @@ extractsrb2kartmacosassets() {
 
         RINGRACERSLATESTVER=$($PRINTF "%s\n" "$RINGRACERSVERS" | head -n1)
         RINGRACERSVER=$(gawk -F'\"' '/SRB2VERSION/ {print $2}' "$BUILD/src/version.h" 2> /dev/null || $PRINTF "%s\n" "$RINGRACERSLATESTVER")
+        RINGRACERSBETAVER=$(gawk -F'\"' '/BETAVERSION/ {print tolower($2)}' "$BUILD/src/version.h" 2> /dev/null || true)
 
         if [ -n "$RINGRACERSLATESTVER" ] && ([ "v$RINGRACERSVER" != "$RINGRACERSLATESTVER" ] && [ "$($PRINTF "$RINGRACERSVER" | gawk '{gsub("\\.|-|[a-z]|[A-Z]",""); print}')" -lt "$($PRINTF "$RINGRACERSLATESTVER" | gawk '{gsub("\\.|-|[a-z]|[A-Z]",""); print}')" ]); then
+
+            if [ -n "$RINGRACERSBETAVER" ]; then
+
+                RINGRACERSVER="$RINGRACERSVER-$RINGRACERSBETAVER"
+
+            fi
 
             if [ -n "$ISNET" ]; then
 
