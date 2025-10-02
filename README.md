@@ -182,7 +182,7 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 Live                |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 LoZ                 |          🟨*          |         🟨*          |        🟨*        |        🟨*      |       ⛔      |
 | SSBSS                    |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| NewMillennium            |          🟨*          |         🟨*          |        ❔         |        ✅       |       ⛔      |
+| NewMillennium            |          🟨*          |         🟨*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 Persona             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart                |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart Moe Mansion    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
