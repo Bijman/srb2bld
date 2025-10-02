@@ -3,7 +3,7 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://github.com/user-attachments/assets/a8a188be-9431-46af-8a31-d2f394c1dc14
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 v2.2 Classic, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries, SRB2 TSoURDt3rd, SRB2 Edit, SRB2 Project Astral, SRB2 VR, SRB2 v2.1 Legacy, SRB2 Fusion Advance, SRB2 Top Down, SRB2 v2.0, XSRB2, SRB2 SF94-Serv, SRB2 Riders, Super SRB2 Kart Z, Super Bomberman Blast 2, SRB2 Final Demo, SRB2 JTE, ShufflarB2, SRB2 Live, SRB2 LoZ, SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Blankart, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers HEP3, Ring Racers Freaky Build, Radio Racers, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, Ultimate Lowee Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 v2.2 Classic, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries, SRB2 TSoURDt3rd, SRB2 Edit, SRB2 The Great Galactic Journey, SRB2 Destructive Illusion, SRB2 VR, SRB2 v2.1 Legacy, SRB2 Fusion Advance, SRB2 Thokker, SRB2 Top Down, Sonic Smash Brawl, SRB2 v2.0, SRB2 Community Build, XSRB2, SRB2 SF94-Serv, SRB2 Riders, Super SRB2 Kart Z, Super Bomberman Blast 2, SRB2 Final Demo, SRB2 JTE, ShufflarB2, SRB2 Live, SRB2 LoZ, Super Smash Bros: Sonic Showdown, NewMillennium (SRB2 Feb 2000 Prototype), SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Blankart, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers HEP3, Ring Racers Freaky Build, Radio Racers, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, Ultimate Lowee Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
@@ -48,6 +48,7 @@ As for macOS users, they need to install these additional dependencies:
 - Automake,
 - Pkg-config,
 - Libtool,
+- Megatools,
 - P7zip,
 - Unrar/Rar,
 - Makeicns,
@@ -57,31 +58,33 @@ As for macOS users, they need to install these additional dependencies:
 # Dependencies Installation
 **Linux:**
 1. In terminal enter this following command:
-- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils file ncurses-bin curl gawk docker.io stow libfuse2 zlib1g patchelf libgdk-pixbuf2.0-bin flatpak flatpak-builder`,
+- Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils file hostname ncurses-bin curl gawk docker.io stow libfuse2 zlib1g patchelf libgdk-pixbuf2.0-bin flatpak flatpak-builder`,
 
-- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils file ncurses curl gawk docker stow fuse2 zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils file hostname ncurses curl gawk docker stow fuse2 zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Gentoo/Gentoo based: `sudo emerge -av dev-vcs/git sys-apps/which sys-apps/coreutils sys-apps/findutils sys-apps/file sys-libs/ncurses net-misc/curl sys-apps/gawk app-containers/docker app-admin/stow sys-fs/fuse:0 sys-libs/zlib dev-util/patchelf x11-libs/gdk-pixbuf sys-apps/flatpak dev-util/flatpak-builder`,
+- Gentoo/Gentoo based: `sudo emerge -av dev-vcs/git sys-apps/which sys-apps/coreutils sys-apps/findutils sys-apps/file sys-apps/net-tools sys-libs/ncurses net-misc/curl sys-apps/gawk app-containers/docker app-admin/stow sys-fs/fuse:0 sys-libs/zlib dev-util/patchelf x11-libs/gdk-pixbuf sys-apps/flatpak dev-util/flatpak-builder`,
 
-- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Fedora/Fedora based: `sudo dnf install make git which coreutils findutils file hostname ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Fedora Silverblue/Fedora Kinoite/Fedora Sway/Fedora Budgie/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder `,
+- Fedora Silverblue/Fedora Kinoite/Fedora Sway/Fedora Budgie/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive make git which coreutils findutils file hostname ncurses curl gawk docker stow fuse-libs zlib-ng-compat patchelf gdk-pixbuf2 flatpak flatpak-builder `,
 
-- RHEL/RHEL based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow fuse-libs zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- RHEL/RHEL based: `sudo dnf install epel-release && sudo dnf upgrade --refresh && sudo dnf install make git which coreutils findutils file hostname ncurses curl gawk docker stow fuse-libs zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
-- Mageia/Mageia based: `sudo dnf install make git which coreutils findutils file ncurses curl gawk docker stow lib64fuse2 lib64zlib1 patchelf gdk-pixbuf2.0 flatpak flatpak-builder`,
+- Mageia/Mageia based: `sudo dnf install make git which coreutils findutils file hostname ncurses curl gawk docker stow lib64fuse2 lib64zlib1 patchelf gdk-pixbuf2.0 flatpak flatpak-builder`,
 
-- openSUSE Leap/openSUSE Tumbleweed/openSUSE Leap based/openSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils file ncurses curl gawk docker stow libfuse2 libz1 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
+- OpenMandriva Lx/OpenMandriva Lx based: enable "Extra" repository with `sudo om-repo-picker` or `sudo dnf config-manager --enable [Extra repository name]` and then enter `sudo dnf install make git which coreutils findutils file hostname ncurses curl gawk docker stow fuse2 libz1 patchelf gdk-pixbuf2.0 flatpak`,
 
-- openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils file ncurses curl gawk docker stow libfuse2 libz1 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder && sudo transactional-update apply`,
+- openSUSE Leap/openSUSE Tumbleweed/openSUSE Leap based/openSUSE Tumbleweed based: `sudo zypper in make git which coreutils findutils file hostname ncurses curl gawk docker stow libfuse2 libz1 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder`,
+
+- openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in make git which coreutils findutils file hostname ncurses curl gawk docker stow libfuse2 libz1 patchelf gdk-pixbuf-query-loaders flatpak flatpak-builder && sudo transactional-update apply`,
 
 - Void/Void based: `sudo xbps-install make git which coreutils findutils file ncurses curl gawk docker stow fuse zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- Alpine/Alpine based: `sudo apk add make git which coreutils findutils file shadow ncurses curl gawk docker stow fuse zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
+- Alpine/Alpine based: `sudo apk add make git which coreutils findutils file net-tools shadow ncurses curl gawk docker stow fuse zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- Solus/Solus based: `sudo eopkg it make git which coreutils findutils file ncurses curl gawk docker stow fuse2 zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
+- Solus/Solus based: `sudo eopkg it make git which coreutils findutils file inetutils ncurses curl gawk docker stow fuse2 zlib patchelf gdk-pixbuf flatpak flatpak-builder`,
 
-- NixOS/NixOS based: `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#file nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#zlib nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`. For Flatpak, set "services.flatpak.enable = true;" in "/etc/nixos/configuration.nix".
+- NixOS/NixOS based: `sudo nix profile install nixpkgs#gnumake nixpkgs#git nixpkgs#which nixpkgs#coreutils nixpkgs#findutils nixpkgs#file nixpkgs#inetutils nixpkgs#ncurses nixpkgs#curl nixpkgs#gawk nixpkgs#stow nixpkgs#fuse nixpkgs#zlib nixpkgs#patchelf nixpkgs#gdk-pixbuf nixpkgs#flatpak nixpkgs#flatpak-builder --extra-experimental-features 'nix-command flakes'` or set those packages in "environment.systemPackages = with pkgs;". For Docker, set "virtualisation.docker.enable = true;", so this should install and enable Docker as service running in the background of system with `sudo nixos-rebuild switch`. For Flatpak, set "services.flatpak.enable = true;" in "/etc/nixos/configuration.nix".
 
 - Systems with immutable root filesystems (with exception of home directory and others depending on distro) like Steam Deck's SteamOS need rootless method of getting dependencies to avoid issues with wiping out installed packages after system's update or not to be able to write to certain path, like "/usr/local":
 	1. Docker (Rootless mode): run `curl -fsSL https://get.docker.com/rootless | sh` to install Docker to user's home directory. For more details read [HERE](https://docs.docker.com/engine/security/rootless),
@@ -102,8 +105,8 @@ As for macOS users, they need to install these additional dependencies:
 
 **macOS:**
 1. In terminal enter this following command:
-- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl makeicns nasm xxhash pillow`,
-- MacPorts: `sudo port -Ncb install cmake autoconf automake pkgconfig libtool gawk stow perl5.28 libiconv p7zip unrar curl makeicns nasm xxhash py313-pillow`.
+- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl megatools makeicns nasm xxhash pillow`,
+- MacPorts: `sudo port -Ncb install cmake autoconf automake pkgconfig libtool gawk stow perl5.28 libiconv p7zip unrar curl megatools makeicns nasm xxhash py313-pillow`.
 
 # Installation
 **Linux:**
@@ -139,7 +142,7 @@ As for macOS users, they need to install these additional dependencies:
 
 # Configuration
 **Linux (Notice: This part can be skipped, if you have installed podman.):**
-1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker`. For immutable systems (Steam Deck's SteamOS, Fedora Silverblue/Fedora Kinoite/Universal Blue) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
+1. Add user to the "docker" group `sudo usermod -aG docker [username]` and enable Docker service with `sudo systemctl enable docker` or `sudo rc-update add docker default` or `sudo ln -s /etc/sv/docker /var/service/` or `sudo dinitctl enable docker` or `sudo s6-service add default docker`, and then start the service with `sudo systemctl start docker` or `sudo rc-service docker start` or `sudo sv up docker` or `sudo dinitctl start docker` or `sudo s6-rc start docker`. For immutable systems (Steam Deck's SteamOS, Fedora Silverblue/Fedora Kinoite/Universal Blue) enter: `systemctl --user enable docker` and `systemctl --user start docker`. After that, logout or reboot the system.
 
 **Windows:**
 1. User is already added to "docker" group and service will run, if Docker Desktop is installed and the system is logged out or rebooted.
@@ -158,12 +161,16 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 Reveries            |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 TSoURDt3rd          |          ✅           |         🟨           |        🟨         |        ✅       |       🟨      |
 | SRB2 Edit                |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
-| SRB2 Project Astral      |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
+| SRB2 GGJ                 |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
+| SRB2 Destructive Illusion|          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
 | SRB2 VR                  |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Fusion Advance      |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
+| SRB2 Thokker             |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
 | SRB2 Top Down            |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
+| Sonic Smash Brawl        |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
 | SRB2 v2.0                |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
+| SRB2 Community Build     |          ✅*          |         ✅*          |        ❔         |        🟨*      |       ⛔      |
 | XSRB2                    |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 SF94-Serv           |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 Riders              |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
@@ -174,6 +181,8 @@ As for macOS users, they need to install these additional dependencies:
 | ShufflarB2               |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 Live                |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 LoZ                 |          🟨*          |         🟨*          |        🟨*        |        🟨*      |       ⛔      |
+| SSBSS                    |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
+| NewMillennium            |          🟨*          |         🟨*          |        ❔         |        ✅       |       ⛔      |
 | SRB2 Persona             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart                |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart Moe Mansion    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -210,7 +219,7 @@ As for macOS users, they need to install these additional dependencies:
 
 ❔ - Not tested.
 
-*Only 32-bit binaries are currently supported. SRB2 v2.0 has graphical issues when running with OpenGL on Linux and Windows.
+*Only 32-bit binaries are currently supported. SRB2 v2.0 has graphical issues when running with OpenGL on Linux and Windows. Disable SFX in SRB2 Community Build's sound options to avoid crashes on Windows.
 
 **Compiles successfully with patch for commit d4d1181ec6f without setting -DSRB2_CONFIG_HAVE_DISCORDRPC=ON compilation flag, but there may be some slowdowns, when running game.
 
@@ -283,25 +292,28 @@ Usage: srb2bld [OPTIONS]
 
      5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
 
-         - Debian/Ubuntu/Debian based/Ubuntu based: "sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install libfuse2:i386 libc6:i386 zlib1g:i386",
+         - Debian/Ubuntu/Debian based/Ubuntu based: "sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install libfuse2:i386 libc6:i386 zlib1g:i386 libglx-mesa0:i386 libgl1:i386 libglvnd0:i386",
 
-         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do "sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib" or use one of the AUR helpers that you have installed - "pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib" or "paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib" or "yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib",
+         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do "sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd" or use one of the AUR helpers that you have installed - "pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd" or "paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd" or "yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd",
 
-         - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib",
+         - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse:0 sys-libs/glibc sys-libs/zlib media-libs/mesa media-libs/libglvnd",
+- Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686",
 
-         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686", 
+         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686",
 
-         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686",
+         - RHEL/RHEL based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686 mesa-dri-drivers.i686 libglvnd-glx.i686",
 
-         - RHEL/RHEL based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686",
+         - Mageia/Mageia based: "sudo dnf config-manager --set-enabled mageia-i586 updates-i586 && sudo dnf install libfuse2.i586 libzlib1.i586 mesa.i586 libglvnd.i586",
 
-         - Mageia/Mageia based: "sudo dnf config-manager --set-enabled mageia-i586 updates-i586 && sudo dnf install libfuse2 libzlib1",
+         - openSUSE/openSUSE based: "sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit Mesa-libGL1-32bit Mesa-32bit libglvnd-32bit",
 
-         - openSUSE/openSUSE based: "sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit",
+         - openSUSE MicroOS/openSUSE MicroOS based: "sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit Mesa-libGL1-32bit Mesa-32bit libglvnd-32bit && sudo transactional-update apply",
 
-         - openSUSE MicroOS/openSUSE MicroOS based: "sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit && sudo transactional-update apply",
+         - Void/Void based: "sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit libgcc-32bit zlib-32bit mesa-32bit libglvnd-32bit",
 
-         - Void/Void based: "sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit libgcc-32bit zlib-32bit".
+         - Solus/Solus based: "sudo eopkg it glibc-32bit libgcc-32bit zlib-32bit mesalib-32bit libglvnd-32bit",
+
+         - NixOS/NixOS based: "sudo nix profile install nixpkgs#pkgsi686Linux.fuse nixpkgs#pkgsi686Linux.glibc nixpkgs#pkgsi686Linux.libgcc nixpkgs#pkgsi686Linux.zlib nixpkgs#pkgsi686Linux.mesa nixpkgs#pkgsi686Linux.libglvnd --extra-experimental-features 'nix-command flakes'" or set those packages in "environment.systemPackages = with pkgs;".
 
      6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set: export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" in "~/.bash_profile" or "~/.zshrc".
 
@@ -311,23 +323,31 @@ Usage: srb2bld [OPTIONS]
 
      9. If you have error "invalid file system type on '/sys/fs/cgroup'", while running script, issue could be with not running cgroups service "sudo systemctl enable cgconfig && sudo systemctl start cgconfig" or "sudo systemctl enable cgmanager && sudo systemctl start cgmanager" or "sudo rc-update add cgroups && sudo rc-service cgroups start" and reboot system.
 
-     10. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
+     10. Other cgroup errors like: "Failed to add conmon to cgroupfs sandbox cgroup: creating cgroup for pids: mkdir /sys/fs/cgroup/pids: no such file or directory. Error: OCI runtime error: runc: runc create failed: no cgroup mount found in mountinfo"" can be solved with "sudo mount -t cgroup cgroup /sys/fs/cgroup" for temporarily mounting or put "cgroup /sys/fs/cgroup cgroup defaults 0 0" at /etc/fstab for mounting at OS boot.
+     
+     11. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
 
-     11. If you encounter issue for example "cp: missing destination file operand after '/home/[username]/.local/share/srb2bld/builds/srb2-2.0/build/AppDir/usr/lib'", while installing 32-bit old SRB2 build or building AppImage/Flatpak, please set "sudo setsebool -P allow_execstack 1" to adjust activated SELinux for allowing executable stacks globally on host OS or create SELinux rules for specific executable stack with recent AVC denial "sudo ausearch -m avc -ts recent | audit2allow -M my_execstack_policy", "sudo semodule -i my_execstack_policy.pp".
+     12. If you encounter issue for example "cp: missing destination file operand after '/home/[username]/.local/share/srb2bld/builds/srb2-2.0/build/AppDir/usr/lib'", while installing 32-bit old SRB2 build or building AppImage/Flatpak, please set "sudo setsebool -P allow_execstack 1" to adjust activated SELinux for allowing executable stacks globally on host OS or create SELinux rules for specific executable stack with recent AVC denial "sudo ausearch -m avc -ts recent | audit2allow -M my_execstack_policy", "sudo semodule -i my_execstack_policy.pp".
 
-     12. If docker fails to run despite following installation/configuration instructions and notes from srb2bld's README, consider switching to "podman".
+     13. If docker fails to run despite following installation/configuration instructions and notes from srb2bld's README, consider switching to "podman".
 
-     13. If you get "unhandled exception" when running Ultimate Zone Builder or High Voltage Ring, uninstall mono in your system.
+     14. If you get "unhandled exception" when running Ultimate Zone Builder or High Voltage Ring, uninstall mono in your system.
 
-     14. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
+     15. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
 
-     15. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
+     16. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
 
-     16. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+     17. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
 
-     17. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
+     18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
 
-     18. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+     19. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
+
+          - Proprietary NVIDIA GPU drivers: "export __NV_PRIME_RENDER_OFFLOAD=1" and "export __GLX_VENDOR_LIBRARY_NAME=nvidia",
+
+          - AMD, NVIDIA and Intel open source drivers: "export DRI_PRIME=1".
+
+     20. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -373,7 +393,7 @@ Usage: srb2bld [OPTIONS]
 
           Then choose "Build SRB2 Custom", when running script.
 
-     19. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+     21. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -399,23 +419,28 @@ Usage: srb2bld [OPTIONS]
 
 5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
 
-         - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install libfuse2:i386 libc6:i386 zlib1g:i386`,
+         - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install libfuse2:i386 libc6:i386 zlib1g:i386 libglx-mesa0:i386 libgl1:i386 libglvnd0:i386`,
 
-         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib` or use one of the AUR helpers that you have installed - `pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib` or `paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib` or `yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib`,
+         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or use one of the AUR helpers that you have installed - `pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or `paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or `yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd`,
 
-         - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse sys-libs/glibc sys-libs/zlib`,
+         - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse:0 sys-libs/glibc sys-libs/zlib media-libs/mesa media-libs/libglvnd`,
+- Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
 
-         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686`,
+         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
 
-         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686`,
+         - RHEL/RHEL based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
 
-         - RHEL/RHEL based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686`,
+         - Mageia/Mageia based: `sudo dnf config-manager --set-enabled mageia-i586 updates-i586 && sudo dnf install libfuse2.i586 libzlib1.i586 mesa.i586 libglvnd.i586`,
 
-         - openSUSE/openSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit`,
+         - openSUSE/openSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit Mesa-libGL1-32bit Mesa-32bit libglvnd-32bit`,
 
-         - openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit && sudo transactional-update apply`,
+         - openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit Mesa-libGL1-32bit Mesa-32bit libglvnd-32bit && sudo transactional-update apply`,
 
-         - Void/Void based: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit libgcc-32bit zlib-32bit`.
+         - Void/Void based: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit libgcc-32bit zlib-32bit mesa-32bit libglvnd-32bit`,
+
+         - Solus/Solus based: `sudo eopkg it glibc-32bit libgcc-32bit zlib-32bit mesalib-32bit libglvnd-32bit`,
+
+         - NixOS/NixOS based: `sudo nix profile install nixpkgs#pkgsi686Linux.fuse nixpkgs#pkgsi686Linux.glibc nixpkgs#pkgsi686Linux.libgcc nixpkgs#pkgsi686Linux.zlib nixpkgs#pkgsi686Linux.mesa nixpkgs#pkgsi686Linux.libglvnd --extra-experimental-features 'nix-command flakes'` or set those packages in `environment.systemPackages = with pkgs;`.
 
 6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set `export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"` in "\~/.bash_profile" or "\~/.zshrc".
 
@@ -425,23 +450,31 @@ Usage: srb2bld [OPTIONS]
 
 9. If you have error "invalid file system type on '/sys/fs/cgroup'", while running script, issue could be with not running cgroups service "sudo systemctl enable cgconfig && sudo systemctl start cgconfig" or "sudo systemctl enable cgmanager && sudo systemctl start cgmanager" or "sudo rc-update add cgroups && sudo rc-service cgroups start" and reboot system.
 
-10. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
+10. Other cgroup errors like: "Failed to add conmon to cgroupfs sandbox cgroup: creating cgroup for pids: mkdir /sys/fs/cgroup/pids: no such file or directory. Error: OCI runtime error: runc: runc create failed: no cgroup mount found in mountinfo"" can be solved with "sudo mount -t cgroup cgroup /sys/fs/cgroup" for temporarily mounting or put "cgroup /sys/fs/cgroup cgroup defaults 0 0" at /etc/fstab for mounting at OS boot.
 
-11. If you encounter issue for example "cp: missing destination file operand after '/home/[username]/.local/share/srb2bld/builds/srb2-2.0/build/AppDir/usr/lib'", while installing 32-bit old SRB2 build or building AppImage/Flatpak, please set "sudo setsebool -P allow_execstack 1" to adjust activated SELinux for allowing executable stacks globally on host OS or create SELinux rules for specific executable stack with recent AVC denial "sudo ausearch -m avc -ts recent | audit2allow -M my_execstack_policy", "sudo semodule -i my_execstack_policy.pp".
+11. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
 
-12. If docker fails to run despite following installation/configuration instructions and notes from srb2bld's README, consider switching to "podman".
+12. If you encounter issue for example "cp: missing destination file operand after '/home/[username]/.local/share/srb2bld/builds/srb2-2.0/build/AppDir/usr/lib'", while installing 32-bit old SRB2 build or building AppImage/Flatpak, please set "sudo setsebool -P allow_execstack 1" to adjust activated SELinux for allowing executable stacks globally on host OS or create SELinux rules for specific executable stack with recent AVC denial "sudo ausearch -m avc -ts recent | audit2allow -M my_execstack_policy", "sudo semodule -i my_execstack_policy.pp".
 
-13. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
+13. If docker fails to run despite following installation/configuration instructions and notes from srb2bld's README, consider switching to "podman".
 
-14. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
+14. If you get "unhandled exception" when running Ultimate Zone Builder, uninstall mono in your system.
 
-15. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
+15. To deal with out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus", decrease number of CPU threads using variable "SRB2BLDNCPU=[number of CPU threads]".
 
-16. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+16. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
 
-17. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
+17. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
 
-18. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
+
+19. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
+
+    - Proprietary NVIDIA GPU drivers: "export __NV_PRIME_RENDER_OFFLOAD=1" and "export __GLX_VENDOR_LIBRARY_NAME=nvidia",
+
+    - AMD, NVIDIA and Intel open source drivers: "export DRI_PRIME=1".
+
+20. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
     - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -487,7 +520,7 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-19. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+21. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
