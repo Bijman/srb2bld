@@ -2294,7 +2294,7 @@ containerentry() {
 
                 if [ -n "\$ISNET" ]; then
 
-                    SRB2REVERIESASSETURL=\$(/usr/bin/curl -s "\$SRB2REVERIESASSETURL" | gawk '{gsub(",","\n"); print}' | gawk -F'"' '/browser_download_url.*.zip/ {print \$4}' | head -n1)
+                    SRB2REVERIESASSETURL=\$(/usr/bin/curl -sL "\$SRB2REVERIESASSETURL" | gawk '{gsub(",","\n"); print}' | gawk -F'"' '/browser_download_url.*.zip/ {print \$4}' | head -n1)
                     if [ "\$(/usr/bin/curl -X GET -sLI "\$SRB2REVERIESASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2Reveries.zip" 2> /dev/null)" ]; then
 
                         rm -f "\$SRB2BLDROOT/assets/SRB2Reveries.zip"
@@ -2587,7 +2587,7 @@ EOF
 
             if [ -n "\$ISNET" ]; then
 
-                NEWMILLENNIUMASSETURL=\$(curl -s "\$NEWMILLENNIUMASSETURL" | gawk -F'"' '/browser_download_url.*freedoom-.*.zip/ {print \$4}' | head -n1)
+                NEWMILLENNIUMASSETURL=\$(curl -sL "\$NEWMILLENNIUMASSETURL" | gawk -F'"' '/browser_download_url.*freedoom-.*.zip/ {print \$4}' | head -n1)
                 if [ "\$(curl -X GET -sLI "\$NEWMILLENNIUMASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/NewMillennium.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/NewMillennium.zip"
@@ -2626,7 +2626,7 @@ EOF
 
                 if [ -n "\$ISNET" ]; then
 
-                    SRB2KARTSATURNASSETURL=\$(curl -s "\$SRB2KARTSATURNASSETURL" | gawk -F'"' '/browser_download_url.*Just-Extra.*Files.zip/ {print \$4}' | head -n1)
+                    SRB2KARTSATURNASSETURL=\$(curl -sL "\$SRB2KARTSATURNASSETURL" | gawk -F'"' '/browser_download_url.*Just-Extra.*Files.zip/ {print \$4}' | head -n1)
                     if [ "\$(curl -X GET -sLI "\$SRB2KARTSATURNASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2KartSaturn.zip" 2> /dev/null)" ]; then
 
                         rm -f "\$SRB2BLDROOT/assets/SRB2KartSaturn.zip"
@@ -2642,7 +2642,7 @@ EOF
 
                 if [ -n "\$ISNET" ]; then
 
-                    SRB2KARTNEPTUNEASSETURL=\$(curl -s "\$SRB2KARTNEPTUNEASSETURL" | gawk -F'"' '/browser_download_url.*64Bit.zip/ {print \$4}' | head -n1)
+                    SRB2KARTNEPTUNEASSETURL=\$(curl -sL "\$SRB2KARTNEPTUNEASSETURL" | gawk -F'"' '/browser_download_url.*64Bit.zip/ {print \$4}' | head -n1)
                     if [ "\$(curl -X GET -sLI "\$SRB2KARTNEPTUNEASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2KartNeptune.zip" 2> /dev/null)" ]; then
 
                         rm -f "\$SRB2BLDROOT/assets/SRB2KartNeptune.zip"
@@ -2680,7 +2680,7 @@ EOF
 
                 if [ -n "\$ISNET" ]; then
 
-                    RADIORACERSASSETURL=\$(curl -s "\$RADIORACERSASSETURL" | gawk -F'"' '/browser_download_url.*radioracers_assets.zip/ {print \$4}' | head -n1)
+                    RADIORACERSASSETURL=\$(curl -sL "\$RADIORACERSASSETURL" | gawk -F'"' '/browser_download_url.*radioracers_assets.zip/ {print \$4}' | head -n1)
                     if [ "\$(curl -X GET -sLI "\$RADIORACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/RadioRacers.zip" 2> /dev/null)" ]; then
 
                         rm -f "\$SRB2BLDROOT/assets/RadioRacers.zip"
@@ -3018,7 +3018,7 @@ EOF
     extractsrb2assets() {
         if [ -n "\$ISNET" ]; then
 
-            SRB2LATESTVER=\$(curl -s "\$SRB2ASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print \$NF}' | head -n1)
+            SRB2LATESTVER=\$(curl -sL "\$SRB2ASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print \$NF}' | head -n1)
 
         fi
 
@@ -3034,11 +3034,11 @@ EOF
 
             if [ -n "\$ISNET" ]; then
 
-                SRB2ASSETURL=\$(curl -s "\$SRB2ASSETURL" | gawk -F'"' '/'SRB2_release_\$SRB2VER'\/.*Full.zip/ {print \$4}')
+                SRB2ASSETURL=\$(curl -sL "\$SRB2ASSETURL" | gawk -F'"' '/'SRB2_release_\$SRB2VER'\/.*Full.zip/ {print \$4}')
 
                 if [ -z "\$SRB2ASSETURL" ]; then
 
-                    SRB2ASSETURL=\$(curl -s "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
+                    SRB2ASSETURL=\$(curl -sL "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
                     \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
                 fi
@@ -3066,7 +3066,7 @@ EOF
 
             if [ -n "\$ISNET" ]; then
 
-                SRB2ASSETURL=\$(curl -s "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
+                SRB2ASSETURL=\$(curl -sL "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
                 if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
@@ -3153,7 +3153,7 @@ EOF
 
             if [ -n "\$ISNET" ]; then
 
-                RINGRACERSVERS=\$(curl -s "\$RINGRACERSASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print \$NF}')
+                RINGRACERSVERS=\$(curl -sL "\$RINGRACERSASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print \$NF}')
 
             fi
 
@@ -3171,11 +3171,11 @@ EOF
 
                 if [ -n "\$ISNET" ]; then
 
-                    RINGRACERSASSETURL=\$(curl -s "\$RINGRACERSASSETURL" | gawk -F'"' '/browser_download_url.*'\$RINGRACERSVER'.*Installer.exe/ {print \$4}')
+                    RINGRACERSASSETURL=\$(curl -sL "\$RINGRACERSASSETURL" | gawk -F'"' '/browser_download_url.*'\$RINGRACERSVER'.*Installer.exe/ {print \$4}')
 
                     if [ -z "\$RINGRACERSASSETURL" ]; then
 
-                        RINGRACERSASSETURL=\$(curl -s "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
+                        RINGRACERSASSETURL=\$(curl -sL "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
                         \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
                     fi
@@ -3195,7 +3195,7 @@ EOF
 
                 if [ -n "\$ISNET" ]; then
 
-                    RINGRACERSASSETURL=\$(curl -s "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
+                    RINGRACERSASSETURL=\$(curl -sL "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
                     if [ "\$(curl -X GET -sLI "\$RINGRACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/RingRacers-Latest.exe" 2> /dev/null)" ]; then
 
                         rm -f "\$SRB2BLDROOT/assets/RingRacers-Latest.exe"
@@ -3221,7 +3221,7 @@ EOF
 
             if [ -n "\$ISNET" ]; then
 
-                SRB2KARTVERS=\$(curl -s "\$SRB2KARTASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print \$NF}')
+                SRB2KARTVERS=\$(curl -sL "\$SRB2KARTASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print \$NF}')
 
             fi
 
@@ -3241,11 +3241,11 @@ EOF
 
                 if [ -n "\$ISNET" ]; then
 
-                    SRB2KARTASSETURL=\$(curl -s "\$SRB2KARTASSETURL" | gawk -F'"' '/'\$SRB2KARTVER'\/.*Installer.exe/ {print \$4}')
+                    SRB2KARTASSETURL=\$(curl -sL "\$SRB2KARTASSETURL" | gawk -F'"' '/'\$SRB2KARTVER'\/.*Installer.exe/ {print \$4}')
 
                     if [ -z "\$SRB2KARTASSETURL" ]; then
 
-                        SRB2KARTASSETURL=\$(curl -s "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
+                        SRB2KARTASSETURL=\$(curl -sL "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
                         \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
                     fi
@@ -3265,7 +3265,7 @@ EOF
 
                 if [ -n "\$ISNET" ]; then
 
-                    SRB2KARTASSETURL=\$(curl -s "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
+                    SRB2KARTASSETURL=\$(curl -sL "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print \$4}')
                     if [ "\$(curl -X GET -sLI "\$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" 2> /dev/null)" ]; then
 
                         rm -f "\$SRB2BLDROOT/assets/SRB2Kart-Latest.exe"
@@ -3295,7 +3295,7 @@ EOF
 
             if [ -n "\$ISNET" ]; then
 
-                SRB2ASSETURL=\$(curl -s "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
+                SRB2ASSETURL=\$(curl -sL "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print \$4}')
                 if [ "\$(curl -X GET -sLI "\$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
                     rm -f "\$SRB2BLDROOT/assets/SRB2-Latest.zip"
@@ -5043,7 +5043,7 @@ REPLACEMENT
 
         if [ -n "\$ISNET" ]; then
 
-            LIBSDL2DEVASSETURL=\$(curl -s "https://api.github.com/repos/libsdl-org/SDL/releases" | gawk -F'"' '/browser_download_url.*SDL2-devel-2.*-mingw.zip/ {print \$4}' | head -n1)
+            LIBSDL2DEVASSETURL=\$(curl -sL "https://api.github.com/repos/libsdl-org/SDL/releases" | gawk -F'"' '/browser_download_url.*SDL2-devel-2.*-mingw.zip/ {print \$4}' | head -n1)
             if [ "\$(curl -X GET -sLI "\$LIBSDL2DEVASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/SDL2-devel-mingw.zip" 2> /dev/null)" ]; then
 
                 rm -f "\$SRB2BLDROOT/libraries/SDL2-devel-mingw.zip"
@@ -5051,7 +5051,7 @@ REPLACEMENT
 
             fi
 
-            LIBSDL2ASSETURL=\$(curl -s "https://api.github.com/repos/libsdl-org/SDL/releases" | gawk -F'"' '/browser_download_url.*SDL2-2.*-win32-x86.zip/ {print \$4}' | head -n1)
+            LIBSDL2ASSETURL=\$(curl -sL "https://api.github.com/repos/libsdl-org/SDL/releases" | gawk -F'"' '/browser_download_url.*SDL2-2.*-win32-x86.zip/ {print \$4}' | head -n1)
             if [ "\$(curl -X GET -sLI "\$LIBSDL2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/SDL2-win32-x86.zip" 2> /dev/null)" ]; then
 
                 rm -f "\$SRB2BLDROOT/libraries/SDL2-win32-x86.zip"
@@ -5083,7 +5083,7 @@ REPLACEMENT
 
         if [ -n "\$ISNET" ]; then
 
-            LIBSDL2MIXERDEVASSETURL=\$(curl -s "https://api.github.com/repos/libsdl-org/SDL_mixer/releases" | gawk -F'"' '/browser_download_url.*SDL2_mixer-devel-2.*-mingw.zip/ {print \$4}' | head -n1)
+            LIBSDL2MIXERDEVASSETURL=\$(curl -sL "https://api.github.com/repos/libsdl-org/SDL_mixer/releases" | gawk -F'"' '/browser_download_url.*SDL2_mixer-devel-2.*-mingw.zip/ {print \$4}' | head -n1)
             if [ "\$(curl -X GET -sLI "\$LIBSDL2MIXERDEVASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/SDL2_mixer-devel-mingw.zip" 2> /dev/null)" ]; then
 
                 rm -f "\$SRB2BLDROOT/libraries/SDL2_mixer-devel-mingw.zip"
@@ -5091,7 +5091,7 @@ REPLACEMENT
 
             fi
 
-            LIBSDL2MIXERASSETURL=\$(curl -s "https://api.github.com/repos/libsdl-org/SDL_mixer/releases" | gawk -F'"' '/browser_download_url.*SDL2_mixer-2.*-win32-x86.zip/ {print \$4}' | head -n1)
+            LIBSDL2MIXERASSETURL=\$(curl -sL "https://api.github.com/repos/libsdl-org/SDL_mixer/releases" | gawk -F'"' '/browser_download_url.*SDL2_mixer-2.*-win32-x86.zip/ {print \$4}' | head -n1)
             if [ "\$(curl -X GET -sLI "\$LIBSDL2MIXERASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/SDL2_mixer-win32-x86.zip" 2> /dev/null)" ]; then
 
                 rm -f "\$SRB2BLDROOT/libraries/SDL2_mixer-win32-x86.zip"
@@ -5214,7 +5214,7 @@ REPLACEMENT
 
             if [ -n "\$ISNET" ]; then
 
-                DISCORDRPCURL="\$(curl -s https://api.github.com/repos/discord/discord-rpc/releases/latest | gawk -F'"' '/browser_download_url.*discord-rpc-win.zip/ {print \$4}')"
+                DISCORDRPCURL="\$(curl -sL https://api.github.com/repos/discord/discord-rpc/releases/latest | gawk -F'"' '/browser_download_url.*discord-rpc-win.zip/ {print \$4}')"
                 curl -RL "\$DISCORDRPCURL" > "\$SRB2BLDROOT/libraries/discord-rpc/discord-rpc-win.zip"
 
             fi
@@ -5558,7 +5558,7 @@ REPLACEMENT
 
                   if [ -n "\$ISNET" ]; then
 
-                      LIBSKIAASSETURL=\$(curl -s "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Windows-Release-x86.zip/ {print \$4}')
+                      LIBSKIAASSETURL=\$(curl -sL "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Windows-Release-x86.zip/ {print \$4}')
                       if [ "\$(curl -X GET -sLI "\$LIBSKIAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/Skia-Windows-Release-x86.zip" 2> /dev/null)" ]; then
 
                           rm -f "\$SRB2BLDROOT/libraries/Skia-Windows-Release-x86.zip"
@@ -5574,7 +5574,7 @@ REPLACEMENT
 
                   if [ -n "\$ISNET" ]; then
 
-                      LIBSKIAASSETURL=\$(curl -s "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Windows-Release-x64.zip/ {print \$4}')
+                      LIBSKIAASSETURL=\$(curl -sL "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Windows-Release-x64.zip/ {print \$4}')
                       if [ "\$(curl -X GET -sLI "\$LIBSKIAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/Skia-Windows-Release-x64.zip" 2> /dev/null)" ]; then
 
                           rm -f "\$SRB2BLDROOT/libraries/Skia-Windows-Release-x64.zip"
@@ -5596,7 +5596,7 @@ REPLACEMENT
 
                   if [ -n "\$ISNET" ]; then
 
-                      LIBSKIAASSETURL=\$(curl -s "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Linux-Release-x86.zip/ {print \$4}')
+                      LIBSKIAASSETURL=\$(curl -sL "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Linux-Release-x86.zip/ {print \$4}')
                       if [ "\$(curl -X GET -sLI "\$LIBSKIAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x86.zip" 2> /dev/null)" ]; then
 
                           rm -f "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x86.zip"
@@ -5612,7 +5612,7 @@ REPLACEMENT
 
                   if [ -n "\$ISNET" ]; then
 
-                      LIBSKIAASSETURL=\$(curl -s "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Linux-Release-x64.zip/ {print \$4}')
+                      LIBSKIAASSETURL=\$(curl -sL "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Linux-Release-x64.zip/ {print \$4}')
                       if [ "\$(curl -X GET -sLI "\$LIBSKIAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip" 2> /dev/null)" ]; then
 
                           rm -f "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip"
@@ -7699,9 +7699,10 @@ else
 
         if [ "\$BUILD" = "\$BUILDPATH/newmillennium" ]; then
 
-            cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+            # LD_TRACE_LOADED_OBJECTS=1 is required specifically to NewMillennium to read linked libraries to compiled binary file.
+            cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" LD_TRACE_LOADED_OBJECTS=1 \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
 
-            if [ "\$LIBC" != "musl" ] && [ "\$FLATPAK" = "1" ]; then
+            if [ "\$LIBC" != "musl" ] || [ "\$FLATPAK" = "1" ]; then
 
                 cp -Lf \$(find /usr/lib/i386-linux-gnu/libgbm.so.[0-9] /lib/i386-linux-gnu/libexpat.so.[0-9] /usr/lib/i386-linux-gnu/libX11.so.[0-9] /usr/lib/i386-linux-gnu/libX11-xcb.so.[0-9] /usr/lib/i386-linux-gnu/libxcb-dri2.so.[0-9] /usr/lib/i386-linux-gnu/libxcb-randr.so.[0-9] /usr/lib/i386-linux-gnu/libxcb-xfixes.so.[0-9] /usr/lib/i386-linux-gnu/libxcb-shm.so.[0-9] /usr/lib/i386-linux-gnu/libdrm.so.[0-9] /usr/lib/i386-linux-gnu/libxcb-dri3.so.0 /usr/lib/i386-linux-gnu/libxcb-present.so.[0-9] /usr/lib/i386-linux-gnu/libdrm_intel.so.[0-9] /usr/lib/i386-linux-gnu/libxcb-sync.so.[0-9] /usr/lib/i386-linux-gnu/libxshmfence.so.[0-9] /usr/lib/i386-linux-gnu/libpciaccess.so.[0-9] /usr/lib/i386-linux-gnu/libxcb-glx.so.[0-9] /usr/lib/i386-linux-gnu/libffi.so.[0-9] /usr/lib/i386-linux-gnu/libXdamage.so.[0-9] /usr/lib/i386-linux-gnu/libLLVM-[0-9][0-9].so.[0-9] /usr/lib/i386-linux-gnu/libsensors.so.[0-9] /usr/lib/i386-linux-gnu/libdrm_radeon.so.[0-9] /usr/lib/i386-linux-gnu/libelf.so.[0-9] /usr/lib/i386-linux-gnu/libdrm_amdgpu.so.[0-9] /usr/lib/i386-linux-gnu/libdrm_nouveau.so.[0-9] /usr/lib/i386-linux-gnu/libatomic.so.[0-9] /usr/lib/i386-linux-gnu/libedit.so.[0-9] /usr/lib/i386-linux-gnu/libwayland-server.so.[0-9] /usr/lib/i386-linux-gnu/libglapi.so.[0-9] /usr/lib/i386-linux-gnu/libGLX_indirect.so.[0-9] 2> /dev/null) "\$BUILD/build/AppDir/usr/lib"
                 cp -rf "/usr/lib/i386-linux-gnu/dri" "\$BUILD/build/AppDir/usr/lib"
@@ -9902,7 +9903,7 @@ extractmacosassets() {
 
             if [ -n "$ISNET" ]; then
 
-                SRB2REVERIESASSETURL=$(/usr/bin/curl -s "$SRB2REVERIESASSETURL" | gawk '{gsub(",","\n"); print}' | gawk -F'"' '/browser_download_url.*.zip/ {print $4}' | head -n1)
+                SRB2REVERIESASSETURL=$(/usr/bin/curl -sL "$SRB2REVERIESASSETURL" | gawk '{gsub(",","\n"); print}' | gawk -F'"' '/browser_download_url.*.zip/ {print $4}' | head -n1)
                 if [ "$(/usr/bin/curl -X GET -sLI "$SRB2REVERIESASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Reveries.zip" 2> /dev/null)" ]; then
 
                     rm -f "$SRB2BLDROOT/assets/SRB2Reveries.zip"
@@ -10167,7 +10168,7 @@ EOF
 
         if [ -n "$ISNET" ]; then
 
-            NEWMILLENNIUMASSETURL=$(curl -s "$NEWMILLENNIUMASSETURL" | gawk -F'"' '/browser_download_url.*freedoom-.*.zip/ {print $4}' | head -n1)
+            NEWMILLENNIUMASSETURL=$(curl -sL "$NEWMILLENNIUMASSETURL" | gawk -F'"' '/browser_download_url.*freedoom-.*.zip/ {print $4}' | head -n1)
             if [ "$(curl -X GET -sLI "$NEWMILLENNIUMASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -c %s "$SRB2BLDROOT/assets/NewMillennium.zip" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/NewMillennium.zip"
@@ -10209,7 +10210,7 @@ EOF
 
             if [ -n "$ISNET" ]; then
 
-                SRB2KARTSATURNASSETURL=$(curl -s "$SRB2KARTSATURNASSETURL" | gawk -F'"' '/browser_download_url.*Just-Extra.*Files.zip/ {print $4}' | head -n1)
+                SRB2KARTSATURNASSETURL=$(curl -sL "$SRB2KARTSATURNASSETURL" | gawk -F'"' '/browser_download_url.*Just-Extra.*Files.zip/ {print $4}' | head -n1)
                 if [ "$(curl -X GET -sLI "$SRB2KARTSATURNASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2KartSaturn.zip" 2> /dev/null)" ]; then
 
                     rm -f "$SRB2BLDROOT/assets/SRB2KartSaturn.zip"
@@ -10225,7 +10226,7 @@ EOF
 
             if [ -n "$ISNET" ]; then
 
-                SRB2KARTNEPTUNEASSETURL=$(curl -s "$SRB2KARTNEPTUNEASSETURL" | gawk -F'"' '/browser_download_url.*64Bit.zip/ {print $4}' | head -n1)
+                SRB2KARTNEPTUNEASSETURL=$(curl -sL "$SRB2KARTNEPTUNEASSETURL" | gawk -F'"' '/browser_download_url.*64Bit.zip/ {print $4}' | head -n1)
                 if [ "$(curl -X GET -sLI "$SRB2KARTNEPTUNEASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2KartNeptune.zip" 2> /dev/null)" ]; then
 
                     rm -f "$SRB2BLDROOT/assets/SRB2KartNeptune.zip"
@@ -10267,7 +10268,7 @@ EOF
 
                 if [ -n "$ISNET" ]; then
 
-                    RADIORACERSASSETURL=$(curl -s "$RADIORACERSASSETURL" | gawk -F'"' '/browser_download_url.*radioracers_assets.zip/ {print $4}' | head -n1)
+                    RADIORACERSASSETURL=$(curl -sL "$RADIORACERSASSETURL" | gawk -F'"' '/browser_download_url.*radioracers_assets.zip/ {print $4}' | head -n1)
                     if [ "$(curl -X GET -sLI "$RADIORACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/RadioRacers.zip" 2> /dev/null)" ]; then
 
                         rm -f "$SRB2BLDROOT/assets/RadioRacers.zip"
@@ -10632,7 +10633,7 @@ extractmacosextracustomassets() {
 extractsrb2macosassets() {
     if [ -n "$ISNET" ]; then
 
-        SRB2LATESTVER=$(curl -s "$SRB2ASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print $NF}' | head -n1)
+        SRB2LATESTVER=$(curl -sL "$SRB2ASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print $NF}' | head -n1)
 
     fi
 
@@ -10648,11 +10649,11 @@ extractsrb2macosassets() {
 
         if [ -n "$ISNET" ]; then
 
-            SRB2ASSETURL=$(curl -s "$SRB2ASSETURL" | gawk -F'"' '/'SRB2_release_$SRB2VER'\/.*Full.zip/ {print $4}')
+            SRB2ASSETURL=$(curl -sL "$SRB2ASSETURL" | gawk -F'"' '/'SRB2_release_$SRB2VER'\/.*Full.zip/ {print $4}')
 
             if [ -z "$SRB2ASSETURL" ]; then
 
-                SRB2ASSETURL=$(curl -s "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+                SRB2ASSETURL=$(curl -sL "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
                 $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
             fi
@@ -10672,7 +10673,7 @@ extractsrb2macosassets() {
 
         if [ -n "$ISNET" ]; then
 
-            SRB2ASSETURL=$(curl -s "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
+            SRB2ASSETURL=$(curl -sL "$SRB2ASSETURL/latest" | gawk -F'"' '/browser_download_url.*Full.zip/ {print $4}')
 
             if [ "$(curl -X GET -sLI "$SRB2ASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2-Latest.zip" 2> /dev/null)" ]; then
 
@@ -10739,7 +10740,7 @@ extractsrb2kartmacosassets() {
 
         if [ -n "$ISNET" ]; then
 
-            RINGRACERSVERS=$(curl -s "$RINGRACERSASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print $NF}')
+            RINGRACERSVERS=$(curl -sL "$RINGRACERSASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print $NF}')
 
         fi
 
@@ -10757,11 +10758,11 @@ extractsrb2kartmacosassets() {
 
             if [ -n "$ISNET" ]; then
 
-                RINGRACERSASSETURL=$(curl -s "$RINGRACERSASSETURL" | gawk -F'"' '/browser_download_url.*'$RINGRACERSVER'.*Installer.exe/ {print $4}')
+                RINGRACERSASSETURL=$(curl -sL "$RINGRACERSASSETURL" | gawk -F'"' '/browser_download_url.*'$RINGRACERSVER'.*Installer.exe/ {print $4}')
 
                 if [ -z "$RINGRACERSASSETURL" ]; then
 
-                    RINGRACERSASSETURL=$(curl -s "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                    RINGRACERSASSETURL=$(curl -sL "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
                     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
                 fi
@@ -10791,7 +10792,7 @@ extractsrb2kartmacosassets() {
 
             if [ -n "$ISNET" ]; then
 
-                RINGRACERSASSETURL=$(curl -s "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                RINGRACERSASSETURL=$(curl -sL "$RINGRACERSASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
 
                 if [ "$(curl -X GET -sLI "$RINGRACERSASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/RingRacers-Latest.exe" 2> /dev/null)" ]; then
 
@@ -10822,7 +10823,7 @@ extractsrb2kartmacosassets() {
 
         if [ -n "$ISNET" ]; then
 
-            SRB2KARTVERS=$(curl -s "$SRB2KARTASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print $NF}')
+            SRB2KARTVERS=$(curl -sL "$SRB2KARTASSETURL" | gawk -F':|_' '/tag_name/ {gsub("\"|,| ",""); print $NF}')
 
         fi
 
@@ -10842,11 +10843,11 @@ extractsrb2kartmacosassets() {
 
             if [ -n "$ISNET" ]; then
 
-                SRB2KARTASSETURL=$(curl -s "$SRB2KARTASSETURL" | gawk -F'"' '/'$SRB2KARTVER'\/.*Installer.exe/ {print $4}')
+                SRB2KARTASSETURL=$(curl -sL "$SRB2KARTASSETURL" | gawk -F'"' '/'$SRB2KARTVER'\/.*Installer.exe/ {print $4}')
 
                 if [ -z "$SRB2KARTASSETURL" ]; then
 
-                    SRB2KARTASSETURL=$(curl -s "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                    SRB2KARTASSETURL=$(curl -sL "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
                     $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Couldn't fetch older assets. Downloading and extracting $BUILDNAME's latest assets. Please wait..."
 
                 fi
@@ -10874,7 +10875,7 @@ extractsrb2kartmacosassets() {
 
             if [ -n "$ISNET" ]; then
 
-                SRB2KARTASSETURL=$(curl -s "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
+                SRB2KARTASSETURL=$(curl -sL "$SRB2KARTASSETURL/latest" | gawk -F'"' '/browser_download_url.*Installer.exe/ {print $4}')
 
                 if [ "$(curl -X GET -sLI "$SRB2KARTASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/SRB2Kart-Latest.exe" 2> /dev/null)" ]; then
 
@@ -11649,7 +11650,7 @@ installdepsglibc() {
                 if [ -x "$(command -v brew 2> /dev/null)" ]; then
 
                     l=$(LD_LIBRARY_PATH="$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib" ldd "$SRB2BINARYLNXPATH" 2>&1 2> /dev/null | gawk '/not found/ && /'$(printf "%s\n" "$l" | gawk '{gsub(".so","*"); print}')'/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | head -n1)
-                    curl -s "https://packages.debian.org/search?suite=default&section=all&arch=any&searchon=contents&keywords=$($PRINTF "%s\n" "$l" | gawk '{gsub("\\+","\\+"); print}')" | gawk '-F">|</a>' '/<\/a> \[[a-z]*[0-9]*\]/ {gsub("-dev|-[0-9].[0-9]-|0",""); gsub("libminiupnpc[0-9][0-9]","miniupnpc"); gsub("libsdl","sdl"); gsub("-","_"); gsub("lua_ham","lua"); gsub("wxgtk.*","wxwidgets"); gsub("libc\\+\\+.*","llvm"); gsub("sdl1.2_compat_shim","sdl12-compat"); gsub("sdl_mixer1.2","sdl_mixer"); print $2}' | head -n1
+                    curl -sL "https://packages.debian.org/search?suite=default&section=all&arch=any&searchon=contents&keywords=$($PRINTF "%s\n" "$l" | gawk '{gsub("\\+","\\+"); print}')" | gawk '-F">|</a>' '/<\/a> \[[a-z]*[0-9]*\]/ {gsub("-dev|-[0-9].[0-9]-|0",""); gsub("libminiupnpc[0-9][0-9]","miniupnpc"); gsub("libsdl","sdl"); gsub("-","_"); gsub("lua_ham","lua"); gsub("wxgtk.*","wxwidgets"); gsub("libc\\+\\+.*","llvm"); gsub("sdl1.2_compat_shim","sdl12-compat"); gsub("sdl_mixer1.2","sdl_mixer"); print $2}' | head -n1
 
                 elif [ -x "$(command -v rpm-ostree 2> /dev/null)" ]; then
 
@@ -11716,7 +11717,7 @@ installdepsglibc() {
                 elif [ -x "$(command -v brew 2> /dev/null)" ]; then
 
                     l=$(LD_LIBRARY_PATH="$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib" ldd "$SRB2BINARYLNXPATH" 2>&1 2> /dev/null | gawk '/not found/ && /'$(printf "%s\n" "$l" | gawk '{gsub(".so","*"); print}')'/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | head -n1)
-                    curl -s "https://packages.debian.org/search?suite=default&section=all&arch=any&searchon=contents&keywords=$($PRINTF "%s\n" "$l" | gawk '{gsub("\\+","\\+"); print}')" | gawk '-F">|</a>' '/<\/a> \[[a-z]*[0-9]*\]/ {gsub("-dev|-[0-9].[0-9]-|0",""); gsub("libminiupnpc[0-9][0-9]","miniupnpc"); gsub("libsdl","sdl"); gsub("-","_"); gsub("lua_ham","lua"); gsub("wxgtk.*","wxwidgets"); gsub("libc\\+\\+.*","llvm"); gsub("sdl1.2_compat_shim","sdl12-compat"); gsub("sdl_mixer1.2","sdl_mixer"); print $2}' | head -n1
+                    curl -sL "https://packages.debian.org/search?suite=default&section=all&arch=any&searchon=contents&keywords=$($PRINTF "%s\n" "$l" | gawk '{gsub("\\+","\\+"); print}')" | gawk '-F">|</a>' '/<\/a> \[[a-z]*[0-9]*\]/ {gsub("-dev|-[0-9].[0-9]-|0",""); gsub("libminiupnpc[0-9][0-9]","miniupnpc"); gsub("libsdl","sdl"); gsub("-","_"); gsub("lua_ham","lua"); gsub("wxgtk.*","wxwidgets"); gsub("libc\\+\\+.*","llvm"); gsub("sdl1.2_compat_shim","sdl12-compat"); gsub("sdl_mixer1.2","sdl_mixer"); print $2}' | head -n1
 
                 fi
 
@@ -13783,7 +13784,7 @@ NIX
 
             $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing dependencies for libSDL2_mixer_ext.so. Please wait..."
             l=$(LD_LIBRARY_PATH="$SRB2BLDPREFIX/lib:/home/linuxbrew/.linuxbrew/lib" ldd "$SRB2BLDPREFIX/lib/libSDL2_mixer_ext.so" 2>&1 2> /dev/null | gawk '/not found/ && /'$($PRINTF "%s\n" "$l" | gawk '{gsub(".so.*",".so"); print}')'/ && !/GLIBC/ && !/symbol not found/ && !/\/usr\/local\/bin/ {print $1}' | head -n1)
-            PACKAGE=$(curl -s "https://packages.debian.org/search?suite=default&section=all&arch=any&searchon=contents&keywords=$($PRINTF "%s\n" "$l" | gawk '{gsub("\\+","\\+"); print}')" | gawk '-F">|</a>' '/<\/a> \[[a-z]*[0-9]*\]/ {gsub("-dev|-[0-9].[0-9]-|0|libpng12",""); gsub("libminiupnpc[0-9][0-9]","miniupnpc"); gsub("libsdl","sdl"); gsub("-","_"); gsub("lua_ham","lua"); gsub("wxgtk.*","wxwidgets"); gsub("libc\\+\\+.*","llvm"); gsub("sdl1.2_compat_shim","sdl12-compat"); gsub("sdl_mixer1.2","sdl_mixer"); gsub("libfluidsynth3","fluid-synth"); print $2}' | head -n1)
+            PACKAGE=$(curl -sL "https://packages.debian.org/search?suite=default&section=all&arch=any&searchon=contents&keywords=$($PRINTF "%s\n" "$l" | gawk '{gsub("\\+","\\+"); print}')" | gawk '-F">|</a>' '/<\/a> \[[a-z]*[0-9]*\]/ {gsub("-dev|-[0-9].[0-9]-|0|libpng12",""); gsub("libminiupnpc[0-9][0-9]","miniupnpc"); gsub("libsdl","sdl"); gsub("-","_"); gsub("lua_ham","lua"); gsub("wxgtk.*","wxwidgets"); gsub("libc\\+\\+.*","llvm"); gsub("sdl1.2_compat_shim","sdl12-compat"); gsub("sdl_mixer1.2","sdl_mixer"); gsub("libfluidsynth3","fluid-synth"); print $2}' | head -n1)
 
             PACKAGE=$($PRINTF "%s\n" "$PACKAGE" | gawk -F'/' '{print $NF}' | sort -u)
 
@@ -15004,7 +15005,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
                 if [ -n "$ISNET" ]; then
 
-                    LIBSKIAASSETURL=$(curl -s "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-macOS-Release-arm64.zip/ {print $4}')
+                    LIBSKIAASSETURL=$(curl -sL "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-macOS-Release-arm64.zip/ {print $4}')
                     if [ "$(curl -X GET -sLI "$LIBSKIAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/libraries/Skia-macOS-Release-arm64.zip" 2> /dev/null)" ]; then
 
                         rm -f "$SRB2BLDROOT/libraries/Skia-macOS-Release-arm64.zip"
@@ -15020,7 +15021,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
                 if [ -n "$ISNET" ]; then
 
-                    LIBSKIAASSETURL=$(curl -s "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-macOS-Release-x64.zip/ {print $4}')
+                    LIBSKIAASSETURL=$(curl -sL "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-macOS-Release-x64.zip/ {print $4}')
                     if [ "$(curl -X GET -sLI "$LIBSKIAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/libraries/Skia-macOS-Release-x64.zip" 2> /dev/null)" ]; then
 
                         rm -f "$SRB2BLDROOT/libraries/Skia-macOS-Release-x64.zip"
@@ -15033,9 +15034,6 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
                 7z x -y "$SRB2BLDROOT/libraries/Skia-macOS-Release-x64.zip" -o"$LIBSKIATMPDIR/libskia"
 
             fi
-
-            #            COMREV=$(git -C "$SRB2BLDROOT/libraries/libskia" rev-parse --short HEAD)
-            #            $PRINTF "%s\n" "$COMREV" > "$SRB2BLDROOT/libraries/libskia/.comrev"
 
         fi
 
