@@ -3,7 +3,7 @@ srb2bld is a shell script, that automates and simplifies process of downloading 
 https://github.com/user-attachments/assets/a8a188be-9431-46af-8a31-d2f394c1dc14
 
 # Features
-- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 v2.2 Classic, SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries, SRB2 TSoURDt3rd, SRB2 Edit, SRB2 The Great Galactic Journey, SRB2 Destructive Illusion, SRB2 VR, SRB2 v2.1 Legacy, SRB2 Fusion Advance, SRB2 Thokker, SRB2 Top Down, Sonic Smash Brawl, SRB2 v2.0, SRB2 Community Build, XSRB2, SRB2 SF94-Serv, SRB2 Riders, Super SRB2 Kart Z, Super Bomberman Blast 2, SRB2 Final Demo, SRB2 JTE, ShufflarB2, SRB2 Live, SRB2 LoZ, Super Smash Bros: Sonic Showdown, NewMillennium (SRB2 Feb 2000 Prototype), SRB2 Persona, SRB2 Kart, SRB2 Kart Moe Mansion, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Blankart, Ring Racers, Ring Racers Noire, Ring Racers HEP2, Ring Racers HEP3, Ring Racers Freaky Build, Radio Racers, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, Ultimate Lowee Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
+- Compiling and installing 32-bit/64-bit binaries of SRB2, SRB2 v2.2 Classic, SRB2 v2.2 Beta 6 (recreation), SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Reveries, SRB2 TSoURDt3rd, SRB2 Edit, SRB2 The Great Galactic Journey, SRB2 Destructive Illusion, SRB2 VR, SRB2 v2.1 Legacy, SRB2 Fusion Advance, SRB2 Thokker, SRB2 Top Down, Sonic Smash Brawl, SRB2 v2.0, SRB2 Community Build, XSRB2, SRB2 SF94-Serv, SRB2 Riders, Super SRB2 Kart Z, Super Bomberman Blast 2, SRB2 Final Demo, SRB2 1095, SRB2 JTE, ShufflarB2, SRB2 Live, SRB2 LoZ, Super Smash Bros: Sonic Showdown, NewMillennium (SRB2 Feb 2000 Prototype), SRB2 Persona, SRB2 Kart, SRB2 Kart Galaxy, SRB2 Kart HEP, SRB2 Kart Saturn, SRB2 Kart Neptune, SRB2 Kart VR, Blankart, Ring Racers, Ring Racers Noire, Ring Racers HEP, Ring Racers Freaky Build, Radio Racers, wadcli, kartmaker (SRB2 Kart), NeptuneFM (SRB2 Kart), kartmaker (Ring Racers), followermaker (Ring Racers), SLADE, Ultimate Zone Builder, Ultimate GKSZ Builder, Ultimate Lowee Builder, High Voltage Ring and Aseprite with Kart Builder on Linux, macOS (tested on version 10.14/Mojave, 10.15/Catalina and 11/Big Sur) and Windows. Check "Compatibility" section or enter the script's -c/--compatibility option for information about which build compiles and run for each system and CPU architecture,
 - Compiling and installing custom SRB2 builds from local or remote Git repository,
 - Ability to set user's flags before compiling,
 - Installing missing dependencies on host system (mostly binaries, except for SRB2 builds on macOS) based on user's set compilation flags,
@@ -105,7 +105,7 @@ As for macOS users, they need to install these additional dependencies:
 
 **macOS:**
 1. In terminal enter this following command:
-- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl megatools makeicns nasm xxhash pillow`,
+- Homebrew: `brew install cmake autoconf automake pkgconfig libtool gawk stow p7zip rar curl megatools makeicns nasm xxhash python pillow`,
 - MacPorts: `sudo port -Ncb install cmake autoconf automake pkgconfig libtool gawk stow perl5.28 libiconv p7zip unrar curl megatools makeicns nasm xxhash py313-pillow`.
 
 # Installation
@@ -151,11 +151,12 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 02-10-2025)
+# Compatibility (as of 17-11-2025)
 |                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
 | :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
 | SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 v2.2 Classic        |          ✅           |         🟨           |        ❔         |        ✅       |       ✅      |
+| SRB2 v2.2 Beta 6         |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
 | SRB2 Uncapped PLUS       |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
 | SRB2 NetPlus             |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
 | SRB2 Reveries            |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
@@ -166,7 +167,7 @@ As for macOS users, they need to install these additional dependencies:
 | SRB2 VR                  |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
 | SRB2 v2.1 Legacy         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Fusion Advance      |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
-| SRB2 Thokker             |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
+| SRB2 Thokker             |          ✅           |         ✅           |        ❔         |        ✅*      |       🟨      |
 | SRB2 Top Down            |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
 | Sonic Smash Brawl        |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
 | SRB2 v2.0                |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
@@ -177,6 +178,7 @@ As for macOS users, they need to install these additional dependencies:
 | Super SRB2 Kart Z        |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | Super Bomberman Blast 2  |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 Final Demo          |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
+| SRB2 1095                |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 JTE                 |          🟨*          |         🟨*          |        ❔         |        🟨*      |       ⛔      |
 | ShufflarB2               |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 Live                |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
@@ -185,17 +187,15 @@ As for macOS users, they need to install these additional dependencies:
 | NewMillennium            |          🟨*          |         🟨*          |        ❔         |        ✅*      |       ⛔      |
 | SRB2 Persona             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart                |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Kart Moe Mansion    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart Galaxy         |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
 | SRB2 Kart HEP            |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
 | SRB2 Kart Saturn         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart Neptune        |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SRB2 Kart VR             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
-| BlanKart                 |          ✅           |         ✅           |        ❔         |        ✅       |       🟨      |
+| BlanKart                 |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
 | Ring Racers              |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers Noire        |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
-| Ring Racers HEP2         |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
-| Ring Racers HEP3         |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
+| Ring Racers HEP          |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | Ring Racers Freaky Build |          ✅           |         🟨           |        ⛔         |        ✅*      |       ✅      |
 | Radio Racers             |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
 | wadcli                   |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
@@ -205,6 +205,7 @@ As for macOS users, they need to install these additional dependencies:
 | followermaker (RR)       |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
 | SLADE                    |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
 | Ultimate Zone Builder    |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
+| Ultimate GKSZ Builder    |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
 | Ultimate Lowee Builder   |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
 | High Voltage Ring        |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
 | Aseprite w/ Kart Builder |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
@@ -286,7 +287,7 @@ Usage: srb2bld [OPTIONS]
 
      2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
-     3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+     3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
      4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with "sudo modprobe fuse". You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 
@@ -341,13 +342,15 @@ Usage: srb2bld [OPTIONS]
 
      18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
 
-     19. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
+     19. In case of missing OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
+
+     20. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
 
           - Proprietary NVIDIA GPU drivers: "export __NV_PRIME_RENDER_OFFLOAD=1" and "export __GLX_VENDOR_LIBRARY_NAME=nvidia",
 
           - AMD, NVIDIA and Intel open source drivers: "export DRI_PRIME=1".
 
-     20. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+     21. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
           - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -393,7 +396,7 @@ Usage: srb2bld [OPTIONS]
 
           Then choose "Build SRB2 Custom", when running script.
 
-     21. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+     22. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
          - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
@@ -413,7 +416,7 @@ Usage: srb2bld [OPTIONS]
 
 2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
-3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, SRB2 Kart Moe Mansion and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
 
 4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with `sudo modprobe fuse`. You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 
@@ -468,13 +471,15 @@ Usage: srb2bld [OPTIONS]
 
 18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
 
-19. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
+19. In case of missing OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
+
+20. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
 
     - Proprietary NVIDIA GPU drivers: "export __NV_PRIME_RENDER_OFFLOAD=1" and "export __GLX_VENDOR_LIBRARY_NAME=nvidia",
 
     - AMD, NVIDIA and Intel open source drivers: "export DRI_PRIME=1".
 
-20. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
+21. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
     - SRB2BLDGITPATH - path to local or remote repository,
 
@@ -520,7 +525,7 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-21. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
+22. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
         - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
