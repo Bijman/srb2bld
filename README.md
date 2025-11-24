@@ -298,7 +298,8 @@ Usage: srb2bld [OPTIONS]
          - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do "sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd" or use one of the AUR helpers that you have installed - "pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd" or "paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd" or "yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd",
 
          - Gentoo/Gentoo based: "ABI_X86=32 sudo -E emerge -av sys-fs/fuse:0 sys-libs/glibc sys-libs/zlib media-libs/mesa media-libs/libglvnd",
-- Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686",
+
+         - Fedora/Fedora based: "sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686",
 
          - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): "rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686",
 
