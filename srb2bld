@@ -3448,7 +3448,7 @@ EOF
 
                 cp -f \$(find "\$BUILD/libs/bin" -name "*.dll" 2> /dev/null) "\$BUILD/build/AppDir/usr/lib"
 
-            elif [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
+            elif [ "\$BUILD" != "\$BUILDPATH/blankart" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
 
                 rm -rf "\$BUILD/libs/dll-binaries/x86_64/Old"
                 cp -f \$(find "\$BUILD/libs/dll-binaries/x86_64" "\$BUILD/libs/libopenmpt/bin/x86_64" "\$BUILD/libs/SDL2_mixer/x86_64-w64-mingw32/bin" "\$BUILD/libs/SDLMixerX/x86_64-w64-mingw32/bin" -name "*.dll" 2> /dev/null | gawk '{n = \$0; sub(".*/","", n); if (!seen[n]++) print \$0}') "\$BUILD/build/AppDir/usr/lib"
@@ -3456,7 +3456,7 @@ EOF
 
             fi
 
-        elif [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
+        elif [ "\$IS64" != "64" ] && [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" != "RingRacers" ]; then
 
             rm -rf "\$BUILD/libs/dll-binaries/i686/Old"
             cp -f \$(find "\$BUILD/libs/dll-binaries/i686" "\$BUILD/libs/bin" "\$BUILD/libs/libopenmpt/bin/x86" "\$BUILD/libs/SDL2_mixer/i686-w64-mingw32/bin" "\$BUILD/libs/SDLMixerX/i686-w64-mingw32/bin" -name "*.dll" 2> /dev/null | gawk '{n = \$0; sub(".*/","", n); if (!seen[n]++) print \$0}') "\$BUILD/build/AppDir/usr/lib"
@@ -5423,6 +5423,35 @@ REPLACEMENT
 
     fi
 
+    # Download libopenal's source code, build and install it.
+    if [ "\$OS" = "Windows" ] && [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
+
+        \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading libopenal's source code. Please wait..."
+
+        if [ -n "\$ISNET" ]; then
+
+            LIBOPENALURL=\$(curl -sL https://api.github.com/repos/kcat/openal-soft/releases | gawk -F'"' '/browser_download_url.*OpenALSoft.*.zip/ && !/HRTF/ {print \$4}' | head -n1)
+            if [ "\$(curl -X GET -sLI "\$LIBOPENALURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/libopenal-win.zip" 2> /dev/null)" ]; then
+
+                rm -f "\$SRB2BLDROOT/libraries/libopenal-win.zip"
+                curl -RL "\$LIBOPENALURL" -o "\$SRB2BLDROOT/libraries/libopenal-win.zip"
+
+            fi
+
+        fi
+
+        if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]; then
+
+            7z e -y "\$SRB2BLDROOT/libraries/libopenal-win.zip" "Win32/OpenAL32.dll" -o"\$BUILD/build/AppDir/usr/lib"
+
+        else
+
+            7z e -y "\$SRB2BLDROOT/libraries/libopenal-win.zip" "Win64/OpenAL32.dll" -o"\$BUILD/build/AppDir/usr/lib"
+
+        fi
+
+    fi
+
     # Download DiscordRPC source code, build and install it.
     if [ -n "\$(\$PRINTF "%s\n" \$CONF | gawk 'match(\$0, /HAVE_DISCORDRPC=1/) {print substr(\$0, RSTART, RLENGTH)}')" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-galaxy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-hep" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-vr" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ]); then
 
@@ -5965,6 +5994,12 @@ REPLACEMENT
             cmake --build "\$BUILD/build" --config Release -j"\$NCPU"
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
+
+            if [ "\$BUILD" = "\$BUILDPATH/blankart" ] && [ ! -d "\$BUILD/build/_deps/png-build/include" ]; then
+
+                mkdir -p "\$BUILD/build/_deps/png-build/include"
+
+            fi
 
             \$BLDCMD \$CONF
             cmake --build "\$BUILD/build" --config Release -j"\$NCPU"
@@ -17463,6 +17498,7 @@ installtowindows() {
         mkdir -p "$SRB2WINPATH"
         cp -f $(find "$BUILD/build/bin" -name "$SRB2WINBIN" -type f 2> /dev/null) "$SRB2WINPATH"
         cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR/"* "$SRB2WINPATH"
+        cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
 
@@ -18670,7 +18706,7 @@ have installed - \"pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs li
 
      18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with \"sudo purge\".
 
-     19. In case of missing OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command \"winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL\".
+     19. In case of issues of sound with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command \"winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL\".
 
      20. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
 

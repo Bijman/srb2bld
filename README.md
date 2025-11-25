@@ -343,7 +343,7 @@ Usage: srb2bld [OPTIONS]
 
      18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
 
-     19. In case of missing OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
+     19. In case of issues of sound with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
 
      20. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
 
@@ -423,29 +423,29 @@ Usage: srb2bld [OPTIONS]
 
 5. If 64-bit Linux system has issues with creating or loading "Sonic Robo Blast 2 Final Demo" (AppImage or installed), make sure you have installed 32-bit versions of FUSE and glibc:
 
-         - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install libfuse2:i386 libc6:i386 zlib1g:i386 libglx-mesa0:i386 libgl1:i386 libglvnd0:i386`,
+    - Debian/Ubuntu/Debian based/Ubuntu based: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install libfuse2:i386 libc6:i386 zlib1g:i386 libglx-mesa0:i386 libgl1:i386 libglvnd0:i386`,
 
-         - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or use one of the AUR helpers that you have installed - `pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or `paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or `yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd`,
+    - Arch/Arch based: uncomment the [multilib] section in /etc/pacman.conf and do `sudo pacman -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or use one of the AUR helpers that you have installed - `pikaur -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or `paru -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd` or `yay -Su --needed lib32-fuse2 lib32-glibc lib32-gcc-libs lib32-zlib lib32-mesa lib32-libglvnd`,
 
-         - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse:0 sys-libs/glibc sys-libs/zlib media-libs/mesa media-libs/libglvnd`,
+    - Gentoo/Gentoo based: `ABI_X86=32 sudo -E emerge -av sys-fs/fuse:0 sys-libs/glibc sys-libs/zlib media-libs/mesa media-libs/libglvnd`,
 
-         - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
+    - Fedora/Fedora based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
 
-         - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
+    - Fedora Silverblue/Fedora Kinoite/Universal Blue (Bazzite, Aurora): `rpm-ostree install -A --allow-inactive fuse-libs.i686 glibc.i686 libgcc.i686 zlib-ng-compat.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
 
-         - RHEL/RHEL based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
+    - RHEL/RHEL based: `sudo dnf install fuse-libs.i686 glibc.i686 libgcc.i686 zlib.i686 mesa-dri-drivers.i686 libglvnd-glx.i686`,
 
-         - Mageia/Mageia based: `sudo dnf config-manager --set-enabled mageia-i586 updates-i586 && sudo dnf install libfuse2.i586 libzlib1.i586 mesa.i586 libglvnd.i586`,
+    - Mageia/Mageia based: `sudo dnf config-manager --set-enabled mageia-i586 updates-i586 && sudo dnf install libfuse2.i586 libzlib1.i586 mesa.i586 libglvnd.i586`,
 
-         - openSUSE/openSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit Mesa-libGL1-32bit Mesa-32bit libglvnd-32bit`,
+    - openSUSE/openSUSE based: `sudo zypper in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit Mesa-libGL1-32bit Mesa-32bit libglvnd-32bit`,
 
-         - openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit Mesa-libGL1-32bit Mesa-32bit libglvnd-32bit && sudo transactional-update apply`,
+    - openSUSE MicroOS/openSUSE MicroOS based: `sudo transactional-update pkg in libfuse2-32bit glibc-32bit libgcc_s1-32bit libz1-32bit Mesa-libGL1-32bit Mesa-32bit libglvnd-32bit && sudo transactional-update apply`,
 
-         - Void/Void based: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit libgcc-32bit zlib-32bit mesa-32bit libglvnd-32bit`,
+    - Void/Void based: `sudo xbps-install -S void-repo-multilib && sudo xbps-install -Su fuse-32bit glibc-32bit libgcc-32bit zlib-32bit mesa-32bit libglvnd-32bit`,
 
-         - Solus/Solus based: `sudo eopkg it glibc-32bit libgcc-32bit zlib-32bit mesalib-32bit libglvnd-32bit`,
+    - Solus/Solus based: `sudo eopkg it glibc-32bit libgcc-32bit zlib-32bit mesalib-32bit libglvnd-32bit`,
 
-         - NixOS/NixOS based: `sudo nix profile install nixpkgs#pkgsi686Linux.fuse nixpkgs#pkgsi686Linux.glibc nixpkgs#pkgsi686Linux.libgcc nixpkgs#pkgsi686Linux.zlib nixpkgs#pkgsi686Linux.mesa nixpkgs#pkgsi686Linux.libglvnd --extra-experimental-features 'nix-command flakes'` or set those packages in `environment.systemPackages = with pkgs;`.
+    - NixOS/NixOS based: `sudo nix profile install nixpkgs#pkgsi686Linux.fuse nixpkgs#pkgsi686Linux.glibc nixpkgs#pkgsi686Linux.libgcc nixpkgs#pkgsi686Linux.zlib nixpkgs#pkgsi686Linux.mesa nixpkgs#pkgsi686Linux.libglvnd --extra-experimental-features 'nix-command flakes'` or set those packages in `environment.systemPackages = with pkgs;`.
 
 6. If Linux system has issue with running build because of not found compiled libraries, even though they are installed, set `export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"` in "\~/.bash_profile" or "\~/.zshrc".
 
@@ -473,7 +473,7 @@ Usage: srb2bld [OPTIONS]
 
 18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
 
-19. In case of missing OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
+19. In case of issues of sound with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
 
 20. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
 
@@ -529,14 +529,14 @@ Usage: srb2bld [OPTIONS]
 
 22. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
 
-        - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
+    - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
-        - SRB2BLDDEVMODE - For developers, who want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
+    - SRB2BLDDEVMODE - For developers, who want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
 
-        - SRB2BLDNOCCACHE - Disable ccache.
+    - SRB2BLDNOCCACHE - Disable ccache.
 
-        - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.
+    - SRB2BLDNOGRADLECACHE - Disable gradle cache, when building Android APK.
 
-        - SRB2BLDNCPU - Determine number of CPU threads to compile build. Useful in case of out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus".
+    - SRB2BLDNCPU - Determine number of CPU threads to compile build. Useful in case of out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus".
 
-        - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart/Ring Racers assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
+    - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart/Ring Racers assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
