@@ -417,7 +417,7 @@ Usage: srb2bld [OPTIONS]
 
 2. WARNING for macOS users! This script makes changes from rpath to absolute paths within some libraries installed from Homebrew, MacPorts or compiled (mostly should affects libraries compiled by user), that are associated with SRB2 binary, so installing or making App Bundles would be successful. In the future this could make unexpected results with apps or SRB2 builds, that depend on those libraries.
 
-3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using "srb2bld --install" command).
+3. If you want to compile some builds with DiscordRPC support (SRB2 Uncapped Plus, SRB2 NetPlus, SRB2 Kart, and SRB2 Kart VR), then type "HAVE_DISCORDRPC=1" (Linux/Windows) or "-DSRB2_CONFIG_HAVE_DISCORDRPC=ON" (macOS), when the script asks about optional compilation flags (using `srb2bld --install` command).
 
 4. If on Linux you get error with "/dev/fuse" or FUSE when running script, then load fuse module with `sudo modprobe fuse`. You can write "fuse" in configuration file, usually in file "/etc/modules" or "/etc/modules-load.d/fuse.conf" or "/etc/conf.d/modules/fuse.conf", to automatically load this module at boot.
 
@@ -453,13 +453,13 @@ Usage: srb2bld [OPTIONS]
 
 8. If you choose branch other than default, configuration directory's name will be changed, for example ".srb2" will become ".srb2udmf", if "udmf" was chosen. Still remember to make backup of configuration/save files, before upgrading to next release of SRB2/SRB2Kart/Ring Racers build, if you chose default branch or kept previously chosen different branch.
 
-9. If you have error "invalid file system type on '/sys/fs/cgroup'", while running script, issue could be with not running cgroups service "sudo systemctl enable cgconfig && sudo systemctl start cgconfig" or "sudo systemctl enable cgmanager && sudo systemctl start cgmanager" or "sudo rc-update add cgroups && sudo rc-service cgroups start" and reboot system.
+9. If you have error "invalid file system type on '/sys/fs/cgroup'", while running script, issue could be with not running cgroups service `sudo systemctl enable cgconfig && sudo systemctl start cgconfig` or `sudo systemctl enable cgmanager && sudo systemctl start cgmanager` or `sudo rc-update add cgroups && sudo rc-service cgroups start` and reboot system.
 
-10. Other cgroup errors like: "Failed to add conmon to cgroupfs sandbox cgroup: creating cgroup for pids: mkdir /sys/fs/cgroup/pids: no such file or directory. Error: OCI runtime error: runc: runc create failed: no cgroup mount found in mountinfo"" can be solved with "sudo mount -t cgroup cgroup /sys/fs/cgroup" for temporarily mounting or put "cgroup /sys/fs/cgroup cgroup defaults 0 0" at /etc/fstab for mounting at OS boot.
+10. Other cgroup errors like: "Failed to add conmon to cgroupfs sandbox cgroup: creating cgroup for pids: mkdir /sys/fs/cgroup/pids: no such file or directory. Error: OCI runtime error: runc: runc create failed: no cgroup mount found in mountinfo"" can be solved with `sudo mount -t cgroup cgroup /sys/fs/cgroup` for temporarily mounting or put "cgroup /sys/fs/cgroup cgroup defaults 0 0" at /etc/fstab for mounting at OS boot.
 
-11. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter "podman system migrate".
+11. If you receive permission issues or errors related to /etc/subuid, /etc/subgid, UID and GID, please check if you have set UIDs/GIDs for user in path /etc/subuid and /etc/subgid. For example "testuser:231072:65536" will assign 65,536 subordinate UIDs/GIDs (231072-296607) to user called "testuser", so configure to user you are logged to. If you still have permission errors, increase range for user you are logged to in files /etc/subuid and /etc/subgid, for example "testuser:231072:200000". Additionally, if you have podman installed, enter `podman system migrate`.
 
-12. If you encounter issue for example "cp: missing destination file operand after '/home/[username]/.local/share/srb2bld/builds/srb2-2.0/build/AppDir/usr/lib'", while installing 32-bit old SRB2 build or building AppImage/Flatpak, please set "sudo setsebool -P allow_execstack 1" to adjust activated SELinux for allowing executable stacks globally on host OS or create SELinux rules for specific executable stack with recent AVC denial "sudo ausearch -m avc -ts recent | audit2allow -M my_execstack_policy", "sudo semodule -i my_execstack_policy.pp".
+12. If you encounter issue for example "cp: missing destination file operand after '/home/[username]/.local/share/srb2bld/builds/srb2-2.0/build/AppDir/usr/lib'", while installing 32-bit old SRB2 build or building AppImage/Flatpak, please set `sudo setsebool -P allow_execstack 1` to adjust activated SELinux for allowing executable stacks globally on host OS or create SELinux rules for specific executable stack with recent AVC denial `sudo ausearch -m avc -ts recent | audit2allow -M my_execstack_policy`, `sudo semodule -i my_execstack_policy.pp`.
 
 13. If docker fails to run despite following installation/configuration instructions and notes from srb2bld's README, consider switching to "podman".
 
@@ -469,17 +469,17 @@ Usage: srb2bld [OPTIONS]
 
 16. Building Android APKs requires gradlew script and Gradle files in the directory "android" for SRB2 Custom.
 
-17. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command "flatpak --user install org.freedesktop.Platform.Compat.i386".
+17. For built Flatpak bundles for 32-bit builds (SRB2 Final Demo, SRB2 JTE), you need to install Flatpak "org.freedesktop.Platform.Compat.i386" with command `flatpak --user install org.freedesktop.Platform.Compat.i386`.
 
-18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
+18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with `sudo purge`.
 
-19. In case of issues of sound with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
+19. In case of issues of sound with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command `winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL`.
 
 20. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
 
-    - Proprietary NVIDIA GPU drivers: "export __NV_PRIME_RENDER_OFFLOAD=1" and "export __GLX_VENDOR_LIBRARY_NAME=nvidia",
+    - Proprietary NVIDIA GPU drivers: `export __NV_PRIME_RENDER_OFFLOAD=1` and `export __GLX_VENDOR_LIBRARY_NAME=nvidia`,
 
-    - AMD, NVIDIA and Intel open source drivers: "export DRI_PRIME=1".
+    - AMD, NVIDIA and Intel open source drivers: `export DRI_PRIME=1`.
 
 21. In order to compile and install custom SRB2/SRB2Kart/Ring Racers build (assuming it is not a very old one) from local or remote repository, write environment variables in shell's configuration file, like ".bash_profile" or ".zshrc", which are:
 
@@ -527,8 +527,8 @@ Usage: srb2bld [OPTIONS]
 ```
    Then choose "Build SRB2 Custom", when running script.
 
-22. Other environment variables to use. To activate them with value "1", do for example "export SRB2BLDDEBUG=1":
-
+22. Other environment variables to use. To activate them with value "1", do for example `export SRB2BLDDEBUG=1`:
+```
     - SRB2BLDDEBUG - Getting verbose output from script. Useful for reporting issues in https://github.com/bijman/srb2bld/issues.
 
     - SRB2BLDDEVMODE - For developers, who want to modify build's source code. Disables cleaning build and resetting changes to build's source code.
@@ -540,3 +540,4 @@ Usage: srb2bld [OPTIONS]
     - SRB2BLDNCPU - Determine number of CPU threads to compile build. Useful in case of out of memory errors, for example "g++: fatal error: Killed signal terminated program cc1plus".
 
     - GITHUB_TOKEN - Increase hourly limit of request to GitHub API. Useful, if connecting to SRB2/SRB2Kart/Ring Racers assets and downloading is blocked after many attempts. Current default number of requests without GitHub personal access token is 60 requests per hour and with GitHub personal access token - 5000 requests per hour. For more details and how to, please read https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api and https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens. You need GitHub account to do this.
+```
