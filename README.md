@@ -343,7 +343,7 @@ Usage: srb2bld [OPTIONS]
 
      18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with "sudo purge".
 
-     19. In case of issues of sound with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
+     19. In case of sound issues with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command "winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL".
 
      20. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
 
@@ -473,7 +473,7 @@ Usage: srb2bld [OPTIONS]
 
 18. Sometimes fixup_bundle function, when building and installing bundle for macOS, fails due to missing library, but the path for it exists. Recommendation is to completely close terminal, reopen it again and run again srb2bld. Other way is to free RAM with `sudo purge`.
 
-19. In case of issues of sound with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command `winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL`.
+19. In case of sound issues with bundled OpenAL32.dll, install OpenAL from https://www.openal.org/downloads or enter winget command `winget install --verbose --interactive --exact --id CreativeTechnology.OpenAL`.
 
 20. For full OpenGL support in SRB2 builds (especially SRB2CB) from Linux distribution with hybrid graphics it is recommended to apply to shell these environment variables:
 
