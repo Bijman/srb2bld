@@ -14,7 +14,7 @@ https://github.com/user-attachments/assets/a8a188be-9431-46af-8a31-d2f394c1dc14
 - Building Android APKs (Linux and Windows only),
 - Removing installed SRB2 builds, source code and assets,
 - Upgrading installed SRB2 builds,
-- Runs on Linux, macOS and Windows (Git Bash).
+- Runs on Linux, macOS and Windows (Git Bash/MSYS).
 
 # Dependencies
 1. General dependencies:
