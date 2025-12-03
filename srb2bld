@@ -923,7 +923,7 @@ buildvar() {
     elif [ "$BUILD" = "$BUILDPATH/blankart" ]; then
 
         BUILDNAME="BlanKart"
-        GITDEFVER="blankart-dev"
+        GITDEFVER="master"
         GITVER="$GITDEFVER"
         GITURL="https://codeberg.org/NepDisk/blankart.git"
 
