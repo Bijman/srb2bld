@@ -9481,7 +9481,7 @@ rm -f /tmp/*.deb
 RUN git clone https://github.com/Cyan4973/xxHash --branch release /tmp/xxHash && \
 make -C /tmp/xxHash PREFIX=/usr install
 
-RUN curl -sL "https://xff.cz/megatools/builds/builds/$(curl -sL https://xff.cz/megatools/builds/builds | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print $2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
+RUN curl -sL "https://xff.cz/megatools/builds/builds/$(curl -sL https://xff.cz/megatools/builds/builds/ | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print $2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
 tar xfv "/tmp/megatools.tar.gz" --wildcards --strip-components=1 -C "/usr/bin" "*/megatools"
 
 RUN mkdir -p "/usr/include/FMOD" "$SRB2BLDROOT/libraries/FMOD" && \
@@ -9610,7 +9610,7 @@ install -Dm755 /tmp/unrar/unrar /usr/bin/unrar
 RUN git clone https://github.com/Cyan4973/xxHash --branch release /tmp/xxHash && \
 make -C /tmp/xxHash PREFIX=/usr install
 
-RUN curl -sL "https://xff.cz/megatools/builds/builds/$(curl -sL https://xff.cz/megatools/builds/builds | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print $2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
+RUN curl -sL "https://xff.cz/megatools/builds/builds/$(curl -sL https://xff.cz/megatools/builds/builds/ | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print $2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
 tar xfv "/tmp/megatools.tar.gz" --wildcards --strip-components=1 -C "/usr/bin" "*/megatools"
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
@@ -9708,7 +9708,7 @@ apt-fast install -y libsdl2-dev libsdl2-mixer-dev libsdl1.2-dev libsdl-image1.2-
 RUN git clone https://github.com/Cyan4973/xxHash --branch release /tmp/xxHash && \
 make -C /tmp/xxHash PREFIX=/usr install
 
-RUN curl -sL "https://xff.cz/megatools/builds/builds/$(curl -sL https://xff.cz/megatools/builds/builds | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print $2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
+RUN curl -sL "https://xff.cz/megatools/builds/builds/$(curl -sL https://xff.cz/megatools/builds/builds/ | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print $2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
 tar xfv "/tmp/megatools.tar.gz" --wildcards --strip-components=1 -C "/usr/bin" "*/megatools"
 
 RUN if [ "$BUILD" = "$BUILDPATH/ring-racers" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-noire" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-hep" ] || [ "$BUILD" = "$BUILDPATH/ring-racers-freaky-build" ] || [ "$BUILD" = "$BUILDPATH/radio-racers" ]; then \
@@ -9823,7 +9823,7 @@ RUN apk update && \
 apk upgrade && \
 apk add file sudo bash dash gawk curl git shadow p7zip findutils
 
-RUN curl -sL "https://xff.cz/megatools/builds/builds/$(curl -sL https://xff.cz/megatools/builds/builds | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print $2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
+RUN curl -sL "https://xff.cz/megatools/builds/builds/$(curl -sL https://xff.cz/megatools/builds/builds/ | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print $2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
 tar xfv "/tmp/megatools.tar.gz" --wildcards --strip-components=1 -C "/usr/bin" "*/megatools"
 
 RUN printf "%s\n" "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
