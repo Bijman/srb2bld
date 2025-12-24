@@ -151,64 +151,64 @@ As for macOS users, they need to install these additional dependencies:
 1. Set SDKROOT environment variable in "\~/.zshrc" or "\~/.bash_profile": `export SDKROOT=[path to .sdk file]` (usually macOS .sdk file is located in "/Library/Developer/CommandLineTools/SDKs" path, if you installed Homebrew or entered `sudo xcode-select --install`),
 2. Enter `source ~/.bash_profile` or `source ~/.zshrc` or restart terminal.
 
-# Compatibility (as of 17-11-2025)
-|                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Windows x86/x64 | macOS x86/x64 |
-| :----------------------: | :-------------------: | :------------------: | :---------------: | :-------------: | :-----------: |
-| SRB2                     |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 v2.2 Classic        |          ✅           |         🟨           |        ❔         |        ✅       |       ✅      |
-| SRB2 v2.2 Beta 6         |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
-| SRB2 Uncapped PLUS       |          ✅           |         ✅           |        ✅         |        ✅       |       🟨**    |
-| SRB2 NetPlus             |          ✅           |         ✅           |        ✅         |        ✅       |       ⛔      |
-| SRB2 Reveries            |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 TSoURDt3rd          |          ✅           |         🟨           |        🟨         |        ✅       |       🟨      |
-| SRB2 Edit                |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
-| SRB2 GGJ                 |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
-| SRB2 Destructive Illusion|          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
-| SRB2 VR                  |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
-| SRB2 v2.1 Legacy         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Fusion Advance      |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
-| SRB2 Thokker             |          ✅           |         ✅           |        ❔         |        ✅*      |       🟨      |
-| SRB2 Top Down            |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
-| Sonic Smash Brawl        |          ✅           |         ✅           |        ❔         |        ✅*      |       ✅      |
-| SRB2 v2.0                |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
-| SRB2 Community Build     |          ✅*          |         ✅*          |        ❔         |        🟨*      |       ⛔      |
-| XSRB2                    |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| SRB2 SF94-Serv           |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| SRB2 Riders              |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| Super SRB2 Kart Z        |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| Super Bomberman Blast 2  |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| SRB2 Final Demo          |          ✅*          |         ✅*          |        ✅*        |        ✅*      |       ⛔      |
-| SRB2 1095                |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| SRB2 JTE                 |          🟨*          |         🟨*          |        ❔         |        🟨*      |       ⛔      |
-| ShufflarB2               |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| SRB2 Live                |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| SRB2 LoZ                 |          🟨*          |         🟨*          |        🟨*        |        🟨*      |       ⛔      |
-| SSBSS                    |          ✅*          |         ✅*          |        ❔         |        ✅*      |       ⛔      |
-| NewMillennium            |          🟨*          |         🟨*          |        ❔         |        ✅*      |       ⛔      |
-| SRB2 Persona             |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Kart                |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Kart Galaxy         |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
-| SRB2 Kart HEP            |          ✅           |         ✅           |        🟨         |        ✅       |       ✅      |
-| SRB2 Kart Saturn         |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Kart Neptune        |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SRB2 Kart VR             |          ✅           |         ✅           |        ✅         |        ✅*      |       ⛔      |
-| BlanKart                 |          ✅           |         ✅           |        ❔         |        ✅       |       ✅      |
-| Ring Racers              |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
-| Ring Racers Noire        |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
-| Ring Racers HEP          |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
-| Ring Racers Freaky Build |          ✅           |         🟨           |        ⛔         |        ✅*      |       ✅      |
-| Radio Racers             |          ✅           |         ✅           |        ⛔         |        ✅*      |       ✅      |
-| wadcli                   |          ✅           |         ✅           |        ✅         |        ⛔       |       ⛔      |
-| kartmaker (SRB2 Kart)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| NeptuneFM (SRB2 Kart)    |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| kartmaker (RR)           |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| followermaker (RR)       |          ✅           |         ✅           |        ✅         |        ✅       |       ✅      |
-| SLADE                    |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
-| Ultimate Zone Builder    |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
-| Ultimate GKSZ Builder    |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
-| Ultimate Lowee Builder   |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
-| High Voltage Ring        |          ✅           |         🟨***        |        ⛔         |        ✅       |       ⛔      |
-| Aseprite w/ Kart Builder |          ✅           |         ✅           |        ⛔         |        ⛔       |       ✅      |
+# Compatibility (as of 17-12-2025)
+|                          | Linux (glibc) x86/x64 | Linux (musl) x86/x64 | Linux (glibc) ARM | Linux (musl) ARM  | Windows x86/x64 | macOS x86/x64 |
+| :----------------------: | :-------------------: | :------------------: | :---------------: | :---------------: | :-------------: | :-----------: |
+| SRB2                     |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 v2.2 Classic        |          ✅           |          🟨          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 v2.2 Beta 6         |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 Uncapped PLUS       |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       🟨**    |
+| SRB2 NetPlus             |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ⛔      |
+| SRB2 Reveries            |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 TSoURDt3rd          |          ✅           |          🟨          |        🟨         |         🟨        |        ✅       |       🟨      |
+| SRB2 Edit                |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 GGJ                 |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 Destructive Illusion|          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 VR                  |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ⛔      |
+| SRB2 v2.1 Legacy         |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 Fusion Advance      |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 Thokker             |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       🟨      |
+| SRB2 Top Down            |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ✅      |
+| Sonic Smash Brawl        |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ✅      |
+| SRB2 v2.0                |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 Community Build     |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        🟨*      |       ⛔      |
+| XSRB2                    |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 SF94-Serv           |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 Riders              |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| Super SRB2 Kart Z        |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| Super Bomberman Blast 2  |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 Final Demo          |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 1095                |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 JTE                 |          🟨*          |          🟨*         |        🟨*        |         ⛔        |        🟨*      |       ⛔      |
+| ShufflarB2               |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 Live                |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 LoZ                 |          🟨*          |          🟨*         |        🟨*        |         ⛔        |        🟨*      |       ⛔      |
+| SSBSS                    |          ✅*          |          ✅*         |        ✅*        |         ⛔        |        ✅*      |       ⛔      |
+| NewMillennium            |          🟨*          |          🟨*         |        🟨*        |         ⛔        |        ✅*      |       ⛔      |
+| SRB2 Persona             |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 Kart                |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 Kart Galaxy         |          ✅           |          ✅          |        🟨         |         ✅        |        ✅       |       ✅      |
+| SRB2 Kart HEP            |          ✅           |          ✅          |        🟨         |         ✅        |        ✅       |       ✅      |
+| SRB2 Kart Saturn         |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 Kart Neptune        |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SRB2 Kart VR             |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ⛔      |
+| BlanKart                 |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| Ring Racers              |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ✅      |
+| Ring Racers Noire        |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ✅      |
+| Ring Racers HEP          |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ✅      |
+| Ring Racers Freaky Build |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ✅      |
+| Radio Racers             |          ✅           |          ✅          |        ✅         |         ✅        |        ✅*      |       ✅      |
+| wadcli                   |          ✅           |          ✅          |        ✅         |         ✅        |        ⛔       |       ⛔      |
+| kartmaker (SRB2 Kart)    |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| NeptuneFM (SRB2 Kart)    |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| kartmaker (RR)           |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| followermaker (RR)       |          ✅           |          ✅          |        ✅         |         ✅        |        ✅       |       ✅      |
+| SLADE                    |          ✅           |          ✅          |        ⛔         |         ✅        |        ⛔       |       ✅      |
+| Ultimate Zone Builder    |          ✅           |          🟨***       |        ⛔         |         🟨***     |        ✅       |       ⛔      |
+| Ultimate GKSZ Builder    |          ✅           |          🟨***       |        ⛔         |         🟨***     |        ✅       |       ⛔      |
+| Ultimate Lowee Builder   |          ✅           |          🟨***       |        ⛔         |         🟨***     |        ✅       |       ⛔      |
+| High Voltage Ring        |          ✅           |          🟨***       |        ⛔         |         ⛔        |        ✅       |       ⛔      |
+| Aseprite w/ Kart Builder |          ✅           |          ✅          |        ⛔         |         ⛔        |        ⛔       |       ✅      |
 
 **Legend:**
 
@@ -245,6 +245,7 @@ Usage: srb2bld [OPTIONS]
      -ad, --android                         Compile and create distributable APK file of SRB2 build (Linux and Windows only).
      -ai, --appimage                        Compile and create distributable AppImage of SRB2/SRB2Kart/Ring Racers build (Linux only).
      -c, --compatibility                    Display compatibility table of compiling SRB2/SRB2Kart/Ring Racers builds for each operating system.
+     -x, --crosscompile                     Compile and create distributable cross-compiled bundle of SRB2/SRB2Kart/Ring Racers build (Linux and Windows only).
      -f, --flatpak                          Compile and create distributable Flatpak of SRB2/SRB2Kart/Ring Racers build (Linux only).
      -i, --install                          Compile and install SRB2/SRB2Kart/Ring Racers build to system.
      -la, --listasset                       List downloaded SRB2/SRB2Kart/Ring Racers assets.
@@ -259,6 +260,7 @@ Usage: srb2bld [OPTIONS]
      -u, --user                             Set installation path to user's home directory (only works with -i/--install, -ui/--uninstall, -rd/--removedep).
      -ui, --uninstall                       Uninstall SRB2/SRB2Kart/Ring Racers build.
      -up, --upgrade                         Upgrade installed SRB2/SRB2Kart/Ring Racers build.
+     -w, --winportable                      Compile and create distributable Windows portable bundle of SRB2/SRB2Kart/Ring Racers build (Windows only).
 
   EXAMPLES:
      1. Compile and install SRB2/SRB2Kart/Ring Racers build to system:
