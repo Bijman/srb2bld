@@ -10359,7 +10359,7 @@ crosscompile() {
     VERSION="$GITVER-$(git -C "$BUILD" rev-parse --short HEAD)"
 
     # Move created bundle to working directory.
-    CROSSBUILDNAME="$($PRINTF "%s\n" "$BUILDNAME" | gawk '{gsub(" ","-"); print}')-$VERSION-$OS-$ARCH.zip"
+    CROSSBUILDNAME="$($PRINTF "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_"); print}')-$VERSION-$OS-$ARCH.zip"
 
     mv -f "$BUILDPATH/package.zip" "$LNXPWD/$CROSSBUILDNAME"
 
@@ -12277,7 +12277,7 @@ FLATPAK
 
     fi
 
-    $($PRINTF "%s\n" "$FLATPAKBIN" | gawk '{print $1}') build-bundle -v "$BUILD/build/srb2bld-repo" "$BUILD/$($PRINTF "%s\n" "$BUILDNAME" | gawk '{gsub(" ","-"); print}')-$VERSION-$ARCH.flatpak" "$FLATPAKNAME"
+    $($PRINTF "%s\n" "$FLATPAKBIN" | gawk '{print $1}') build-bundle -v "$BUILD/build/srb2bld-repo" "$BUILD/$($PRINTF "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_"); print}')-$VERSION-$ARCH.flatpak" "$FLATPAKNAME"
 
     # Set name of Flatpak in message.
     FLATPAKNAME=$(find "$BUILD" -name "*.flatpak" 2> /dev/null | gawk -F'/' '{print $NF}')
@@ -19329,7 +19329,7 @@ winportable() {
     VERSION="$GITVER-$(git -C "$BUILD" rev-parse --short HEAD)"
 
     # Move created bundle to working directory.
-    WINPORTABLEBUILDNAME="$($PRINTF "%s\n" "$BUILDNAME" | gawk '{gsub(" ","-"); print}')-$VERSION-Windows-$ARCH.zip"
+    WINPORTABLEBUILDNAME="$($PRINTF "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_"); print}')-$VERSION-Windows-$ARCH.zip"
 
     mv -f "$BUILDPATH/package.zip" "$LNXPWD/$WINPORTABLEBUILDNAME"
 
