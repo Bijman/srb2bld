@@ -8001,7 +8001,7 @@ exec "\$HERE/lib/p7zip/7z" "\$@"
 
         # libstdc++.so.6 and libzstd.so.1 cause SDL2 window without loading game for NewMillennium on Gentoo.
         # libGL.so.1, libGLdispatch.so.0, libGLX.so.0 and libGLX_mesa.so.0 create GLX opcode error and does not open SDL2 window.
-        cp -Lf \$(ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libm.so|libpthread.so|libresolv.so|librt.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+        cp -Lf \$(ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|version|libc.so|libdl.so|ld-|libm.so|libpthread.so|libresolv.so|librt.so|libcom_err.so/ {print}' | sort -u) "\$BUILD/build/AppDir/usr/lib"
 
         if [ "\$BUILD" = "\$BUILDPATH/newmillennium" ]; then
 
@@ -8081,7 +8081,7 @@ else
             if [ "\$LIBC" != "musl" ] || [ "\$FLATPAK" = "1" ] || [ "\$CROSS" = "1" ]; then
 
                 # LD_TRACE_LOADED_OBJECTS=1 is required specifically to NewMillennium to read linked libraries to compiled binary file.
-                cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" LD_TRACE_LOADED_OBJECTS=1 \$(find "\$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+                cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" LD_TRACE_LOADED_OBJECTS=1 \$(find "\$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|version|libc.so|libdl.so|ld-|libstdc++|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}' | sort -u) "\$BUILD/build/AppDir/usr/lib"
 
                 cp -Lf \$(find /usr/lib/*/libgbm.so.[0-9] /lib/*/libexpat.so.[0-9] /usr/lib/*/libX11.so.[0-9] /usr/lib/*/libX11-xcb.so.[0-9] /usr/lib/*/libxcb-dri2.so.[0-9] /usr/lib/*/libxcb-randr.so.[0-9] /usr/lib/*/libxcb-xfixes.so.[0-9] /usr/lib/*/libxcb-shm.so.[0-9] /usr/lib/*/libdrm.so.[0-9] /usr/lib/*/libxcb-dri3.so.0 /usr/lib/*/libxcb-present.so.[0-9] /usr/lib/*/libdrm_intel.so.[0-9] /usr/lib/*/libxcb-sync.so.[0-9] /usr/lib/*/libxshmfence.so.[0-9] /usr/lib/*/libpciaccess.so.[0-9] /usr/lib/*/libxcb-glx.so.[0-9] /usr/lib/*/libffi.so.[0-9] /usr/lib/*/libXdamage.so.[0-9] /usr/lib/*/libLLVM-[0-9][0-9].so.[0-9] /usr/lib/*/libsensors.so.[0-9] /usr/lib/*/libdrm_radeon.so.[0-9] /usr/lib/*/libelf.so.[0-9] /usr/lib/*/libdrm_amdgpu.so.[0-9] /usr/lib/*/libdrm_nouveau.so.[0-9] /usr/lib/*/libatomic.so.[0-9] /usr/lib/*/libedit.so.[0-9] /usr/lib/*/libwayland-server.so.[0-9] /usr/lib/*/libglapi.so.[0-9] /usr/lib/*/libGLX_indirect.so.[0-9] 2> /dev/null) "\$BUILD/build/AppDir/usr/lib"
                 cp -rf "/usr/lib/"*/dri "\$BUILD/build/AppDir/usr/lib"
@@ -8095,7 +8095,7 @@ else
 
         else
 
-            cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+            cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|version|libc.so|libdl.so|ld-|libgcc_s.so|libm.so|libpthread.so|libresolv.so|librt.so|libz.so|libcom_err.so/ {print}' | sort -u) "\$BUILD/build/AppDir/usr/lib"
 
         fi
 
@@ -8103,7 +8103,7 @@ else
 
     if ([ "\$LNXOSNAME" = "NixOS" ] || [ "\$BUILD" = "\$BUILDPATH/slade" ]) && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ]; then
 
-         cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|libc.so|libdl.so|ld-|libm.so|libpthread.so|libresolv.so|librt.so/ {print}') "\$BUILD/build/AppDir/usr/lib"
+         cp -Lf \$(LD_LIBRARY_PATH="\$SRB2BLDPREFIX/lib" ldd \$(find "\$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null) 2> /dev/null | gawk '{print \$3}' | gawk '!/not|dynamic|version|libc.so|libdl.so|ld-|libm.so|libpthread.so|libresolv.so|librt.so/ {print}' | sort -u) "\$BUILD/build/AppDir/usr/lib"
 
     fi
 
