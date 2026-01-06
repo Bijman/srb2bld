@@ -281,7 +281,7 @@ LNXFLUIDSYNTHVER="2.2.0"
 LNXDISCORDRPCVER="master"
 LNXOPENVRVER="1.10.30"
 LNXLZFVER="master"
-LNXWXGTKVER="3.2.7"
+LNXWXGTKVER="3.2.8"
 LNXWEBPVER="main"
 LNXZDBSPVER="master"
 LNXMONOVER="6.6.0"
@@ -4514,7 +4514,7 @@ REPLACEMENT
 
         fi
 
-        if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3250" ] && [ "\$LIBC" != "musl" ]; then
+        if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{major=substr(\$0,1,1)+0; minor=substr(\$0,2,1)+0; patch=substr(\$0,3)+0; print major*10000 + minor*100 + patch}') -ge "30205" ] && [ "\$LIBC" != "musl" ]; then
 
             gawk -i inplace '!/REGEX REPLACE "windres"/ {print}' "\$BUILD/cmake/unix.cmake"
             gawk -i inplace '{gsub("\\\\$<BUILD_INTERFACE:|>",""); print}' "\$BUILD/thirdparty/fmt/CMakeLists.txt"
@@ -4751,13 +4751,13 @@ REPLACEMENT
 
         elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
-            if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -le "3113" ] && ([ "\$LIBC" != "musl" ] && ([ "\$ARCH" = "x86_64" ] || [ "\$ARCH" != "x86_64" ])); then
+            if [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{major=substr(\$0,1,1)+0; minor=substr(\$0,2,1)+0; patch=substr(\$0,3)+0; print major*10000 + minor*100 + patch}') -le "301013" ] && ([ "\$LIBC" != "musl" ] && ([ "\$ARCH" = "x86_64" ] || [ "\$ARCH" != "x86_64" ])); then
 
                 sudo apt install -y $LNXWXGTK30PKG
 
                 BLDCMD="cmake -S \$BUILD -B \$BUILD/build -DCMAKE_POLICY_VERSION_MINIMUM=\$CMAKEPOLVER -DNO_WEBVIEW=ON -DwxWidgets_CONFIG_EXECUTABLE=/usr/bin/wx-config -DCMAKE_C_COMPILER="\$CCACHE_BIN_PATH"\$SLADEGCCOLDVER -DCMAKE_CXX_COMPILER="\$CCACHE_BIN_PATH"\$SLADEGXXOLDVER -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\$BUILD/build/AppDir/usr"
 
-            elif [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3113" ] && [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -le "3250" ] && ([ "\$LIBC" != "musl" ] && ([ "\$ARCH" = "x86_64" ] || [ "\$ARCH" != "x86_64" ])); then
+            elif [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{major=substr(\$0,1,1)+0; minor=substr(\$0,2,1)+0; patch=substr(\$0,3)+0; print major*10000 + minor*100 + patch}') -ge "301013" ] && [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{major=substr(\$0,1,1)+0; minor=substr(\$0,2,1)+0; patch=substr(\$0,3)+0; print major*10000 + minor*100 + patch}') -le "30205" ] && ([ "\$LIBC" != "musl" ] && ([ "\$ARCH" = "x86_64" ] || [ "\$ARCH" != "x86_64" ])); then
 
                 sudo apt install -y $LNXWXGTKPKG
 
@@ -5769,7 +5769,7 @@ REPLACEMENT
     fi
 
     # Download libwxgtk's source code, build and install it.
-    if [ "\$BUILD" = "\$BUILDPATH/slade" ] && [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3260" ] && ([ "\$LIBC" != "musl" ] && ([ "\$ARCH" = "x86_64" ] || [ "\$ARCH" != "x86_64" ])); then
+    if [ "\$BUILD" = "\$BUILDPATH/slade" ] && [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{major=substr(\$0,1,1)+0; minor=substr(\$0,2,1)+0; patch=substr(\$0,3)+0; print major*10000 + minor*100 + patch}') -ge "30206" ] && ([ "\$LIBC" != "musl" ] && ([ "\$ARCH" = "x86_64" ] || [ "\$ARCH" != "x86_64" ])); then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/libwxgtk/.git" ]; then
 
@@ -5809,7 +5809,7 @@ REPLACEMENT
     fi
 
     # Download libwebp's source code, build and install it.
-    if [ "\$BUILD" = "\$BUILDPATH/slade" ] && [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{if(\$0 < 1000) {gsub("$","0"); print} else {print}}') -ge "3260" ] && ([ "\$LIBC" != "musl" ] && ([ "\$ARCH" = "x86_64" ] || [ "\$ARCH" != "x86_64" ])); then
+    if [ "\$BUILD" = "\$BUILDPATH/slade" ] && [ \$(git -C "\$BUILD" describe --tags | gawk -F'_|-' '{gsub("\\\.|-|[a-z]",""); print \$1}' | gawk '{major=substr(\$0,1,1)+0; minor=substr(\$0,2,1)+0; patch=substr(\$0,3)+0; print major*10000 + minor*100 + patch}') -ge "30206" ] && ([ "\$LIBC" != "musl" ] && ([ "\$ARCH" = "x86_64" ] || [ "\$ARCH" != "x86_64" ])); then
 
         if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$CROSS" = "1" ] || [ "\$WINPORTABLE" = "1" ] || [ "\$LNXOSNAME" = "NixOS" ]; then
 
