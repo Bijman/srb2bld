@@ -176,7 +176,7 @@ SRB2CLASSICASSETURL="https://codeberg.org/srb2classic/srb2classic-assets/archive
 SRB2BETAASSETURL="https://api.github.com/repos/xdf22/SRB2-2.2-Beta6/releases"
 SRB2NETPLUSASSETURL="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.9/SRB2-v229-Patch.zip"
 SRB2REVERIESASSETURL="https://codeberg.org/api/v1/repos/cande/cherry/releases"
-#SRB2TSOURDT3RDASSETURL="https://mb.srb2.org/addons/the-story-of-uncapped-revengence-discord-the-3rd.4932/download"
+SRB2TSOURDT3RDASSETURL="https://mb.srb2.org/addons/the-story-of-uncapped-revengence-discord-the-3rd.4932/download"
 SRB2GGJASSETURL="https://git.do.srb2.org/chaoloveicemdboy/srb2ggj-assets-public.git"
 SRB2DESTRUCTIVEILLUSIONASSETURL="https://srb2workshop.org/resources/destructive-illusion-re-upload.110/download"
 SRB2VRASSETURL="https://github.com/STJr/SRB2/releases/download/SRB2_release_2.2.9/SRB2-v229-Patch.zip"
@@ -2287,7 +2287,17 @@ containerentry() {
 
     export LIBRARY_PATH="\$SRB2BLDPREFIX/lib"
     export PKG_CONFIG_PATH="\$SRB2BLDPREFIX/lib/pkgconfig"
-    export PATH="\$SRB2BLDROOT/libraries/depot_tools:\$SRB2BLDPREFIX/bin:\$PATH"
+
+    if [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
+
+        export PATH="\$SRB2BLDROOT/libraries/depot_tools:\$SRB2BLDPREFIX/bin:\$PATH"
+
+    else
+
+        export PATH="\$SRB2BLDPREFIX/bin:\$PATH"
+
+    fi
+
     export DEBIAN_FRONTEND="noninteractive"
     export SRB2BLDNOCCACHE="$SRB2BLDNOCCACHE"
 
@@ -2407,23 +2417,19 @@ containerentry() {
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
 
-                if [ -n "\$ISNET" ] && [ "\$(curl -X GET -LI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
+                if [ -n "\$ISNET" ]; then
 
-                    rm -f "\$SRB2BLDROOT/assets/tsourdt3rd.pk3"
-                    curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" -o "\$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+                    SRB2ASSETETAG=\$(curl -X GET -sLI "\$SRB2TSOURDT3RDASSETURL" | gawk -F'etag: ' '{IGNORECASE=1} /etag/ {gsub("\r|\\"",""); print \$NF}' 2> /dev/null | tail -n1)
+                    if [ "\$SRB2ASSETETAG" != "\$(7z l "\$SRB2BLDROOT/assets/SRB2TSoURDt3RD.7z" 2> /dev/null | gawk '/Comment/ {print \$NF}')" ]; then
 
-                fi
+                        rm -f "\$SRB2BLDROOT/assets/SRB2TSoURDt3RD.7z"
+                        curl -RL "\$SRB2TSOURDT3RDASSETURL" -o "\$SRB2BLDROOT/assets/SRB2TSoURDt3RD.7z"
 
-                cp -f "\$SRB2BLDROOT/assets/tsourdt3rd.pk3" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
-
-                if [ -n "\$ISNET" ] && [ "\$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/assets/jukebox.pk3" 2> /dev/null)" ]; then
-
-                    rm -f "\$SRB2BLDROOT/assets/jukebox.pk3"
-                    curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" -o "\$SRB2BLDROOT/assets/jukebox.pk3"
+                    fi
 
                 fi
 
-                cp -f "\$SRB2BLDROOT/assets/jukebox.pk3" "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
+                7z e -y "\$SRB2BLDROOT/assets/SRB2TSoURDt3RD.7z" "*/*.pk3" -o"\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR"
 
             elif [ "\$BUILD" = "\$BUILDPATH/srb2-ggj" ]; then
 
@@ -3178,7 +3184,7 @@ EOF
 
         fi
 
-        SRB2VER=\$(gawk -F'\"' '/SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null || \$PRINTF "%s\n" "\$SRB2LATESTVER")
+        SRB2VER=\$(gawk -F'\"' '/^#define SRB2VERSION/ {print \$2}' "\$BUILD/src/version.h" 2> /dev/null || \$PRINTF "%s\n" "\$SRB2LATESTVER")
 
         if [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
@@ -3527,6 +3533,30 @@ EOF
 
     fi
 
+    # Run script to setup libraries for SRB2 Classic.
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
+
+        cd "\$BUILD" || exit
+        git -C "\$BUILD" reset --hard
+
+        if [ "\$OS" = "Windows" ]; then
+
+            gawk -i inplace '{gsub("\r",""); print}' "\$BUILD/setup-deps.sh"
+            sh "\$BUILD/setup-deps.sh"
+
+        fi
+
+#    # Download and copy some missing dll libraries from NuGet for Ultimate GKSZ Builder.
+#    elif [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ]; then
+#
+#        curl -L https://www.nuget.org/api/v2/package/SharpCompress/0.20.0 -o "\$BUILD/SharpCompress.nupkg"
+#        curl -L https://www.nuget.org/api/v2/package/System.Memory/4.5.5 -o "\$BUILD/System-Memory.nupkg"
+#        7z e -y "\$BUILD/SharpCompress.nupkg" "lib/net45/SharpCompress.dll" -o"\$BUILD/Build"
+#        7z e -y "\$BUILD/System-Memory.nupkg" "lib/net461/System.Memory.dll" -o"\$BUILD/Build"
+#        mkdir -p "\$BUILD/Build/Plugins/Dependencies"
+
+    fi
+
 if [ "\$ANDROID" = "1" ]; then
 
     cd "\$BUILD/android" || exit
@@ -3714,6 +3744,19 @@ else
 
     fi
 
+    # Removing compilation flag '-mno-ms-bitfields' from src/Makefile due to "gcc: error: unrecognized command-line option '-mno-ms-bitfields'" for ARM devices.
+    if [ -f "\$BUILD/src/Makefile" ] && [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}') ] && [ "\$(gawk 'match(\$0, /-mno-ms-bitfields/) {print substr(\$0, RSTART, RLENGTH)}' "\$BUILD/src/CMakeLists.txt" 2> /dev/null | head -n1)" = "-mno-ms-bitfields" ]; then
+
+        gawk -i inplace '/ifneq \\(,\\\$\\(filter \\\$\\(CC\\) \\\$\\(CXX\\),gcc g\\+\\+\\)\\)/ {suppress=1} /^\$/ {suppress=0} !suppress' "\$BUILD/src/Makefile"
+
+    fi
+
+    # Removing compilation flag '-mno-ms-bitfields' from src/CMakeLists.txt due to "gcc: error: unrecognized command-line option '-mno-ms-bitfields'" for ARM devices.
+    if [ -f "\$BUILD/src/CMakeLists.txt" ] && [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}') ] && [ "\$(gawk 'match(\$0, /-mno-ms-bitfields/) {print substr(\$0, RSTART, RLENGTH)}' "\$BUILD/src/CMakeLists.txt" 2> /dev/null | head -n1)" = "-mno-ms-bitfields" ]; then
+        gawk -i inplace '/if \\("\\\${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "\\\${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"\)/ {suppress=1} /^\$/ {suppress=0} !suppress' "\$BUILD/src/CMakeLists.txt"
+
+    fi
+
     # Modify the build's configuration and assets directory names to avoid conflicts between installed builds. Other fixes as well for specific build.
     if [ "\$BUILD" = "\$BUILDPATH/srb2" ]; then
 
@@ -3740,6 +3783,12 @@ else
             fi
 
         done
+
+        # Patching to remove uncommitted changes message from main menu.
+        gawk -i inplace '{gsub("UNCOMMITTED CHANGES!!!",""); print}' "\$BUILD/src/m_menu.c"
+
+        # Required removing carriage returns from code, if we want patches to be applied, due to CRLF endings from Windows host.
+        find "\$BUILD/libs/libpng" -path ./.git -prune -o -type f -exec gawk -i inplace '{gsub("\r",""); print}' '{}' \;
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-beta6" ]; then
 
@@ -3809,6 +3858,16 @@ else
         gawk -i inplace '{gsub("/usr/share/games/SRB2","/usr/share/games/SRB2TSoURDt3rd"); print}' "\$BUILD/src/sdl/i_system.c"
         gawk -i inplace '{gsub("/usr/games/SRB2","/usr/games/SRB2TSoURDt3rd"); print}' "\$BUILD/src/sdl/i_system.c"
         gawk -i inplace '{gsub("\\\\\\\srb2","\\\\srb2tsourdt3rd"); print}' "\$BUILD/src/sdl/i_system.c"
+
+        # Fixing linking errors rearding DISCORD_RequestSFX function.
+        gawk -i inplace '{gsub("lua_pushinteger\\\\(L, DISCORD_RequestSFX\\\\);","#ifdef HAVE_DISCORDRPC\n\t\t\tlua_pushinteger(L, DISCORD_RequestSFX);\n\t\t\t#endif"); print}' "\$BUILD/src/STAR/lua/smkg-lu_script.c"
+        gawk -i inplace '{gsub("DISCORD_RequestSFX = \\\\(INT32\\\\)luaL_checkinteger\\\\(L, 2\\\\);","#ifdef HAVE_DISCORDRPC\n\t\t\tDISCORD_RequestSFX = (INT32)luaL_checkinteger(L, 2);\n\t\t\t#endif"); print}' "\$BUILD/src/STAR/lua/smkg-lu_script.c"
+
+        # Fixing "error: field 'ip4' has incomplete type" by adding system's netinet/in.h header file to build's src/netcode/i_net.h.
+        gawk -i inplace '{gsub("#include \"../command.h\"","#include \"../command.h\"\n#ifndef _WIN32\n#include <netinet/in.h>\n#endif"); print}' "\$BUILD/src/netcode/i_net.h"
+
+        # Fix for "error: 'MUS_OPUS' undeclared".
+        gawk -i inplace 'BEGIN{RS=""; ORS="\n\n"} {gsub("Mix_Init\\\\(MIX_INIT_FLAC\\\\|MIX_INIT_MOD\\\\|MIX_INIT_MP3\\\\|MIX_INIT_OGG\\\\|MIX_INIT_MID\\\\|MIX_INIT_OPUS\\\\);","int init_flags = MIX_INIT_FLAC|MIX_INIT_MOD|MIX_INIT_MP3|MIX_INIT_OGG|MIX_INIT_MID;\n#ifdef MIX_INIT_OPUS\ninit_flags |= MIX_INIT_OPUS;\n#endif\nMix_Init(init_flags);"); gsub("case MUS_MP3:|case MUS_MP3_MAD:|return MU_MP3;",""); gsub("case MUS_OPUS:","case MU_OPUS:"); print}' "\$BUILD/src/sdl/mixer_sound.c"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ]; then
 
@@ -4147,7 +4206,7 @@ else
         gawk -i inplace '{gsub("//\t#define TIMEOFDAY","#define TIMEOFDAY"); print}' "\$BUILD/SRB21094/branches/JTESHUFFLE/src/JTE/JTEDefs.h"
 
         # Adding flag "-marm" to increase branch range from Thumb-2 for ARM devices.
-        if [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}') ]; then
+        if [ -n "\$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
             gawk -i inplace '{gsub("OPTS\\\\+=-DLINUX","OPTS+=-DLINUX -marm"); print}' "\$BUILD/SRB21094/branches/JTESHUFFLE/src/sdl/MakeNIX.cfg"
 
@@ -4169,7 +4228,7 @@ else
         gawk -i inplace '{gsub("Nasmw","nasm"); print}' "\$BUILD/SRB21094/branches/LIVE/src/Makefile.cfg"
 
         # Adding flag "-marm" to increase branch range from Thumb-2 for ARM devices.
-        if [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}') ]; then
+        if [ -n "\$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
             gawk -i inplace '{gsub("OPTS\\\\+=-DLINUX","OPTS+=-DLINUX -marm"); print}' "\$BUILD/SRB21094/branches/LIVE/src/sdl/MakeNIX.cfg"
 
@@ -4364,13 +4423,6 @@ REPLACEMENT
         # Going back to pthread header due to missing in Ubuntu 18.04.
         gawk -i inplace '{gsub("<threads.h>","<pthread.h>"); print}' "\$BUILD/src/r_draw_span.cpp"
 
-        # Removing compilation flag '-mno-ms-bitfields' from src/Makefile due to "gcc: error: unrecognized command-line option '-mno-ms-bitfields'" for ARM devices.
-        if [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}') ]; then
-
-            gawk -i inplace '/ifneq \\(,\\\$\\(filter \\\$\\(CC\\) \\\$\\(CXX\\),gcc g\\+\\+\\)\\)/ {suppress=1} /^\$/ {suppress=0} !suppress' "\$BUILD/src/Makefile"
-
-        fi
-
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-kart-neptune" ]; then
 
         gawk -i inplace '{gsub("#define DEFAULTDIR \\".srb2kart\\"","#define DEFAULTDIR \\".srb2kart'\$GITVERCONF'\\""); print}' "\$BUILD/src/doomdef.h"
@@ -4399,7 +4451,7 @@ REPLACEMENT
         gawk -i inplace '{gsub("/usr/local/share/games/SRB2Kart-V2","'\$SRB2BLDPREFIX'/share/games/SRB2Kart-V2"); print}' "\$BUILD/src/sdl/i_system.cpp"
         gawk -i inplace '{gsub("/usr/local/games/SRB2Kart-V2","'\$SRB2BLDPREFIX'/games/SRB2Kart-V2"); print}' "\$BUILD/src/sdl/i_system.cpp"
 
-        # Patching BlanKart to remove uncommitted changes message from main menu.
+        # Patching to remove uncommitted changes message from main menu.
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "\$BUILD/src/m_menu.c"
 
         # Fixing linking of pthread.
@@ -4407,13 +4459,6 @@ REPLACEMENT
 
         # Fixing error with backtrace linking on musl-based distros.
         gawk -i inplace '/size = backtrace\(array, BT_SIZE\);/ {suppress=1} /CRASHLOG_WRITE/ {suppress=0} !suppress' "\$BUILD/src/sdl/i_system.cpp"
-
-        # Removing compilation flag '-mno-ms-bitfields' from src/CMakeLists.txt due to "gcc: error: unrecognized command-line option '-mno-ms-bitfields'" for ARM devices.
-        if [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}') ]; then
-
-            gawk -i inplace '/if \\("\\\${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "\\\${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"\)/ {suppress=1} /^\$/ {suppress=0} !suppress' "\$BUILD/src/CMakeLists.txt"
-
-        fi
 
         # Replace XXH3 hashes after creating assets.
         for a in \$(ls "\$BUILD/build/AppDir/usr/games/\$ASSETAPPDIR/"*.pk3 | gawk -F'/' '{gsub(".pk3",""); print \$NF}'); do
@@ -4534,6 +4579,22 @@ REPLACEMENT
         # Renaming configuration file for High Voltage Ring due to run exceptions.
         gawk -i inplace '{gsub("UDBuilder.default.cfg","HVRBuilder.default.cfg"); print}' "\$BUILD/Source/Core/General/General.cs"
 
+        # Add sse2nenon.h header file to build's Source/Native/Matrix.cpp for compatibility with ARM devices.
+        gawk -i inplace 'BEGIN{RS=""; ORS="\n\n"} {gsub("#ifndef NO_SSE\n#include <xmmintrin.h>\n#endif","#ifdef __x86_64__\n#include <xmmintrin.h>\n#else\n#include \"sse2neon.h\"\n#endif"); print}' "\$BUILD/Source/Native/Matrix.cpp"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ]; then
+
+        # Remove duplicated AssemblyVersion attribute.
+#        gawk -i inplace '!/AssemblyVersion\(/ {print}' "\$BUILD/Source/Core/Properties/AssemblyInfo.cs"
+
+        # Remove cleaning Build directory function when running make command to keep copied missing libraries SharpCompress and System.Memory.
+        gawk -i inplace '/<Target Name="CleanOutputDirectory" BeforeTargets="BeforeBuild">/ {suppress=1} /<Target Name="CopyAssetsToBuildFolder" AfterTargets="AfterBuild">/ {suppress=0} !suppress' "\$BUILD/Source/Core/BuilderMono.csproj"
+
+    # Required removing carriage returns from code, if we want patches to be applied, due to CRLF endings from Windows host.
+    elif [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
+
+        find "\$BUILD" -name "*.awk" -o -name "*.cmake" -o -name "*.dfa" -exec gawk -i inplace '{gsub("\r",""); print}' {} \;
+
     fi
 
     # Add compilation flags.
@@ -4630,7 +4691,7 @@ REPLACEMENT
 
             elif [ "\$ARCH" = "aarch64" ]; then
 
-                LIBSKIAPATH="/tmp/libskia/out/Release-arm64"
+                LIBSKIAPATH="\$SRB2BLDROOT/libraries/libskia/out/Release-arm64"
 
             fi
 
@@ -4658,7 +4719,7 @@ REPLACEMENT
 
         if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
 
-            BLDCMD="cmake -S \$BUILD -B \$BUILD/build -DCMAKE_C_COMPILER="\$CCACHE_BIN_PATH"\$GCCVER -DCMAKE_CXX_COMPILER="\$CCACHE_BIN_PATH"\$GXXVER -DCMAKE_C_FLAGS=-pthread -DCMAKE_CXX_FLAGS=-pthread -DSRB2_CONFIG_HWRENDER=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=\$BUILD/build/AppDir/usr"
+            BLDCMD="cmake -S \$BUILD -B \$BUILD/build -DCMAKE_C_COMPILER="\$CCACHE_BIN_PATH"\$GCCVER -DCMAKE_CXX_COMPILER="\$CCACHE_BIN_PATH"\$GXXVER -DCMAKE_C_FLAGS=-pthread -DCMAKE_CXX_FLAGS=-pthread -DSRB2_CONFIG_HWRENDER=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\$BUILD/build/AppDir/usr"
 
         elif [ "\$BUILD" = "\$BUILDPATH/srb2-thokker" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-top-down" ]; then
 
@@ -4785,7 +4846,7 @@ REPLACEMENT
 
             elif [ "\$ARCH" = "aarch64" ]; then
 
-                LIBSKIAPATH="/tmp/libskia/out/Release-arm64"
+                LIBSKIAPATH="\$SRB2BLDROOT/libraries/libskia/out/Release-arm64"
 
             fi
 
@@ -4894,7 +4955,7 @@ REPLACEMENT
     fi
 
     # Download libbacktrace's source code, build and install it.
-    if ([ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-cb" ] && [ "\$BUILD" != "\$BUILDPATH/xsrb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-sf94-serv" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-riders" ] && [ "\$BUILD" != "\$BUILDPATH/super-srb2-kart-z" ] && [ "\$BUILD" != "\$BUILDPATH/sbb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-final-demo" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-1095" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ] && [ "\$BUILD" != "\$BUILDPATH/shufflarb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-live" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-loz" ] && [ "\$BUILD" != "\$BUILDPATH/ssbss" ] && [ "\$BUILD" != "\$BUILDPATH/newmillennium" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimate-zone-builder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimate-gksz-builder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimate-lowee-builder" ] && [ "\$BUILD" != "\$BUILDPATH/high-voltage-ring" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]) || ([ "\$OS" = "Windows" ] && [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ]); then
+    if ([ "\$OS" = "Linux" ] && [ "\$LIBC" = "musl" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-2.0" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-cb" ] && [ "\$BUILD" != "\$BUILDPATH/xsrb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-sf94-serv" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-riders" ] && [ "\$BUILD" != "\$BUILDPATH/super-srb2-kart-z" ] && [ "\$BUILD" != "\$BUILDPATH/sbb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-final-demo" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-1095" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-jte" ] && [ "\$BUILD" != "\$BUILDPATH/shufflarb2" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-live" ] && [ "\$BUILD" != "\$BUILDPATH/srb2-loz" ] && [ "\$BUILD" != "\$BUILDPATH/ssbss" ] && [ "\$BUILD" != "\$BUILDPATH/newmillennium" ] && [ "\$BUILD" != "\$BUILDPATH/wadcli" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker" ] && [ "\$BUILD" != "\$BUILDPATH/neptunefm" ] && [ "\$BUILD" != "\$BUILDPATH/kartmaker-ring-racers" ] && [ "\$BUILD" != "\$BUILDPATH/followermaker" ] && [ "\$BUILD" != "\$BUILDPATH/slade" ] && [ "\$BUILD" != "\$BUILDPATH/ultimate-zone-builder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimate-gksz-builder" ] && [ "\$BUILD" != "\$BUILDPATH/ultimate-lowee-builder" ] && [ "\$BUILD" != "\$BUILDPATH/high-voltage-ring" ] && [ "\$BUILD" != "\$BUILDPATH/aseprite" ]) || ([ "\$OS" = "Windows" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ])); then
 
         if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$CROSS" = "1" ] || [ "\$WINPORTABLE" = "1" ] || [ "\$LNXOSNAME" = "NixOS" ]; then
 
@@ -5399,7 +5460,7 @@ REPLACEMENT
             7z x data.tar
             sudo cp -rf "usr/lib/i386-linux-gnu/cmake/SDL2_mixer" "/usr/lib/i386-linux-gnu/cmake"
 
-        elif [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}') ]; then
+        elif [ -n "\$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}')" ]; then
 
             sudo mkdir -p "/usr/lib/arm-linux-gnueabihf/cmake/SDL2_mixer"
             curl -LO http://ftp.us.debian.org/debian/pool/main/libs/libsdl2-mixer/libsdl2-mixer-dev_2.6.2+dfsg-2_armhf.deb
@@ -5597,7 +5658,7 @@ REPLACEMENT
 
             \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing DiscordRPC. Please wait..."
             CFLAGS="" cmake -S "\$SRB2BLDROOT/libraries/discord-rpc" -B "\$SRB2BLDROOT/libraries/discord-rpc/build" -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="\$DISCORDRPCPREFIX"
-            cmake --build "\$SRB2BLDROOT/libraries/discord-rpc/build" -j"\$NCPU" --config Release
+            cmake --build "\$SRB2BLDROOT/libraries/discord-rpc/build" -j"\$NCPU" --target discord-rpc --config Release
 
             if [ -d "\$SRB2BLDPREFIX/stow/discord-rpc" ] && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$WINPORTABLE" != "1" ] && [ "\$LNXOSNAME" != "NixOS" ]); then
 
@@ -5953,7 +6014,23 @@ REPLACEMENT
 
               \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Installing libskia. Please wait..."
 
-              if [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]; then
+              if [ "\$ARCH" = "x86_64" ]; then
+
+                  if [ -n "\$ISNET" ]; then
+
+                      LIBSKIAASSETURL=\$(curl -sL "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Linux-Release-x64.zip/ {print \$4}')
+                      if [ "\$(curl -X GET -sLI "\$LIBSKIAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip" 2> /dev/null)" ]; then
+
+                          rm -f "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip"
+                          curl -RL "\$LIBSKIAASSETURL" -o "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip"
+
+                      fi
+
+                  fi
+
+                  7z x -y "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip" -o"/tmp/libskia"
+
+              elif [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]; then
 
                   if [ -n "\$ISNET" ]; then
 
@@ -5969,21 +6046,41 @@ REPLACEMENT
 
                   7z x -y "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x86.zip" -o"/tmp/libskia"
 
-              else
+              elif [ "\$ARCH" = "aarch64" ]; then
 
-                  if [ -n "\$ISNET" ]; then
+                  if [ ! -d "\$SRB2BLDROOT/libraries/libskia" ]; then
 
-                      LIBSKIAASSETURL=\$(curl -sL "https://api.github.com/repos/aseprite/skia/releases/latest" | gawk -F'"' '/browser_download_url.*Skia-Linux-Release-x64.zip/ {print \$4}')
-                      if [ "\$(curl -X GET -sLI "\$LIBSKIAASSETURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print \$NF}' 2> /dev/null | tail -n1)" != "\$(stat -c %s "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip" 2> /dev/null)" ]; then
+                      \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading libskia's source code. Please wait..."
+                      git clone \$GITOPTS https://github.com/aseprite/skia.git --recursive --branch "$LNXSKIAVER" "\$SRB2BLDROOT/libraries/libskia"
 
-                          rm -f "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip"
-                          curl -RL "\$LIBSKIAASSETURL" -o "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip"
+                  else
+
+                      \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating and cleaning up libskia's source code. Please wait..."
+                      git -C "\$SRB2BLDROOT/libraries/libskia" clean -qdffx -e .comrev
+                      git -C "\$SRB2BLDROOT/libraries/libskia" reset -q --hard
+                      git -C "\$SRB2BLDROOT/libraries/libskia" checkout -q main
+
+                      if [ -n "\$ISNET" ]; then
+
+                          git -C "\$SRB2BLDROOT/libraries/libskia" pull --recurse-submodules --rebase --autostash
 
                       fi
 
+                      git -C "\$SRB2BLDROOT/libraries/libskia" checkout -q "$LNXSKIAVER"
+
                   fi
 
-                  7z x -y "\$SRB2BLDROOT/libraries/Skia-Linux-Release-x64.zip" -o"/tmp/libskia"
+                  cd "\$SRB2BLDROOT/libraries/libskia" || exit
+                  python3 "\$SRB2BLDROOT/libraries/libskia/tools/git-sync-deps"
+                  python3 "\$SRB2BLDROOT/libraries/libskia/bin/fetch-ninja"
+                  gn gen "\$SRB2BLDROOT/libraries/libskia/out/Release-arm64" --args="is_debug=false is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false skia_use_freetype=true skia_use_harfbuzz=true skia_pdf_subset_harfbuzz=true skia_use_system_freetype2=false skia_use_system_harfbuzz=false"
+                  ninja -C "\$SRB2BLDROOT/libraries/libskia/out/Release-arm64" skia modules
+
+                  git -C "\$SRB2BLDROOT/libraries/libskia" clean -qdffx -e .comrev
+                  git -C "\$SRB2BLDROOT/libraries/libskia" reset -q --hard
+
+                  COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libskia" rev-parse --short HEAD)
+                  \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libskia/.comrev"
 
               fi
 
@@ -6084,13 +6181,6 @@ REPLACEMENT
             fi
 
             cd "\$BUILD" || exit
-
-            if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
-
-                sh "\$BUILD/setup-deps.sh"
-
-            fi
-
             \$BLDCMD \$CONF
             cmake --build "\$BUILD/build" --config Release -j"\$NCPU"
 
@@ -6125,6 +6215,14 @@ REPLACEMENT
         elif [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-lowee-builder" ] || [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]; then
 
             cd "\$BUILD" || exit
+
+            # Download sse2neon.h header file fror compatibility with ARM devices.
+            if [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]; then
+
+                curl -L https://raw.githubusercontent.com/DLTcollab/sse2neon/refs/tags/v1.5.0/sse2neon.h -o "\$BUILD/Source/Native/sse2neon.h"
+
+            fi
+
             \$BLDCMD \$CONF
 
         elif [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
@@ -6134,10 +6232,7 @@ REPLACEMENT
 
             curl -L https://raw.githubusercontent.com/wine-mirror/wine/master/include/interactioncontext.h -o /usr/x86_64-w64-mingw32/include/interactioncontext.h
 
-            # Required removing carriage returns from code, if we want patches to be applied, due to CRLF endings from Windows host.
-            find "\$BUILD" -name "*.awk" -o -name "*.cmake" -o -name "*.dfa" -exec gawk -i inplace '{gsub("\r",""); print}' {} \;
             \$BLDCMD \$CONF
-
             ninja -C "\$BUILD/build" -k0 -j"\$NCPU" aseprite
             ninja -C "\$BUILD/build" install
             git clone \$GITOPTS https://github.com/DragonDePlatino/Kart-Builder.git "\$BUILD/build/AppDir/usr/share/aseprite/data/extensions/kart-builder"
@@ -6291,6 +6386,7 @@ REPLACEMENT
 
         elif [ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-lowee-builder" ] || [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]; then
 
+            # Name of binary file for Ultimate Zone Builder and its forks.
             if [ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ]; then
 
                 UZBBIN="uzb"
@@ -6309,14 +6405,39 @@ REPLACEMENT
 
             fi
 
+            # Download sse2neon.h header file fror compatibility with ARM devices.
+            if [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]; then
+
+                curl -L https://raw.githubusercontent.com/DLTcollab/sse2neon/refs/tags/v1.5.0/sse2neon.h -o "\$BUILD/Source/Native/sse2neon.h"
+
+            fi
+
             \$BLDCMD \$CONF
 
             if [ "\$APPIMAGE" = "1" ] || [ "\$FLATPAK" = "1" ] || [ "\$CROSS" = "1" ] || [ "\$LNXOSNAME" != "NixOS" ]; then
 
-                mkbundle --fetch-target "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64"
-                cp -f "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/etc/mono/config" "\$BUILD/Build/config"
+                if [ "\$ARCH" = "x86_64" ]; then
+
+                    LNXMONOARCH="x64"
+
+                elif [ "\$ARCH" = "i386" ] || [ "\$ARCH" = "i486" ] || [ "\$ARCH" = "i686" ]; then
+
+                    LNXMONOARCH="x86"
+
+                elif [ "\$ARCH" = "armhf" ]; then
+
+                    LNXMONOARCH="arm"
+
+                elif [ "\$ARCH" = "aarch64" ]; then
+
+                    LNXMONOARCH="arm64"
+
+                fi
+
+                mkbundle --fetch-target "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH"
+                cp -f "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH/etc/mono/config" "\$BUILD/Build/config"
                 gawk -i inplace '{gsub("\\\\\$mono_libdir/",""); print}' "\$BUILD/Build/config"
-                mkbundle --deps --cross "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64" --config "\$BUILD/Build/config" --machine-config "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/etc/mono/4.5/machine.config" -L "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-x64/lib/mono/4.5" -L "\$BUILD/Build" --library /lib/\$ARCH-linux-gnu/libc.so.6 --library /usr/lib/\$ARCH-linux-gnu/libjpeg.so.8 --library /usr/lib/\$ARCH-linux-gnu/libjbig.so.0 --library /usr/lib/\$ARCH-linux-gnu/libtiff.so.5 --library /lib/\$ARCH-linux-gnu/liblzma.so.5 --library /lib/\$ARCH-linux-gnu/libz.so.1 --library /usr/lib/\$ARCH-linux-gnu/libX11.so.6 --library /usr/lib/\$ARCH-linux-gnu/libxcb.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXau.so.6 --library /lib/\$ARCH-linux-gnu/libbsd.so.0 --library /usr/lib/\$ARCH-linux-gnu/libXdmcp.so.6 --library /usr/lib/\$ARCH-linux-gnu/libexif.so.12 --library /usr/lib/libgdiplus.so --library /usr/lib/\$ARCH-linux-gnu/libcairo.so.2 --library /usr/lib/\$ARCH-linux-gnu/libfreetype.so.6 --library /usr/lib/\$ARCH-linux-gnu/libgif.so.7 --library /usr/lib/\$ARCH-linux-gnu/libpng16.so.16 --library /usr/lib/\$ARCH-linux-gnu/libfontconfig.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXext.so.6 --library /usr/lib/\$ARCH-linux-gnu/libXrender.so.1 --library /usr/lib/\$ARCH-linux-gnu/libxcb-render.so.0 --library /usr/lib/\$ARCH-linux-gnu/libxcb-shm.so.0 --library /usr/lib/\$ARCH-linux-gnu/libpixman-1.so.0 --library /lib/\$ARCH-linux-gnu/libbz2.so.1.0 --library /usr/lib/\$ARCH-linux-gnu/libharfbuzz.so.0 --library /lib/\$ARCH-linux-gnu/libexpat.so.1 --library /usr/lib/\$ARCH-linux-gnu/libgraphite2.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXcursor.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXfixes.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXinerama.so.1 --library /lib/\$ARCH-linux-gnu/libkeyutils.so.1 --library /usr/lib/\$ARCH-linux-gnu/libkrb5support.so.0 --library /usr/lib/\$ARCH-linux-gnu/libk5crypto.so.3 --library /usr/lib/\$ARCH-linux-gnu/libkrb5.so.3 --library /usr/lib/\$ARCH-linux-gnu/libgssapi_krb5.so.2 --library /lib/\$ARCH-linux-gnu/libcom_err.so.2 --library /lib/\$ARCH-linux-gnu/libresolv.so.2 --library /usr/lib/libmono-native.so --library /usr/lib/libMonoPosixHelper.so --library /usr/lib/libMonoSupportW.so -o "\$BUILD/build/AppDir/usr/bin/\$UZBBIN.bin" "\$BUILD/Build/Builder.exe"
+                mkbundle --deps --cross "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH" --config "\$BUILD/Build/config" --machine-config "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH/etc/mono/4.5/machine.config" -L "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH/lib/mono/4.5" -L "\$BUILD/Build" --library /lib/\$ARCH-linux-gnu/libc.so.6 --library /usr/lib/\$ARCH-linux-gnu/libjpeg.so.8 --library /usr/lib/\$ARCH-linux-gnu/libjbig.so.0 --library /usr/lib/\$ARCH-linux-gnu/libtiff.so.5 --library /lib/\$ARCH-linux-gnu/liblzma.so.5 --library /lib/\$ARCH-linux-gnu/libz.so.1 --library /usr/lib/\$ARCH-linux-gnu/libX11.so.6 --library /usr/lib/\$ARCH-linux-gnu/libxcb.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXau.so.6 --library /lib/\$ARCH-linux-gnu/libbsd.so.0 --library /usr/lib/\$ARCH-linux-gnu/libXdmcp.so.6 --library /usr/lib/\$ARCH-linux-gnu/libexif.so.12 --library /usr/lib/libgdiplus.so --library /usr/lib/\$ARCH-linux-gnu/libcairo.so.2 --library /usr/lib/\$ARCH-linux-gnu/libfreetype.so.6 --library /usr/lib/\$ARCH-linux-gnu/libgif.so.7 --library /usr/lib/\$ARCH-linux-gnu/libpng16.so.16 --library /usr/lib/\$ARCH-linux-gnu/libfontconfig.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXext.so.6 --library /usr/lib/\$ARCH-linux-gnu/libXrender.so.1 --library /usr/lib/\$ARCH-linux-gnu/libxcb-render.so.0 --library /usr/lib/\$ARCH-linux-gnu/libxcb-shm.so.0 --library /usr/lib/\$ARCH-linux-gnu/libpixman-1.so.0 --library /lib/\$ARCH-linux-gnu/libbz2.so.1.0 --library /usr/lib/\$ARCH-linux-gnu/libharfbuzz.so.0 --library /lib/\$ARCH-linux-gnu/libexpat.so.1 --library /usr/lib/\$ARCH-linux-gnu/libgraphite2.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXcursor.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXfixes.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXinerama.so.1 --library /lib/\$ARCH-linux-gnu/libkeyutils.so.1 --library /usr/lib/\$ARCH-linux-gnu/libkrb5support.so.0 --library /usr/lib/\$ARCH-linux-gnu/libk5crypto.so.3 --library /usr/lib/\$ARCH-linux-gnu/libkrb5.so.3 --library /usr/lib/\$ARCH-linux-gnu/libgssapi_krb5.so.2 --library /lib/\$ARCH-linux-gnu/libcom_err.so.2 --library /lib/\$ARCH-linux-gnu/libresolv.so.2 --library /usr/lib/libmono-native.so --library /usr/lib/libMonoPosixHelper.so --library /usr/lib/libMonoSupportW.so -o "\$BUILD/build/AppDir/usr/bin/\$UZBBIN.bin" "\$BUILD/Build/Builder.exe"
 
             fi
 
@@ -6324,9 +6445,6 @@ REPLACEMENT
             cp -rf /usr/share/icons/Adwaita "\$BUILD/build/AppDir/usr/share/icons"
 
         elif [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
-
-            # Required removing carriage returns from code, if we want patches to be applied, due to CRLF endings from Windows host.
-            find "\$BUILD" -name "*.awk" -o -name "*.cmake" -o -name "*.dfa" -exec gawk -i inplace '{gsub("\r",""); print}' {} \;
 
             \$BLDCMD \$CONF
             ninja -C "\$BUILD/build" -k0 -j"\$NCPU" aseprite
@@ -8014,7 +8132,7 @@ exec "\$HERE/lib/p7zip/7z" "\$@"
 
     # Download appimagetool.
     \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $BUILDNAME's AppImage. Please wait..."
-    ISARM=\$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm/) {print substr(\$0, RSTART, RLENGTH)}')
+    ISARM=\$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}')
     IS64=\$(getconf LONG_BIT)
 
     if [ -z "\$ISNET" ]; then
@@ -9186,7 +9304,11 @@ fi
 # Get app icon.
 if [ "\$ANDROID" != "1" ]; then
 
-    if [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
+    if [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
+
+        convert "\$BUILD/src/win32/srb2tsourdt3rd.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+
+    elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
         if [ -n "\$ISNET" ]; then
 
@@ -10588,23 +10710,37 @@ extractmacosassets() {
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ]; then
 
-            if [ -n "$ISNET" ] && [ "$(curl -X GET -LI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
+            #            if [ -n "$ISNET" ] && [ "$(curl -X GET -LI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/tsourdt3rd.pk3" 2> /dev/null)" ]; then
 
-                rm -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
-                curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" -o "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+            #                rm -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+            #                curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/releases/$(curl -sL "https://git.do.srb2.org/api/v4/projects/435/repository/tree?path=releases" | gawk '{gsub(",","\n"); print}' | gawk -F'releases/' '/path/ {gsub("\"","");gsub(" ","%20"); print $2}' | tail -n1)/tsourdt3rd.pk3" -o "$SRB2BLDROOT/assets/tsourdt3rd.pk3"
+
+            #            fi
+
+            #            cp -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3" "$BUILD/assets/installer"
+
+            #            if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/jukebox.pk3" 2> /dev/null)" ]; then
+
+            #                rm -f "$SRB2BLDROOT/assets/jukebox.pk3"
+            #                curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" -o "$SRB2BLDROOT/assets/jukebox.pk3"
+
+            #            fi
+
+            #            cp -f "$SRB2BLDROOT/assets/jukebox.pk3" "$BUILD/assets/installer"
+
+            if [ -n "$ISNET" ]; then
+
+                SRB2ASSETETAG=$(curl -X GET -sLI "$SRB2TSOURDT3RDASSETURL" | gawk -F'etag: ' '{IGNORECASE=1} /etag/ {gsub("\r|\"",""); print $NF}' 2> /dev/null | tail -n1)
+                if [ "$SRB2ASSETETAG" != "$(7z l "$SRB2BLDROOT/assets/SRB2TSoURDt3RD.7z" 2> /dev/null | gawk '/Comment/ {print $NF}')" ]; then
+
+                    rm -f "$SRB2BLDROOT/assets/SRB2TSoURDt3RD.7z"
+                    curl -RL "$SRB2TSOURDT3RDASSETURL" -o "$SRB2BLDROOT/assets/SRB2TSoURDt3RD.7z"
+
+                fi
 
             fi
 
-            cp -f "$SRB2BLDROOT/assets/tsourdt3rd.pk3" "$BUILD/assets/installer"
-
-            if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/jukebox.pk3" 2> /dev/null)" ]; then
-
-                rm -f "$SRB2BLDROOT/assets/jukebox.pk3"
-                curl -RL "https://git.do.srb2.org/StarManiaKG/tsourdt3rd-assets/-/raw/main/extras/jukebox.pk3" -o "$SRB2BLDROOT/assets/jukebox.pk3"
-
-            fi
-
-            cp -f "$SRB2BLDROOT/assets/jukebox.pk3" "$BUILD/assets/installer"
+            7z e -y "$SRB2BLDROOT/assets/SRB2TSoURDt3RD.7z" "*/*.pk3" -o"$BUILD/assets/installer"
 
         elif [ "$BUILD" = "$BUILDPATH/srb2-ggj" ]; then
 
@@ -12828,7 +12964,6 @@ installtolinux() {
         if [ "$LNXOSNAME" != "NixOS" ]; then
 
             $SUDO install -Dm755 $(find "$BUILD/build/AppDir/usr/bin" -type f 2> /dev/null | head -n1) "$SRB2BINARYLNXPATH"
-            $SUDO install -Dm755 $(find "$BUILD/build/bin" -type f -name "*.debug" 2> /dev/null | head -n1) "$SRB2BINARYDEBUGLNXPATH"
             $SUDO install -d "$SRB2ASSETLNXPATH"
             $SUDO cp -rf "$BUILD/build/AppDir/usr/games/$ASSETAPPDIR"/* "$SRB2ASSETLNXPATH"
             $SUDO install -Dm644 "$BUILD/build/AppDir/usr/share/applications/"* -t "$SRB2BLDPREFIX/share/applications"
@@ -15086,7 +15221,7 @@ in_block {
     if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
 
         # Renamed target of dir to match SRB2.
-        gawk -i inplace '{gsub("SRB2SDL2","SRB2"); print}' "$BUILD/assets/CMakeLists.txt" "$BUILD/src/dedicated/CMakeLists.txt"
+        gawk -i inplace '{gsub("SRB2SDL2","SRB2"); print}' "$BUILD/src/dedicated/CMakeLists.txt"
 
         # Corrected path to b_bot.h.
         gawk -i inplace '{gsub("#include \"b_bot.h\"","#include \"../b_bot.h\""); print}' "$BUILD/src/netcode/d_netcmd.c"
@@ -15103,6 +15238,9 @@ in_block {
 
         done
 
+        # Patching to remove uncommitted changes message from main menu.
+        gawk -i inplace '{gsub("UNCOMMITTED CHANGES!!!",""); print}' "$BUILD/src/m_menu.c"
+
     # Patching SRB2 Uncapped Plus' source code to fix error with implicit declaration of function R_ResetFirstLerp is invalid in C99 [-Werror,-Wimplicit-function-declaration]. Thanks Lach for help with this.
     elif [ "$BUILD" = "$BUILDPATH/srb2-uncapped-plus" ]; then
 
@@ -15113,6 +15251,21 @@ in_block {
         # Adding missing files to CMakeLists.txt due to linking errors.
         gawk -i inplace '{gsub("p_floor.c","p_floor.c\n\tp_haptic.c"); print}' "$BUILD/src/CMakeLists.txt"
         gawk -i inplace '{gsub("ogl_sdl.c","ogl_sdl.c\n\ti_gamepad.c"); print}' "$BUILD/src/sdl/CMakeLists.txt"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ]; then
+
+        # Remove non-existing subdirectory.
+        gawk -i inplace '!/add_subdirectory\(stb\)/' "$BUILD/thirdparty/CMakeLists.txt"
+
+        # Fixing linking errors rearding DISCORD_RequestSFX function.
+        gawk -i inplace '{gsub("lua_pushinteger\\(L, DISCORD_RequestSFX\\);","#ifdef HAVE_DISCORDRPC\n\t\t\tlua_pushinteger(L, DISCORD_RequestSFX);\n\t\t\t#endif"); print}' "$BUILD/src/STAR/lua/smkg-lu_script.c"
+        gawk -i inplace '{gsub("DISCORD_RequestSFX = \\(INT32\\)luaL_checkinteger\\(L, 2\\);","#ifdef HAVE_DISCORDRPC\n\t\t\tDISCORD_RequestSFX = (INT32)luaL_checkinteger(L, 2);\n\t\t\t#endif"); print}' "$BUILD/src/STAR/lua/smkg-lu_script.c"
+
+        # Fixing "error: field 'ip4' has incomplete type" by adding system's netinet/in.h header file to build's src/netcode/i_net.h.
+        gawk -i inplace '{gsub("#include \"../command.h\"","#include \"../command.h\"\n#ifndef _WIN32\n#include <netinet/in.h>\n#endif"); print}' "$BUILD/src/netcode/i_net.h"
+
+        # Fix for "error: 'MUS_OPUS' undeclared".
+        gawk -i inplace 'BEGIN{RS=""; ORS="\n\n"} {gsub("Mix_Init\\(MIX_INIT_FLAC\\|MIX_INIT_MOD\\|MIX_INIT_MP3\\|MIX_INIT_OGG\\|MIX_INIT_MID\\|MIX_INIT_OPUS\\);","int init_flags = MIX_INIT_FLAC|MIX_INIT_MOD|MIX_INIT_MP3|MIX_INIT_OGG|MIX_INIT_MID;\n#ifdef MIX_INIT_OPUS\ninit_flags |= MIX_INIT_OPUS;\n#endif\nMix_Init(init_flags);"); gsub("case MUS_MP3:|case MUS_MP3_MAD:|return MU_MP3;",""); gsub("case MUS_OPUS:","case MU_OPUS:"); print}' "$BUILD/src/sdl/mixer_sound.c"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-edit" ]; then
 
@@ -15245,12 +15398,12 @@ in_block {
         # Replacement for "models" to "mdls" in assets/CMakeLists.txt.
         gawk -i inplace '{gsub("models","mdls"); print}' "$BUILD/assets/CMakeLists.txt"
 
-        # Patching BlanKart to remove uncommitted changes message from main menu.
+        # Patching to remove uncommitted changes message from main menu.
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/m_menu.c"
 
     elif [ "$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
 
-        # Patching SRB2 Ring Racers' builds to remove uncommitted changes message from main menu.
+        # Patching Ring Racers' builds to remove uncommitted changes message from main menu.
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/f_finale.c"
         gawk -i inplace '{gsub("!.*UNCOMMITTED CHANGES.*!",""); print}' "$BUILD/src/d_netcmd.c"
 
@@ -16709,6 +16862,10 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
 
             makeicns -in "$BUILD/src/win32/srb2classic.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
 
+        elif [ "$BUILD" = "$BUILDPATH/srb2-tsourdt3rd" ]; then
+
+            makeicns -in "$BUILD/src/win32/srb2tsourdt3rd.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
+
         else
 
             makeicns -in "$BUILD/src/win32/Srb2win.ico" -64 -out "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources/Srb2mac.icns" 2> /dev/null
@@ -17178,17 +17335,17 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         if [ "$BUILD" = "$BUILDPATH/srb2-thokker" ]; then
 
             cmake --install "$BUILD/build" --prefix "$BUILD/build/package"
-            mkdir -p "$BUILD/build/package/Sonic Robo Blast 2 Thokker.app/Contents/Frameworks"
-            cp -Lrf $(otool -L "$BUILD/build/package/Sonic Robo Blast 2 Thokker.app/Contents/MacOS/Sonic Robo Blast 2 Thokker" | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ {print $1}') "$BUILD/build/package/Sonic Robo Blast 2 Thokker.app/Contents/Frameworks"
-            cp -Lrf $(otool -L $(otool -L "$BUILD/build/package/Sonic Robo Blast 2 Thokker.app/Contents/MacOS/Sonic Robo Blast 2 Thokker" | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ {print $1}') | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ && !/:/ {print $1}' | sort -u) "$BUILD/build/package/Sonic Robo Blast 2 Thokker.app/Contents/Frameworks"
+            mkdir -p "$BUILD/build/package/$BUILDNAME.app/Contents/Frameworks"
+            cp -Lrf $(otool -L "$BUILD/build/package/$BUILDNAME.app/Contents/MacOS/$BUILDNAME" | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ {print $1}') "$BUILD/build/package/$BUILDNAME.app/Contents/Frameworks"
+            cp -Lrf $(otool -L $(otool -L "$BUILD/build/package/$BUILDNAME.app/Contents/MacOS/$BUILDNAME" | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ {print $1}') | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ && !/:/ {print $1}' | sort -u) "$BUILD/build/package/$BUILDNAME.app/Contents/Frameworks"
 
             cat << THOKKER | tee "$BUILD/build/package/srb2thk" > /dev/null
 #!/bin/sh
 
-export DYLD_LIBRARY_PATH="/Applications/Sonic Robo Blast 2 Thokker.app/Contents/Frameworks"
-export SRB2WADDIR="/Applications/Sonic Robo Blast 2 Thokker.app/Contents/Resources"
+export DYLD_LIBRARY_PATH="/Applications/$BUILDNAME.app/Contents/Frameworks"
+export SRB2WADDIR="/Applications/$BUILDNAME.app/Contents/Resources"
 
-"/Applications/Sonic Robo Blast 2 Thokker.app/Contents/MacOS/Sonic Robo Blast 2 Thokker"
+"/Applications/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
 THOKKER
 
@@ -17277,6 +17434,12 @@ README
 
         else
 
+            if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
+
+                cp -f "$BUILD/assets/installer/"*.pk3 "$BUILD/build/bin/$BUILDNAME.app/Contents/Resources"
+
+            fi
+
             cmake --build "$BUILD/build" -t package -j"$NCPU"
 
         fi
@@ -17346,21 +17509,25 @@ README
 
             sudo -E cmake --install "$BUILD/build"
 
-            if [ "$BUILD" = "$BUILDPATH/srb2-thokker" ]; then
+            if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
 
-                sudo mkdir -p "$SRB2BLDPREFIX/Sonic Robo Blast 2 Thokker.app/Contents/Frameworks"
+                sudo cp -f "$BUILD/assets/installer/"*.pk3 "$SRB2BLDPREFIX/$BUILDNAME.app/Contents/Resources"
 
-                sudo cp -Lrf $(otool -L "$SRB2BLDPREFIX/Sonic Robo Blast 2 Thokker.app/Contents/MacOS/Sonic Robo Blast 2 Thokker" | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ {print $1}') "$SRB2BLDPREFIX/Sonic Robo Blast 2 Thokker.app/Contents/Frameworks"
+            elif [ "$BUILD" = "$BUILDPATH/srb2-thokker" ]; then
 
-                sudo cp -Lrf $(otool -L $(otool -L "$SRB2BLDPREFIX/Sonic Robo Blast 2 Thokker.app/Contents/MacOS/Sonic Robo Blast 2 Thokker" | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ {print $1}') | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ && !/:/ {print $1}' | sort -u) "$SRB2BLDPREFIX/Sonic Robo Blast 2 Thokker.app/Contents/Frameworks"
+                sudo mkdir -p "$SRB2BLDPREFIX/$BUILDNAME.app/Contents/Frameworks"
+
+                sudo cp -Lrf $(otool -L "$SRB2BLDPREFIX/$BUILDNAME.app/Contents/MacOS/$BUILDNAME" | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ {print $1}') "$SRB2BLDPREFIX/$BUILDNAME.app/Contents/Frameworks"
+
+                sudo cp -Lrf $(otool -L $(otool -L "$SRB2BLDPREFIX/$BUILDNAME.app/Contents/MacOS/$BUILDNAME" | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ {print $1}') | gawk '/'$($PRINTF "%s\n" "$SRB2BLDPREFIX" | gawk '{gsub("/","\\/"); print}')'/ && /.dylib/ && !/:/ {print $1}' | sort -u) "$SRB2BLDPREFIX/$BUILDNAME.app/Contents/Frameworks"
 
                 cat << THOKKER | sudo tee "$SRB2BLDPREFIX/srb2thk" > /dev/null
 #!/bin/sh
 
-export DYLD_LIBRARY_PATH="$SRB2BLDPREFIX/Sonic Robo Blast 2 Thokker.app/Contents/Frameworks"
-export SRB2WADDIR="$SRB2BLDPREFIX/Sonic Robo Blast 2 Thokker.app/Contents/Resources"
+export DYLD_LIBRARY_PATH="$SRB2BLDPREFIX/$BUILDNAME.app/Contents/Frameworks"
+export SRB2WADDIR="$SRB2BLDPREFIX/$BUILDNAME.app/Contents/Resources"
 
-"$SRB2BLDPREFIX/Sonic Robo Blast 2 Thokker.app/Contents/MacOS/Sonic Robo Blast 2 Thokker"
+"$SRB2BLDPREFIX/$BUILDNAME.app/Contents/MacOS/$BUILDNAME"
 
 THOKKER
 
