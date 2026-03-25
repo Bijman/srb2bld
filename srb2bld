@@ -283,6 +283,7 @@ LNXOPENVRVER="1.10.30"
 LNXLZFVER="master"
 LNXWXGTKVER="3.2.8"
 LNXWEBPVER="main"
+LNXGDIPLUSVER="main"
 LNXZDBSPVER="master"
 LNXMONOVER="6.6.0"
 LNXMONOUBUVER="18.04"
@@ -305,7 +306,7 @@ LNXVCPKGVER="master"
 if [ "$OS" = "Darwin" ]; then
 
     MACOSVER="10.9"
-    MACOSVERSLADE="11"
+    MACOSSLADEVER="11"
     MACOSPNGVER="1.6.41"
     MACOSOGGVER="1.3.5"
     MACOSVORBISVER="1.3.7"
@@ -319,7 +320,7 @@ if [ "$OS" = "Darwin" ]; then
     MACOSGMEVER="0.6.2"
     MACOSSNDFILEVER="master"
     MACOSFLUIDSYNTHVER="master"
-    MACOSOPENALVER="master"
+    MACOSOPENALVER="1.25.1"
     MACOSDISCORDRPCVER="master"
     MACOSOPENVRVER="1.10.30"
     MACOSMINIUPNPCVER="master"
@@ -734,7 +735,7 @@ buildvar() {
         BUILDNAME="Sonic Robo Blast 2 v2.1 Legacy"
         GITDEFVER="master"
         GITVER="$GITDEFVER"
-        GITURL="https://github.com/P-AS/srb2-legacy.git"
+        GITURL="https://github.com/srb2-preservation/srb2-legacy.git"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-fusion-advance" ]; then
 
@@ -3546,15 +3547,6 @@ EOF
 
         fi
 
-#    # Download and copy some missing dll libraries from NuGet for Ultimate GKSZ Builder.
-#    elif [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ]; then
-#
-#        curl -L https://www.nuget.org/api/v2/package/SharpCompress/0.20.0 -o "\$BUILD/SharpCompress.nupkg"
-#        curl -L https://www.nuget.org/api/v2/package/System.Memory/4.5.5 -o "\$BUILD/System-Memory.nupkg"
-#        7z e -y "\$BUILD/SharpCompress.nupkg" "lib/net45/SharpCompress.dll" -o"\$BUILD/Build"
-#        7z e -y "\$BUILD/System-Memory.nupkg" "lib/net461/System.Memory.dll" -o"\$BUILD/Build"
-#        mkdir -p "\$BUILD/Build/Plugins/Dependencies"
-
     fi
 
 if [ "\$ANDROID" = "1" ]; then
@@ -3745,15 +3737,16 @@ else
     fi
 
     # Removing compilation flag '-mno-ms-bitfields' from src/Makefile due to "gcc: error: unrecognized command-line option '-mno-ms-bitfields'" for ARM devices.
-    if [ -f "\$BUILD/src/Makefile" ] && [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}') ] && [ "\$(gawk 'match(\$0, /-mno-ms-bitfields/) {print substr(\$0, RSTART, RLENGTH)}' "\$BUILD/src/CMakeLists.txt" 2> /dev/null | head -n1)" = "-mno-ms-bitfields" ]; then
+    if [ -f "\$BUILD/src/Makefile" ] && [ -n "\$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(gawk 'match(\$0, /-mno-ms-bitfields/) {print substr(\$0, RSTART, RLENGTH)}' "\$BUILD/src/CMakeLists.txt" 2> /dev/null | head -n1)" = "-mno-ms-bitfields" ]; then
 
         gawk -i inplace '/ifneq \\(,\\\$\\(filter \\\$\\(CC\\) \\\$\\(CXX\\),gcc g\\+\\+\\)\\)/ {suppress=1} /^\$/ {suppress=0} !suppress' "\$BUILD/src/Makefile"
 
     fi
 
     # Removing compilation flag '-mno-ms-bitfields' from src/CMakeLists.txt due to "gcc: error: unrecognized command-line option '-mno-ms-bitfields'" for ARM devices.
-    if [ -f "\$BUILD/src/CMakeLists.txt" ] && [ -n \$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}') ] && [ "\$(gawk 'match(\$0, /-mno-ms-bitfields/) {print substr(\$0, RSTART, RLENGTH)}' "\$BUILD/src/CMakeLists.txt" 2> /dev/null | head -n1)" = "-mno-ms-bitfields" ]; then
-        gawk -i inplace '/if \\("\\\${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "\\\${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"\)/ {suppress=1} /^\$/ {suppress=0} !suppress' "\$BUILD/src/CMakeLists.txt"
+    if [ -f "\$BUILD/src/CMakeLists.txt" ] && [ -n "\$(\$PRINTF "%s\n" "\$ARCH" | gawk 'match(\$0, /arm|aarch64/) {print substr(\$0, RSTART, RLENGTH)}')" ] && [ "\$(gawk 'match(\$0, /-mno-ms-bitfields/) {print substr(\$0, RSTART, RLENGTH)}' "\$BUILD/src/CMakeLists.txt" 2> /dev/null | head -n1)" = "-mno-ms-bitfields" ]; then
+
+        gawk -i inplace '/# Compatibility flag with later versions of GCC/ {suppress=1} /^\$/ {suppress=0} !suppress' "\$BUILD/src/CMakeLists.txt"
 
     fi
 
@@ -4563,7 +4556,7 @@ REPLACEMENT
 
         fi
 
-    # Adding the System.Numerics reference to BuilderMono.csproj file to fix "error CS0246: The type or namespace name 'Matrix4x4' could not be found".
+    # Adding the System.Numerics line to BuilderMono.csproj file to fix - "error CS0246: The type or namespace name 'Matrix4x4' could not be found".
     elif [ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ]; then
 
         gawk -i inplace '{gsub("<Reference Include=\"System.Data\" />","<Reference Include=\"System.Numerics\" />\n\t<Reference Include=\"System.Data\" />"); print}' "\$BUILD/Source/Core/BuilderMono.csproj"
@@ -4581,11 +4574,15 @@ REPLACEMENT
 
     elif [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ]; then
 
-        # Remove duplicated AssemblyVersion attribute.
-#        gawk -i inplace '!/AssemblyVersion\(/ {print}' "\$BUILD/Source/Core/Properties/AssemblyInfo.cs"
-
         # Remove cleaning Build directory function when running make command to keep copied missing libraries SharpCompress and System.Memory.
         gawk -i inplace '/<Target Name="CleanOutputDirectory" BeforeTargets="BeforeBuild">/ {suppress=1} /<Target Name="CopyAssetsToBuildFolder" AfterTargets="AfterBuild">/ {suppress=0} !suppress' "\$BUILD/Source/Core/BuilderMono.csproj"
+
+        # Fix "error CS0102: The type 'MapInfo' already contains a definition for 'LightAttenuationMode'" by removing duplicated line.
+        gawk -i inplace '/private string lightAttenuationMode;/ {if(!found){found=1;next}}{print}' "\$BUILD/Source/Core/GZBuilder/Data/MapInfo.cs"
+        gawk -i inplace '/public string LightAttenuationMode { get { return lightAttenuationMode; } internal set { lightAttenuationMode = value; isdefined = true; } }/ {if(!found){found=1;next}}{print}' "\$BUILD/Source/Core/GZBuilder/Data/MapInfo.cs"
+
+        # Fix "error CS0246: The type or namespace name 'MouseEventArgs' could not be found" .
+        gawk -i inplace '{gsub("using CodeImp.DoomBuilder.Map;","using CodeImp.DoomBuilder.Map;\nusing System.Windows.Forms;"); print}' "\$BUILD/Source/Plugins/BuilderModes/VisualModes/VisualSidedefSlope.cs"
 
     # Required removing carriage returns from code, if we want patches to be applied, due to CRLF endings from Windows host.
     elif [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
@@ -5351,9 +5348,9 @@ REPLACEMENT
     fi
 
     # Download libSDL's source code, build and install it.
-    if [ "\$OS" = "Linux" ] && [ "\$LIBC" != "musl" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ]); then
+    if [ "\$OS" = "Linux" ] && [ "\$LIBC" != "musl" ] && ([ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-kart-saturn" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ] || [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ] || [ "\$(dirname \$BUILD)" = "\$BUILDPATH/srb2-custom" ]); then
 
-        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
 
             LNXSDLVER="$LNXSDL3VER"
 
@@ -5395,7 +5392,7 @@ REPLACEMENT
             \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing libSDL. Please wait..."
             cd "\$SRB2BLDROOT/libraries/libsdl" || exit
 
-            if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
+            if [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ] || [ "\$BUILD" = "\$BUILDPATH/blankart" ]; then
 
                 CFLAGS="" cmake -S "\$SRB2BLDROOT/libraries/libsdl" -B "\$SRB2BLDROOT/libraries/libsdl/build" -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr"
                 cmake --build "\$SRB2BLDROOT/libraries/libsdl/build" -j"\$NCPU" --config Release
@@ -6101,6 +6098,47 @@ REPLACEMENT
 
     fi
 
+    # Download libgdiplus' source code, build and install it.
+    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-lowee-builder" ] || [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]); then
+
+        sudo dpkg --remove --force-depends libgdiplus
+
+        if [ ! -d "\$SRB2BLDROOT/libraries/libgdiplus/.git" ]; then
+
+            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Downloading libgdiplus' source code. Please wait..."
+            git clone \$GITOPTS https://gitlab.winehq.org/mono/libgdiplus.git --recursive --branch "$LNXGDIPLUSVER" "\$SRB2BLDROOT/libraries/libgdiplus"
+
+        else
+
+            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Updating and cleaning up libgdiplus' source code. Please wait..."
+            git -C "\$SRB2BLDROOT/libraries/libgdiplus" clean -qdffx -e .comrev
+            git -C "\$SRB2BLDROOT/libraries/libgdiplus" reset -q --hard
+            git -C "\$SRB2BLDROOT/libraries/libgdiplus" checkout -q main
+
+            if [ -n "\$ISNET" ]; then
+
+                git -C "\$SRB2BLDROOT/libraries/libgdiplus" pull --recurse-submodules --rebase --autostash
+
+            fi
+
+            git -C "\$SRB2BLDROOT/libraries/libgdiplus" checkout -q "$LNXGDIPLUSVER"
+
+        fi
+
+        \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing libgdiplus. Please wait..."
+        cd "\$SRB2BLDROOT/libraries/libgdiplus" || exit
+        CFLAGS="" CC=""\$CCACHE_BIN_PATH"\$GCCVER" CXX=""\$CCACHE_BIN_PATH"\$GXXVER" "\$SRB2BLDROOT/libraries/libgdiplus/autogen.sh" --prefix "/usr"
+        make -k -j"\$NCPU" -C "\$SRB2BLDROOT/libraries/libgdiplus"
+        sudo make -C "\$SRB2BLDROOT/libraries/libgdiplus" install
+
+        git -C "\$SRB2BLDROOT/libraries/libgdiplus" clean -qdffx -e .comrev
+        git -C "\$SRB2BLDROOT/libraries/libgdiplus" reset -q --hard
+
+        COMREV=\$(git -C "\$SRB2BLDROOT/libraries/libgdiplus" rev-parse --short HEAD)
+        \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/libgdiplus/.comrev"
+
+    fi
+
     # Download zdbsp's source code, build and install it.
     if [ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-lowee-builder" ] || [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]; then
 
@@ -6450,7 +6488,53 @@ REPLACEMENT
                 mkbundle --fetch-target "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH"
                 cp -f "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH/etc/mono/config" "\$BUILD/Build/config"
                 gawk -i inplace '{gsub("\\\\\$mono_libdir/",""); print}' "\$BUILD/Build/config"
-                mkbundle --deps --cross "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH" --config "\$BUILD/Build/config" --machine-config "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH/etc/mono/4.5/machine.config" -L "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH/lib/mono/4.5" -L "\$BUILD/Build" --library /lib/\$ARCH-linux-gnu/libc.so.6 --library /usr/lib/\$ARCH-linux-gnu/libjpeg.so.8 --library /usr/lib/\$ARCH-linux-gnu/libjbig.so.0 --library /usr/lib/\$ARCH-linux-gnu/libtiff.so.5 --library /lib/\$ARCH-linux-gnu/liblzma.so.5 --library /lib/\$ARCH-linux-gnu/libz.so.1 --library /usr/lib/\$ARCH-linux-gnu/libX11.so.6 --library /usr/lib/\$ARCH-linux-gnu/libxcb.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXau.so.6 --library /lib/\$ARCH-linux-gnu/libbsd.so.0 --library /usr/lib/\$ARCH-linux-gnu/libXdmcp.so.6 --library /usr/lib/\$ARCH-linux-gnu/libexif.so.12 --library /usr/lib/libgdiplus.so --library /usr/lib/\$ARCH-linux-gnu/libcairo.so.2 --library /usr/lib/\$ARCH-linux-gnu/libfreetype.so.6 --library /usr/lib/\$ARCH-linux-gnu/libgif.so.7 --library /usr/lib/\$ARCH-linux-gnu/libpng16.so.16 --library /usr/lib/\$ARCH-linux-gnu/libfontconfig.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXext.so.6 --library /usr/lib/\$ARCH-linux-gnu/libXrender.so.1 --library /usr/lib/\$ARCH-linux-gnu/libxcb-render.so.0 --library /usr/lib/\$ARCH-linux-gnu/libxcb-shm.so.0 --library /usr/lib/\$ARCH-linux-gnu/libpixman-1.so.0 --library /lib/\$ARCH-linux-gnu/libbz2.so.1.0 --library /usr/lib/\$ARCH-linux-gnu/libharfbuzz.so.0 --library /lib/\$ARCH-linux-gnu/libexpat.so.1 --library /usr/lib/\$ARCH-linux-gnu/libgraphite2.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXcursor.so.1 --library /usr/lib/\$ARCH-linux-gnu/libXfixes.so.3 --library /usr/lib/\$ARCH-linux-gnu/libXinerama.so.1 --library /lib/\$ARCH-linux-gnu/libkeyutils.so.1 --library /usr/lib/\$ARCH-linux-gnu/libkrb5support.so.0 --library /usr/lib/\$ARCH-linux-gnu/libk5crypto.so.3 --library /usr/lib/\$ARCH-linux-gnu/libkrb5.so.3 --library /usr/lib/\$ARCH-linux-gnu/libgssapi_krb5.so.2 --library /lib/\$ARCH-linux-gnu/libcom_err.so.2 --library /lib/\$ARCH-linux-gnu/libresolv.so.2 --library /usr/lib/libmono-native.so --library /usr/lib/libMonoPosixHelper.so --library /usr/lib/libMonoSupportW.so -o "\$BUILD/build/AppDir/usr/bin/\$UZBBIN.bin" "\$BUILD/Build/Builder.exe"
+
+                mkbundle --deps --cross "mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH" --config "\$BUILD/Build/config" --machine-config "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH/etc/mono/4.5/machine.config" -L "\$HOME/.mono/targets/mono-$LNXMONOVER-ubuntu-$LNXMONOUBUVER-\$LNXMONOARCH/lib/mono/4.5" -L "\$BUILD/Build" \
+                --library /lib/x86_64-linux-gnu/libc.so.6 \
+                --library /lib/x86_64-linux-gnu/libbsd.so.0 \
+                --library /lib/x86_64-linux-gnu/libpcre.so.3 \
+                --library /lib/x86_64-linux-gnu/libselinux.so.1 \
+                --library /lib/x86_64-linux-gnu/libresolv.so.2 \
+                --library /lib/x86_64-linux-gnu/libblkid.so.1 \
+                --library /lib/x86_64-linux-gnu/libmount.so.1 \
+                --library /lib/x86_64-linux-gnu/libz.so.1 \
+                --library /lib/x86_64-linux-gnu/liblzma.so.5 \
+                --library /lib/x86_64-linux-gnu/libexpat.so.1 \
+                --library /usr/lib/x86_64-linux-gnu/libffi.so.6 \
+                --library /usr/lib/x86_64-linux-gnu/libjbig.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libpng16.so.16 \
+                --library /usr/lib/x86_64-linux-gnu/libjpeg.so.8 \
+                --library /usr/lib/x86_64-linux-gnu/libtiff.so.5 \
+                --library /usr/lib/x86_64-linux-gnu/libgif.so.7 \
+                --library /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libgraphite2.so.3 \
+                --library /usr/lib/x86_64-linux-gnu/libXau.so.6 \
+                --library /usr/lib/x86_64-linux-gnu/libXdmcp.so.6 \
+                --library /usr/lib/x86_64-linux-gnu/libxcb.so.1 \
+                --library /usr/lib/x86_64-linux-gnu/libxcb-shm.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libxcb-render.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libX11.so.6 \
+                --library /usr/lib/x86_64-linux-gnu/libXext.so.6 \
+                --library /usr/lib/x86_64-linux-gnu/libXrender.so.1 \
+                --library /usr/lib/x86_64-linux-gnu/libpixman-1.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libcairo.so.2 \
+                --library /usr/lib/x86_64-linux-gnu/libexif.so.12 \
+                --library /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libgio-2.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libdatrie.so.1 \
+                --library /usr/lib/x86_64-linux-gnu/libthai.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libpango-1.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libatk-1.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libgdk-x11-2.0.so.0 \
+                --library /usr/lib/x86_64-linux-gnu/libgtk-x11-2.0.so.0 \
+                --library /usr/lib/libgdiplus.so \
+                --library /usr/lib/libmono-native.so \
+                --library /usr/lib/libMonoPosixHelper.so \
+                --library /usr/lib/libMonoSupportW.so \
+                -o "\$BUILD/build/AppDir/usr/bin/\$UZBBIN.bin" "\$BUILD/Build/Builder.exe"
 
             fi
 
@@ -7963,7 +8047,7 @@ export \$APPIMAGEWADDIR="\\\$HERE/usr/games/\$ASSETAPPDIR"
 export SDL_SOUNDFONTS="\\\$SDL_SOUNDFONTS"
 export SDL_FORCE_SOUNDFONTS=1
 
-exec "\\\$HERE/usr/bin/\\\$(ls \\\$HERE/usr/bin)" "\\\$@"
+exec "\\\$HERE/usr/bin/\\\$(ls "\\\$HERE/usr/bin")" "\\\$@"
 APPRUNBIN
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.0" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-cb" ] || [ "\$BUILD" = "\$BUILDPATH/xsrb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-sf94-serv" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-riders" ] || [ "\$BUILD" = "\$BUILDPATH/super-srb2-kart-z" ] || [ "\$BUILD" = "\$BUILDPATH/sbb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-final-demo" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-1095" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-jte" ] || [ "\$BUILD" = "\$BUILDPATH/shufflarb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-live" ] || [ "\$BUILD" = "\$BUILDPATH/ssbss" ]; then
@@ -7973,9 +8057,9 @@ export SRB2WADDIR="\$HERE/usr/games/SRB2"
 
 if [ "\$(gawk -F'=' '/^NAME=/ {gsub("\"",""); print \$NF}' /etc/os-release)" = "NixOS" ]; then
 
-    if [ ! -f "\$(patchelf --print-interpreter "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)")" ] && [ "\$(patchelf --print-interpreter "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)")" != "\$(find /lib/ld-linux.so.* 2> /dev/null)" ]; then
+    if [ ! -f "\$(patchelf --print-interpreter "\$HERE/usr/bin/\$(ls "\$HERE/usr/bin")")" ] && [ "\$(patchelf --print-interpreter "\$HERE/usr/bin/\$(ls "\$HERE/usr/bin")")" != "\$(find /lib/ld-linux.so.* 2> /dev/null)" ]; then
 
-        patchelf --set-interpreter "\$(find /nix/store -name ld-linux.so.* -type f 2> /dev/null | sort -V | tail -n1)" "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)"
+        patchelf --set-interpreter "\$(find /nix/store -name ld-linux.so.* -type f 2> /dev/null | sort -V | tail -n1)" "\$HERE/usr/bin/\$(ls "\$HERE/usr/bin")"
 
     fi
 
@@ -7987,7 +8071,7 @@ fi
 
 cd "\$HERE"
 
-exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" "\$@"
+exec "\$HERE/usr/bin/\$(ls "\$HERE/usr/bin")" "\$@"
 APPRUNBIN
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-loz" ]; then
@@ -8009,7 +8093,7 @@ fi
 
 cd "\$HERE/usr/games/SRB2"
 
-exec "\$HERE/usr/bin/\$(ls \$HERE/usr/bin)" -opengl "\$@"
+exec "\$HERE/usr/bin/\$(ls "\$HERE/usr/bin")" -opengl "\$@"
 APPRUNBIN
 
     elif [ "\$BUILD" = "\$BUILDPATH/newmillennium" ]; then
@@ -9319,7 +9403,7 @@ if [ "\$ANDROID" != "1" ]; then
 
     if [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ]; then
 
-        convert "\$BUILD/src/win32/srb2tsourdt3rd.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/src/win32/srb2tsourdt3rd.ico[5]" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
     elif [ "\$BUILD" = "\$BUILDPATH/wadcli" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker" ] || [ "\$BUILD" = "\$BUILDPATH/neptunefm" ] || [ "\$BUILD" = "\$BUILDPATH/kartmaker-ring-racers" ] || [ "\$BUILD" = "\$BUILDPATH/followermaker" ]; then
 
@@ -9337,17 +9421,17 @@ if [ "\$ANDROID" != "1" ]; then
 
     elif [ "\$BUILD" = "\$BUILDPATH/slade" ]; then
 
-        convert "\$BUILD/dist/res/slade.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/dist/res/slade.ico" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
         cp -f "\$BUILD/dist/res/slade.ico" "\$BUILD/build/icon.ico"
 
     elif [ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-lowee-builder" ]; then
 
-        convert "\$BUILD/Setup/UZB-small.bmp" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/Setup/UZB-small.bmp" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
         convert "\$BUILD/Setup/UZB-small.bmp" -alpha on -background none "\$BUILD/build/icon.ico"
 
     elif [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]; then
 
-        convert "\$BUILD/Setup/HVR-small.bmp" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/Setup/HVR-small.bmp" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
         convert "\$BUILD/Setup/HVR-small.bmp" -alpha on -background none "\$BUILD/build/icon.ico"
 
     elif [ "\$BUILD" = "\$BUILDPATH/aseprite" ]; then
@@ -9357,29 +9441,29 @@ if [ "\$ANDROID" != "1" ]; then
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-classic" ]; then
 
-        convert "\$BUILD/src/win32/srb2classic.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/src/win32/srb2classic.ico[5]" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-2.2-beta6" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-2.1-legacy" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-fusion-advance" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-thokker" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-top-down" ] || [ "\$BUILD" = "\$BUILDPATH/sonic-smash-brawl" ]; then
 
-        convert "\$BUILD/src/win32/Srb2win.ico[8]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/src/win32/Srb2win.ico[8]" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
     elif [ "\$BUILD" = "\$BUILDPATH/shufflarb2" ]; then
 
-        convert "\$BUILD/\$SRC/win32/ShufRB2.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/\$SRC/win32/ShufRB2.ico" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
     elif [ "\$BUILD" = "\$BUILDPATH/newmillennium" ]; then
 
-        convert "\$BUILD/\$SRC/WIN32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+        convert "\$BUILD/\$SRC/WIN32/Srb2win.ico" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
     else
 
         if [ -n "\$(identify "\$BUILD/\$SRC/win32/Srb2win.ico" | gawk '/ico\\[5\\] PNG/ {print}')" ] || [ -n "\$(identify "\$BUILD/\$SRC/win32/Srb2win.ico" | tail -n1 | gawk '/ico\\[1\\] PNG/ {print}')" ]; then
 
-            convert "\$BUILD/\$SRC/win32/Srb2win.ico[5]" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+            convert "\$BUILD/\$SRC/win32/Srb2win.ico[5]" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
         else
 
-            convert "\$BUILD/\$SRC/win32/Srb2win.ico" -resize 64x64\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
+            convert "\$BUILD/\$SRC/win32/Srb2win.ico" -resize 128x128\! -filter lanczos -alpha on -background none -flatten "\$BUILD/build/icon.png"
 
         fi
 
@@ -9882,7 +9966,7 @@ RUN apt-get update && \
 apt-get full-upgrade -y && \
 apt-get install -y apt-fast && \
 gawk -i inplace '{sub("DOWNLOADBEFORE=","DOWNLOADBEFORE=true");sub("_MAXNUM=5","_MAXNUM=20"); print}' /etc/apt-fast.conf && \
-apt-fast install -y libfmt-dev libsfml-dev libjpeg-dev libogg-dev libflac-dev libvorbis-dev libopenal-dev libudev-dev libglew-dev libfreeimage-dev libftgl-dev libfluidsynth-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgconf2-dev freeglut3-dev libmodplug-dev libnotify-dev libcurl4-openssl-dev libbz2-dev gtk2-engines-pixbuf libgtk-3-dev libcanberra-gtk3-dev libcanberra-gtk3-module libcanberra-gtk-dev libcanberra-gtk-module liblua5.3-dev libmpg123-dev libfuse-dev fuse libx11-dev mesa-common-dev mono-complete gnome-themes-extra nasm build-essential g++ $GCCVER $GXXVER ccache automake libtool cmake patchelf file sudo dash git stow imagemagick p7zip-full p7zip-rar
+apt-fast install -y libgif-dev libfmt-dev libsfml-dev libjpeg-dev libogg-dev libflac-dev libvorbis-dev libopenal-dev libudev-dev libglew-dev libfreeimage-dev libftgl-dev libfluidsynth-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgconf2-dev freeglut3-dev libmodplug-dev libnotify-dev libcurl4-openssl-dev libbz2-dev gtk2-engines-pixbuf libgtk-3-dev libcanberra-gtk3-dev libcanberra-gtk3-module libcanberra-gtk-dev libcanberra-gtk-module liblua5.3-dev libmpg123-dev libfuse-dev fuse libx11-dev mesa-common-dev mono-complete gnome-themes-extra nasm build-essential g++ $GCCVER $GXXVER ccache automake libtool cmake patchelf file sudo dash git stow imagemagick p7zip-full p7zip-rar
 
 RUN printf "%s\n" "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 useradd -m -G sudo -s /bin/dash srb2bld && \
@@ -10450,6 +10534,12 @@ crosscompile() {
     if [ "$OS" = "Linux" ]; then
 
         OS="Windows"
+
+        if [ "$LIBC" = "musl" ]; then
+
+            unset LIBC
+
+        fi
 
     elif [ "$OS" = "Windows" ]; then
 
@@ -11141,7 +11231,7 @@ EOF
 
                 fi
 
-                7z x -y "$SRB2BLDROOT/assets/RingRacers-2.3.exe" "*.pk3" "*.dat" "data/*" "models/*" -o"$BUILD/assets/installer"
+                unrar x -y "$SRB2BLDROOT/assets/RingRacers-2.3.exe" "*.pk3" "*.dat" "data/*" "models/*" "$BUILD/assets/installer"
                 cp -f "$BUILD/!REQUIRED ASSETS/"*.pk3 "$BUILD/assets/installer"
                 find "$BUILD/assets/installer" -type d -exec chmod -R 755 {} \;
 
@@ -14200,7 +14290,7 @@ Exiting..."
 
     else
 
-        \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"mono\" to run program."
+        \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"mono\" and \"libgdiplus\" to run program."
         exit 1
 
     fi
@@ -14214,7 +14304,7 @@ else
 
     fi
 
-    "$SRB2ASSETLNXPATH/$UZBBIN.bin" "\$@" || [ "\$?" != "137" ] && (([ ! -x "\$(command -v mono)" ] && (([ "\$(command -v zenity)" ] && zenity --warning --text "Please install \"mono\" to run program." || exit 1) || \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"mono\" to run program." && exit 1)) || mono Builder.exe "\$@")
+    "$SRB2ASSETLNXPATH/$UZBBIN.bin" "\$@" || [ "\$?" != "137" ] && (([ ! -x "\$(command -v mono)" ] && (([ "\$(command -v zenity)" ] && zenity --warning --text "Please install \"mono\" and \"libgdiplus\" to run program." || exit 1) || \$PRINTF "\e[1;93m\n%s\n\e[0m" "Please install \"mono\" and \"libgdiplus\" to run program." && exit 1)) || mono Builder.exe "\$@")
 
 fi
 
@@ -15047,6 +15137,20 @@ installtomacos() {
 
     fi
 
+    if [ -f "$HOMEBREWPREFIX/lib/libSDL3.dylib" ]; then
+
+        LIBSDL3PREFIX="$HOMEBREWPREFIX"
+
+    elif [ -f "$MACPORTPREFIX/lib/libSDL3.dylib" ]; then
+
+        LIBSDL3PREFIX="$MACPORTPREFIX"
+
+    else
+
+        LIBSDL3PREFIX="$SRB2BLDPREFIX"
+
+    fi
+
     if [ -f "$HOMEBREWPREFIX/lib/libopenal.dylib" ]; then
 
         LIBOPENALPREFIX="$HOMEBREWPREFIX"
@@ -15387,6 +15491,9 @@ in_block {
 
     elif [ "$BUILD" = "$BUILDPATH/blankart" ]; then
 
+        # Removing CMAKE_OSX_DEPLOYMENT_TARGET and CMAKE_OSX_ARCHITECTURES from CMakeLists.txt since they are specified in cmake build command.
+        gawk -i inplace '/if\(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin"\)/ {suppress=1} /if\("\${CMAKE_CURRENT_BINARY_DIR}"/ {suppress=0} !suppress' "$BUILD/CMakeLists.txt"
+
         # Fixing linking error "Undefined symbols for architecture x86_64: "OSX_GetResourcesPath(char*)", referenced from:_I_LocateWad in i_system.cpp.o".
         gawk -i inplace '{gsub("void OSX_GetResourcesPath\\(char \\* buffer\\);","#ifdef __cplusplus\nextern \"C\" {\n#endif\n\nvoid OSX_GetResourcesPath(char * buffer);\n\n#ifdef __cplusplus\n}\n#endif\n"); print}' "$BUILD/src/sdl/macosx/mac_resources.h"
 
@@ -15522,7 +15629,7 @@ in_block {
     # Display content of Makefile for a good view of available compilation flags.
     if [ "$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then
 
-        BLDCMD="cmake -S $BUILD -B $BUILD/build --preset ninja-x64_osx_vcpkg-release -DVCPKG_TARGET_TRIPLET=x64-osx -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVERSLADE -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKEPOLVER -DCMAKE_BUILD_TYPE=Release -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DSRB2_CONFIG_ENABLE_WEBM_MOVIES=ON -G 'Unix Makefiles'"
+        BLDCMD="cmake -S $BUILD -B $BUILD/build --preset ninja-x64_osx_vcpkg-release -DVCPKG_TARGET_TRIPLET=x64-osx -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSSLADEVER -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKEPOLVER -DCMAKE_BUILD_TYPE=Release -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DSRB2_CONFIG_ENABLE_WEBM_MOVIES=ON -G 'Unix Makefiles'"
         eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
     elif [ "$BUILD" = "$BUILDPATH/wadcli" ]; then
@@ -15546,7 +15653,7 @@ in_block {
 
         fi
 
-        BLDCMD="cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(command -v $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVERSLADE -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKEPOLVER -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DwxWidgets_INCLUDE_DIRS=$WXWIDGETSPREFIX/include -DwxWidgets_LIBRARIES=$WXWIDGETSPREFIX/lib -DMPG123_INCLUDE_DIR=$LIBMPG123PREFIX/include -DMPG123_LIBRARIES=$LIBMPG123PREFIX/lib/libmpg123.dylib"
+        BLDCMD="cmake -S $BUILD -B $BUILD/build -DwxWidgets_CONFIG_EXECUTABLE=$(command -v $MACPORTPREFIX/Library/Frameworks/wxWidgets.framework/Versions/wxWidgets/*/bin/wx-config wx-config wx-config-gtk3 2> /dev/null | head -n1) -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSSLADEVER -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKEPOLVER -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DwxWidgets_INCLUDE_DIRS=$WXWIDGETSPREFIX/include -DwxWidgets_LIBRARIES=$WXWIDGETSPREFIX/lib -DMPG123_INCLUDE_DIR=$LIBMPG123PREFIX/include -DMPG123_LIBRARIES=$LIBMPG123PREFIX/lib/libmpg123.dylib"
         eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
     elif [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
@@ -15567,18 +15674,22 @@ in_block {
 
         fi
 
+        # Required for linking with provided libskia by Aseprite.
+        MACOSVER="10.15"
+
         BLDCMD="cmake -S $BUILD -B $BUILD/build -G Ninja -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=$ARCH -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKEPOLVER -DCMAKE_OSX_SYSROOT=$SDKROOT -DBUILD_TESTING=OFF -DCLIP_TESTS=OFF -DCMARK_TESTS=OFF -DENABLE_TEST=OFF -DENABLE_TESTS=OFF -DFMT_CUDA_TEST=OFF -DFMT_TEST=OFF -DJSON11_BUILD_TESTS=OFF -DLAF_WITH_TESTS=OFF -DOBSERVABLE_TESTS=OFF -DPNG_TESTS=OFF -DUNDO_TESTS=OFF -Dtinyxml2_BUILD_TESTING=OFF -DLAF_BACKEND=skia -DSKIA_DIR=$LIBSKIATMPDIR/libskia -DSKIA_LIBRARY_DIR=$LIBSKIAPATH -DSKIA_LIBRARY=$LIBSKIAPATH/libskia.a -DCMAKE_PREFIX_PATH=$LIBSKIAPATH"
         eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
     else
 
+        # CMAKE_OSX_DEPLOYMENT_TARGET set with "10.09" breaks compilation for some SRB2 builds, so it is upgraded to "10.15".
         if [ "$BUILD" = "$BUILDPATH/srb2-kart-saturn" ] || [ "$BUILD" = "$BUILDPATH/blankart" ]; then
 
             MACOSVER="10.15"
 
         fi
 
-        BLDCMD="cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKEPOLVER -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=$ARCH -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DSRB2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CONFIG_EXTERNAL_ASSETS=ON -DSRB2_CONFIG_SHARED_INTERNAL_LIBRARIES=ON -DSRB2_CONFIG_SYSTEM_LIBRARIES=ON -DSRB2_CONFIG_USE_GME=ON -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DCMAKE_EXE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_MODULE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DSDL2_MIXER_INCLUDE_DIR=$LIBSDL2MIXERPREFIX/include/SDL2 -DSDL2_MIXER_LIBRARY=$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DPNG_PNG_INCLUDE_DIR=$LIBPNGPREFIX/include -DPNG_LIBRARY=$LIBPNGPREFIX/lib/libpng.dylib -DMODPLUG_INCLUDE_DIR=$LIBMODPLUGPREFIX/include -DMODPLUG_LIBRARY=$LIBMODPLUGPREFIX/lib/libmodplug.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON"
+        BLDCMD="cmake -S $BUILD -B $BUILD/build -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSVER -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKEPOLVER -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=$ARCH -DCPACK_PACKAGE_DESCRIPTION_SUMMARY=\"$BUILDNAME\" -DCPACK_PACKAGE_FILE_NAME=\"$BUILDNAME\" -DSRB2_SDL2_EXE_NAME=\"$BUILDNAME\" -DSRB2_EXE_NAME=\"$BUILDNAME\" -DCPACK_PACKAGE_VENDOR=srb2bld -DSRB2_CONFIG_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_ASSET_DIRECTORY=$BUILD/assets/installer -DSRB2_CONFIG_EXTERNAL_ASSETS=ON -DSRB2_CONFIG_SHARED_INTERNAL_LIBRARIES=ON -DSRB2_CONFIG_SYSTEM_LIBRARIES=ON -DSRB2_CONFIG_USE_GME=ON -DSRB2_CPACK_GENERATOR=DragNDrop -DCMAKE_INSTALL_PREFIX=$SRB2BLDPREFIX -DCMAKE_EXE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_MODULE_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DCMAKE_SHARED_LINKER_FLAGS_RELEASE=-headerpad_max_install_names -DSDL2_INCLUDE_DIR=$LIBSDL2PREFIX/include/SDL2 -DSDL2_LIBRARY=$LIBSDL2PREFIX/lib/libSDL2.dylib -DSDL2_MIXER_INCLUDE_DIR=$LIBSDL2MIXERPREFIX/include/SDL2 -DSDL2_MIXER_LIBRARY=$LIBSDL2MIXERPREFIX/lib/libSDL2_mixer.dylib -DSDL3_INCLUDE_DIR=$LIBSDL3PREFIX/include/SDL3 -DSDL3_LIBRARY=$LIBSDL3PREFIX/lib/libSDL3.dylib -DGME_INCLUDE_DIR=$LIBGMEPREFIX/include/gme -DGME_LIBRARY=$LIBGMEPREFIX/lib/libgme.dylib -DOPENMPT_INCLUDE_DIR=$LIBOPENMPTPREFIX/include/libopenmpt -DOPENMPT_LIBRARY=$LIBOPENMPTPREFIX/lib/libopenmpt.dylib -DPNG_PNG_INCLUDE_DIR=$LIBPNGPREFIX/include -DPNG_LIBRARY=$LIBPNGPREFIX/lib/libpng.dylib -DMODPLUG_INCLUDE_DIR=$LIBMODPLUGPREFIX/include -DMODPLUG_LIBRARY=$LIBMODPLUGPREFIX/lib/libmodplug.dylib -DCMAKE_SKIP_RPATH=ON -DCMAKE_SKIP_INSTALL_RPATH=ON"
         eval $BLDCMD -LAH 2>&1 | gawk '{if(f)print} /-- Cache values/{f=1}' 2> /dev/null
 
     fi
@@ -16165,7 +16276,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         fi
 
         # Download libSDL's source code, build and install it.
-        if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
+        if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ] || [ "$BUILD" = "$BUILDPATH/blankart" ]; then
 
             MACOSSDLVER="$MACOSSDL3VER"
 
@@ -16202,7 +16313,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
             $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing libSDL. Please wait..."
             cd "$SRB2BLDROOT/libraries/libsdl" || exit
 
-            if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
+            if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ] || [ "$BUILD" = "$BUILDPATH/blankart" ]; then
 
                 git -C "$SRB2BLDROOT/libraries/libsdl" checkout -q "$MACOSSDL3VER"
                 CFLAGS="" cmake -S "$SRB2BLDROOT/libraries/libsdl" -B "$SRB2BLDROOT/libraries/libsdl/build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$SRB2BLDPREFIX/stow/libsdl3"
@@ -16494,7 +16605,7 @@ Press y/yes to continue, or n/no or ctrl+c to quit."
         fi
 
         # Download libSDL2_mixer's source code, build and install it.
-        if [ "$ISSDL2MIXERX" != "libsdl2_mixerx" ] && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
+        if [ "$BUILD" != "$BUILDPATH/blankart" ] && [ "$ISSDL2MIXERX" != "libsdl2_mixerx" ] && [ "$ISSDL2MIXER" = "libsdl2_mixer" ]; then
 
             if [ ! -d "$SRB2BLDROOT/libraries/libsdl2-mixer/.git" ]; then
 
@@ -17420,7 +17531,7 @@ README
 
         elif [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
 
-            ASEPRITEDMGURL="https://www.aseprite.org/$(curl -sL https://aseprite.org/trial | gawk -F'href="|"' '/\.dmg/ {print $4}')"
+            ASEPRITEDMGURL="https://www.aseprite.org/$(curl -sL https://aseprite.org/trial | gawk -F'href="|"' '/\.dmg/ {print $2}')"
             if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "$ASEPRITEDMGURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/Aseprite-trial-macOS.dmg" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/Aseprite-trial-macOS.dmg"
@@ -17496,7 +17607,7 @@ README
 
         elif [ "$BUILD" = "$BUILDPATH/aseprite" ]; then
 
-            ASEPRITEDMGURL="https://www.aseprite.org/$(curl -sL https://aseprite.org/trial | gawk -F'href="|"' '/\.dmg/ {print $4}')"
+            ASEPRITEDMGURL="https://www.aseprite.org/$(curl -sL https://aseprite.org/trial | gawk -F'href="|"' '/\.dmg/ {print $2}')"
             if [ -n "$ISNET" ] && [ "$(curl -X GET -sLI "$ASEPRITEDMGURL" | gawk -F'Content-Length: ' '{IGNORECASE=1} /Content-Length/ {gsub("\r",""); print $NF}' 2> /dev/null | tail -n1)" != "$(stat -f %z "$SRB2BLDROOT/assets/Aseprite-trial-macOS.dmg" 2> /dev/null)" ]; then
 
                 rm -f "$SRB2BLDROOT/assets/Aseprite-trial-macOS.dmg"

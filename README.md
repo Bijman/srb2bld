@@ -60,7 +60,7 @@ As for macOS users, they need to install these additional dependencies:
 1. In terminal enter this following command:
 - Debian/Ubuntu/Debian based/Ubuntu based: `sudo apt install make git debianutils coreutils findutils file hostname ncurses-bin curl gawk docker.io stow libfuse2 zlib1g patchelf libgdk-pixbuf2.0-bin flatpak flatpak-builder`,
 
-- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils file hostname ncurses curl gawk docker stow fuse2 zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
+- Arch/Arch based: `sudo pacman -S --needed make git which coreutils findutils file inetutils ncurses curl gawk docker stow fuse2 zlib patchelf gdk-pixbuf2 flatpak flatpak-builder`,
 
 - Gentoo/Gentoo based: `sudo emerge -av dev-vcs/git sys-apps/which sys-apps/coreutils sys-apps/findutils sys-apps/file sys-apps/net-tools sys-libs/ncurses net-misc/curl sys-apps/gawk app-containers/docker app-admin/stow sys-fs/fuse:0 sys-libs/zlib dev-util/patchelf x11-libs/gdk-pixbuf sys-apps/flatpak dev-util/flatpak-builder`,
 
