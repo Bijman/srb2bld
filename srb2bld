@@ -423,10 +423,14 @@ android() {
 
     choosebranchcommit
 
-    if [ ! -x "$BUILD/android/gradlew" ]; then
+    if [ ! -f "$BUILD/android/gradlew" ]; then
 
         $PRINTF "$FAILURE%s\n\e[0m" "ERROR: Couldn't find gradlew script at path \"$BUILD/android\". Exiting."
         exit
+
+    elif [ -f "$BUILD/android/gradlew" ] && [ ! -x "$BUILD/android/gradlew" ]; then
+
+        chmod 755 "$BUILD/android/gradlew"
 
     fi
 
@@ -448,12 +452,15 @@ android() {
 
     containerrun
 
+    # Export commit revision name before creating Windows portable bundle.
+    VERSION="$GITVER-$(git -C "$BUILD" rev-parse --short HEAD)"
+
     # Set name of APK in message.
-    APKPATH=$(find "$BUILD/android/app/build/outputs/apk/gameFull/debug" "$BUILD/android/app/build/outputs/apk/debug" -name "*.apk" 2> /dev/null || true)
-    APKNAME=$($PRINTF "%s\n" "$APKPATH" | gawk -F'/' '{print $NF}')
+    APKPATH=$(find "$BUILD/android/app/build/outputs/apk/gameFull/debug" -name "*.apk" 2> /dev/null | head -n1 || true)
+    APKNAME=$($PRINTF "%s\n" "$APKPATH" | gawk -F'/' '{gsub("srb2-android","'$($PRINTF "%s\n" "$BUILDNAME" | gawk '{gsub(" ","_"); print}')-$VERSION'"); print $NF}')
 
     # Move created APK to working directory.
-    mv -f "$APKPATH" "$ANDPWD" 2> /dev/null
+    mv -f "$APKPATH" "$ANDPWD/$APKNAME" 2> /dev/null
     $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "Android APK for $BUILDNAME is done. Look for \"$APKNAME\" in \"$ANDPWD\" path."
 }
 
@@ -552,8 +559,6 @@ appimage() {
 
     installsm64rom
 
-    installarchipelagoworld
-
     cd "$BUILD/build/AppDir" || exit
 
     ICONSIZE=$(find "$BUILD/build/AppDir/usr/share/icons/hicolor" -mindepth 1 -maxdepth 1 2> /dev/null | gawk -F'/' '!/scalable/ {print $NF}' | head -n1)
@@ -629,6 +634,8 @@ NIX
     # Move created AppImage to working directory.
     mv -f "$BUILD/$APPIMAGENAME" "$REALPWD" 2> /dev/null
 
+    installarchipelagoworld
+
     $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "AppImage for $BUILDNAME is done. Look for \"$APPIMAGENAME\" in \"$REALPWD\" path. For NixOS users, please install appimage-run and use command \"appimage-run $APPIMAGENAME\"."
 }
 
@@ -654,6 +661,13 @@ buildvar() {
         GITDEFVER="bitten-master"
         GITVER="$GITDEFVER"
         GITURL="https://git.do.srb2.org/bitten2up/SRB2-Android.git"
+
+    elif [ "$BUILD" = "$BUILDPATH/srb2-android-saxashitter" ]; then
+
+        BUILDNAME="Sonic Robo Blast 2 Saxashitter"
+        GITDEFVER="port"
+        GITVER="$GITDEFVER"
+        GITURL="https://github.com/Saxashitter/SRB2-Android-Port.git"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
 
@@ -1163,18 +1177,79 @@ choosebranchcommit() {
     if [ "$COMMIT" = "1" ]; then
 
         # Choose Git commit.
-        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please choose commit by typing number and then pressing enter, or just press enter to continue with the latest commit, which is $(git -C $BUILD log --format=%h | head -n1). To quit, press ctrl+c."
+        $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please choose commit by typing number and then pressing enter, or just press enter to continue with the latest commit, which is $(git -C $BUILD log -n 1 --format=%h). To quit, press ctrl+c. Type 'more' to load 100 more commits. Type 'com <hash>' to enter a commit hash directly."
         $PRINTF "$NOTICE%s\n\e[0m" "WARNING: By choosing different commit other than default, compilation or running compiled build may fail."
-        sleep 2
-        array="$(git -C "$BUILD" log --format="%h")"
-        arrayname="$(GIT_PAGER="" git -C "$BUILD" log --format="%h (%s, %ad)")"
-        count="$(echo "$array" | wc -l)"
+
+        # Initialize with the first 100 commits.
+        DISPLAY_COUNT=100
+        array="$(git -C "$BUILD" log -n "$DISPLAY_COUNT" --format="%h")"
+        arrayname="$(GIT_PAGER="" git -C "$BUILD" log -n "$DISPLAY_COUNT" --format="%h (%s, %ad)")"
+        count="$(printf '%s\n' "$array" | wc -l)"
+        total_commits="$(git -C "$BUILD" rev-list --count HEAD)"
         n=""
         echo "$arrayname" | gawk '{print NR")", $0}'
         while true; do
 
             $PRINTF "#? "
             read -r n
+
+            # Option to load 100 more commits.
+            if [ "$n" = "more" ]; then
+
+                PREV_COUNT=$count
+                DISPLAY_COUNT=$((DISPLAY_COUNT + 100))
+
+                array="$(git -C "$BUILD" log -n "$DISPLAY_COUNT" --format="%h")"
+                arrayname="$(GIT_PAGER="" git -C "$BUILD" log -n "$DISPLAY_COUNT" --format="%h (%s, %ad)")"
+                count="$(printf '%s\n' "$array" | wc -l)"
+
+                if [ "$count" -gt "$PREV_COUNT" ]; then
+
+                    # Print only the newly added commits (from PREV_COUNT + 1 to the new count).
+                    printf '%s\n' "$arrayname" | gawk -v start="$((PREV_COUNT + 1))" 'NR >= start {print NR")", $0}'
+
+                else
+
+                    $PRINTF "$NOTICE%s\n\e[0m" "-- No more commits to load. --"
+
+                fi
+                continue
+
+            fi
+
+            # Option to directly enter a commit hash with "c" prefix.
+            case "$n" in
+
+                com\ *)
+
+                    COMREV="${n#com }"
+
+                    # Validate that the commit exists.
+                    if git -C "$BUILD" cat-file -t "$COMREV" > /dev/null 2>&1; then
+
+                        if [ -d "$BUILD/.git" ]; then
+
+                            $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Switching to commit \"$COMREV\"."
+
+                            if [ -n "$GITVER" ]; then
+
+                                git -C "$BUILD" checkout -q "$COMREV"
+
+                            fi
+
+                        fi
+                        break
+
+                    else
+
+                        $PRINTF "$NOTICE%s\n\e[0m" "ERROR: Commit \"$COMREV\" not found. Please try again."
+
+                    fi
+                    continue
+
+                    ;;
+
+            esac
 
             if [ -n "$n" ] && [ "$n" -eq "$n" ] && [ "$n" -gt 0 ] && [ "$n" -le "$count" ]; then
 
@@ -1662,7 +1737,7 @@ chooseandroidbuild() {
     while
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please choose by typing number and then pressing enter. Press enter or ctrl+c to quit."
-        for loop in "Build SRB2" "Build SRB2 bitten" "Build SRB2 Reveries" "Build SRB2 v2.1 Legacy" "Build SRB2 Kart" "Build Ring Racers" "Build SRB2 Custom"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
+        for loop in "Build SRB2" "Build SRB2 bitten" "Build SRB2 Saxashitter" "Build SRB2 Reveries" "Build SRB2 v2.1 Legacy" "Build SRB2 Kart" "Build Ring Racers" "Build SRB2 Custom"; do $PRINTF "%s\n" "$((i += 1))) $loop"; done
         $PRINTF "#? "
         read -r choose
     do
@@ -1686,33 +1761,40 @@ chooseandroidbuild() {
 
             "3")
 
-                BUILD="$BUILDPATH/srb2-android-reveries"
+                BUILD="$BUILDPATH/srb2-android-saxashitter"
                 break
 
                 ;;
 
             "4")
 
-                BUILD="$BUILDPATH/srb2-android-2.1-legacy"
+                BUILD="$BUILDPATH/srb2-android-reveries"
                 break
 
                 ;;
 
             "5")
 
-                BUILD="$BUILDPATH/srb2-kart-android"
+                BUILD="$BUILDPATH/srb2-android-2.1-legacy"
                 break
 
                 ;;
 
             "6")
 
-                BUILD="$BUILDPATH/ring-racers-android"
+                BUILD="$BUILDPATH/srb2-kart-android"
                 break
 
                 ;;
 
             "7")
+
+                BUILD="$BUILDPATH/ring-racers-android"
+                break
+
+                ;;
+
+            "8")
 
                 custombuild
                 break
@@ -1770,6 +1852,8 @@ chooseinstall() {
 
         installtomacos
 
+        installarchipelagoworld
+
         installtolist
 
     else
@@ -1790,21 +1874,19 @@ chooseinstall() {
 
     if [ "$OS" = "Windows" ]; then
 
+        installtowindows
+
         installsm64rom
 
-        installtowindows
+        installarchipelagoworld
 
         installtolist
 
     elif [ "$OS" = "Linux" ]; then
 
-        installsm64rom
-
         installtolinux
 
     fi
-
-    installarchipelagoworld
 }
 
 chooseremoveasset() {
@@ -2358,6 +2440,7 @@ containerentry() {
 
     export DEBIAN_FRONTEND="noninteractive"
     export SRB2BLDNOCCACHE="$SRB2BLDNOCCACHE"
+    export SRB2BLDNOGRADLECACHE="$SRB2BLDNOGRADLECACHE"
 
     # Remove musl variable for Ultimate Zone Builder and High Voltage Ring to compile in glibc environment.
     if [ "\$LIBC" = "musl" ] && ([ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-lowee-builder" ] || [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]); then
@@ -2408,11 +2491,11 @@ containerentry() {
     # Correcting compiled library permissions when running -u/--user or having read-only filesystem.
     if [ "\$WINOS" != "1" ]; then
 
-        if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$ANDROID" != "1" ]); then
+        if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$WINPORTABLE" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
             sudo find -L "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true
 
-        elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$ANDROID" != "1" ]); then
+        elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$WINPORTABLE" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
             sudo find -L "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true
 
@@ -2423,11 +2506,11 @@ containerentry() {
         fi
 
         # Setting trap signal for correcting compiled build's source code, libraries etc. permissions when running -u/--user or having read-only filesystem.
-        if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$ANDROID" != "1" ]); then
+        if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$WINPORTABLE" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
             trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process. Try \"srb2bld -i -t\" to compile and install tagged/release version of build." ; exit 1' 0 1 2 3 6 15
 
-        elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$ANDROID" != "1" ]); then
+        elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$WINPORTABLE" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
             trap '[ $? = 0 ] && \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true && \$PRINTF "\n$PROMPT==> $FAILURE%s\n\e[0m" "ERROR: Build didn'\''t finish due to error or cancelling process. Try \"srb2bld -i -t\" to compile and install tagged/release version of build." ; exit 1' 0 1 2 3 6 15
 
@@ -2447,7 +2530,7 @@ containerentry() {
     git -C "\$BUILD" config advice.nameTooLong false
 
     extractassets() {
-        if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-bitten" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-ggj" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-sm64" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
+        if [ "\$BUILD" = "\$BUILDPATH/srb2" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-bitten" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-saxashitter" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-uncapped-plus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-netplus" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-tsourdt3rd" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-edit" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-ggj" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-sm64" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-persona" ]; then
 
             if [ "\$BUILD" = "\$BUILDPATH/srb2-reveries" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-reveries" ]; then
 
@@ -3616,7 +3699,10 @@ if [ "\$ANDROID" = "1" ]; then
 
     \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building $BUILDNAME's Android APK. Please wait..."
 
-    if [ "\$SRB2BLDNOGRADLECACHE" = "1" ]; then
+    # Change ownership to user srb2bld at path Android SDK. Fix for Docker users.
+    sudo chown -R srb2bld:srb2bld /opt/sdk
+
+    if [ "\$SRB2BLDNOGRADLECACHE" = "1" ] || [ "\$BUILD" = "\$BUILDPATH/srb2-android-saxashitter" ]; then
 
         "\$BUILD/android/gradlew" assembleDebug --no-build-cache --no-configuration-cache --parallel --max-workers="\$NCPU"
 
@@ -3958,6 +4044,9 @@ else
         gawk -i inplace '{gsub("/usr/share/games/SRB2","/usr/share/games/SRB2SM64"); print}' "\$BUILD/src/sdl/i_system.c"
         gawk -i inplace '{gsub("/usr/games/SRB2","/usr/games/SRB2SM64"); print}' "\$BUILD/src/sdl/i_system.c"
         gawk -i inplace '{gsub("\\\\\\\srb2","\\\\srb2sm64"); print}' "\$BUILD/src/sdl/i_system.c"
+
+        # Remove return carriages from Python script affecting Windows users with Docker Desktop + Winpty.
+        gawk -i inplace '{gsub("\r",""); print}' "\$BUILD/libsm64/import-mario-geo.py"
 
     elif [ "\$BUILD" = "\$BUILDPATH/srb2-vr" ]; then
 
@@ -5803,7 +5892,7 @@ REPLACEMENT
 
         fi
 
-        \$PRINTF "\n\$PROMPT==> \$MESSAGE%s\n\e[0m" "Building libsm64. Please wait..."
+        \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building libsm64. Please wait..."
 
         if [ "\$OS" = "Windows" ]; then
 
@@ -6278,7 +6367,7 @@ REPLACEMENT
     fi
 
     # Download zdbsp's source code, build and install it.
-    if [ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-lowee-builder" ] || [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]; then
+    if [ "\$OS" = "Linux" ] && ([ "\$BUILD" = "\$BUILDPATH/ultimate-zone-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-gksz-builder" ] || [ "\$BUILD" = "\$BUILDPATH/ultimate-lowee-builder" ] || [ "\$BUILD" = "\$BUILDPATH/high-voltage-ring" ]); then
 
         if [ ! -d "\$SRB2BLDROOT/libraries/zdbsp/.git" ]; then
 
@@ -6302,16 +6391,16 @@ REPLACEMENT
 
         fi
 
-            \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing zdbsp. Please wait..."
-            CFLAGS="" cmake -S "\$SRB2BLDROOT/libraries/zdbsp" -B "\$SRB2BLDROOT/libraries/zdbsp/build" -DCMAKE_POLICY_VERSION_MINIMUM="\$CMAKEPOLVER" -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
-            cmake --build "\$SRB2BLDROOT/libraries/zdbsp/build" -j"\$NCPU" --config Release
-            cp -f "\$SRB2BLDROOT/libraries/zdbsp/build/zdbsp" "\$BUILD/Build/Compilers/Nodebuilders/zdbsp.exe"
+        \$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Building and installing zdbsp. Please wait..."
+        CFLAGS="" cmake -S "\$SRB2BLDROOT/libraries/zdbsp" -B "\$SRB2BLDROOT/libraries/zdbsp/build" -DCMAKE_POLICY_VERSION_MINIMUM="\$CMAKEPOLVER" -DCMAKE_C_COMPILER=""\$CCACHE_BIN_PATH"\$GCCVER" -DCMAKE_CXX_COMPILER=""\$CCACHE_BIN_PATH"\$GXXVER" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+        cmake --build "\$SRB2BLDROOT/libraries/zdbsp/build" -j"\$NCPU" --config Release
+        cp -f "\$SRB2BLDROOT/libraries/zdbsp/build/zdbsp" "\$(find \$BUILD -name "zdbsp.exe" -type f -printf "%p\n" 2> /dev/null | head -n1)"
 
-            git -C "\$SRB2BLDROOT/libraries/zdbsp" clean -qdffx -e .comrev
-            git -C "\$SRB2BLDROOT/libraries/zdbsp" reset -q --hard
+        git -C "\$SRB2BLDROOT/libraries/zdbsp" clean -qdffx -e .comrev
+        git -C "\$SRB2BLDROOT/libraries/zdbsp" reset -q --hard
 
-            COMREV=\$(git -C "\$SRB2BLDROOT/libraries/zdbsp" rev-parse --short HEAD)
-            \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/zdbsp/.comrev"
+        COMREV=\$(git -C "\$SRB2BLDROOT/libraries/zdbsp" rev-parse --short HEAD)
+        \$PRINTF "%s\n" "\$COMREV" > "\$SRB2BLDROOT/libraries/zdbsp/.comrev"
 
     fi
 
@@ -10029,11 +10118,11 @@ if [ "\$WINOS" != "1" ]; then
     fi
 
     # Correcting compiled build's source code, libraries etc. permissions when running -u/--user or having read-only filesystem.
-    if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$ANDROID" != "1" ]); then
+    if [ "\$OSVIRT" = "podman" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$WINPORTABLE" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
         trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" ! -group root -exec chown -R root:root {} \; 2> /dev/null || true ; exit 0' 0
 
-    elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$ANDROID" != "1" ]); then
+    elif [ "\$OSVIRT" = "docker" ] && ([ -n "\$(\$PRINTF "%s\n" "\$SRB2BLDPREFIX" | gawk 'match(\$0, /\/home\/'\$HOSTUSER'\/.local/) {print substr(\$0, RSTART, RLENGTH)}')" ] || [ -n "\$ISREADONLY" ]) && ([ "\$APPIMAGE" != "1" ] && [ "\$FLATPAK" != "1" ] && [ "\$CROSS" != "1" ] && [ "\$WINPORTABLE" != "1" ] && [ "\$ANDROID" != "1" ]); then
 
         trap '\$PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Correcting permissions to $BUILDNAME'\''s source code. Please wait..." && [ "\$(basename \$BUILD)" = "ring-racers" ] && export BUILD="\$BUILDMAIN" ; sudo find -L "\$BUILD" "\$SRB2BLDPREFIX/stow" "\$SRB2BLDPREFIX/bin" "\$SRB2BLDPREFIX/include" "\$SRB2BLDPREFIX/lib" "\$SRB2BLDROOT/libraries" "$HOME/.cache/ccache" -group root -exec chown -R srb2bld:srb2bld {} \; 2> /dev/null || true ; exit 0' 0
 
@@ -10057,28 +10146,6 @@ ENTRYPOINT
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-games-windows-container"
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-tools-windows-container"
     cp -rf "$SRB2BLDROOT/containers/srb2-games-linux-glibc-container" "$SRB2BLDROOT/containers/srb2-games-android-container"
-
-    # Set CPU architecture for Docker/Podman images in case of building old SRB2 versions.
-    if ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && ( ([ "$OS" = "Windows" ] && ([ "$BUILD" = "$BUILDPATH/srb2-thokker" ] || [ "$BUILD" = "$BUILDPATH/srb2-top-down" ] || [ "$BUILD" = "$BUILDPATH/sonic-smash-brawl" ])) || [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-cb" ] || [ "$BUILD" = "$BUILDPATH/xsrb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-sf94-serv" ] || [ "$BUILD" = "$BUILDPATH/srb2-riders" ] || [ "$BUILD" = "$BUILDPATH/super-srb2-kart-z" ] || [ "$BUILD" = "$BUILDPATH/sbb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-1095" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ] || [ "$BUILD" = "$BUILDPATH/shufflarb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-live" ] || [ "$BUILD" = "$BUILDPATH/srb2-loz" ] || [ "$BUILD" = "$BUILDPATH/ssbss" ] || [ "$BUILD" = "$BUILDPATH/newmillennium" ]); then
-
-        PLATFORM="--platform linux/386"
-
-    elif ([ "$ARCH" = "armhf" ] || [ "$ARCH" = "aarch64" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-cb" ] || [ "$BUILD" = "$BUILDPATH/xsrb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-sf94-serv" ] || [ "$BUILD" = "$BUILDPATH/srb2-riders" ] || [ "$BUILD" = "$BUILDPATH/super-srb2-kart-z" ] || [ "$BUILD" = "$BUILDPATH/sbb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-1095" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ] || [ "$BUILD" = "$BUILDPATH/shufflarb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-live" ] || [ "$BUILD" = "$BUILDPATH/srb2-loz" ] || [ "$BUILD" = "$BUILDPATH/ssbss" ] || [ "$BUILD" = "$BUILDPATH/newmillennium" ]); then
-
-        PLATFORM="--platform linux/armhf"
-
-    # For compatibility with Debian Testing for Windows builds due to lack of CPU architecture detection in this container.
-    else
-
-        PLATFORM="--platform linux/$($OSVIRT info | gawk '/arch:|Architecture:/ {gsub("\x1b\\[0K",""); print $2}' | head -n1)"
-
-        if [ "$ARCH" != "armhf" ] && [ "$ARCH" != "aarch64" ]; then
-
-            LIBNVIDIA="libnvidia-gl-530 libnvidia-extra-530"
-
-        fi
-
-    fi
 
     # Compiled binary is borked when building on Ubuntu 18.04, so moving SRB2 Classic to Ubuntu 22.04 container.
     if [ "$BUILD" = "$BUILDPATH/srb2-2.2-classic" ]; then
@@ -10353,10 +10420,11 @@ make -C /tmp/xxHash PREFIX=/usr install
 RUN curl -sL "https://xff.cz/megatools/builds/builds/\$(curl -sL https://xff.cz/megatools/builds/builds/ | gawk -F'"' '/megatools-.*linux-'$ARCH'.tar.gz/ {print \$2}' | tail -n1)" -o "/tmp/megatools.tar.gz" && \
 tar xfv "/tmp/megatools.tar.gz" --wildcards --strip-components=1 -C "/usr/bin" "*/megatools"
 
-RUN if [ "\$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print \$2}' "\$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then \
+RUN if [ "$(gawk -F'\"' '/SRB2APPLICATION/ {gsub(" ",""); print $2}' "$BUILD/src/doomdef.h" 2> /dev/null)" = "RingRacers" ]; then \
 curl -RLOC - --retry 999 https://snapshot.debian.org/archive/debian/20231215T150950Z/pool/main/i/icu/libicu74_74.2-1_\$(dpkg --print-architecture).deb --output-dir /tmp && \
 curl -LO \$(curl -Ls https://api.github.com/repos/PowerShell/PowerShell/releases/latest | gawk -F'"' '/browser_download_url.*powershell.*.deb_'\$(dpkg --print-architecture)'.deb/ {print \$4}') --output-dir /tmp && \
-dpkg -i /tmp/*.deb ; \
+dpkg -i /tmp/*.deb && \
+ln -s /usr/bin/pwsh /usr/bin/powershell.exe ; \
 fi
 
 RUN mkdir -p "/usr/include/FMOD" "\$SRB2BLDROOT/libraries/FMOD" && \
@@ -10484,7 +10552,7 @@ DOCKERFILE
 
 containerrun() {
     # Restarting Docker daemon in order to avoid connection to be refused by Docker image repository. One time check after every reboot/shutdown of system.
-    if [ ! -f /tmp/srb2bld-docker ] && [ ! -x "$(command -v podman 2> /dev/null)" ]; then
+    if ( ([ -x "$(command -v tasklist 2> /dev/null)" ] && [ -z "$(tasklist 2> /dev/null | gawk '/Docker Desktop/ {print $1}' | head -n1)" ]) && ([ -x "$(command -v ps 2> /dev/null)" ] && [ -z "$(ps c 2> /dev/null | gawk '/dockerd/ {print $1}' | head -n1)" ])) && [ ! -x "$(command -v podman 2> /dev/null)" ]; then
 
         if [ -x "$(command -v doas 2> /dev/null)" ]; then
 
@@ -10497,8 +10565,14 @@ containerrun() {
         fi
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Starting Docker daemon. Please wait..."
+        if [ -x "$PROGRAMFILES/Docker/Docker/Docker Desktop.exe" ]; then
 
-        if [ -x "$(command -v systemctl 2> /dev/null)" ] && [ -n "$(systemctl --user list-units docker.service | gawk '/docker/ {print $1}')" ]; then
+            # Disable UI of Docker Desktop at startup.
+            gawk -i inplace '{gsub("OpenUIOnStartupDisabled\": false","OpenUIOnStartupDisabled\": true"); print}' "$APPDATA/Docker/settings-store.json"
+            docker desktop restart
+            sleep 10
+
+        elif [ -x "$(command -v systemctl 2> /dev/null)" ] && [ -n "$(systemctl --user list-units docker.service | gawk '/docker/ {print $1}')" ]; then
 
             systemctl --user restart docker || systemctl --user restart dockerd
 
@@ -10560,6 +10634,28 @@ containerrun() {
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Starting Podman daemon. Please wait..."
         podman machine start
+
+    fi
+
+    # Set CPU architecture for Docker/Podman images in case of building old SRB2 versions.
+    if ([ "$ARCH" = "i386" ] || [ "$ARCH" = "i486" ] || [ "$ARCH" = "i686" ] || [ "$ARCH" = "x86_64" ]) && ( ([ "$OS" = "Windows" ] && ([ "$BUILD" = "$BUILDPATH/srb2-thokker" ] || [ "$BUILD" = "$BUILDPATH/srb2-top-down" ] || [ "$BUILD" = "$BUILDPATH/sonic-smash-brawl" ])) || [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-cb" ] || [ "$BUILD" = "$BUILDPATH/xsrb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-sf94-serv" ] || [ "$BUILD" = "$BUILDPATH/srb2-riders" ] || [ "$BUILD" = "$BUILDPATH/super-srb2-kart-z" ] || [ "$BUILD" = "$BUILDPATH/sbb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-1095" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ] || [ "$BUILD" = "$BUILDPATH/shufflarb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-live" ] || [ "$BUILD" = "$BUILDPATH/srb2-loz" ] || [ "$BUILD" = "$BUILDPATH/ssbss" ] || [ "$BUILD" = "$BUILDPATH/newmillennium" ]); then
+
+        PLATFORM="--platform linux/386"
+
+    elif ([ "$ARCH" = "armhf" ] || [ "$ARCH" = "aarch64" ]) && ([ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-cb" ] || [ "$BUILD" = "$BUILDPATH/xsrb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-sf94-serv" ] || [ "$BUILD" = "$BUILDPATH/srb2-riders" ] || [ "$BUILD" = "$BUILDPATH/super-srb2-kart-z" ] || [ "$BUILD" = "$BUILDPATH/sbb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-1095" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ] || [ "$BUILD" = "$BUILDPATH/shufflarb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-live" ] || [ "$BUILD" = "$BUILDPATH/srb2-loz" ] || [ "$BUILD" = "$BUILDPATH/ssbss" ] || [ "$BUILD" = "$BUILDPATH/newmillennium" ]); then
+
+        PLATFORM="--platform linux/armhf"
+
+    # For compatibility with Debian Testing for Windows builds due to lack of CPU architecture detection in this container.
+    else
+
+        PLATFORM="--platform linux/$($OSVIRT info | gawk '/arch:|Architecture:/ {gsub("\x1b\\[0K",""); print $2}' | head -n1)"
+
+        if [ "$ARCH" != "armhf" ] && [ "$ARCH" != "aarch64" ]; then
+
+            LIBNVIDIA="libnvidia-gl-530 libnvidia-extra-530"
+
+        fi
 
     fi
 
@@ -10880,8 +10976,19 @@ custombuild() {
 
             CUSTOMDIRS="$(find "$BUILD" -mindepth 1 -maxdepth 1 -type d 2> /dev/null)"
             $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Please choose custom build by typing number and then pressing enter. Press enter or ctrl+c to quit."
-            array=$($PRINTF "%s\nAddNewCustom" "$CUSTOMDIRS")
-            arrayname=$($PRINTF "%s\nBuild new custom build" "$(for c in $($PRINTF "%s\n" "$CUSTOMDIRS" | gawk -F'/' '{print $NF}'); do $PRINTF "%s\n" "Build $c"; done)")
+
+            if [ "$ANDROID" = "1" ]; then
+
+                array=$($PRINTF "%s\nAddNewCustom" "$($PRINTF "%s\n" "$CUSTOMDIRS" | gawk '/-android/ {print}')" | gawk 'NF{print}')
+                arrayname=$($PRINTF "%s\nBuild new custom build" "$(for c in $($PRINTF "%s\n" "$CUSTOMDIRS" | gawk -F'/' '/-android/ {print $NF}'); do $PRINTF "%s\n" "Build $c"; done)" | gawk 'NF{print}')
+
+            else
+
+                array=$($PRINTF "%s\nAddNewCustom" "$CUSTOMDIRS" | gawk 'NF{print}')
+                arrayname=$($PRINTF "%s\nBuild new custom build" "$(for c in "$CUSTOMDIRS"; do $PRINTF "%s\n" "Build $c"; done)" | gawk 'NF{print}')
+
+            fi
+
             count="$($PRINTF "%s\n" "$array" | wc -l)"
             n=""
             $PRINTF "%s\n" "$arrayname" | gawk '{print NR")", $0}'
@@ -10896,6 +11003,12 @@ custombuild() {
                 if [ "$CUSTOMPATH" = "AddNewCustom" ]; then
 
                     customvar
+
+                    if [ "$ANDROID" = "1" ]; then
+
+                        CUSTOMDIR="$CUSTOMDIR-android"
+
+                    fi
 
                 else
 
@@ -10917,12 +11030,6 @@ custombuild() {
     else
 
         customvar
-
-    fi
-
-    if [ "$ANDROID" = "1" ]; then
-
-        CUSTOMDIR="$CUSTOMDIR-android"
 
     fi
 
@@ -10977,7 +11084,7 @@ custombuild() {
     fi
 
     # Copy directory with source code to script's data path.
-    if [ -n "$(find "$SRB2BLDGITPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ] && [ ! -d "$BUILD/.git" ]; then
+    if [ -d "$(find "$SRB2BLDGITPATH" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | head -n1)" ] && [ ! -d "$BUILD/.git" ]; then
 
         $PRINTF "\n$PROMPT==> $MESSAGE%s\n\e[0m" "Copying source code. Please wait..."
         sleep 1
@@ -12267,8 +12374,6 @@ flatpak() {
 
     installsm64rom
 
-    installarchipelagoworld
-
     # Export commit revision name before creating Flatpak.
     export VERSION="$GITVER-$(git -C "$BUILD" rev-parse --short HEAD)"
 
@@ -12780,6 +12885,8 @@ FLATPAK
     # Move created Flatpak to working directory.
     mv -f "$BUILD/$FLATPAKNAME" "$REALPWD" 2> /dev/null
 
+    installarchipelagoworld
+
     $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "Flatpak for $BUILDNAME is done. Look for \"$FLATPAKNAME\" in \"$REALPWD\" path and install file with \"flatpak --user install $FLATPAKNAME\""
 
     if [ "$BUILD" = "$BUILDPATH/srb2-2.0" ] || [ "$BUILD" = "$BUILDPATH/srb2-cb" ] || [ "$BUILD" = "$BUILDPATH/xsrb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-sf94-serv" ] || [ "$BUILD" = "$BUILDPATH/srb2-riders" ] || [ "$BUILD" = "$BUILDPATH/super-srb2-kart-z" ] || [ "$BUILD" = "$BUILDPATH/sbb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-final-demo" ] || [ "$BUILD" = "$BUILDPATH/srb2-1095" ] || [ "$BUILD" = "$BUILDPATH/srb2-jte" ] || [ "$BUILD" = "$BUILDPATH/shufflarb2" ] || [ "$BUILD" = "$BUILDPATH/srb2-live" ] || [ "$BUILD" = "$BUILDPATH/srb2-loz" ] || [ "$BUILD" = "$BUILDPATH/newmillennium" ]; then
@@ -12799,7 +12906,13 @@ installsm64rom() {
             read -r SM64ROM
 
             # Copying Super Mario 64 (USA) ROM to srb2bld's assets directory.
-            cp -f "$SM64ROM" "$SRB2BLDROOT/assets/baserom.us.z64"
+            if [ -f "$SM64ROM" ]; then
+
+                cp -f "$SM64ROM" "$SRB2BLDROOT/assets/baserom.us.z64"
+                $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "File \"$SM64ROM\" has been copied to path \"$SRB2BLDROOT/assets/baserom.us.z64\"."
+                SM64ROM="$SRB2BLDROOT/assets/baserom.us.z64"
+
+            fi
 
         else
 
@@ -12811,7 +12924,7 @@ installsm64rom() {
 
             if [ "$CROSS" = "1" ]; then
 
-                SM64ROMPATH="$REALPWD/$CROSSBUILDNAME"
+                SM64ROMPATH=$($PRINTF "%s\n" "$REALPWD/$CROSSBUILDNAME" | gawk '{drive=toupper(substr($0,2,1)); sub("^/[a-zA-Z]/",drive ":\\"); gsub("/","\\"); print}')
 
             else
 
@@ -12823,7 +12936,7 @@ installsm64rom() {
 
             if [ "$CROSS" = "1" ]; then
 
-                SM64ROMPATH=$($PRINTF "%s\n" "$REALPWD/$CROSSBUILDNAME" | gawk '{drive=toupper(substr($0,2,1)); sub("^/[a-zA-Z]/",drive ":\\"); gsub("/","\\"); print}')
+                SM64ROMPATH="$REALPWD/$CROSSBUILDNAME"
 
             elif [ "$WINPORTABLE" = "1" ]; then
 
@@ -12831,7 +12944,7 @@ installsm64rom() {
 
             else
 
-                SM64ROMPATH="$SRB2WINPATH"
+                SM64ROMPATH=$($PRINTF "%s\n" "$SRB2WINPATH" | gawk '{drive=toupper(substr($0,2,1)); sub("^/[a-zA-Z]/",drive ":\\"); gsub("/","\\"); print}')
 
             fi
 
@@ -12843,17 +12956,22 @@ installsm64rom() {
 
         if [ "$CROSS" = "1" ] || [ "$WINPORTABLE" = "1" ]; then
 
-            if ([ "$CROSS" = "1" ] || [ "$WINPORTABLE" = "1" ]) && [ -x "$(which powershell 2> /dev/null)" ]; then
+            if [ -x "$(which powershell 2> /dev/null)" ]; then
 
                 SM64ROM=$($PRINTF "%s\n" "$SRB2BLDROOT/assets/baserom.us.z64" | gawk '{drive=toupper(substr($0,2,1)); sub("^/[a-zA-Z]/",drive ":\\"); gsub("/","\\"); print}')
                 powershell -NoProfile -Command "Compress-Archive -Path \"$SM64ROM\" -Update -DestinationPath \"$SM64ROMPATH\""
                 $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "File \"$SM64ROM\" has been added to zip file \"$SM64ROMPATH\"."
 
-            elif [ "$CROSS" = "1" ] && [ -x "$(which zip 2> /dev/null)" ]; then
+            elif [ -x "$(which 7z 2> /dev/null)" ]; then
 
-                cd "$(dirname "$SM64ROM")" || exit
-                zip "$REALPWD/$CROSSBUILDNAME" "$(basename "$SM64ROM")"
+                7z u "$SM64ROMPATH" "$SM64ROM"
+
+            elif [ -x "$(which zip 2> /dev/null)" ]; then
+
                 cd "$REALPWD" || exit
+                cp -f "$SM64ROM" "$REALPWD/$(basename "$SM64ROM")"
+                zip -u "$SM64ROMPATH" "$(basename "$SM64ROM")"
+                rm -f "$REALPWD/$(basename "$SM64ROM")"
 
             else
 
@@ -12863,12 +12981,29 @@ installsm64rom() {
 
         elif [ ! -f "$SM64ROM" ]; then
 
-            $PRINTF "\n$PROMPT==> $NOTICE%s\n\e[0m\a" "Please copy \"Super Mario 64 (USA).z64\" ROM as \"baserom.us.z64\" to path \"$SM64ROMPATH\"."
+            if [ "$OS" = "Linux" ] && ([ "$APPIMAGE" != "1" ] && [ "$FLATPAK" != "1" ] && [ "$CROSS" != "1" ]); then
+
+                $PRINTF "\n$PROMPT==> $NOTICE%s\n\e[0m\a" "Please copy \"Super Mario 64 (USA).z64\" ROM as \"baserom.us.z64\" to path \"$SRB2BLDPREFIX/share/games/SRB2SM64\" to use this build's features."
+
+            elif ([ "$OS" = "Darwin" ] && [ "$APPBUNDLE" = "1" ]) || ([ "$OS" = "Linux" ] && ([ "$APPIMAGE" = "1" ] || [ "$FLATPAK" = "1" ] || [ "$CROSS" = "1" ])); then
+
+                $PRINTF "\n$PROMPT==> $NOTICE%s\n\e[0m\a" "Please copy \"Super Mario 64 (USA).z64\" ROM as \"baserom.us.z64\" to path \"$SRB2BLDROOT/assets\" and rerun script to use this build's features."
+
+            elif [ "$OS" = "Darwin" ] && [ "$APPBUNDLE" != "1" ]; then
+
+                $PRINTF "\n$PROMPT==> $NOTICE%s\n\e[0m\a" "Please copy \"Super Mario 64 (USA).z64\" ROM as \"baserom.us.z64\" to path \"/Applications/Sonic Robo Blast 2 SM64.app/Contents/Resources\" to use this build's features."
+
+            else
+
+                $PRINTF "\n$PROMPT==> $NOTICE%s\n\e[0m\a" "Please copy \"Super Mario 64 (USA).z64\" ROM as \"baserom.us.z64\" to path \"$SM64ROMPATH\" to use this build's features."
+
+            fi
+
+            sleep 2
 
         else
 
             cp -f "$SM64ROM" "$SM64ROMPATH/baserom.us.z64"
-            $PRINTF "\n$PROMPT==> $SUCCESS%s\n\e[0m\a" "File \"$SM64ROM\" has been copied to path \"$SM64ROMPATH\"."
 
         fi
 
@@ -15170,6 +15305,10 @@ NIX
         rm -rf "$NIXOSFLAKEBUILDPATH"
 
     fi
+
+    installsm64rom
+
+    installarchipelagoworld
 
     installtolist
 
@@ -18314,7 +18453,6 @@ installtowindows() {
         cp -f "$BUILD/build/AppDir/usr/lib/"*.dll "$SRB2WINPATH"
         $PRINTF "@echo off\nstart $SRB2WINBIN -software" > "$SRB2WINPATH/$SRB2WINDIR (Software).bat"
         $PRINTF "@echo off\nstart $SRB2WINBIN -opengl" > "$SRB2WINPATH/$SRB2WINDIR (OpenGL).bat"
-        $PRINTF "@echo off\nstart $SRB2WINBIN -openvr -win" > "$SRB2WINPATH/$SRB2WINDIR (OpenVR).bat"
 
     elif [ "$BUILD" = "$BUILDPATH/srb2-vr" ]; then
 
@@ -18915,7 +19053,7 @@ installtowindows() {
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
         rm -rf "$BUILD/Build/AppDir" "$BUILD/Build/builder"
         mkdir -p "$SRB2WINPATH/$SRB2WINDIR"
-        cp -rf "$BUILD/Build/"* "$SRB2WINPATH/$SRB2WINDIR"
+        cp -rf "$BUILD/build/"* "$SRB2WINPATH/$SRB2WINDIR"
         $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR/$SRB2WINDIR.bat"
 
     elif [ "$BUILD" = "$BUILDPATH/ultimate-gksz-builder" ]; then
@@ -18925,7 +19063,7 @@ installtowindows() {
         SRB2WINBIN=$(find "$BUILD/Build" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Software"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
-        rm -rf "$BUILD/Build/AppDir" "$BUILD/Build/builder"
+        rm -rf "$BUILD/Build/AppDir" "$BUILD/Build/builder" "$BUILD/Build/Compilers/Nodebuilders/zdbsp" "$BUILD/Build/Compilers/Nodebuilders/ZenNode"
         mkdir -p "$SRB2WINPATH/$SRB2WINDIR"
         cp -rf "$BUILD/Build/"* "$SRB2WINPATH/$SRB2WINDIR"
         $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR/$SRB2WINDIR.bat"
@@ -18937,7 +19075,7 @@ installtowindows() {
         SRB2WINBIN=$(find "$BUILD/Build" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Software"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
-        rm -rf "$BUILD/Build/AppDir" "$BUILD/Build/builder"
+        rm -rf "$BUILD/Build/AppDir" "$BUILD/Build/builder" "$BUILD/Build/Compilers/Nodebuilders/zdbsp" "$BUILD/Build/Compilers/Nodebuilders/ZenNode"
         mkdir -p "$SRB2WINPATH/$SRB2WINDIR"
         cp -rf "$BUILD/Build/"* "$SRB2WINPATH/$SRB2WINDIR"
         $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR/$SRB2WINDIR.bat"
@@ -18949,7 +19087,7 @@ installtowindows() {
         SRB2WINBIN=$(find "$BUILD/Build" -name "*.exe" -type f 2> /dev/null | gawk -F'/' '{print $NF}' | head -n1)
         SRB2WINPATH="$HOME/SRB2 Software"
         SRB2WINMENUPATH="$HOME/Start Menu/Programs/$SRB2WINMENUDIR"
-        rm -rf "$BUILD/Build/AppDir" "$BUILD/Build/builder"
+        rm -rf "$BUILD/Build/AppDir" "$BUILD/Build/builder" "$BUILD/Build/Compilers/Nodebuilders/zdbsp" "$BUILD/Build/Compilers/Nodebuilders/ZenNode"
         mkdir -p "$SRB2WINPATH/$SRB2WINDIR"
         cp -rf "$BUILD/Build/"* "$SRB2WINPATH/$SRB2WINDIR"
         $PRINTF "@echo off\nstart $SRB2WINBIN" > "$SRB2WINPATH/$SRB2WINDIR/$SRB2WINDIR.bat"

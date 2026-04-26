@@ -231,6 +231,7 @@ As for macOS users, they need to install these additional dependencies:
 # Supported Android builds
 - SRB2 Android by Lactozilla
 - SRB2 Android by bitten2up
+- SRB2 Android by Saxashitter
 - SRB2 Reveries by Candelavla
 - SRB2 v2.1 Legacy by SRB2 Preservation
 - SRB2 Kart by bitten2up
